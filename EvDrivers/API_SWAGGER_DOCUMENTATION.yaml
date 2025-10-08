@@ -1,0 +1,1082 @@
+openapi: 3.0.0
+info:
+  title: EV Battery Swap Management System API
+  description: |
+    Comprehensive API for EV Battery Swap Management System with monthly billing based on distance usage.
+    
+    ## Authentication
+    Use POST `/api/auth/login` to get JWT token, then include in Authorization header:
+    ```
+    Authorization: Bearer jwt-token-xxxxx
+    ```
+    
+    ## Monthly Billing System
+    - Battery swaps do NOT charge money immediately (cost = 0)
+    - System tracks distance usage automatically via odometer readings
+    - Monthly billing based on service plans and distance overage
+    - Payment processed at end of month with usage reset
+    
+    ## Database Credentials (for testing)
+    - **Admin**: admin@evswap.com / admin123
+    - **Driver**: minh.driver@gmail.com / driver123  
+    - **Staff**: duc.staff@evswap.com / staff123
+    
+  version: 1.0.0
+  contact:
+    name: EV Battery Swap Team
+    email: dev@evswap.com
+servers:
+  - url: http://localhost:8080
+    description: Development server
+
+tags:
+  - name: Authentication
+    description: User authentication and authorization
+  - name: Battery Management
+    description: Battery operations, swaps, and monitoring
+  - name: Payment & Billing
+    description: Monthly billing system and payment processing
+  - name: Contract Management
+    description: Service plans and contract management
+  - name: Station Management
+    description: Station and infrastructure management
+  - name: User Management
+    description: User profile and management
+
+paths:
+  # Authentication APIs
+  /api/auth/login:
+    post:
+      tags: [Authentication]
+      summary: User login
+      description: Authenticate user and get JWT token with role-based redirect
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: admin@evswap.com
+                password:
+                  type: string
+                  example: admin123
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Login successful
+                  token:
+                    type: string
+                    example: jwt-token-1759744436894
+                  user:
+                    $ref: '#/components/schemas/User'
+                  redirect:
+                    type: string
+                    example: /admin/dashboard?id=admin001
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/auth/logout:
+    post:
+      tags: [Authentication]
+      summary: User logout
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/auth/me:
+    get:
+      tags: [Authentication]
+      summary: Get current user info
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current user info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  user:
+                    $ref: '#/components/schemas/User'
+                  note:
+                    type: string
+                    example: Mock data - JWT token validation not implemented yet
+
+  # Battery Management APIs
+  /api/batteries/{id}/status:
+    get:
+      tags: [Battery Management]
+      summary: Get battery status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Battery status retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/BatteryStatus'
+
+  /api/batteries/{id}/history:
+    get:
+      tags: [Battery Management]
+      summary: Get battery swap history
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Battery history retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SwapHistory'
+                  total:
+                    type: integer
+
+  /api/batteries/swap/initiate:
+    post:
+      tags: [Battery Management]
+      summary: Initiate battery swap
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userId, stationId]
+              properties:
+                userId:
+                  type: string
+                  example: driver001
+                stationId:
+                  type: integer
+                  example: 1
+                batteryId:
+                  type: integer
+                  example: 1
+                  description: Optional - current battery ID to swap out
+      responses:
+        '200':
+          description: Swap initiated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/SwapTransaction'
+
+  /api/batteries/swap/{swapId}/confirm:
+    post:
+      tags: [Battery Management]
+      summary: Confirm battery swap completion
+      description: |
+        Confirms swap completion and automatically tracks distance usage for monthly billing.
+        Cost is 0 as billing is monthly-based.
+      parameters:
+        - name: swapId
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Swap confirmed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/SwapResult'
+
+  /api/batteries/{id}/health:
+    get:
+      tags: [Battery Management]
+      summary: Get battery health metrics
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Battery health retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/BatteryHealth'
+
+  /api/batteries/station/{stationId}:
+    get:
+      tags: [Battery Management]
+      summary: Get all batteries at a station
+      parameters:
+        - name: stationId
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Station batteries retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/StationBattery'
+                  total:
+                    type: integer
+
+  # Payment & Monthly Billing APIs
+  /api/payments/process:
+    post:
+      tags: [Payment & Billing]
+      summary: Process general payment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userId, amount, method, type]
+              properties:
+                userId:
+                  type: string
+                  example: driver001
+                amount:
+                  type: number
+                  example: 270000
+                method:
+                  type: string
+                  enum: [QR, Stripe, Paypal, Subscription]
+                  example: QR
+                type:
+                  type: string
+                  example: MONTHLY_BILLING
+      responses:
+        '200':
+          description: Payment processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/PaymentResult'
+
+  /api/payments/calculate-monthly-bill/{contractId}:
+    post:
+      tags: [Payment & Billing]
+      summary: Calculate monthly bill for contract
+      description: Calculate current month bill based on distance usage and service plan
+      parameters:
+        - name: contractId
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Monthly bill calculated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/MonthlyBill'
+
+  /api/payments/process-monthly-payment/{contractId}:
+    post:
+      tags: [Payment & Billing]
+      summary: Process monthly payment and reset usage
+      description: Pay monthly bill and reset contract usage for next month
+      parameters:
+        - name: contractId
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userId, method]
+              properties:
+                userId:
+                  type: string
+                  example: driver001
+                method:
+                  type: string
+                  enum: [QR, Stripe, Paypal, Subscription]
+                  example: QR
+      responses:
+        '200':
+          description: Monthly payment processed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/MonthlyPaymentResult'
+
+  /api/payments/monthly-usage-summary/{contractId}:
+    get:
+      tags: [Payment & Billing]
+      summary: Get monthly usage summary
+      description: Current month usage details and billing information
+      parameters:
+        - name: contractId
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Usage summary retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/UsageSummary'
+
+  /api/payments/current-bill-status/user/{userId}:
+    get:
+      tags: [Payment & Billing]
+      summary: Get current bill status for all user contracts
+      description: Overview of all active contracts with current billing status
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: driver001
+      responses:
+        '200':
+          description: Bill status retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BillStatus'
+                  totalActiveContracts:
+                    type: integer
+                  totalPendingAmount:
+                    type: number
+
+  /api/payments/user/{userId}/history:
+    get:
+      tags: [Payment & Billing]
+      summary: Get user payment history
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: driver001
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Payment history retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PaymentHistory'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+  # Contract Management APIs
+  /api/contracts/user/{userId}:
+    get:
+      tags: [Contract Management]
+      summary: Get user contracts
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: driver001
+      responses:
+        '200':
+          description: User contracts retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Contract'
+
+  /api/contracts/plans:
+    get:
+      tags: [Contract Management]
+      summary: Get available service plans
+      description: |
+        Available service plans with pricing:
+        - **Eco**: 135k/200km + overage fees
+        - **Cơ bản**: 270k/400km + overage fees  
+        - **Plus**: 405k/600km + overage fees
+        - **Premium**: 3M/unlimited (no overage)
+      responses:
+        '200':
+          description: Service plans retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ServicePlan'
+
+  /api/contracts/{contractId}/billing:
+    post:
+      tags: [Contract Management]
+      summary: Process monthly billing for contract
+      parameters:
+        - name: contractId
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Monthly billing processed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  # Station Management APIs
+  /api/stations:
+    get:
+      tags: [Station Management]
+      summary: Get all stations
+      responses:
+        '200':
+          description: Stations retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Station'
+
+  # User Management APIs  
+  /api/users/{id}:
+    get:
+      tags: [User Management]
+      summary: Get user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: driver001
+      responses:
+        '200':
+          description: User retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/User'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    Unauthorized:
+      description: Unauthorized access
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: Email, mật khẩu sai hoặc tài khoản bị khóa!
+
+  schemas:
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          example: admin001
+        email:
+          type: string
+          example: admin@evswap.com
+        name:
+          type: string
+          example: Duc Anh Nguyen
+        role:
+          type: string
+          enum: [Admin, Staff, EV Driver]
+          example: Admin
+        phone:
+          type: string
+          example: '0901234567'
+        status:
+          type: string
+          example: active
+
+    BatteryStatus:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        serialNumber:
+          type: string
+          example: BAT-1-2024
+        model:
+          type: string
+          example: LiFePO4-60kWh
+        capacity:
+          type: integer
+          example: 60
+        stateOfHealth:
+          type: number
+          example: 98.5
+        status:
+          type: string
+          example: AVAILABLE
+        cycleCount:
+          type: integer
+          example: 45
+        slotId:
+          type: integer
+          example: 1
+
+    SwapHistory:
+      type: object
+      properties:
+        swapId:
+          type: integer
+        userId:
+          type: string
+        stationName:
+          type: string
+        swapDate:
+          type: string
+          format: date-time
+        status:
+          type: string
+        distanceUsed:
+          type: number
+        batteryRole:
+          type: string
+          enum: [OLD, NEW]
+
+    SwapTransaction:
+      type: object
+      properties:
+        swapId:
+          type: integer
+        userId:
+          type: string
+        stationId:
+          type: integer
+        newBatteryId:
+          type: integer
+        status:
+          type: string
+          example: INITIATED
+        slotNumber:
+          type: integer
+        towerNumber:
+          type: integer
+        estimatedTime:
+          type: integer
+          example: 300
+        initiatedAt:
+          type: string
+          format: date-time
+
+    SwapResult:
+      type: object
+      properties:
+        swapId:
+          type: integer
+        userId:
+          type: string
+        status:
+          type: string
+          example: COMPLETED
+        cost:
+          type: integer
+          example: 0
+        billingNote:
+          type: string
+          example: Monthly billing based on distance usage
+        distanceUsed:
+          type: number
+        usageUpdated:
+          type: boolean
+        completedAt:
+          type: string
+          format: date-time
+
+    BatteryHealth:
+      type: object
+      properties:
+        batteryId:
+          type: integer
+        model:
+          type: string
+        overallHealth:
+          type: number
+        cycleCount:
+          type: integer
+        capacityRetention:
+          type: number
+        estimatedLifeRemaining:
+          type: number
+        degradationRate:
+          type: number
+        recommendations:
+          type: array
+          items:
+            type: string
+
+    StationBattery:
+      type: object
+      properties:
+        id:
+          type: integer
+        serialNumber:
+          type: string
+        model:
+          type: string
+        capacity:
+          type: integer
+        stateOfHealth:
+          type: number
+        status:
+          type: string
+        slotNumber:
+          type: integer
+        towerNumber:
+          type: integer
+        cycleCount:
+          type: integer
+
+    PaymentResult:
+      type: object
+      properties:
+        paymentId:
+          type: integer
+        userId:
+          type: string
+        amount:
+          type: number
+        method:
+          type: string
+        status:
+          type: string
+        transactionId:
+          type: string
+        processedAt:
+          type: string
+          format: date-time
+        fee:
+          type: number
+        netAmount:
+          type: number
+
+    MonthlyBill:
+      type: object
+      properties:
+        contractId:
+          type: integer
+        currentMonth:
+          type: string
+          example: 2024-10
+        distanceUsed:
+          type: number
+        baseFee:
+          type: number
+        overageDistance:
+          type: number
+        overageFee:
+          type: number
+        totalFee:
+          type: number
+        planName:
+          type: string
+        baseDistance:
+          type: integer
+        isUnlimited:
+          type: boolean
+
+    MonthlyPaymentResult:
+      type: object
+      properties:
+        paymentId:
+          type: integer
+        contractId:
+          type: integer
+        userId:
+          type: string
+        amount:
+          type: number
+        method:
+          type: string
+        type:
+          type: string
+          example: MONTHLY_BILLING
+        status:
+          type: string
+        billingMonth:
+          type: string
+        distanceBilled:
+          type: number
+        baseFee:
+          type: number
+        overageFee:
+          type: number
+        processedAt:
+          type: string
+          format: date-time
+        billingReset:
+          type: boolean
+
+    UsageSummary:
+      type: object
+      properties:
+        contractId:
+          type: integer
+        currentMonth:
+          type: string
+        planName:
+          type: string
+        baseDistance:
+          type: integer
+        distanceUsed:
+          type: number
+        overageDistance:
+          type: number
+        usagePercentage:
+          type: number
+        baseFee:
+          type: number
+        overageFee:
+          type: number
+        totalFee:
+          type: number
+        lastResetDate:
+          type: string
+          format: date-time
+
+    BillStatus:
+      type: object
+      properties:
+        contractId:
+          type: integer
+        contractNumber:
+          type: string
+        currentMonth:
+          type: string
+        planName:
+          type: string
+        planType:
+          type: string
+        baseDistance:
+          type: integer
+        basePrice:
+          type: number
+        isUnlimited:
+          type: boolean
+        distanceUsed:
+          type: number
+        baseFee:
+          type: number
+        overageDistance:
+          type: number
+        overageFee:
+          type: number
+        currentTotalFee:
+          type: number
+        usageProgress:
+          type: number
+        warningLevel:
+          type: string
+          enum: [NONE, LOW, MEDIUM, HIGH]
+        warningMessage:
+          type: string
+        daysRemainingInMonth:
+          type: integer
+
+    PaymentHistory:
+      type: object
+      properties:
+        paymentId:
+          type: integer
+        userId:
+          type: string
+        amount:
+          type: number
+        method:
+          type: string
+        status:
+          type: string
+        currency:
+          type: string
+        transactionId:
+          type: string
+        processedAt:
+          type: string
+          format: date-time
+        contractId:
+          type: integer
+
+    Contract:
+      type: object
+      properties:
+        contractId:
+          type: integer
+        vehicleId:
+          type: integer
+        contractNumber:
+          type: string
+        status:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        planId:
+          type: integer
+        planType:
+          type: string
+        planName:
+          type: string
+        monthlyFee:
+          type: number
+        baseDistance:
+          type: integer
+        depositFee:
+          type: number
+        description:
+          type: string
+        isUnlimited:
+          type: boolean
+        usedSwaps:
+          type: integer
+        usedDistance:
+          type: number
+        monthlyBaseFee:
+          type: number
+        monthlyOverageFee:
+          type: number
+        monthlyTotalFee:
+          type: number
+        currentMonth:
+          type: string
+
+    ServicePlan:
+      type: object
+      properties:
+        planId:
+          type: integer
+        planName:
+          type: string
+          example: Eco
+        name:
+          type: string
+          example: Eco Plan
+        basePrice:
+          type: number
+          example: 135000
+        monthlyFee:
+          type: number
+          example: 135000
+        baseDistance:
+          type: integer
+          example: 200
+        depositFee:
+          type: number
+          example: 400000
+        description:
+          type: string
+          example: Nếu ≤ 200 km thì chỉ trả 135.000 VNĐ
+        isUnlimited:
+          type: boolean
+        features:
+          type: array
+          items:
+            type: string
+
+    Station:
+      type: object
+      properties:
+        stationId:
+          type: integer
+        name:
+          type: string
+        location:
+          type: string
+        status:
+          type: string
+        availableBatteries:
+          type: integer
+        totalSlots:
+          type: integer
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        size:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
