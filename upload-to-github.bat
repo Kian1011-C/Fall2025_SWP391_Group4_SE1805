@@ -12,7 +12,7 @@ git init
 echo.
 echo [2/7] Adding remote repository...
 git remote remove origin 2>nul
-git remote add origin https://github.com/chstrg2208/ev-battery-swap-system.git
+git remote add origin https://github.com/Kian1011-C/Fall2025_SWP391_Group4_SE1805.git
 
 echo.
 echo [3/7] Setting default branch to main...
