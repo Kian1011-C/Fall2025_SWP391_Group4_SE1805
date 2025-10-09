@@ -249,6 +249,116 @@ class UserService {
       };
     }
   }
+
+  // Update user profile
+  async updateUserProfile(userId, profileData) {
+    try {
+      console.log('UserService: Update user profile', userId, profileData);
+      
+      const response = await apiUtils.put(API_CONFIG.ENDPOINTS.USERS.BY_ID(userId), profileData);
+      
+      if (response.success) {
+        return {
+          success: true,
+          data: response.data,
+          message: 'Cập nhật hồ sơ thành công'
+        };
+      } else {
+        throw new Error(response.message || 'Không thể cập nhật hồ sơ');
+      }
+    } catch (error) {
+      console.error('Update user profile error:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return {
+        success: false,
+        message: errorInfo.message || 'Lỗi khi cập nhật hồ sơ',
+        error: errorInfo
+      };
+    }
+  }
+
+  // Get user dashboard data
+  async getUserDashboard(userId) {
+    try {
+      console.log('UserService: Get user dashboard', userId);
+      
+      const response = await apiUtils.get(`/api/users/${userId}/dashboard`);
+      
+      if (response.success) {
+        return {
+          success: true,
+          data: response.data,
+          message: 'Lấy dữ liệu dashboard thành công'
+        };
+      } else {
+        throw new Error(response.message || 'Không thể lấy dữ liệu dashboard');
+      }
+    } catch (error) {
+      console.error('Get user dashboard error:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return {
+        success: false,
+        message: errorInfo.message || 'Lỗi khi lấy dữ liệu dashboard',
+        error: errorInfo
+      };
+    }
+  }
+
+  // Update user preferences
+  async updateUserPreferences(userId, preferences) {
+    try {
+      console.log('UserService: Update user preferences', userId, preferences);
+      
+      const response = await apiUtils.put(`/api/users/${userId}/preferences`, preferences);
+      
+      if (response.success) {
+        return {
+          success: true,
+          data: response.data,
+          message: 'Cập nhật tùy chọn thành công'
+        };
+      } else {
+        throw new Error(response.message || 'Không thể cập nhật tùy chọn');
+      }
+    } catch (error) {
+      console.error('Update user preferences error:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return {
+        success: false,
+        message: errorInfo.message || 'Lỗi khi cập nhật tùy chọn',
+        error: errorInfo
+      };
+    }
+  }
+
+  // Change password
+  async changePassword(userId, passwordData) {
+    try {
+      console.log('UserService: Change password', userId);
+      
+      const response = await apiUtils.put(`/api/users/${userId}/password`, {
+        oldPassword: passwordData.oldPassword,
+        newPassword: passwordData.newPassword
+      });
+      
+      if (response.success) {
+        return {
+          success: true,
+          message: 'Đổi mật khẩu thành công'
+        };
+      } else {
+        throw new Error(response.message || 'Không thể đổi mật khẩu');
+      }
+    } catch (error) {
+      console.error('Change password error:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return {
+        success: false,
+        message: errorInfo.message || 'Lỗi khi đổi mật khẩu',
+        error: errorInfo
+      };
+    }
+  }
 }
 
 export default new UserService();

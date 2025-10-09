@@ -232,7 +232,8 @@ class StationService {
     try {
       console.log('StationService: Get towers by station', stationId);
       
-      const response = await apiUtils.get(`/api/stations/${stationId}/towers`);
+      // Đúng endpoint theo API documentation: /api/driver/towers?stationId={id}
+      const response = await apiUtils.get('/api/driver/towers', { stationId: stationId });
       
       if (response.success) {
         return {
