@@ -1,3 +1,4 @@
+export { default as SelectVehicleModal } from './SelectVehicleModal';
 // Dashboard Components Index
 export { default as WelcomeHeader } from './WelcomeHeader';
 export { default as StatsCards } from './StatsCards';

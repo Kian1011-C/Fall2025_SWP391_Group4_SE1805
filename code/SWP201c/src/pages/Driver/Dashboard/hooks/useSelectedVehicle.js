@@ -5,8 +5,7 @@ import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
   saveSelectedVehicleToSession,
-  getUpdatedVehicleFromSession,
-  getAutoSelectedVehicle
+  getUpdatedVehicleFromSession
 } from '../utils';
 
 export const useSelectedVehicle = (vehicles) => {
@@ -27,15 +26,11 @@ export const useSelectedVehicle = (vehicles) => {
     }
   }, [location.state]);
 
-  // Auto-select vehicle when vehicles change
+  // Initialize from session only; do NOT auto-select to force user choice
   useEffect(() => {
-    if (vehicles.length > 0) {
-      const sessionVehicle = getUpdatedVehicleFromSession();
-      const autoSelected = getAutoSelectedVehicle(vehicles, selectedVehicle, sessionVehicle);
-      
-      if (autoSelected && autoSelected !== selectedVehicle) {
-        setSelectedVehicle(autoSelected);
-      }
+    const sessionVehicle = getUpdatedVehicleFromSession();
+    if (!selectedVehicle && sessionVehicle) {
+      setSelectedVehicle(sessionVehicle);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [vehicles]);

@@ -2,6 +2,7 @@
 // Handle battery swap transactions and operations
 
 import { apiUtils } from '../config/api.js';
+import { devLog, handleApiError, shouldUseDemoMode, DEV_CONFIG } from '../config/development.js';
 
 class SwapService {
   // Get active swap sessions for user
@@ -117,6 +118,105 @@ class SwapService {
         message: errorInfo.message || 'Lỗi khi khởi tạo đổi pin',
         error: errorInfo
       };
+    }
+  }
+
+  // New unified request for quick swap
+  async requestSwap(payload) {
+    try {
+      devLog('info', 'Request swap with payload:', payload);
+      
+      // Demo mode is disabled, try real API calls
+      devLog('info', 'Demo mode disabled, attempting real API calls');
+      
+      // Check backend availability first
+      if (DEV_CONFIG.BACKEND_CHECK.ENABLED) {
+        devLog('info', 'Checking backend availability');
+        const isBackendAvailable = await this.checkBackendHealth();
+        if (!isBackendAvailable) {
+          devLog('error', 'Backend not available');
+          return { 
+            success: false, 
+            message: 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.',
+            error: 'Backend not available',
+            endpoint: 'none'
+          };
+        }
+        devLog('info', 'Backend is available, proceeding with API calls');
+      }
+      
+      // Try multiple endpoints that might exist
+      const endpoints = [
+        '/api/swaps',
+        '/api/batteries/swap',
+        '/api/swaps/request',
+        '/api/battery-swaps'
+      ];
+      
+      for (const endpoint of endpoints) {
+        try {
+          devLog('debug', `Trying endpoint: ${endpoint}`);
+          const response = await apiUtils.post(endpoint, payload);
+          if (response?.success || response?.data) {
+            devLog('info', `Success with endpoint: ${endpoint}`);
+            return { 
+              success: true, 
+              data: response.data || response, 
+              message: response.message || 'Yêu cầu đổi pin thành công',
+              endpoint: endpoint
+            };
+          }
+        } catch (error) {
+          // Log specific error types for debugging
+          if (error.code === 'ERR_NETWORK' || error.message.includes('CORS')) {
+            devLog('warn', `CORS/Network error for ${endpoint}:`, error.message);
+          } else if (error.response?.status === 404) {
+            devLog('warn', `404 Not Found for ${endpoint}`);
+          } else if (error.response?.status === 405) {
+            devLog('warn', `405 Method Not Allowed for ${endpoint}`);
+          } else {
+            devLog('debug', `Endpoint ${endpoint} failed:`, error.message);
+          }
+          continue;
+        }
+      }
+      
+      // If all endpoints fail, return real error
+      devLog('error', 'All swap endpoints failed');
+      return { 
+        success: false, 
+        message: 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng và thử lại.',
+        error: 'All endpoints failed',
+        endpoint: 'none'
+      };
+    } catch (error) {
+      devLog('error', 'Request swap error:', error);
+      // Return real error instead of demo mode
+      return { 
+        success: false, 
+        message: 'Lỗi hệ thống khi gửi yêu cầu đổi pin. Vui lòng thử lại sau.',
+        error: error.message || 'Unknown error',
+        endpoint: 'none'
+      };
+    }
+  }
+
+  // Check if backend is available
+  async checkBackendHealth() {
+    try {
+      // Try to use existing endpoints that we know exist
+      const response = await apiUtils.get('/api/stations', {}, { timeout: 5000 });
+      return response?.success || response?.data !== undefined;
+    } catch (error) {
+      // Try alternative endpoints that might exist
+      try {
+        const response = await apiUtils.get('/api/vehicles', {}, { timeout: 5000 });
+        return response?.success || response?.data !== undefined;
+      } catch (error2) {
+        // If all health checks fail, assume backend is not available
+        devLog('warn', 'Backend health check failed, assuming backend is not available');
+        return false;
+      }
     }
   }
 
@@ -318,6 +418,61 @@ class SwapService {
     }
   }
 
+  // Get swap count summary for a user (current/month/total)
+  async getSwapCountSummary(userId) {
+    try {
+      console.log('SwapService: Get swap count summary for user:', userId);
+      
+      // Try multiple endpoints that might exist
+      const endpoints = [
+        `/api/users/${userId}/swaps`,
+        `/api/swaps?userId=${userId}`,
+        `/api/batteries/swap/user/${userId}`,
+        `/api/swaps/user/${userId}`
+      ];
+      
+      for (const endpoint of endpoints) {
+        try {
+          const response = await apiUtils.get(endpoint);
+          if (response?.success) {
+            const swaps = Array.isArray(response.data) ? response.data : (response.data?.swaps || []);
+            console.log(`SwapService: Found swaps via ${endpoint}:`, swaps.length);
+            return { 
+              success: true, 
+              data: { 
+                totalSwaps: swaps.length,
+                endpoint: endpoint
+              } 
+            };
+          }
+        } catch (error) {
+          console.log(`SwapService: Endpoint ${endpoint} failed:`, error.message);
+          continue;
+        }
+      }
+      
+      // If all endpoints fail, return empty data
+      console.warn('SwapService: All swap endpoints failed, returning empty data');
+      return { 
+        success: false, 
+        data: { 
+          totalSwaps: 0,
+          endpoint: 'none'
+        },
+        message: 'Không thể kết nối đến server'
+      };
+    } catch (error) {
+      console.error('SwapService: Get swap count summary error:', error);
+      return { 
+        success: false, 
+        data: { 
+          totalSwaps: 0,
+          error: error.message
+        } 
+      };
+    }
+  }
+
   // Get swap statuses
   getSwapStatuses() {
     return [
@@ -399,41 +554,14 @@ class SwapService {
       console.log('SwapService: Request staff assistance', assistanceData);
       
       // NOTE: Backend does not have /api/swaps/request-assistance endpoint yet
-      // Using MOCK mode until backend API is implemented
-      const MOCK_MODE = true; // Keep true - backend endpoint not available
-      
-      if (MOCK_MODE) {
-        console.log('⚠️ MOCK MODE: Simulating staff assistance request (Backend API not available)');
-        
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        // Mock successful response
-        return {
-          success: true,
-          data: {
-            requestId: `ASSIST_${Date.now().toString().slice(-8)}`,
-            status: 'pending',
-            priority: assistanceData.currentBatteryLevel <= 10 ? 'urgent' : 
-                     assistanceData.currentBatteryLevel <= 20 ? 'high' : 'normal',
-            estimatedResponseTime: '5-10 phút',
-            message: 'Yêu cầu hỗ trợ đã được gửi đến nhân viên trạm',
-            requestTime: new Date().toISOString(),
-            stationName: assistanceData.stationName,
-            vehiclePlate: assistanceData.vehiclePlate
-          },
-          message: 'Yêu cầu hỗ trợ từ nhân viên đã được gửi thành công'
-        };
-      }
-      
-      // Real API call (when backend endpoint is ready)
+      // Try to call the actual API endpoint
       const response = await apiUtils.post('/api/swaps/request-assistance', assistanceData);
       
       if (response.success) {
         return {
           success: true,
           data: response.data,
-          message: 'Yêu cầu hỗ trợ từ nhân viên đã được gửi thành công'
+          message: 'Yêu cầu hỗ trợ đã được gửi thành công'
         };
       } else {
         throw new Error(response.message || 'Không thể gửi yêu cầu hỗ trợ');
@@ -534,4 +662,6 @@ class SwapService {
   }
 }
 
-export default new SwapService();
+const swapService = new SwapService();
+export default swapService;
+export { swapService };

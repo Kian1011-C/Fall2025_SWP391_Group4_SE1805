@@ -14,7 +14,7 @@ import {
   processContracts
 } from '../utils';
 
-export const useDashboardData = () => {
+export const useDashboardData = (selectedVehicle = null) => {
   const { currentUser } = useAuth();
   const [vehicles, setVehicles] = useState([]);
   const [contracts, setContracts] = useState([]);
@@ -60,23 +60,31 @@ export const useDashboardData = () => {
         // Process vehicles
         const processedVehicles = processVehicles(userVehicles);
         const finalVehicles = updateVehiclesFromSession(processedVehicles);
-        setVehicles(finalVehicles);
+        setVehicles(selectedVehicle ? [selectedVehicle] : finalVehicles);
         
         // Fetch contracts
         const userContracts = await fetchContracts(userId, userDashboard);
         setContracts(userContracts);
         
-        // Fetch payments
+        // Fetch payments (current status)
         const payments = await fetchPayments(userId);
-        setRecentPayments(payments);
+        setRecentPayments(payments.slice(0, 5));
         
         // Calculate stats
-        const calculatedStats = normalizeDashboardStats(
+        let calculatedStats = normalizeDashboardStats(
           userDashboard, 
           processedVehicles, 
           userContracts, 
           []
         );
+
+        // If a vehicle is selected, enrich stats with vehicle-specific data
+        if (selectedVehicle) {
+          const swaps = await (await import('../../../../assets/js/services/swapService')).default.getSwapCountSummary(userId);
+          if (swaps?.success && swaps.data) {
+            calculatedStats.totalSwaps = swaps.data?.totalSwaps ?? calculatedStats.totalSwaps;
+          }
+        }
         setStats(calculatedStats);
         
         console.log('✅ Successfully loaded dashboard data');
@@ -90,14 +98,20 @@ export const useDashboardData = () => {
           const userDashboard = userData.dashboard || {};
           const processedVehicles = processVehicles(userVehicles);
           const finalVehicles = updateVehiclesFromSession(processedVehicles);
-          setVehicles(finalVehicles);
+          setVehicles(selectedVehicle ? [selectedVehicle] : finalVehicles);
           const userContracts = await fetchContracts(userId, userDashboard);
           setContracts(userContracts);
           const payments = await fetchPayments(userId);
-          setRecentPayments(payments);
-          const calculatedStats = normalizeDashboardStats(
+          setRecentPayments(payments.slice(0, 5));
+          let calculatedStats = normalizeDashboardStats(
             userDashboard, processedVehicles, userContracts, []
           );
+          if (selectedVehicle) {
+            const swaps = await (await import('../../../../assets/js/services/swapService')).default.getSwapCountSummary(userId);
+            if (swaps?.success && swaps.data) {
+              calculatedStats.totalSwaps = swaps.data?.totalSwaps ?? calculatedStats.totalSwaps;
+            }
+          }
           setStats(calculatedStats);
         } else {
           throw new Error('API không trả về dữ liệu hợp lệ');
@@ -148,8 +162,7 @@ export const useDashboardData = () => {
       console.log('💰 Payment service response:', paymentsResponse);
       
       if (paymentsResponse.success && paymentsResponse.data) {
-        return Array.isArray(paymentsResponse.data) ? 
-          paymentsResponse.data.slice(0, 5) : [];
+        return Array.isArray(paymentsResponse.data) ? paymentsResponse.data : [];
       }
       return [];
     } catch (err) {
@@ -162,7 +175,7 @@ export const useDashboardData = () => {
   useEffect(() => {
     fetchDashboardData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [selectedVehicle?.id]);
 
   return {
     vehicles,

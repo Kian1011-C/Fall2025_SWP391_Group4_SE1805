@@ -62,6 +62,20 @@ class PaymentService {
     }
   }
 
+  // Get current bill/payment status for a user
+  async getCurrentPaymentStatus(userId) {
+    try {
+      const response = await apiUtils.get(`/api/payments/current-bill-status/user/${userId}`);
+      if (response?.success) {
+        return { success: true, data: response.data };
+      }
+      return { success: false, data: null, message: response?.message || 'Không thể lấy trạng thái thanh toán hiện tại' };
+    } catch (error) {
+      const errorInfo = apiUtils.handleError(error);
+      return { success: false, data: null, message: errorInfo.message };
+    }
+  }
+
   async setupAutoPayment(userId, paymentMethod) {
     try {
       console.log('PaymentService: Setup auto payment', userId, paymentMethod);

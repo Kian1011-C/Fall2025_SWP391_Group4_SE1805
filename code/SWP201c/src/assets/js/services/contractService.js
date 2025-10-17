@@ -72,6 +72,22 @@ class ContractService {
     }
   }
 
+  // Get active contract for a user
+  async getActiveContract(userId) {
+    try {
+      const response = await apiUtils.get(`/api/contracts/user/${userId}`);
+      if (response?.success) {
+        const contracts = Array.isArray(response.data) ? response.data : (response.data?.contracts || []);
+        const active = contracts.find(c => c.status === 'active') || null;
+        return { success: true, data: active };
+      }
+      return { success: false, data: null, message: response?.message || 'Không thể lấy hợp đồng đang hoạt động' };
+    } catch (error) {
+      const errorInfo = apiUtils.handleError(error);
+      return { success: false, data: null, message: errorInfo.message };
+    }
+  }
+
   async updateContract(contractId, updates) {
     try {
       console.log('ContractService: Update contract', contractId, updates);

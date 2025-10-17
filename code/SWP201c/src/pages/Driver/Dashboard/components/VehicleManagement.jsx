@@ -36,13 +36,15 @@ const VehicleManagement = ({
         contracts={contracts} 
       />
 
-      {/* Vehicle List */}
-      <VehicleList
-        vehicles={vehicles}
-        selectedVehicle={selectedVehicle}
-        onSelectVehicle={onSelectVehicle}
-        contracts={contracts}
-      />
+      {/* Vehicle List removed per request when a vehicle is selected */}
+      {!selectedVehicle && (
+        <VehicleList
+          vehicles={vehicles}
+          selectedVehicle={selectedVehicle}
+          onSelectVehicle={onSelectVehicle}
+          contracts={contracts}
+        />
+      )}
     </div>
   );
 };

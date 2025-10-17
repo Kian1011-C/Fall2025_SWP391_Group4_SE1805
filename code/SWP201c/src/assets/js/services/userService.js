@@ -84,6 +84,8 @@ class UserService {
     }
   }
 
+  // No backend endpoint for driver vehicle detail per Swagger; keep placeholder removed
+
   // Get user profile
   async getUserProfile(userId) {
     try {

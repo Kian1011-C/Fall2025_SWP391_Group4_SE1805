@@ -1,14 +1,73 @@
 // Debug Info Component
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 const DebugInfo = ({ currentUser, vehicles, contracts, error, onRefresh }) => {
-  // Always show debug info for now
-  // if (import.meta.env.VITE_ENABLE_DEBUG !== 'true') return null;
+  const [apiStatus, setApiStatus] = useState({
+    swaps: 'unknown',
+    stations: 'unknown',
+    overall: 'unknown'
+  });
+
+  // Test API endpoints when component mounts
+  useEffect(() => {
+    const testAPIs = async () => {
+      const userId = currentUser?.id || currentUser?.user_id || currentUser?.userId;
+      if (!userId) return;
+
+      const status = { swaps: 'unknown', stations: 'unknown', overall: 'unknown' };
+
+      // Test swaps API - use service instead of direct fetch
+      try {
+        const { swapService } = await import('../../../../assets/js/services');
+        const swapsResponse = await swapService.getSwapCountSummary(userId);
+        status.swaps = swapsResponse.success ? 'success' : 'error';
+      } catch (e) {
+        status.swaps = 'error';
+      }
+
+      // Test stations API - use service instead of direct fetch
+      try {
+        const { stationService } = await import('../../../../assets/js/services');
+        const stationsResponse = await stationService.getAvailableStations();
+        status.stations = stationsResponse.success ? 'success' : 'error';
+      } catch (e) {
+        status.stations = 'error';
+      }
+
+      // Overall status
+      if (status.swaps === 'success' && status.stations === 'success') {
+        status.overall = 'success';
+      } else if (status.swaps === 'error' || status.stations === 'error') {
+        status.overall = 'partial';
+      }
+
+      setApiStatus(status);
+    };
+
+    testAPIs();
+  }, [currentUser]);
 
   const handleLogout = () => {
     console.log('🚪 Debug logout clicked');
-    // This would need to be passed as a prop or use context
     alert('Logout functionality needs to be connected');
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'success': return '✅';
+      case 'error': return '❌';
+      case 'partial': return '⚠️';
+      default: return '⏳';
+    }
+  };
+
+  const getStatusText = (status) => {
+    switch (status) {
+      case 'success': return 'Connected';
+      case 'error': return 'Failed';
+      case 'partial': return 'Partial';
+      default: return 'Unknown';
+    }
   };
 
   return (
@@ -26,8 +85,13 @@ const DebugInfo = ({ currentUser, vehicles, contracts, error, onRefresh }) => {
       Current User ID: {currentUser?.id || currentUser?.user_id || currentUser?.userId}<br/>
       Vehicles Count: {vehicles.length}<br/>
       Contracts Count: {contracts.length}<br/>
-      Data Source: {error ? 'API FAILED - No Data' : vehicles.length > 0 ? 'API SUCCESS' : 'NO DATA'}<br/>
-      API Status: {error ? '❌ Error' : vehicles.length > 0 ? '✅ Connected' : '⏳ No Response'}<br/>
+      <br/>
+      <strong>API Status:</strong><br/>
+      Swaps API: {getStatusIcon(apiStatus.swaps)} {getStatusText(apiStatus.swaps)}<br/>
+      Stations API: {getStatusIcon(apiStatus.stations)} {getStatusText(apiStatus.stations)}<br/>
+      Overall: {getStatusIcon(apiStatus.overall)} {getStatusText(apiStatus.overall)}<br/>
+      <br/>
+      Data Source: {error ? 'API FAILED - Using Mock Data' : vehicles.length > 0 ? 'API SUCCESS' : 'NO DATA'}<br/>
       Error: {error || 'None'}<br/>
       <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
         <button 

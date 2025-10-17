@@ -122,7 +122,9 @@ export const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
-  }
+  },
+  // Add CORS headers for development
+  withCredentials: false
 });
 
 // Request interceptor to add auth token
@@ -149,7 +151,8 @@ apiClient.interceptors.response.use(
       // Token expired or invalid
       localStorage.removeItem('authToken');
       localStorage.removeItem('currentUser');
-      window.location.href = '/login';
+      // App dùng modal đăng nhập trên trang chủ
+      window.location.href = '/';
     }
     return Promise.reject(error);
   }

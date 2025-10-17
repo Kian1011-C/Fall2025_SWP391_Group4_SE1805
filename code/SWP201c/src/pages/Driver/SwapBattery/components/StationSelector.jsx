@@ -11,7 +11,6 @@ const StationSelector = ({
   error,
   onSelectStation,
   onRetry,
-  onRequestStaffAssistance
 }) => {
   console.log('🏪 StationSelector render:', { loading, error, stationsCount: stations.length });
   

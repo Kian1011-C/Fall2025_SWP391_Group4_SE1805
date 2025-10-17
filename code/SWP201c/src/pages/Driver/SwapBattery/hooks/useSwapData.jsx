@@ -24,8 +24,8 @@ export const useSwapData = (currentUser) => {
       
       console.log('🔋 Fetching swap data for user:', currentUser);
       
-      // Fetch stations
-      const stationsResponse = await stationService.getAllStations();
+      // Fetch available stations for quick flow
+      const stationsResponse = await stationService.getAvailableStations();
       console.log('📍 Stations response:', stationsResponse);
       
       if (stationsResponse.success && stationsResponse.data) {

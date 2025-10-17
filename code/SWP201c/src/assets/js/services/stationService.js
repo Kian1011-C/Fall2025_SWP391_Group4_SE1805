@@ -31,6 +31,55 @@ class StationService {
     }
   }
 
+  // New: get available stations list for quick swap
+  async getAvailableStations() {
+    try {
+      console.log('StationService: Get available stations');
+      
+      // Try multiple endpoints that might exist
+      const endpoints = [
+        '/api/stations',
+        '/api/stations/available',
+        '/api/stations/active'
+      ];
+      
+      for (const endpoint of endpoints) {
+        try {
+          const response = await apiUtils.get(endpoint);
+          if (response?.success) {
+            console.log(`StationService: Found stations via ${endpoint}:`, response.data?.length || 0);
+            return { 
+              success: true, 
+              data: response.data || [],
+              endpoint: endpoint
+            };
+          }
+        } catch (error) {
+          console.log(`StationService: Endpoint ${endpoint} failed:`, error.message);
+          continue;
+        }
+      }
+      
+      // If all endpoints fail, return empty data
+      console.warn('StationService: All station endpoints failed, returning empty data');
+      return { 
+        success: false, 
+        data: [],
+        endpoint: 'none',
+        message: 'Không thể kết nối đến server'
+      };
+    } catch (error) {
+      console.error('StationService: Get available stations error:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return { 
+        success: false, 
+        data: [],
+        message: errorInfo.message,
+        error: error.message
+      };
+    }
+  }
+
   // Get station by ID
   async getStationById(stationId) {
     try {

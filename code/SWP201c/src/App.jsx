@@ -18,6 +18,7 @@ import { DriverRoute, StaffRoute, AdminRoute } from './components/ProtectedRoute
 
 // Driver Pages
 import DriverDashboard from './pages/Driver/Dashboard';
+import SelectVehicle from './pages/Driver/SelectVehicle';
 import DriverSwapBattery from './pages/Driver/SwapBattery';
 import DriverVehicles from './pages/Driver/Vehicles';
 import DriverStationsMap from './pages/Driver/StationsMap';
@@ -56,6 +57,9 @@ function AppContent() {
           {/* Driver Routes - Only accessible by drivers */}
           <Route path="/driver/dashboard" element={
             <DriverRoute><DriverDashboard /></DriverRoute>
+          } />
+          <Route path="/driver/select-vehicle" element={
+            <DriverRoute><React.Suspense fallback={<div/>}><SelectVehicle /></React.Suspense></DriverRoute>
           } />
           <Route path="/driver/swap-battery" element={
             <DriverRoute><DriverSwapBattery /></DriverRoute>

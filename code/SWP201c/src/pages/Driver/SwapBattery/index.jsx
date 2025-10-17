@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
-// import { swapService } from '../../../assets/js/services';
+import { swapService } from '../../../assets/js/services/swapService';
+import { devLog } from '../../../assets/js/config/development';
 import '../../../assets/css/battery-swap.css';
 
 // Hooks
@@ -20,12 +21,13 @@ import {
   TakeNewBattery,
   ConfirmAndSave,
   SwapSuccess,
-  StaffAssistanceButton
+  StaffAssistanceButton,
+  ApiErrorModal
 } from './components';
 
 // Utils
 import { getBatteryLevel } from './utils';
-import { swapService } from '../../../assets/js/services';
+// import { swapService } from '../../../assets/js/services';
 
 const SwapBatteryContainer = () => {
   const { currentUser } = useAuth();
@@ -80,7 +82,8 @@ const SwapBatteryContainer = () => {
   const [swapId, setSwapId] = useState(null);
   // Simple flags kept for future UI states (e.g., spinner/toast)
   const [apiLoading, setApiLoading] = useState(false); // eslint-disable-line no-unused-vars
-  const [apiError, setApiError] = useState(null); // eslint-disable-line no-unused-vars
+  const [apiError, setApiError] = useState(null);
+  const [showApiErrorModal, setShowApiErrorModal] = useState(false);
 
   // Initialize - Get vehicle from navigation
   useEffect(() => {
@@ -102,7 +105,30 @@ const SwapBatteryContainer = () => {
                   'batteryLevel:', vehicleFromNavigation.batteryLevel, ')');
       setCurrentBatteryLevel(batteryLevel);
     } else {
-      console.warn('⚠️ No vehicle received from navigation, using default battery level');
+      console.warn('⚠️ No vehicle received from navigation, checking session storage...');
+      
+      // Try to get vehicle from session storage
+      try {
+        const sessionVehicle = JSON.parse(sessionStorage.getItem('selectedVehicle'));
+        if (sessionVehicle) {
+          console.log('🚗 Found vehicle in session storage:', sessionVehicle);
+          setSelectedVehicle(sessionVehicle);
+          const batteryLevel = getBatteryLevel(sessionVehicle, 50);
+          setCurrentBatteryLevel(batteryLevel);
+        } else {
+          console.error('❌ No vehicle found in session storage either!');
+          alert('Vui lòng chọn xe trước khi đổi pin. Đang chuyển về Dashboard...');
+          setTimeout(() => {
+            navigate('/driver/dashboard');
+          }, 2000);
+        }
+      } catch (err) {
+        console.error('❌ Error reading session storage:', err);
+        alert('Vui lòng chọn xe trước khi đổi pin. Đang chuyển về Dashboard...');
+        setTimeout(() => {
+          navigate('/driver/dashboard');
+        }, 2000);
+      }
     }
 
     fetchInitialData(vehicleFromNavigation);
@@ -141,8 +167,9 @@ const SwapBatteryContainer = () => {
       setSelectedTower(null);
       const stationId = station.stationId || station.id;
       await fetchTowersByStation(stationId);
-      // Stay at step 1 until user also selects a tower and clicks "Tiếp tục"
-      console.log('🏪 Station selected; waiting for tower selection before proceeding');
+      // Move to step 2 (choose tower)
+      setCurrentStep(2);
+      console.log('🏪 Station selected; moving to step 2 to choose tower');
     } else {
       console.log('❌ Station not active, cannot select');
       alert('Trạm này đang bảo trì. Vui lòng chọn trạm khác.');
@@ -151,13 +178,23 @@ const SwapBatteryContainer = () => {
 
   // Handle tower selection (stay in step 1 until user proceeds)
   const handleSelectTower = async (tower) => {
+    console.log('🔌 handleSelectTower called!');
+    console.log('📍 Tower:', tower);
+    
     const statusVal = typeof tower.status === 'string' ? tower.status.toLowerCase() : tower.status;
     if (statusVal === 'active' || statusVal === true || statusVal === 1) {
+      console.log('✅ Tower is active, selecting...');
       setSelectedTower(tower);
       setSelectedNewBatterySlot(null);
       setSelectedEmptySlot(null);
       const towerId = tower.towerId || tower.id;
       await fetchSlotsByTower(towerId);
+      // Move to step 3 after selecting tower
+      setCurrentStep(3);
+      console.log('🔌 Tower selected; moving to step 3');
+    } else {
+      console.log('❌ Tower not active, cannot select');
+      alert('Trụ này không khả dụng. Vui lòng chọn trụ khác.');
     }
   };
 
@@ -169,38 +206,67 @@ const SwapBatteryContainer = () => {
   // Handle navigation
   const handleNext = async () => {
     // New flow (6 steps):
-    // 1) Tìm/đặt trạm (chọn trạm + trụ) → 2) Quét QR đăng nhập → 3) Chọn Đổi pin → 4) Bỏ pin cũ → 5) Nhận pin đầy → 6) Lắp pin & hoàn tất
+    // 1) Chọn trạm → 2) Chọn trụ → 3) Đến trạm & xác nhận → 4) Bỏ pin cũ → 5) Nhận pin mới → 6) Hoàn tất
     if (currentStep === 1) {
-      if (selectedStation && selectedTower) {
-        setCurrentStep(2);
-      }
+      // Step 1: User selects station, then automatically moves to step 2
+      // This is handled by handleSelectStation
+      console.log('Step 1: Station selection handled by handleSelectStation');
     } else if (currentStep === 2) {
-      setCurrentStep(3);
+      // Step 2: User selects tower, then automatically moves to step 3
+      // This is handled by handleSelectTower
+      console.log('Step 2: Tower selection handled by handleSelectTower');
     } else if (currentStep === 3) {
-      // Initiate swap via BE
-      if (!selectedStation) {
-        alert('Thiếu thông tin trạm');
+      // Step 3: User clicks "Đổi pin" button to send swap request
+      console.log('Step 3: Sending swap request...');
+      console.log('Selected Station:', selectedStation);
+      console.log('Selected Tower:', selectedTower);
+      console.log('Selected Vehicle:', selectedVehicle);
+      
+      if (!selectedStation || !selectedTower || !selectedVehicle) {
+        console.error('❌ Missing required info:', {
+          station: !!selectedStation,
+          tower: !!selectedTower,
+          vehicle: !!selectedVehicle
+        });
+        alert('Thiếu thông tin (trạm/trụ/xe). Vui lòng quay lại chọn trạm và trụ.');
         return;
       }
+      
       setApiLoading(true);
       setApiError(null);
       try {
-        // Theo BE: /api/batteries/swap/initiate yêu cầu { userId, stationId } (batteryId optional)
-        const resolvedContractId = userContract?.contract_id || userContract?.contractId || userContract?.id;
         const payload = {
-          userId: currentUser?.id || currentUser?.user_id || currentUser?.userId,
-          stationId: selectedStation?.stationId || selectedStation?.id,
-          contractId: resolvedContractId,
-          contract_id: resolvedContractId
+          driver_id: currentUser?.id || currentUser?.user_id || currentUser?.userId,
+          vehicle_id: selectedVehicle?.vehicle_id || selectedVehicle?.vehicleId || selectedVehicle?.id,
+          station_id: selectedStation?.stationId || selectedStation?.id,
+          slot_id: selectedTower?.towerId || selectedTower?.id
         };
-        const res = await swapService.initiateSwap(payload);
-        if (res?.success && res.data) {
-          setSwapId(res.data.swapId || res.data.id);
+        devLog('info', 'Sending swap request with payload:', payload);
+        
+        const res = await swapService.requestSwap(payload);
+        devLog('info', 'Swap request response:', res);
+        
+        if (res?.success) {
+          setSwapId(res.data?.swapId || res.data?.id || `SWAP_${Date.now()}`);
           setCurrentStep(4);
+          devLog('info', 'API call successful:', res.message);
         } else {
-          setApiError(res?.message || 'Không thể khởi tạo đổi pin');
-          alert(res?.message || 'Không thể khởi tạo đổi pin');
+          // Handle API failure - show error modal
+          devLog('error', 'Swap request failed:', res.message);
+          setApiError({
+            message: res.message || 'Lỗi khi gửi yêu cầu đổi pin',
+            errorType: res.errorType || 'UNKNOWN'
+          });
+          setShowApiErrorModal(true);
+          return; // Don't continue to next step
         }
+      } catch (error) {
+        devLog('error', 'Swap request error:', error);
+        setApiError({
+          message: error.message || 'Lỗi khi gửi yêu cầu đổi pin',
+          errorType: 'UNKNOWN'
+        });
+        setShowApiErrorModal(true);
       } finally {
         setApiLoading(false);
       }
@@ -299,7 +365,11 @@ const SwapBatteryContainer = () => {
               onSelectStation={handleSelectStation}
               onRetry={() => fetchInitialData(location.state?.selectedVehicle)}
             />
-            {selectedStation && (
+          </div>
+        );
+
+      case 2:
+        return (
               <TowerSelector
                 towers={towers}
                 selectedStation={selectedStation}
@@ -308,30 +378,60 @@ const SwapBatteryContainer = () => {
                 onSelectTower={handleSelectTower}
                 onGoBack={() => setCurrentStep(1)}
               />
-            )}
-          </div>
-        );
-
-      case 2:
-        return (
-          <div style={{ padding: '16px', color: '#B0B0B0' }}>
-            <h3 style={{ color: '#FFFFFF' }}>Bước 2: Quét mã QR để đăng nhập</h3>
-            <p>Vui lòng dùng ứng dụng để quét QR trên màn hình trạm để xác thực.</p>
-          </div>
         );
 
       case 3:
         return (
-          <div style={{ padding: '16px', color: '#B0B0B0' }}>
-            <h3 style={{ color: '#FFFFFF' }}>Bước 3: Chọn “Đổi pin”</h3>
-            <p>Nhấn nút Đổi pin trên màn hình trạm để bắt đầu quy trình.</p>
+          <div className="step-confirmation-container">
+            <div className="step-confirmation-header">
+              <div className="step-icon">📍</div>
+              <h3 className="step-title">Đến trạm & xác nhận</h3>
+            </div>
+            
+            <div className="step-confirmation-content">
+              <div className="location-info">
+                <div className="location-card">
+                  <div className="location-icon">🏪</div>
+                  <div className="location-details">
+                    <div className="location-label">Trạm đã chọn</div>
+                    <div className="location-value">{selectedStation?.name || '...'}</div>
+                  </div>
+                </div>
+                
+                <div className="location-card">
+                  <div className="location-icon">🔌</div>
+                  <div className="location-details">
+                    <div className="location-label">Trụ sạc</div>
+                    <div className="location-value">{selectedTower?.towerNumber || selectedTower?.name || selectedTower?.id || '...'}</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="instructions">
+                <div className="instruction-item">
+                  <div className="instruction-icon">✅</div>
+                  <p>Kiểm tra biển báo trên trụ sạc để đảm bảo đúng vị trí</p>
+                </div>
+                <div className="instruction-item">
+                  <div className="instruction-icon">📱</div>
+                  <p>Nhấn nút "Đổi pin" để gửi yêu cầu đến hệ thống trạm</p>
+                </div>
+                <div className="instruction-item">
+                  <div className="instruction-icon">🔋</div>
+                  <p>Sau khi hệ thống xác nhận, bạn sẽ được hướng dẫn đặt pin cũ vào khoang</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="step-confirmation-actions">
             <button
-              className="btn-swap btn-confirm"
+                className="btn-swap btn-confirm btn-large"
               onClick={handleNext}
-              style={{ marginTop: '16px' }}
             >
-              ✓ Đổi pin
+                <span className="btn-icon">🔋</span>
+                <span className="btn-text">Đổi pin</span>
             </button>
+            </div>
           </div>
         );
 
@@ -431,13 +531,7 @@ const SwapBatteryContainer = () => {
                 <button className="btn-swap btn-back" onClick={handleFinish}>
                   Hủy
                 </button>
-                <button
-                  className="btn-swap btn-next"
-                  onClick={handleNext}
-                  disabled={!selectedStation || !selectedTower}
-                >
-                  Tiếp tục →
-                </button>
+                {/* Step 1: Station selection handled by handleSelectStation */}
               </>
             )}
 
@@ -446,9 +540,7 @@ const SwapBatteryContainer = () => {
                 <button className="btn-swap btn-back" onClick={handleBack}>
                   ← Quay lại
                 </button>
-                <button className="btn-swap btn-confirm" onClick={handleNext}>
-                  ✓ Xác nhận đổi pin
-                </button>
+                {/* Step 2: Tower selection handled by handleSelectTower */}
               </>
             )}
 
@@ -457,13 +549,7 @@ const SwapBatteryContainer = () => {
                 <button className="btn-swap btn-back" onClick={handleBack}>
                   ← Quay lại
                 </button>
-                <button
-                  className="btn-swap btn-next"
-                  onClick={handleNext}
-                  disabled={false}
-                >
-                  Tiếp tục →
-                </button>
+                {/* Nút "Đổi pin" được hiển thị trong Step 3 content */}
               </>
             )}
 
@@ -499,6 +585,20 @@ const SwapBatteryContainer = () => {
             position="bottom"
           />
         </div>
+        
+        {/* API Error Modal */}
+        <ApiErrorModal
+          isOpen={showApiErrorModal}
+          onClose={() => setShowApiErrorModal(false)}
+          error={apiError}
+          onRetry={() => {
+            setShowApiErrorModal(false);
+            // Retry the current step
+            if (currentStep === 3) {
+              handleNext();
+            }
+          }}
+        />
     </div>
   );
 };

@@ -50,12 +50,8 @@ const RegisterModal = () => {
             </select>
           </div>
           <div className="form-actions">
-            <button type="button" className="btn" onClick={() => setShowRegisterModal(false)}>
-              Hủy
-            </button>
-            <button type="submit" className="btn btn-primary">
-              Đăng ký
-            </button>
+            <button type="button" className="btn" onClick={() => setShowRegisterModal(false)}>Hủy</button>
+            <button type="submit" className="btn btn-primary">Đăng ký</button>
           </div>
         </form>
       </div>
@@ -64,4 +60,5 @@ const RegisterModal = () => {
 };
 
 export default RegisterModal;
+
 

@@ -3,12 +3,12 @@ import React from 'react';
 
 const SwapProgressBar = ({ currentStep }) => {
   const steps = [
-    { number: 1, label: 'Tìm/đặt trạm' },
-    { number: 2, label: 'Quét QR đăng nhập' },
-    { number: 3, label: 'Chọn Đổi pin' },
-    { number: 4, label: 'Bỏ pin cũ' },
-    { number: 5, label: 'Nhận pin đầy' },
-    { number: 6, label: 'Lắp pin & hoàn tất' }
+    { number: 1, label: 'Chọn trạm' },
+    { number: 2, label: 'Chọn trụ' },
+    { number: 3, label: 'Đến trạm & xác nhận' },
+    { number: 4, label: 'Đặt pin cũ' },
+    { number: 5, label: 'Nhận pin mới' },
+    { number: 6, label: 'Hoàn tất đổi pin' }
   ];
 
   return (

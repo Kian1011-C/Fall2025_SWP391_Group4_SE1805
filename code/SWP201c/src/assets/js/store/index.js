@@ -6,7 +6,6 @@ import useBatteryStore from './batterySlice.js';
 import useContractStore from './contractSlice.js';
 import usePaymentStore from './paymentSlice.js';
 import useStationStore from './stationSlice.js';
-import useSwapStore from './swapSlice.js';
 import useVehicleStore from './vehicleSlice.js';
 import useUserStore from './userSlice.js';
 import useReportStore from './reportSlice.js';
@@ -19,7 +18,6 @@ export {
   useContractStore,
   usePaymentStore,
   useStationStore,
-  useSwapStore,
   useVehicleStore,
   useUserStore,
   useReportStore,
@@ -33,7 +31,6 @@ export default {
   contract: useContractStore,
   payment: usePaymentStore,
   station: useStationStore,
-  swap: useSwapStore,
   vehicle: useVehicleStore,
   user: useUserStore,
   report: useReportStore,

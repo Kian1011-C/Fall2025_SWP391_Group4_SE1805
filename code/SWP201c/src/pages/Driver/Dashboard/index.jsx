@@ -13,7 +13,8 @@ import {
   QuickActions,
   VehicleManagement,
   PaymentHistory,
-  DebugInfo
+  DebugInfo,
+  SelectVehicleModal
 } from './components';
 
 const DriverDashboard = () => {
@@ -21,6 +22,10 @@ const DriverDashboard = () => {
   const { currentUser } = useAuth();
   
   // Custom hooks for data and vehicle selection
+  // Read selected vehicle from session to avoid circular dependency
+  let sessionSelectedVehicle = null;
+  try { sessionSelectedVehicle = JSON.parse(sessionStorage.getItem('selectedVehicle')); } catch {}
+
   const {
     vehicles,
     contracts,
@@ -29,9 +34,11 @@ const DriverDashboard = () => {
     loading,
     error,
     refetch
-  } = useDashboardData();
+  } = useDashboardData(sessionSelectedVehicle);
   
   const { selectedVehicle, setSelectedVehicle } = useSelectedVehicle(vehicles);
+
+  // Show selection modal on first visit if no selected vehicle
 
   // Loading state
   if (loading) {
@@ -105,6 +112,8 @@ const DriverDashboard = () => {
     );
   }
 
+  const displayedVehicles = selectedVehicle ? [selectedVehicle] : vehicles;
+
   return (
     <DashboardLayout role="driver">
       <style>
@@ -116,30 +125,55 @@ const DriverDashboard = () => {
       </style>
 
       <div style={{ padding: '20px', minHeight: '100vh' }}>
-        {/* TEST BUTTON FOR SETTINGS */}
-        <button
-          onClick={() => {
-            console.log('🧪 TEST: Navigating to /driver/settings');
-            navigate('/driver/settings');
-          }}
-          style={{
-            position: 'fixed',
-            top: '80px',
-            right: '20px',
-            padding: '12px 24px',
-            background: 'linear-gradient(135deg, #ff6b6b, #ff5252)',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontWeight: 'bold',
-            fontSize: '14px',
-            zIndex: 9999,
-            boxShadow: '0 4px 15px rgba(255, 107, 107, 0.4)'
-          }}
-        >
-          🧪 TEST Settings
-        </button>
+        {/* Selected vehicle banner + change button */}
+        {selectedVehicle && (
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            background: 'rgba(30,41,59,0.6)',
+            border: '1px solid rgba(148,163,184,0.24)',
+            borderRadius: 12,
+            padding: '12px 16px',
+            marginBottom: 16
+          }}>
+            <div>
+              <div style={{ fontWeight: 700, color: '#FFFFFF' }}>
+                Xe đang sử dụng: {selectedVehicle.plateNumber || selectedVehicle.license_plate || selectedVehicle.licensePlate || 'N/A'}
+              </div>
+              <div style={{ fontSize: 13, color: '#B0B0B0' }}>
+                Loại: {selectedVehicle.model || selectedVehicle.vehicleModel || 'N/A'} — Pin: {selectedVehicle.health ?? selectedVehicle.batteryLevel ?? selectedVehicle.battery_level ?? 'N/A'}%
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                try { sessionStorage.removeItem('selectedVehicle'); } catch {}
+                setSelectedVehicle(null);
+              }}
+              style={{
+                padding: '8px 12px',
+                background: 'linear-gradient(135deg, #6ab7ff, #4a90e2)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 8,
+                cursor: 'pointer',
+                fontWeight: 600
+              }}
+            >
+              Đổi xe
+            </button>
+          </div>
+        )}
+        {!selectedVehicle && vehicles?.length > 0 && (
+          <SelectVehicleModal
+            vehicles={vehicles}
+            onSelect={(v) => {
+              try { sessionStorage.setItem('selectedVehicle', JSON.stringify(v)); } catch {}
+              setSelectedVehicle(v);
+            }}
+          />
+        )}
+        {/* TEST Settings button removed */}
         
         {/* Debug Info */}
         <DebugInfo 
@@ -169,7 +203,7 @@ const DriverDashboard = () => {
         
         {/* Vehicle Management */}
         <VehicleManagement
-          vehicles={vehicles}
+          vehicles={displayedVehicles}
           contracts={contracts}
           selectedVehicle={selectedVehicle}
           onSelectVehicle={setSelectedVehicle}
