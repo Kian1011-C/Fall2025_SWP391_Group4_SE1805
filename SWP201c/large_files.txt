@@ -1,0 +1,15 @@
+﻿591 lines - D:\KI 5\SWP391\Fall2025_SWP391_Group4_SE1805\ev-battery-swap-system\code\SWP201c\src\pages\Admin\Reports.jsx
+586 lines - D:\KI 5\SWP391\Fall2025_SWP391_Group4_SE1805\ev-battery-swap-system\code\SWP201c\src\pages\Admin\Dashboard.jsx
+574 lines - D:\KI 5\SWP391\Fall2025_SWP391_Group4_SE1805\ev-battery-swap-system\code\SWP201c\src\pages\Driver\Vehicles_backup.jsx
+564 lines - D:\KI 5\SWP391\Fall2025_SWP391_Group4_SE1805\ev-battery-swap-system\code\SWP201c\src\pages\Admin\Users.jsx
+528 lines - D:\KI 5\SWP391\Fall2025_SWP391_Group4_SE1805\ev-battery-swap-system\code\SWP201c\src\components\common\LandingPage.jsx
+512 lines - D:\KI 5\SWP391\Fall2025_SWP391_Group4_SE1805\ev-battery-swap-system\code\SWP201c\src\assets\js\services\swapService.js
+505 lines - D:\KI 5\SWP391\Fall2025_SWP391_Group4_SE1805\ev-battery-swap-system\code\SWP201c\src\pages\Admin\Contracts.jsx
+503 lines - D:\KI 5\SWP391\Fall2025_SWP391_Group4_SE1805\ev-battery-swap-system\code\SWP201c\src\pages\Staff\TransactionManagement.jsx
+502 lines - D:\KI 5\SWP391\Fall2025_SWP391_Group4_SE1805\ev-battery-swap-system\code\SWP201c\src\pages\Driver\SwapBattery\SwapBatteryContainer.jsx
+484 lines - D:\KI 5\SWP391\Fall2025_SWP391_Group4_SE1805\ev-battery-swap-system\code\SWP201c\src\pages\Driver\Vehicles.jsx
+482 lines - D:\KI 5\SWP391\Fall2025_SWP391_Group4_SE1805\ev-battery-swap-system\code\SWP201c\src\pages\Admin\Batteries.jsx
+462 lines - D:\KI 5\SWP391\Fall2025_SWP391_Group4_SE1805\ev-battery-swap-system\code\SWP201c\src\pages\Staff\BatteryInventory.jsx
+445 lines - D:\KI 5\SWP391\Fall2025_SWP391_Group4_SE1805\ev-battery-swap-system\code\SWP201c\src\pages\Driver\Subscriptions.jsx
+426 lines - D:\KI 5\SWP391\Fall2025_SWP391_Group4_SE1805\ev-battery-swap-system\code\SWP201c\src\pages\Admin\Subscriptions.jsx
+1037 lines - D:\KI 5\SWP391\Fall2025_SWP391_Group4_SE1805\ev-battery-swap-system\code\SWP201c\src\pages\Driver\Dashboard.jsx
