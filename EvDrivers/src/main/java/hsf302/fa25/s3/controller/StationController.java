@@ -8,7 +8,6 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/stations")
-@CrossOrigin(origins = "*")
 public class StationController {
     
     private final StationDao stationDao = new StationDao();
@@ -40,6 +39,8 @@ public class StationController {
                 
                 stationMap.put("totalSlots", details.getOrDefault("totalSlots", 0));
                 stationMap.put("availableSlots", details.getOrDefault("availableSlots", 0));
+                // Ensure availableSlots is the count of full batteries (ready to use)
+                stationMap.put("available_slots", details.getOrDefault("availableSlots", 0));
                 stationMap.put("chargingSlots", details.getOrDefault("chargingSlots", 0));
                 stationMap.put("emptySlots", details.getOrDefault("emptySlots", 0));
                 stationMap.put("todayTransactions", details.getOrDefault("todayTransactions", 0));

@@ -10,7 +10,6 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/batteries")
-@CrossOrigin(origins = "*")
 public class BatteryController {
 
     private final BatteryDao batteryDao = new BatteryDao();
@@ -77,14 +76,17 @@ public class BatteryController {
             Long stationId = Long.valueOf(swapRequest.get("stationId").toString());
             Long oldBatteryId = swapRequest.containsKey("batteryId") ? 
                 Long.valueOf(swapRequest.get("batteryId").toString()) : null;
+            // Optional: vehicleId selected by user (so we update the correct vehicle)
+            Integer vehicleId = swapRequest.containsKey("vehicleId") && swapRequest.get("vehicleId") != null
+                    ? Integer.valueOf(swapRequest.get("vehicleId").toString()) : null;
             
             // Find available battery at the station
             String findBatterySql = """
-                SELECT TOP 1 b.battery_id, sl.slot_number, t.tower_number
+                SELECT TOP 1 b.battery_id, sl.slot_id, sl.slot_number, t.tower_id, t.tower_number
                 FROM Batteries b
                 INNER JOIN Slots sl ON b.slot_id = sl.slot_id
                 INNER JOIN Towers t ON sl.tower_id = t.tower_id
-                WHERE t.station_id = ? AND b.status = 'AVAILABLE'
+                WHERE t.station_id = ? AND UPPER(b.status) = 'AVAILABLE'
                 ORDER BY b.state_of_health DESC
             """;
             
@@ -95,50 +97,113 @@ public class BatteryController {
                 java.sql.ResultSet rs = ps.executeQuery();
                 if (rs.next()) {
                     Long newBatteryId = rs.getLong("battery_id");
+                    Integer newBatterySlotId = rs.getObject("slot_id") != null ? rs.getInt("slot_id") : null;
                     int slotNumber = rs.getInt("slot_number");
+                    int towerId = rs.getInt("tower_id");
                     int towerNumber = rs.getInt("tower_number");
                     
-                    // Create swap record
+                    // Find active contract for this user's vehicle(s)
+                    Integer contractId = null;
+                    String findContractSql;
+                    if (vehicleId != null) {
+                        findContractSql = "SELECT TOP 1 c.contract_id FROM Contracts c WHERE c.vehicle_id = ? AND c.status = 'active' ORDER BY c.contract_id DESC";
+                        try (java.sql.PreparedStatement cPs = conn.prepareStatement(findContractSql)) {
+                            cPs.setInt(1, vehicleId);
+                            try (java.sql.ResultSet cRs = cPs.executeQuery()) {
+                                if (cRs.next()) {
+                                    contractId = cRs.getInt("contract_id");
+                                }
+                            }
+                        }
+                    } else {
+                        findContractSql = "SELECT TOP 1 c.contract_id FROM Contracts c " +
+                                "WHERE c.vehicle_id IN (SELECT vehicle_id FROM Vehicles WHERE user_id = ?) " +
+                                "AND c.status = 'active' ORDER BY c.contract_id DESC";
+                        try (java.sql.PreparedStatement cPs = conn.prepareStatement(findContractSql)) {
+                            cPs.setString(1, userId);
+                            try (java.sql.ResultSet cRs = cPs.executeQuery()) {
+                                if (cRs.next()) {
+                                    contractId = cRs.getInt("contract_id");
+                                }
+                            }
+                        }
+                    }
+
+                    if (contractId == null) {
+                        Map<String, Object> response = new HashMap<>();
+                        response.put("success", false);
+                        response.put("message", "Không tìm thấy hợp đồng active cho user này. Không thể tạo swap.");
+                        return ResponseEntity.status(400).body(response);
+                    }
+                    // Determine vehicle_id to persist on swap: prefer vehicleId from request, otherwise resolve from contract
+                    Integer swapVehicleId = null;
+                    if (vehicleId != null) {
+                        swapVehicleId = vehicleId;
+                    } else {
+                        // find vehicle_id from contract
+                        String findVehicleSql = "SELECT vehicle_id FROM Contracts WHERE contract_id = ?";
+                        try (java.sql.PreparedStatement vPs = conn.prepareStatement(findVehicleSql)) {
+                            vPs.setInt(1, contractId);
+                            try (java.sql.ResultSet vRs = vPs.executeQuery()) {
+                                if (vRs.next()) {
+                                    swapVehicleId = vRs.getInt("vehicle_id");
+                                }
+                            }
+                        }
+                    }
+
+                    // Create swap record (include contract_id and vehicle_id)
                     String insertSwapSql = """
-                        INSERT INTO Swaps (user_id, station_id, old_battery_id, new_battery_id, swap_date, status)
-                        VALUES (?, ?, ?, ?, GETDATE(), 'INITIATED')
+                        INSERT INTO Swaps (user_id, contract_id, vehicle_id, station_id, tower_id, old_battery_id, new_battery_id, swap_date, status)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, GETDATE(), 'INITIATED')
                     """;
-                    
-                    try (java.sql.PreparedStatement insertPs = conn.prepareStatement(insertSwapSql, 
+
+                    try (java.sql.PreparedStatement insertPs = conn.prepareStatement(insertSwapSql,
                             java.sql.Statement.RETURN_GENERATED_KEYS)) {
                         insertPs.setString(1, userId);
-                        insertPs.setLong(2, stationId);
-                        if (oldBatteryId != null) {
-                            insertPs.setLong(3, oldBatteryId);
+                        insertPs.setInt(2, contractId);
+                        if (swapVehicleId != null) {
+                            insertPs.setInt(3, swapVehicleId);
                         } else {
-                            insertPs.setNull(3, java.sql.Types.BIGINT);
+                            insertPs.setNull(3, java.sql.Types.INTEGER);
                         }
-                        insertPs.setLong(4, newBatteryId);
-                        
+                        insertPs.setLong(4, stationId);
+                        insertPs.setInt(5, towerId);
+                        if (oldBatteryId != null) {
+                            insertPs.setLong(6, oldBatteryId);
+                        } else {
+                            insertPs.setNull(6, java.sql.Types.BIGINT);
+                        }
+                        insertPs.setLong(7, newBatteryId);
+
                         int rowsAffected = insertPs.executeUpdate();
                         if (rowsAffected > 0) {
-                            java.sql.ResultSet generatedKeys = insertPs.getGeneratedKeys();
-                            if (generatedKeys.next()) {
-                                Long swapId = generatedKeys.getLong(1);
-                                
-                                Map<String, Object> swapTransaction = new HashMap<>();
-                                swapTransaction.put("swapId", swapId);
-                                swapTransaction.put("userId", userId);
-                                swapTransaction.put("stationId", stationId);
-                                swapTransaction.put("oldBatteryId", oldBatteryId);
-                                swapTransaction.put("newBatteryId", newBatteryId);
-                                swapTransaction.put("status", "INITIATED");
-                                swapTransaction.put("slotNumber", slotNumber);
-                                swapTransaction.put("towerNumber", towerNumber);
-                                swapTransaction.put("estimatedTime", 300); // 5 minutes
-                                swapTransaction.put("initiatedAt", new java.util.Date());
-                                
-                                Map<String, Object> response = new HashMap<>();
-                                response.put("success", true);
-                                response.put("message", "Battery swap initiated successfully");
-                                response.put("data", swapTransaction);
-                                
-                                return ResponseEntity.ok(response);
+                            try (java.sql.ResultSet generatedKeys = insertPs.getGeneratedKeys()) {
+                                if (generatedKeys.next()) {
+                                    Long swapId = generatedKeys.getLong(1);
+
+                                    Map<String, Object> swapTransaction = new HashMap<>();
+                                    swapTransaction.put("swapId", swapId);
+                                    swapTransaction.put("userId", userId);
+                                    swapTransaction.put("contractId", contractId);
+                                    swapTransaction.put("vehicleId", swapVehicleId);
+                                    swapTransaction.put("stationId", stationId);
+                                    swapTransaction.put("oldBatteryId", oldBatteryId);
+                                    swapTransaction.put("newBatteryId", newBatteryId);
+                                    swapTransaction.put("status", "INITIATED");
+                                    swapTransaction.put("slotNumber", slotNumber);
+                                    swapTransaction.put("slotId", newBatterySlotId);
+                                    swapTransaction.put("towerNumber", towerNumber);
+                                    swapTransaction.put("estimatedTime", 300); // 5 minutes
+                                    swapTransaction.put("initiatedAt", new java.util.Date());
+
+                                    Map<String, Object> response = new HashMap<>();
+                                    response.put("success", true);
+                                    response.put("message", "Battery swap initiated successfully");
+                                    response.put("data", swapTransaction);
+
+                                    return ResponseEntity.ok(response);
+                                }
                             }
                         }
                     }
@@ -166,12 +231,15 @@ public class BatteryController {
     @PostMapping("/swap/{swapId}/confirm")
     public ResponseEntity<?> confirmBatterySwap(@PathVariable Long swapId) {
         try {
-            // Update swap status to COMPLETED
-            String updateSwapSql = "UPDATE Swaps SET status = 'COMPLETED' WHERE swap_id = ?";
-            
-            // Get swap details
+            // We'll perform necessary updates in a transaction:
+            // - set swap.status = 'COMPLETED'
+            // - move old battery into an empty slot (if exists) and set its status = 'charging'
+            // - remove new battery from its slot (slot becomes empty) and set new battery status = 'in_use'
+            // - update vehicle.current_battery_id to new battery
             String getSwapSql = """
                 SELECT s.*, 
+                       old_b.slot_id as old_slot_id,
+                       new_b.slot_id as new_slot_id,
                        old_b.state_of_health as old_battery_charge,
                        new_b.state_of_health as new_battery_charge
                 FROM Swaps s
@@ -179,91 +247,135 @@ public class BatteryController {
                 INNER JOIN Batteries new_b ON s.new_battery_id = new_b.battery_id
                 WHERE s.swap_id = ?
             """;
-            
+
             try (java.sql.Connection conn = hsf302.fa25.s3.context.ConnectDB.getConnection()) {
-                // Update swap status
-                try (java.sql.PreparedStatement updatePs = conn.prepareStatement(updateSwapSql)) {
-                    updatePs.setLong(1, swapId);
-                    int rowsUpdated = updatePs.executeUpdate();
-                    
-                    if (rowsUpdated > 0) {
-                        // Get updated swap details
-                        try (java.sql.PreparedStatement selectPs = conn.prepareStatement(getSwapSql)) {
-                            selectPs.setLong(1, swapId);
-                            
-                            java.sql.ResultSet rs = selectPs.executeQuery();
-                            if (rs.next()) {
-                                Map<String, Object> swapResult = new HashMap<>();
-                                swapResult.put("swapId", rs.getLong("swap_id"));
-                                swapResult.put("userId", rs.getString("user_id"));
-                                swapResult.put("stationId", rs.getLong("station_id"));
-                                swapResult.put("oldBatteryId", rs.getObject("old_battery_id"));
-                                swapResult.put("newBatteryId", rs.getLong("new_battery_id"));
-                                swapResult.put("status", "COMPLETED");
-                                swapResult.put("swapDate", rs.getTimestamp("swap_date"));
-                                swapResult.put("completedAt", new java.util.Date());
-                                
-                                // Calculate actual time (mock calculation)
-                                long startTime = rs.getTimestamp("swap_date").getTime();
-                                long currentTime = System.currentTimeMillis();
-                                long actualTimeSeconds = Math.min(600, (currentTime - startTime) / 1000); // Max 10 minutes
-                                swapResult.put("actualTime", actualTimeSeconds);
-                                
-                                swapResult.put("oldBatteryCharge", rs.getDouble("old_battery_charge"));
-                                swapResult.put("newBatteryCharge", rs.getDouble("new_battery_charge"));
-                                
-                                // No cost for individual swap - billing is monthly based on distance used
-                                swapResult.put("cost", 0);
-                                swapResult.put("billingNote", "Monthly billing based on distance usage");
-                                
-                                // Track distance usage for monthly billing
-                                java.math.BigDecimal distanceUsed = null;
-                                if (rs.getBigDecimal("odometer_after") != null && rs.getBigDecimal("odometer_before") != null) {
-                                    distanceUsed = rs.getBigDecimal("odometer_after").subtract(rs.getBigDecimal("odometer_before"));
-                                    
-                                    if (distanceUsed.compareTo(java.math.BigDecimal.ZERO) > 0) {
-                                        // Find contract for this user to update monthly usage
-                                        try (java.sql.PreparedStatement contractPs = conn.prepareStatement(
-                                                "SELECT TOP 1 contract_id FROM Contracts WHERE vehicle_id IN " +
-                                                "(SELECT vehicle_id FROM Vehicles WHERE user_id = ?) AND status = 'ACTIVE'")) {
-                                            contractPs.setString(1, rs.getString("user_id"));
-                                            java.sql.ResultSet contractRs = contractPs.executeQuery();
-                                            
-                                            if (contractRs.next()) {
-                                                int contractId = contractRs.getInt("contract_id");
-                                                
-                                                // Update monthly usage in contract
-                                                contractDao.updateMonthlyUsage(contractId, distanceUsed);
-                                                contractDao.calculateAndUpdateMonthlyFees(contractId);
-                                                
-                                                swapResult.put("distanceUsed", distanceUsed);
-                                                swapResult.put("contractId", contractId);
-                                                swapResult.put("usageUpdated", true);
-                                                swapResult.put("billingNote", "Distance tracked for monthly billing");
-                                            }
-                                        }
+                conn.setAutoCommit(false);
+
+                // Read swap and battery slot info
+                try (java.sql.PreparedStatement selectPs = conn.prepareStatement(getSwapSql)) {
+                    selectPs.setLong(1, swapId);
+                    try (java.sql.ResultSet rs = selectPs.executeQuery()) {
+                        if (!rs.next()) {
+                            conn.rollback();
+                            Map<String, Object> response = new HashMap<>();
+                            response.put("success", false);
+                            response.put("message", "Swap not found");
+                            return ResponseEntity.status(404).body(response);
+                        }
+
+                        Integer oldBatteryId = rs.getObject("old_battery_id") != null ? rs.getInt("old_battery_id") : null;
+                        int newBatteryId = rs.getInt("new_battery_id");
+                        int stationId = rs.getInt("station_id");
+                        Integer contractId = rs.getObject("contract_id") != null ? rs.getInt("contract_id") : null;
+
+                        // 1) Update swap status
+                        try (java.sql.PreparedStatement updateSwapPs = conn.prepareStatement("UPDATE Swaps SET status = 'COMPLETED', swap_date = GETDATE() WHERE swap_id = ?")) {
+                            updateSwapPs.setLong(1, swapId);
+                            updateSwapPs.executeUpdate();
+                        }
+
+                        // 2) Handle old battery: move into an empty slot and set to 'charging'
+                        if (oldBatteryId != null) {
+                            String findEmptySlotSql = """
+                                SELECT TOP 1 sl.slot_id FROM Slots sl
+                                INNER JOIN Towers t ON sl.tower_id = t.tower_id
+                                WHERE t.station_id = ? AND sl.status = 'empty'
+                                ORDER BY sl.slot_number
+                            """;
+                            Integer targetSlotId = null;
+                            try (java.sql.PreparedStatement slotPs = conn.prepareStatement(findEmptySlotSql)) {
+                                slotPs.setInt(1, stationId);
+                                try (java.sql.ResultSet slotRs = slotPs.executeQuery()) {
+                                    if (slotRs.next()) {
+                                        targetSlotId = slotRs.getInt("slot_id");
                                     }
-                                } else {
-                                    swapResult.put("distanceUsed", 0);
-                                    swapResult.put("usageUpdated", false);
-                                    swapResult.put("billingNote", "No odometer data - distance not tracked");
                                 }
-                                
-                                Map<String, Object> response = new HashMap<>();
-                                response.put("success", true);
-                                response.put("message", "Battery swap completed successfully");
-                                response.put("data", swapResult);
-                                
-                                return ResponseEntity.ok(response);
+                            }
+
+                            if (targetSlotId != null) {
+                                // assign old battery to the empty slot and set status 'charging'
+                                try (java.sql.PreparedStatement updBat = conn.prepareStatement("UPDATE Batteries SET slot_id = ?, status = 'charging' WHERE battery_id = ?")) {
+                                    updBat.setInt(1, targetSlotId);
+                                    updBat.setInt(2, oldBatteryId);
+                                    updBat.executeUpdate();
+                                }
+                                // set slot status to 'charging'
+                                try (java.sql.PreparedStatement updSlot = conn.prepareStatement("UPDATE Slots SET status = 'charging' WHERE slot_id = ?")) {
+                                    updSlot.setInt(1, targetSlotId);
+                                    updSlot.executeUpdate();
+                                }
+                            } else {
+                                // No empty slot: set battery status to 'charging' and clear slot_id
+                                try (java.sql.PreparedStatement updBat = conn.prepareStatement("UPDATE Batteries SET slot_id = NULL, status = 'charging' WHERE battery_id = ?")) {
+                                    updBat.setInt(1, oldBatteryId);
+                                    updBat.executeUpdate();
+                                }
                             }
                         }
+
+                        // 3) Handle new battery: remove from its slot (slot becomes empty) and set status 'in_use'
+                        // Get new battery's current slot id (if any)
+                        Integer newBatterySlotId = rs.getObject("new_slot_id") != null ? rs.getInt("new_slot_id") : null;
+                        if (newBatterySlotId != null) {
+                            // set slot to 'empty'
+                            try (java.sql.PreparedStatement updSlot = conn.prepareStatement("UPDATE Slots SET status = 'empty' WHERE slot_id = ?")) {
+                                updSlot.setInt(1, newBatterySlotId);
+                                updSlot.executeUpdate();
+                            }
+                        }
+                        // set new battery to in_use and clear slot_id
+                        try (java.sql.PreparedStatement updNewBat = conn.prepareStatement("UPDATE Batteries SET slot_id = NULL, status = 'in_use' WHERE battery_id = ?")) {
+                            updNewBat.setInt(1, newBatteryId);
+                            updNewBat.executeUpdate();
+                        }
+
+                        // 4) Update vehicle current_battery_id if contract -> vehicle mapping exists
+                        if (contractId != null) {
+                            try (java.sql.PreparedStatement vehPs = conn.prepareStatement(
+                                    "UPDATE Vehicles SET current_battery_id = ? WHERE vehicle_id = (SELECT vehicle_id FROM Contracts WHERE contract_id = ?)") ) {
+                                vehPs.setInt(1, newBatteryId);
+                                vehPs.setInt(2, contractId);
+                                vehPs.executeUpdate();
+                            }
+                        }
+
+                        // 5) Update contract usage & billing as before
+                        java.math.BigDecimal distanceUsed = null;
+                        if (rs.getBigDecimal("odometer_after") != null && rs.getBigDecimal("odometer_before") != null) {
+                            distanceUsed = rs.getBigDecimal("odometer_after").subtract(rs.getBigDecimal("odometer_before"));
+                            if (distanceUsed.compareTo(java.math.BigDecimal.ZERO) > 0 && contractId != null) {
+                                contractDao.updateMonthlyUsage(contractId, distanceUsed);
+                                contractDao.calculateAndUpdateMonthlyFees(contractId);
+                            }
+                        }
+
+                        // commit transaction
+                        conn.commit();
+
+                        // Prepare response payload
+                        Map<String, Object> swapResult = new HashMap<>();
+                        swapResult.put("swapId", swapId);
+                        swapResult.put("userId", rs.getString("user_id"));
+                        swapResult.put("stationId", stationId);
+                        swapResult.put("oldBatteryId", oldBatteryId);
+                        swapResult.put("newBatteryId", newBatteryId);
+                        swapResult.put("status", "COMPLETED");
+                        swapResult.put("swapDate", rs.getTimestamp("swap_date"));
+                        swapResult.put("completedAt", new java.util.Date());
+
+                        Map<String, Object> response = new HashMap<>();
+                        response.put("success", true);
+                        response.put("message", "Battery swap completed successfully");
+                        response.put("data", swapResult);
+                        return ResponseEntity.ok(response);
                     }
                 }
-                
+            } catch (Exception ex) {
+                ex.printStackTrace();
                 Map<String, Object> response = new HashMap<>();
                 response.put("success", false);
-                response.put("message", "Swap not found or already completed");
-                return ResponseEntity.status(404).body(response);
+                response.put("message", "Error during swap completion: " + ex.getMessage());
+                return ResponseEntity.status(500).body(response);
             }
         } catch (Exception e) {
             Map<String, Object> response = new HashMap<>();
@@ -478,6 +590,338 @@ public class BatteryController {
             Map<String, Object> response = new HashMap<>();
             response.put("success", false);
             response.put("message", "Error: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    // ==================== STAFF BATTERY MANAGEMENT CRUD APIs ====================
+
+    @GetMapping
+    public ResponseEntity<?> getAllBatteries(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Long stationId,
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "50") int size) {
+        try {
+            List<Battery> batteries;
+            
+            if (status != null && !status.isEmpty()) {
+                batteries = batteryDao.getBatteriesByStatus(status);
+            } else {
+                batteries = batteryDao.getAllBatteries();
+            }
+            
+            // Filter by station if provided
+            if (stationId != null) {
+                batteries = batteries.stream()
+                    .filter(b -> {
+                        // Check if battery belongs to the station through slot/tower relationship
+                        try {
+                            String checkSql = """
+                                SELECT COUNT(*) FROM Batteries b
+                                INNER JOIN Slots sl ON b.slot_id = sl.slot_id
+                                INNER JOIN Towers t ON sl.tower_id = t.tower_id
+                                WHERE b.battery_id = ? AND t.station_id = ?
+                            """;
+                            try (java.sql.Connection conn = hsf302.fa25.s3.context.ConnectDB.getConnection();
+                                 java.sql.PreparedStatement ps = conn.prepareStatement(checkSql)) {
+                                ps.setInt(1, b.getBatteryId());
+                                ps.setLong(2, stationId);
+                                java.sql.ResultSet rs = ps.executeQuery();
+                                if (rs.next()) {
+                                    return rs.getInt(1) > 0;
+                                }
+                            }
+                        } catch (Exception e) {
+                            return false;
+                        }
+                        return false;
+                    }).toList();
+            }
+            
+            // Apply pagination
+            int start = page * size;
+            int end = Math.min(start + size, batteries.size());
+            List<Battery> paginatedBatteries = batteries.subList(start, end);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("data", paginatedBatteries);
+            response.put("total", batteries.size());
+            response.put("page", page);
+            response.put("size", size);
+            response.put("totalPages", (batteries.size() + size - 1) / size);
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Error fetching batteries: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getBatteryById(@PathVariable Long id) {
+        try {
+            Battery battery = batteryDao.getBatteryById(id.intValue());
+            
+            Map<String, Object> response = new HashMap<>();
+            if (battery != null) {
+                response.put("success", true);
+                response.put("data", battery);
+            } else {
+                response.put("success", false);
+                response.put("message", "Battery not found");
+                return ResponseEntity.status(404).body(response);
+            }
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Error fetching battery: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    @PostMapping
+    public ResponseEntity<?> createBattery(@RequestBody Battery battery) {
+        try {
+            // Validate required fields
+            if (battery.getModel() == null || battery.getModel().trim().isEmpty()) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Model is required");
+                return ResponseEntity.status(400).body(response);
+            }
+            
+            if (battery.getCapacity() <= 0) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Capacity must be greater than 0");
+                return ResponseEntity.status(400).body(response);
+            }
+            
+            // Set defaults
+            if (battery.getStateOfHealth() == 0) {
+                battery.setStateOfHealth(100.0); // New battery starts at 100%
+            }
+            if (battery.getStatus() == null || battery.getStatus().isEmpty()) {
+                battery.setStatus("AVAILABLE");
+            }
+            if (battery.getCycleCount() == 0) {
+                battery.setCycleCount(0); // New battery starts at 0 cycles
+            }
+            
+            boolean created = batteryDao.createBattery(battery);
+            
+            Map<String, Object> response = new HashMap<>();
+            if (created) {
+                response.put("success", true);
+                response.put("message", "Battery created successfully");
+                response.put("data", battery);
+            } else {
+                response.put("success", false);
+                response.put("message", "Failed to create battery");
+                return ResponseEntity.status(500).body(response);
+            }
+            
+            return ResponseEntity.status(201).body(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Error creating battery: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateBattery(@PathVariable Long id, @RequestBody Battery battery) {
+        try {
+            // Check if battery exists
+            Battery existingBattery = batteryDao.getBatteryById(id.intValue());
+            if (existingBattery == null) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Battery not found");
+                return ResponseEntity.status(404).body(response);
+            }
+            
+            // Set the ID for update
+            battery.setBatteryId(id.intValue());
+            
+            // Validate fields
+            if (battery.getModel() == null || battery.getModel().trim().isEmpty()) {
+                battery.setModel(existingBattery.getModel());
+            }
+            if (battery.getCapacity() <= 0) {
+                battery.setCapacity(existingBattery.getCapacity());
+            }
+            if (battery.getStateOfHealth() < 0 || battery.getStateOfHealth() > 100) {
+                battery.setStateOfHealth(existingBattery.getStateOfHealth());
+            }
+            if (battery.getStatus() == null || battery.getStatus().isEmpty()) {
+                battery.setStatus(existingBattery.getStatus());
+            }
+            
+            boolean updated = batteryDao.updateBattery(battery);
+            
+            Map<String, Object> response = new HashMap<>();
+            if (updated) {
+                response.put("success", true);
+                response.put("message", "Battery updated successfully");
+                response.put("data", battery);
+            } else {
+                response.put("success", false);
+                response.put("message", "Failed to update battery");
+                return ResponseEntity.status(500).body(response);
+            }
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Error updating battery: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteBattery(@PathVariable Long id) {
+        try {
+            // Check if battery exists
+            Battery existingBattery = batteryDao.getBatteryById(id.intValue());
+            if (existingBattery == null) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Battery not found");
+                return ResponseEntity.status(404).body(response);
+            }
+            
+            // Check if battery is currently in use
+            if ("IN_USE".equals(existingBattery.getStatus())) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Cannot delete battery that is currently in use");
+                return ResponseEntity.status(400).body(response);
+            }
+            
+            boolean deleted = batteryDao.deleteBattery(id.intValue());
+            
+            Map<String, Object> response = new HashMap<>();
+            if (deleted) {
+                response.put("success", true);
+                response.put("message", "Battery deleted successfully");
+            } else {
+                response.put("success", false);
+                response.put("message", "Failed to delete battery");
+                return ResponseEntity.status(500).body(response);
+            }
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Error deleting battery: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    @GetMapping("/statistics")
+    public ResponseEntity<?> getBatteryStatistics() {
+        try {
+            Map<String, Integer> stats = batteryDao.getBatteryStatistics();
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("data", stats);
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Error fetching battery statistics: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    @PutMapping("/bulk")
+    public ResponseEntity<?> bulkUpdateBatteries(@RequestBody Map<String, Object> request) {
+        try {
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> batteryUpdates = (List<Map<String, Object>>) request.get("batteries");
+            
+            if (batteryUpdates == null || batteryUpdates.isEmpty()) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "No batteries provided for update");
+                return ResponseEntity.status(400).body(response);
+            }
+            
+            int successCount = 0;
+            int failCount = 0;
+            List<String> errors = new ArrayList<>();
+            
+            for (Map<String, Object> batteryData : batteryUpdates) {
+                try {
+                    Integer id = (Integer) batteryData.get("batteryId");
+                    if (id == null) {
+                        failCount++;
+                        errors.add("Battery ID missing");
+                        continue;
+                    }
+                    
+                    Battery existingBattery = batteryDao.getBatteryById(id);
+                    if (existingBattery == null) {
+                        failCount++;
+                        errors.add("Battery " + id + " not found");
+                        continue;
+                    }
+                    
+                    // Update fields if provided
+                    if (batteryData.containsKey("status")) {
+                        existingBattery.setStatus((String) batteryData.get("status"));
+                    }
+                    if (batteryData.containsKey("stateOfHealth")) {
+                        Double health = Double.valueOf(batteryData.get("stateOfHealth").toString());
+                        if (health >= 0 && health <= 100) {
+                            existingBattery.setStateOfHealth(health);
+                        }
+                    }
+                    if (batteryData.containsKey("cycleCount")) {
+                        Integer cycles = (Integer) batteryData.get("cycleCount");
+                        if (cycles >= 0) {
+                            existingBattery.setCycleCount(cycles);
+                        }
+                    }
+                    
+                    if (batteryDao.updateBattery(existingBattery)) {
+                        successCount++;
+                    } else {
+                        failCount++;
+                        errors.add("Failed to update battery " + id);
+                    }
+                } catch (Exception e) {
+                    failCount++;
+                    errors.add("Error updating battery: " + e.getMessage());
+                }
+            }
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", successCount > 0);
+            response.put("message", String.format("Bulk update completed. Success: %d, Failed: %d", successCount, failCount));
+            response.put("successCount", successCount);
+            response.put("failCount", failCount);
+            if (!errors.isEmpty()) {
+                response.put("errors", errors);
+            }
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Error in bulk update: " + e.getMessage());
             return ResponseEntity.status(500).body(response);
         }
     }

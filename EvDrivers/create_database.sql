@@ -146,9 +146,10 @@ CREATE TABLE Swaps (
     swap_id INT PRIMARY KEY IDENTITY(1,1),
     user_id VARCHAR(50) NOT NULL, -- FK đến Users.user_id (driver)
     contract_id INT NOT NULL,
+    vehicle_id INT NULL,
     station_id INT NOT NULL,
     tower_id INT NOT NULL,
-    staff_id VARCHAR(50) NOT NULL, -- FK đến Users.user_id (staff)
+    staff_id VARCHAR(50) NULL, -- FK đến Users.user_id (staff); allow NULL for automatic/system swaps
     old_battery_id INT NULL,
     new_battery_id INT NULL,
     odometer_before DECIMAL(12,2) NULL,
@@ -160,6 +161,7 @@ CREATE TABLE Swaps (
     payment_id INT NULL,
     FOREIGN KEY (user_id) REFERENCES Users(user_id),
     FOREIGN KEY (contract_id) REFERENCES Contracts(contract_id),
+    FOREIGN KEY (vehicle_id) REFERENCES Vehicles(vehicle_id),
     FOREIGN KEY (station_id) REFERENCES Stations(station_id),
     FOREIGN KEY (tower_id) REFERENCES Towers(tower_id),
     FOREIGN KEY (staff_id) REFERENCES Users(user_id),
@@ -297,12 +299,12 @@ INSERT INTO Payments (user_id, contract_id, amount, method, status, currency, tr
 ('driver002', 3, 50000, 'QR', 'success', 'VND', 'QR-20241005-005');
 
 -- Insert Swaps
-INSERT INTO Swaps (user_id, contract_id, station_id, tower_id, staff_id, old_battery_id, new_battery_id, 
+INSERT INTO Swaps (user_id, contract_id, vehicle_id, station_id, tower_id, staff_id, old_battery_id, new_battery_id, 
                   odometer_before, odometer_after, status, payment_id) VALUES
-('driver001', 1, 1, 1, 'staff001', 20, 1, 15420.5, 15450.8, 'COMPLETED', 4),
-('driver001', 2, 2, 3, 'staff002', 21, 9, 8750.2, 8785.6, 'COMPLETED', NULL),
-('driver002', 3, 1, 2, 'staff001', 22, 5, 12340.1, 12375.4, 'COMPLETED', 5),
-('driver001', 1, 2, 4, 'staff002', 1, 11, 15460.3, 15490.7, 'COMPLETED', NULL);
+('driver001', 1, 1, 1, 1, 'staff001', 20, 1, 15420.5, 15450.8, 'COMPLETED', 4),
+('driver001', 2, 2, 2, 3, 'staff002', 21, 9, 8750.2, 8785.6, 'COMPLETED', NULL),
+('driver002', 3, 3, 1, 2, 'staff001', 22, 5, 12340.1, 12375.4, 'COMPLETED', 5),
+('driver001', 1, 1, 2, 4, 'staff002', 1, 11, 15460.3, 15490.7, 'COMPLETED', NULL);
 
 -- Insert Reports
 INSERT INTO Reports (station_id, date, total_swaps, revenue, issues) VALUES

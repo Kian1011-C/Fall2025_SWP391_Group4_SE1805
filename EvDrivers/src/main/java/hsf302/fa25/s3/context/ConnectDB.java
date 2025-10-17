@@ -10,7 +10,8 @@ public class ConnectDB {
             "jdbc:sqlserver://localhost:1433;"
                     + "databaseName=ev_battery_swap;"
                     + "encrypt=true;"
-                    + "trustServerCertificate=true;";
+                    + "trustServerCertificate=true;"
+                    + "sslProtocol=TLSv1.2;";
     private static final String USER = "sa";
     private static final String PASSWORD = "123";
 

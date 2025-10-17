@@ -27,7 +27,9 @@ public class BatteryDao {
                 b.setCapacity(rs.getInt("capacity"));
                 b.setStateOfHealth(rs.getDouble("state_of_health"));
                 b.setStatus(rs.getString("status"));
-                b.setSlotId(rs.getInt("slot_id"));
+                // use getObject to preserve NULL -> null in Integer slotId
+                Object slotObj = rs.getObject("slot_id");
+                if (slotObj != null) b.setSlotId(((Number) slotObj).intValue());
                 list.add(b);
             }
         } catch (Exception e) {
@@ -168,7 +170,8 @@ public class BatteryDao {
         b.setCapacity(rs.getInt("capacity"));
         b.setStateOfHealth(rs.getDouble("state_of_health"));
         b.setStatus(rs.getString("status"));
-        b.setSlotId(rs.getInt("slot_id"));
+        Object slotObj = rs.getObject("slot_id");
+        if (slotObj != null) b.setSlotId(((Number) slotObj).intValue());
         return b;
     }
 }

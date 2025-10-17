@@ -6,7 +6,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SlotDao {
 
@@ -30,5 +32,28 @@ public class SlotDao {
             e.printStackTrace();
         }
         return list;
+    }
+
+    // Lấy thông tin pin trong slot
+    public Map<String, Object> getBatteryInfoBySlotId(int slotId) {
+        String sql = "SELECT b.battery_id, b.model, b.state_of_health, b.status as battery_status " +
+                    "FROM Batteries b WHERE b.slot_id = ?";
+        try (Connection conn = ConnectDB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, slotId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                Map<String, Object> batteryInfo = new HashMap<>();
+                batteryInfo.put("battery_id", rs.getInt("battery_id"));
+                batteryInfo.put("model", rs.getString("model"));
+                batteryInfo.put("state_of_health", rs.getDouble("state_of_health"));
+                batteryInfo.put("battery_status", rs.getString("battery_status"));
+                return batteryInfo;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null; // Không có pin trong slot này
     }
 }
