@@ -1,42 +1,53 @@
-// Admin/Subscriptions/hooks/useSubscriptionsData.js
-// Custom hook for fetching subscription plans data from API
-
-import { useState, useEffect } from 'react';
-import contractService from '../../../../assets/js/services/contractService';
+import { useState, useEffect, useCallback } from 'react';
+import servicePlanService from '../../../../assets/js/services/servicePlanService';
 
 export const useSubscriptionsData = () => {
   const [plans, setPlans] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchPlans = async () => {
+  // Hàm gọi API
+  const fetchPlans = useCallback(async () => {
     try {
-      setLoading(true);
+      setIsLoading(true);
       setError(null);
-      
-      const result = await contractService.getContractPlans();
-      
-      if (result.success) {
-        setPlans(result.data || []);
+      const response = await servicePlanService.getAllServicePlans();
+      if (response.success && Array.isArray(response.data)) {
+        setPlans(response.data);
       } else {
-        setError(result.message || 'Không thể tải danh sách gói dịch vụ');
+        throw new Error(response.message || "Dữ liệu gói cước không hợp lệ.");
       }
     } catch (err) {
-      setError('Lỗi khi tải danh sách gói dịch vụ');
-      console.error('Error fetching plans:', err);
+      setError(err.message || "Không thể tải danh sách gói cước.");
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchPlans();
-  }, []);
+  }, [fetchPlans]);
+
+  // Các hàm CRUD
+  const handleCreate = async (planData) => {
+    const response = await servicePlanService.createServicePlan(planData);
+    if (response.success) {
+      fetchPlans(); // Tải lại danh sách
+    }
+    return response;
+  };
+
+  const handleUpdate = async (planId, planData) => {
+    const response = await servicePlanService.updateServicePlan(planId, planData);
+    if (response.success) {
+      fetchPlans(); // Tải lại danh sách
+    }
+    return response;
+  };
 
   return {
     plans,
-    loading,
-    error,
-    refetch: fetchPlans
+    isLoading, error, refetch: fetchPlans,
+    handleCreate, handleUpdate,
   };
 };

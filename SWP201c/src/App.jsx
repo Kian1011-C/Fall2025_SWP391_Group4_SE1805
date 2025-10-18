@@ -1,8 +1,10 @@
 import React, { Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import './App.css';
 
-// --- Providers & Hooks ---
+// --- Context Providers & Hooks ---
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { SwapProvider } from './context/SwapContext';
 import { AppProvider } from './context/AppContext';
@@ -18,6 +20,7 @@ import { DriverRoute, StaffRoute, AdminRoute } from './components/ProtectedRoute
 import DriverLayout from './layouts/DriverLayout';
 import StaffLayout from './layouts/StaffLayout';
 import VehicleSelectionScreen from './pages/Driver/Vehicles';
+import AdminLayout from './layouts/AdminLayout';
 
 // --- Driver Pages ---
 import DriverDashboard from './pages/Driver/Dashboard';
@@ -39,7 +42,20 @@ import StaffTransactionManagement from './pages/Staff/TransactionManagement';
 
 // --- Admin Pages ---
 import AdminDashboard from './pages/Admin/Dashboard';
-// ... import các trang Admin khác
+import AdminUsers from './pages/Admin/Users';
+import AdminStations from './pages/Admin/Stations';
+import AdminBatteries from './pages/Admin/Batteries';
+import AdminSubscriptions from './pages/Admin/Subscriptions';
+import AdminContracts from './pages/Admin/Contracts';
+import AdminReports from './pages/Admin/Reports';
+
+// Fix default markers for React Leaflet
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
 
 // "Gatekeeper" component for Driver
 function ProtectedDriverLayout() {
@@ -88,9 +104,17 @@ function AppContent() {
           </Route>
           
           {/* === ADMIN ROUTES === */}
-          <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-          {/* ... các route admin khác ... */}
-
+          <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="stations" element={<AdminStations />} />
+            <Route path="batteries" element={<AdminBatteries />} />
+            <Route path="contracts" element={<AdminContracts />} />
+            <Route path="subscriptions" element={<AdminSubscriptions />} />
+            <Route path="reports" element={<AdminReports />} />
+          </Route>
+          
           {/* === PUBLIC & REDIRECT ROUTES === */}
           <Route path="/" element={
             currentUser ? (

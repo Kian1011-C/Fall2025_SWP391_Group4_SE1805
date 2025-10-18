@@ -1,47 +1,49 @@
-// Admin/Contracts/hooks/useContractsData.js
-// Custom hook for fetching contracts data from API
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import contractService from '../../../../assets/js/services/contractService';
 
 export const useContractsData = () => {
-  const [contracts] = useState([]); // setContracts will be used when API is ready
-  const [loading, setLoading] = useState(true);
+  const [contracts, setContracts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [filterStatus, setFilterStatus] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const fetchContracts = async () => {
+  const fetchContracts = useCallback(async (filters) => {
     try {
-      setLoading(true);
+      setIsLoading(true);
       setError(null);
-      
-      // Note: Backend cần API GET /api/contracts (get all)
-      // Tạm thời dùng endpoint có sẵn
-      const result = await contractService.getContractPlans();
-      
-      if (result.success) {
-        // Map plans to contract format hoặc dùng endpoint khác
-        // When API is ready, uncomment this:
-        // setContracts(result.data);
-        setError('Backend cần implement GET /api/contracts endpoint để lấy danh sách tất cả hợp đồng');
+      const response = await contractService.getAllContracts(filters);
+      if (response.success && Array.isArray(response.data)) {
+        setContracts(response.data);
       } else {
-        setError(result.message);
+        throw new Error(response.message || "Dữ liệu hợp đồng không hợp lệ.");
       }
     } catch (err) {
-      setError('Không thể tải dữ liệu hợp đồng');
-      console.error('Error fetching contracts:', err);
+      setError(err.message || "Không thể tải danh sách hợp đồng.");
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchContracts();
-  }, []);
+  }, [fetchContracts]);
+
+  const filteredContracts = useMemo(() => {
+    return contracts.filter(contract => {
+      const statusMatch = filterStatus ? contract.status === filterStatus : true;
+      const searchMatch = searchQuery ? 
+        (contract.contractNumber?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+         contract.userId?.toLowerCase().includes(searchQuery.toLowerCase())) 
+        : true;
+      return statusMatch && searchMatch;
+    });
+  }, [contracts, filterStatus, searchQuery]);
 
   return {
-    contracts,
-    loading,
-    error,
-    refetch: fetchContracts
+    contracts: filteredContracts,
+    isLoading, error, refetch: fetchContracts,
+    filterStatus, setFilterStatus,
+    searchQuery, setSearchQuery,
   };
 };

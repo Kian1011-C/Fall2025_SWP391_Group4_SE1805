@@ -1,133 +1,110 @@
-// Admin/Batteries/index.jsx
-// Main container for Admin Batteries Management (Refactored with SoC)
-
 import React, { useState } from 'react';
-import DashboardLayout from '../../../layouts/DashboardLayout';
-
-// Custom hooks
-import {
-  useBatteriesData,
-  useBatteriesActions,
-  useBatteriesFilters
-} from './hooks';
-
-// Components
-import {
-  BatteriesHeader,
-  BatteriesStatsCards,
-  BatteriesControls,
-  BatteriesGrid,
-  AddBatteryModal
-} from './components';
+import { useBatteriesData } from './hooks/useBatteriesData';
+import BatteryRow from './components/BatteryRow';
+import BatteryFormModal from './components/BatteryFormModal';
 
 const AdminBatteries = () => {
-  // Modal state
-  const [showAddModal, setShowAddModal] = useState(false);
+  const { batteries, isLoading, error, refetch, filterStatus, setFilterStatus, searchQuery, setSearchQuery, handleCreate, handleUpdate } = useBatteriesData();
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingBattery, setEditingBattery] = useState(null);
 
-  // Custom hooks
-  const { batteries, loading, error, refetch } = useBatteriesData();
-  const {
-    handleMaintenanceBattery,
-    handleDeleteBattery,
-    handleAddBattery
-  } = useBatteriesActions(refetch);
-
-  const {
-    searchTerm,
-    setSearchTerm,
-    selectedStatus,
-    setSelectedStatus,
-    filteredBatteries,
-    stats
-  } = useBatteriesFilters(batteries);
-
-  // Event handlers
-  const handleAddClick = () => {
-    setShowAddModal(true);
+  const handleOpenCreateModal = () => {
+    setEditingBattery(null);
+    setIsModalOpen(true);
   };
 
-  const handleModalClose = () => {
-    setShowAddModal(false);
+  const handleOpenEditModal = (battery) => {
+    setEditingBattery(battery);
+    setIsModalOpen(true);
   };
 
-  const handleAddSubmit = async (batteryData) => {
-    const result = await handleAddBattery(batteryData);
-    
-    if (result.success) {
-      setShowAddModal(false);
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingBattery(null);
+  };
+
+  const handleSave = async (formData, batteryId) => {
+    let response;
+    if (batteryId) {
+      // Đây là trường hợp Cập nhật (Update)
+      response = await handleUpdate(batteryId, formData);
+    } else {
+      // Đây là trường hợp Tạo mới (Create)
+      response = await handleCreate(formData);
     }
-    // If not implemented or error, modal stays open for user to see alert
+    
+    if (response.success) {
+      handleCloseModal();
+      // showToast('Thành công!', 'success'); // Bạn có thể thêm hàm toast
+    } else {
+      // showErrorToast(response.message); // Hiển thị lỗi
+      console.error("Lỗi khi lưu:", response.message);
+    }
   };
 
-  // Loading state
-  if (loading) {
+  const renderContent = () => {
+    if (isLoading) return <p style={{ color: '#9ca3af', textAlign: 'center' }}>Đang tải danh sách pin...</p>;
+    if (error) return ( <div style={{ color: '#ef4444', textAlign: 'center' }}><p>Lỗi: {error}</p><button onClick={refetch}>Thử lại</button></div> );
+    if (batteries.length === 0) return <p style={{ color: '#9ca3af', textAlign: 'center' }}>Không tìm thấy viên pin nào.</p>;
+
     return (
-      <div style={{ padding: '20px', textAlign: 'center', color: '#FFFFFF' }}>
-        <h2>Đang tải dữ liệu pin...</h2>
+      <div style={{ background: '#1f2937', borderRadius: '12px', overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+          <thead>
+            <tr style={{ background: '#374151' }}>
+              <th style={{ padding: '15px 20px' }}>Mã Pin</th>
+              <th style={{ padding: '15px 20px' }}>Mẫu Pin</th>
+              <th style={{ padding: '15px 20px' }}>Trạng thái</th>
+              <th style={{ padding: '15px 20px' }}>Sức khỏe (%)</th>
+              <th style={{ padding: '15px 20px' }}>Chu kỳ sạc</th>
+              <th style={{ padding: '15px 20px' }}>Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            {batteries.map(bat => <BatteryRow key={bat.batteryId} battery={bat} onEdit={handleOpenEditModal} />)}
+          </tbody>
+        </table>
       </div>
     );
-  }
+  };
 
-  // Error state
-  if (error) {
-    return (
-      <div style={{ padding: '20px', textAlign: 'center', color: '#ff6b6b' }}>
-        <h2>Lỗi: {error}</h2>
-        <button 
-          onClick={refetch} 
-          style={{ 
-            marginTop: '20px', 
-            padding: '10px 20px',
-            background: '#19c37d',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer'
-          }}
-        >
-          Thử lại
-        </button>
-      </div>
-    );
-  }
-
-  // Thêm log để kiểm tra render trong AdminBatteries
-  console.log('🔍 AdminBatteries: Rendering with props:', { batteries, loading, error });
-
-  // Main render
   return (
-    <DashboardLayout role="admin">
-      <div style={{ padding: '20px' }}>
-        {/* Header */}
-        <BatteriesHeader />
-
-        {/* Statistics Cards */}
-        <BatteriesStatsCards stats={stats} />
-
-        {/* Search & Filter Controls */}
-        <BatteriesControls
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-          selectedStatus={selectedStatus}
-          onStatusChange={setSelectedStatus}
-          onAddClick={handleAddClick}
-        />
-
-        {/* Batteries Grid */}
-        <BatteriesGrid
-          batteries={filteredBatteries}
-          onMaintenance={handleMaintenanceBattery}
-          onDelete={handleDeleteBattery}
-        />
-
-        {/* Add Battery Modal */}
-        <AddBatteryModal
-          isOpen={showAddModal}
-          onClose={handleModalClose}
-          onSubmit={handleAddSubmit}
-        />
+    <>
+      <div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+          <div>
+            <h1 style={{ margin: 0, fontSize: '28px' }}>Quản lý Pin</h1>
+            <p style={{ margin: '5px 0 0 0', color: '#9ca3af' }}>Thêm, sửa và theo dõi tất cả các viên pin trong hệ thống.</p>
+          </div>
+          <button onClick={handleOpenCreateModal} style={{ background: '#f59e0b', color: '#111827', border: 'none', padding: '10px 15px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
+            + Thêm Pin Mới
+          </button>
+        </div>
+        <div style={{ display: 'flex', gap: '15px', marginBottom: '20px' }}>
+          <input 
+            type="text" 
+            placeholder="Tìm theo Mã pin hoặc Mẫu pin..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ flex: 1, background: '#374151', color: 'white', border: '1px solid #4b5563', padding: '10px', borderRadius: '8px' }}
+          />
+          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} style={{ background: '#374151', color: 'white', border: '1px solid #4b5563', padding: '10px', borderRadius: '8px' }}>
+            <option value="">Tất cả trạng thái</option>
+            <option value="AVAILABLE">Sẵn sàng</option>
+            <option value="CHARGING">Đang sạc</option>
+            <option value="MAINTENANCE">Bảo trì</option>
+          </select>
+        </div>
+        {renderContent()}
       </div>
-    </DashboardLayout>
+      <BatteryFormModal 
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSave={handleSave}
+        battery={editingBattery}
+      />
+    </>
   );
 };
 

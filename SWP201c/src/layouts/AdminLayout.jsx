@@ -1,27 +1,45 @@
-// Admin Layout Component
-// Layout wrapper for admin pages
-
 import React from 'react';
+import { NavLink, Outlet } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import '../assets/css/AdminLayout.css'; // Chúng ta sẽ tạo file này
 
-const AdminLayout = ({ children }) => {
+const AdminLayout = () => {
+  const { handleLogout } = useAuth();
+
+  // Dựa trên cấu trúc thư mục của bạn
+  const navItems = [
+    { path: '/admin/dashboard', name: 'Trang chủ', icon: '🏠' },
+    { path: '/admin/users', name: 'Quản lý Người dùng', icon: '👥' },
+    { path: '/admin/stations', name: 'Quản lý Trạm', icon: '🏢' },
+    { path: '/admin/batteries', name: 'Quản lý Pin', icon: '🔋' },
+    { path: '/admin/contracts', name: 'Quản lý Hợp đồng', icon: '📄' },
+    { path: '/admin/subscriptions', name: 'Quản lý Gói cước', icon: '⭐' },
+    { path: '/admin/reports', name: 'Báo cáo', icon: '📊' },
+  ];
+
   return (
     <div className="admin-layout">
-      <header className="admin-header">
-        <nav className="admin-nav">
-          <div className="brand">SWP201 - Admin</div>
-          <div className="nav-items">
-            {/* TODO: Add navigation items */}
-          </div>
+      <aside className="admin-sidebar">
+        <div className="sidebar-header">
+          <h3>Admin Panel</h3>
+        </div>
+        <nav className="sidebar-nav">
+          {navItems.map(item => (
+            <NavLink key={item.path} to={item.path} className="nav-link">
+              <span className="nav-icon">{item.icon}</span>
+              <span className="nav-text">{item.name}</span>
+            </NavLink>
+          ))}
         </nav>
-      </header>
-      
-      <main className="admin-main">
-        {children}
+        <div className="sidebar-footer">
+          <button onClick={handleLogout} className="logout-button">
+            Đăng xuất
+          </button>
+        </div>
+      </aside>
+      <main className="admin-content">
+        <Outlet />
       </main>
-      
-      <footer className="admin-footer">
-        {/* TODO: Add footer content */}
-      </footer>
     </div>
   );
 };

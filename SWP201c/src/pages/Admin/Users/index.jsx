@@ -1,162 +1,118 @@
-// Admin/Users/index.jsx
-// Main container for Admin Users page (Refactored with SoC)
-
 import React, { useState } from 'react';
-import DashboardLayout from '../../../layouts/DashboardLayout';
-
-// Custom hooks - Business logic
-import { 
-  useUsersData, 
-  useUsersActions, 
-  useUsersFilters 
-} from './hooks';
-
-// Utils
-import { calculateStats } from './utils';
-
-// UI Components
-import {
-  UsersHeader,
-  UsersSubTabs,
-  UsersStatsCards,
-  CurrentTabHeader,
-  UsersSearchBar,
-  UsersTable,
-  AddUserModal
-} from './components';
+import { useAdminUsersData } from './hooks/useAdminUsersData';
+import UserRow from './components/UserRow';
+import UserFormModal from './components/UserFormModal'; // <-- Import Modal
 
 const AdminUsers = () => {
-  // Data fetching hook
-  const { users, loading, error, refetch } = useUsersData();
+  // Lấy thêm các hàm handleCreate và handleUpdate từ hook
+  const { 
+    users, isLoading, error, refetch, 
+    filterRole, setFilterRole, 
+    searchQuery, setSearchQuery,
+    handleCreate, handleUpdate 
+  } = useAdminUsersData();
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
 
-  // CRUD actions hook
-  const { createUser, deleteUser, toggleStatus } = useUsersActions(refetch);
-
-  // Filtering hook
-  const {
-    filteredUsers,
-    searchTerm,
-    setSearchTerm,
-    activeTab,
-    setActiveTab,
-    selectedStatus,
-    setSelectedStatus
-  } = useUsersFilters(users);
-
-  // UI state (presentation only)
-  const [showAddModal, setShowAddModal] = useState(false);
-
-  // Calculate statistics
-  const stats = calculateStats(users);
-
-  // Event handlers (thin wrappers)
-  const handleAddUser = () => {
-    setShowAddModal(true);
+  const handleOpenCreateModal = () => {
+    setEditingUser(null); // Đảm bảo là tạo mới
+    setIsModalOpen(true);
   };
 
-  const handleSaveUser = async (userData) => {
-    await createUser(userData);
-    setShowAddModal(false);
+  const handleOpenEditModal = (user) => {
+    setEditingUser(user); // Đặt user cần sửa
+    setIsModalOpen(true);
   };
 
-  const handleDeleteUser = async (userId) => {
-    await deleteUser(userId);
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingUser(null);
   };
 
-  const handleToggleStatus = async (userId) => {
-    await toggleStatus(userId);
+  // Hàm được gọi khi nhấn "Lưu" trên Modal
+  const handleSave = async (formData, userId) => {
+    let response;
+    if (userId) {
+      // Đây là trường hợp Cập nhật (Update)
+      response = await handleUpdate(userId, formData);
+    } else {
+      // Đây là trường hợp Tạo mới (Create)
+      response = await handleCreate(formData);
+    }
+    
+    if (response.success) {
+      handleCloseModal();
+    } else {
+      alert(response.message); // Hiển thị lỗi nếu có
+    }
   };
 
-  const handleRetry = () => {
-    refetch();
-  };
+  const renderContent = () => {
+    if (isLoading) return <p style={{ color: '#9ca3af', textAlign: 'center' }}>Đang tải danh sách người dùng...</p>;
+    if (error) return ( <div style={{ color: '#ef4444', textAlign: 'center' }}><p>Lỗi: {error}</p><button onClick={refetch}>Thử lại</button></div> );
+    if (users.length === 0) return <p style={{ color: '#9ca3af', textAlign: 'center' }}>Không tìm thấy người dùng nào.</p>;
 
-  // Early returns for loading/error states
-  if (loading) {
     return (
-      <DashboardLayout role="admin">
-        <div style={{ padding: '20px', textAlign: 'center', color: '#FFFFFF' }}>
-          <h2>Đang tải dữ liệu người dùng...</h2>
-        </div>
-      </DashboardLayout>
+      <div style={{ background: '#1f2937', borderRadius: '12px', overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+          <thead>
+            <tr style={{ background: '#374151' }}>
+              <th style={{ padding: '15px 20px' }}>ID</th>
+              <th style={{ padding: '15px 20px' }}>Tên</th>
+              <th style={{ padding: '15px 20px' }}>Email</th>
+              <th style={{ padding: '15px 20px' }}>Vai trò</th>
+              <th style={{ padding: '15px 20px' }}>Trạng thái</th>
+              <th style={{ padding: '15px 20px' }}>Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            {/* Truyền hàm handleOpenEditModal xuống cho nút Sửa */}
+            {users.map(user => <UserRow key={user.userId} user={user} onEdit={handleOpenEditModal} />)}
+          </tbody>
+        </table>
+      </div>
     );
-  }
+  };
 
-  if (error) {
-    return (
-      <DashboardLayout role="admin">
-        <div style={{ padding: '20px', textAlign: 'center', color: '#ff6b6b' }}>
-          <h2>Lỗi: {error}</h2>
-          <button 
-            onClick={handleRetry} 
-            style={{ 
-              marginTop: '20px', 
-              padding: '10px 20px',
-              background: '#27ae60',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer'
-            }}
-          >
-            Thử lại
+  return (
+    <>
+      <div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+          <div>
+            <h1 style={{ margin: 0, fontSize: '28px' }}>Quản lý Người dùng</h1>
+            <p style={{ margin: '5px 0 0 0', color: '#9ca3af' }}>Tìm kiếm, lọc và chỉnh sửa thông tin người dùng.</p>
+          </div>
+          {/* Gắn sự kiện onClick vào nút Thêm mới */}
+          <button onClick={handleOpenCreateModal} style={{ background: '#f59e0b', color: '#111827', border: 'none', padding: '10px 15px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
+            + Thêm người dùng mới
           </button>
         </div>
-      </DashboardLayout>
-    );
-  }
-
-  // Main render
-  return (
-    <DashboardLayout role="admin">
-      <div style={{ padding: '20px' }}>
-        {/* Page Header */}
-        <UsersHeader />
-
-        {/* Sub-tabs Navigation */}
-        <UsersSubTabs
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          stats={stats}
-        />
-
-        {/* Statistics Cards */}
-        <UsersStatsCards stats={stats} />
-
-        {/* Current Tab Header with Add Button */}
-        <CurrentTabHeader
-          activeTab={activeTab}
-          filteredCount={filteredUsers.length}
-          onAddClick={handleAddUser}
-        />
-
-        {/* Search and Filter Bar */}
-        <UsersSearchBar
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-          selectedStatus={selectedStatus}
-          onStatusChange={setSelectedStatus}
-          activeTab={activeTab}
-        />
-
-        {/* Users Table */}
-        <UsersTable
-          users={filteredUsers}
-          loading={false}
-          error={null}
-          onToggleStatus={handleToggleStatus}
-          onDelete={handleDeleteUser}
-        />
-
-        {/* Add User Modal */}
-        {showAddModal && (
-          <AddUserModal
-            onClose={() => setShowAddModal(false)}
-            onSave={handleSaveUser}
+        <div style={{ display: 'flex', gap: '15px', marginBottom: '20px' }}>
+          <input 
+            type="text" 
+            placeholder="Tìm theo tên hoặc email..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ flex: 1, background: '#374151', color: 'white', border: '1px solid #4b5563', padding: '10px', borderRadius: '8px' }}
           />
-        )}
+          <select value={filterRole} onChange={(e) => setFilterRole(e.target.value)} style={{ background: '#374151', color: 'white', border: '1px solid #4b5563', padding: '10px', borderRadius: '8px' }}>
+            <option value="">Tất cả vai trò</option>
+            <option value="driver">Driver</option>
+            <option value="staff">Staff</option>
+          </select>
+        </div>
+        {renderContent()}
       </div>
-    </DashboardLayout>
+      
+      {/* Render Modal */}
+      <UserFormModal 
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSave={handleSave}
+        user={editingUser}
+      />
+    </>
   );
 };
 

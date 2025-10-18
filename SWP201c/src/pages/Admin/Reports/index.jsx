@@ -1,163 +1,75 @@
-// Admin/Reports/index.jsx
-// Container for Reports page - orchestrates all components and hooks
-
 import React from 'react';
-import DashboardLayout from '../../../layouts/DashboardLayout';
-import { useReportsData, useReportsFilters } from './hooks';
-import {
-  ReportsHeader,
-  ReportsTabs,
-  OverviewTab,
-  RevenueTab,
-  UsageTab,
-  CustomersTab
-} from './components';
-import { isReportDataEmpty } from './utils';
+import { useReportsData } from './hooks/useReportsData';
+import ReportCard from './components/ReportCard';
 
-const Reports = () => {
-  // Custom hooks for data and filters
-  const { activeTab, dateRange, handleTabChange, handleDateRangeChange } = useReportsFilters();
-  const { reportData, loading, error } = useReportsData(dateRange);
+// Style cho bộ lọc ngày tháng
+const dateInputStyle = {
+  background: '#374151', color: 'white', border: '1px solid #4b5563',
+  padding: '10px 15px', borderRadius: '8px', fontSize: '14px'
+};
 
-  // Handle export functionality
-  const handleExport = () => {
-    alert('Chức năng xuất báo cáo đang được phát triển');
-    // When API ready: implement PDF/Excel export
+const AdminReports = () => {
+  const { revenueData, usageData, isLoading, error, dateRange, setDateRange, refetch } = useReportsData();
+
+  const handleDateChange = (e) => {
+    setDateRange(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
   };
 
-  // Loading state
-  if (loading) {
-    return (
-      <DashboardLayout role="admin">
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '60vh'
-        }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{
-              width: '60px',
-              height: '60px',
-              border: '4px solid rgba(106, 183, 255, 0.2)',
-              borderTop: '4px solid #6ab7ff',
-              borderRadius: '50%',
-              animation: 'spin 1s linear infinite',
-              margin: '0 auto 20px'
-            }} />
-            <p style={{ color: '#B0B0B0', fontSize: '1.1rem' }}>
-              Đang tải báo cáo...
-            </p>
-          </div>
-        </div>
-      </DashboardLayout>
+  const renderContent = () => {
+    if (isLoading) return <p style={{ color: '#9ca3af', textAlign: 'center' }}>Đang tải dữ liệu báo cáo...</p>;
+    if (error) return (
+      <div style={{ color: '#ef4444', textAlign: 'center' }}>
+        <p>Lỗi: {error}</p>
+        <button onClick={refetch} style={{ background: '#374151', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer' }}>
+          Thử lại
+        </button>
+      </div>
     );
-  }
+    if (!revenueData || !usageData) return <p style={{ color: '#9ca3af', textAlign: 'center' }}>Không có dữ liệu báo cáo.</p>;
 
-  // Error state
-  if (error) {
     return (
-      <DashboardLayout role="admin">
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '60vh'
-        }}>
-          <div style={{
-            background: 'rgba(239, 68, 68, 0.1)',
-            borderRadius: '12px',
-            padding: '30px',
-            border: '1px solid rgba(239, 68, 68, 0.3)',
-            textAlign: 'center',
-            maxWidth: '500px'
-          }}>
-            <div style={{ fontSize: '3rem', marginBottom: '15px' }}>⚠️</div>
-            <h3 style={{ color: '#EF4444', marginBottom: '10px' }}>
-              Lỗi tải dữ liệu
-            </h3>
-            <p style={{ color: '#B0B0B0' }}>{error}</p>
-          </div>
+      <>
+        {/* Hàng 1: Thống kê Doanh thu */}
+        <h2 style={{ color: 'white', borderBottom: '1px solid #374151', paddingBottom: '10px' }}>Báo cáo Doanh thu</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '25px', marginBottom: '30px' }}>
+          <ReportCard label="Tổng Doanh thu" value={revenueData.totalRevenue?.toLocaleString('vi-VN') + ' ₫'} icon="💰" color="#10b981" />
+          <ReportCard label="Giao dịch" value={revenueData.totalTransactions?.toLocaleString()} icon="💳" color="#3b82f6" />
+          <ReportCard label="Doanh thu TB / Giao dịch" value={revenueData.avgRevenuePerTx?.toLocaleString('vi-VN') + ' ₫'} icon="📊" color="#f59e0b" />
         </div>
-      </DashboardLayout>
-    );
-  }
 
-  // Empty data state
-  if (isReportDataEmpty(reportData)) {
-    return (
-      <DashboardLayout role="admin">
-        <ReportsHeader 
-          dateRange={dateRange}
-          onDateRangeChange={handleDateRangeChange}
-          onExport={handleExport}
-        />
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '50vh'
-        }}>
-          <div style={{
-            background: 'rgba(26, 32, 44, 0.8)',
-            borderRadius: '12px',
-            padding: '40px',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            textAlign: 'center'
-          }}>
-            <div style={{ fontSize: '4rem', marginBottom: '20px' }}>📊</div>
-            <h3 style={{ color: '#FFFFFF', marginBottom: '10px' }}>
-              Chưa có dữ liệu báo cáo
-            </h3>
-            <p style={{ color: '#B0B0B0' }}>
-              Dữ liệu báo cáo sẽ xuất hiện khi hệ thống có giao dịch
-            </p>
-          </div>
+        {/* Hàng 2: Thống kê Sử dụng */}
+        <h2 style={{ color: 'white', borderBottom: '1px solid #374151', paddingBottom: '10px' }}>Báo cáo Sử dụng</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '25px' }}>
+          <ReportCard label="Tổng lượt đổi pin" value={usageData.totalSwaps?.toLocaleString()} icon="🔄" color="#3b82f6" />
+          <ReportCard label="Trạm Yêu thích" value={usageData.favoriteStation || 'N/A'} icon="🏢" color="#f59e0b" />
+          <ReportCard label="Tài xế Hoạt động" value={usageData.activeUsers?.toLocaleString()} icon="👥" color="#10b981" />
         </div>
-      </DashboardLayout>
+      </>
     );
-  }
-
-  // Render active tab content
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case 'overview':
-        return <OverviewTab data={reportData.overview} />;
-      case 'revenue':
-        return <RevenueTab data={reportData.revenue} />;
-      case 'usage':
-        return <UsageTab data={reportData.usage} />;
-      case 'customers':
-        return <CustomersTab data={reportData.customers} />;
-      default:
-        return <OverviewTab data={reportData.overview} />;
-    }
   };
 
   return (
-    <DashboardLayout role="admin">
-      <style>
-        {`
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
-        `}
-      </style>
-
-      <ReportsHeader 
-        dateRange={dateRange}
-        onDateRangeChange={handleDateRangeChange}
-        onExport={handleExport}
-      />
-
-      <ReportsTabs 
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-      />
-
-      {renderTabContent()}
-    </DashboardLayout>
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+        <div>
+          <h1 style={{ margin: 0, fontSize: '28px' }}>Báo cáo</h1>
+          <p style={{ margin: '5px 0 0 0', color: '#9ca3af' }}>Xem báo cáo chi tiết về doanh thu và tình hình sử dụng.</p>
+        </div>
+        <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+          <input type="date" name="startDate" value={dateRange.startDate} onChange={handleDateChange} style={dateInputStyle} />
+          <span style={{ color: '#9ca3af' }}>đến</span>
+          <input type="date" name="endDate" value={dateRange.endDate} onChange={handleDateChange} style={dateInputStyle} />
+          <button onClick={refetch} disabled={isLoading} style={{ background: '#374151', color: 'white', border: 'none', padding: '10px 15px', borderRadius: '8px', cursor: 'pointer' }}>
+            {isLoading ? 'Đang tải...' : '🔄 Lọc'}
+          </button>
+        </div>
+      </div>
+      {renderContent()}
+    </div>
   );
 };
 
-export default Reports;
+export default AdminReports;

@@ -1,6 +1,6 @@
 import React from 'react';
 
-const StatCard = ({ label, value, icon, color = '#f59e0b' }) => (
+const ReportCard = ({ label, value, icon, color = '#f59e0b' }) => (
   <div style={{ background: '#1f2937', padding: '25px', borderRadius: '16px', borderLeft: `5px solid ${color}` }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
       <div>
@@ -12,4 +12,4 @@ const StatCard = ({ label, value, icon, color = '#f59e0b' }) => (
   </div>
 );
 
-export default StatCard;
+export default ReportCard;

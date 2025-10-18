@@ -4,21 +4,23 @@ import React, { useState, useEffect } from 'react';
 const inputStyle = { width: '100%', padding: '10px', background: '#374151', color: 'white', border: '1px solid #4b5563', borderRadius: '8px', boxSizing: 'border-box' };
 const labelStyle = { display: 'block', marginBottom: '8px', color: '#9ca3af' };
 
-const StationFormModal = ({ isOpen, onClose, onSave, station }) => {
-  const [formData, setFormData] = useState({ name: '', location: '', status: 'active' });
-  const isEditing = !!station;
+const BatteryFormModal = ({ isOpen, onClose, onSave, battery }) => {
+  const [formData, setFormData] = useState({ model: '', capacity: 100, stateOfHealth: 100, status: 'AVAILABLE' });
+  const isEditing = !!battery;
 
   useEffect(() => {
     if (isEditing) {
       setFormData({
-        name: station.name || '',
-        location: station.address || station.location || '',
-        status: station.status || 'active',
+        model: battery.model || '',
+        capacity: battery.capacity || 100,
+        stateOfHealth: battery.stateOfHealth || 100,
+        status: battery.status || 'AVAILABLE',
       });
     } else {
-      setFormData({ name: '', location: '', status: 'active' });
+      // Reset form khi mở modal để "Tạo mới"
+      setFormData({ model: '', capacity: 100, stateOfHealth: 100, status: 'AVAILABLE' });
     }
-  }, [station, isEditing, isOpen]);
+  }, [battery, isEditing, isOpen]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -27,7 +29,7 @@ const StationFormModal = ({ isOpen, onClose, onSave, station }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(formData, station?.id);
+    onSave(formData, battery?.batteryId);
   };
 
   if (!isOpen) return null;
@@ -37,23 +39,27 @@ const StationFormModal = ({ isOpen, onClose, onSave, station }) => {
       <div style={{ background: '#1f2937', borderRadius: '16px', width: '90%', maxWidth: '500px', border: '1px solid #374151' }} onClick={e => e.stopPropagation()}>
         <form onSubmit={handleSubmit}>
           <div style={{ padding: '20px', borderBottom: '1px solid #374151' }}>
-            <h2 style={{ margin: 0, fontSize: '20px' }}>{isEditing ? 'Chỉnh sửa Trạm' : 'Tạo Trạm Mới'}</h2>
+            <h2 style={{ margin: 0, fontSize: '20px' }}>{isEditing ? 'Chỉnh sửa Pin' : 'Tạo Pin Mới'}</h2>
           </div>
           <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div>
-              <label style={labelStyle}>Tên Trạm</label>
-              <input type="text" name="name" value={formData.name} onChange={handleChange} style={inputStyle} required />
+              <label style={labelStyle}>Mẫu Pin (Model)</label>
+              <input type="text" name="model" value={formData.model} onChange={handleChange} style={inputStyle} required />
             </div>
             <div>
-              <label style={labelStyle}>Địa chỉ</label>
-              <input type="text" name="location" value={formData.location} onChange={handleChange} style={inputStyle} required />
+              <label style={labelStyle}>Dung lượng (Capacity)</label>
+              <input type="number" name="capacity" value={formData.capacity} onChange={handleChange} style={inputStyle} required />
+            </div>
+            <div>
+              <label style={labelStyle}>Sức khỏe (State of Health)</label>
+              <input type="number" name="stateOfHealth" value={formData.stateOfHealth} onChange={handleChange} style={inputStyle} required />
             </div>
             <div>
               <label style={labelStyle}>Trạng thái</label>
               <select name="status" value={formData.status} onChange={handleChange} style={inputStyle}>
-                <option value="active">Hoạt động</option>
-                <option value="maintenance">Bảo trì</option>
-                <option value="offline">Ngoại tuyến</option>
+                <option value="AVAILABLE">Sẵn sàng</option>
+                <option value="CHARGING">Đang sạc</option>
+                <option value="MAINTENANCE">Bảo trì</option>
               </select>
             </div>
           </div>
@@ -67,4 +73,4 @@ const StationFormModal = ({ isOpen, onClose, onSave, station }) => {
   );
 };
 
-export default StationFormModal;
+export default BatteryFormModal;

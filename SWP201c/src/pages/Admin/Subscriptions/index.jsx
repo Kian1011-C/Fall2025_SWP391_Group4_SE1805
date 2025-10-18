@@ -1,129 +1,90 @@
-// Admin/Subscriptions/index.jsx
-// Main container for Admin Subscriptions Management (Refactored with SoC)
-
-import React from 'react';
-import DashboardLayout from '../../../layouts/DashboardLayout';
-
-// Custom hooks
-import {
-  useSubscriptionsData,
-  useSubscriptionsActions,
-  useSubscriptionForm
-} from './hooks';
-
-// Components
-import {
-  SubscriptionsHeader,
-  PlansGrid,
-  PlanFormModal
-} from './components';
+import React, { useState } from 'react';
+import { useSubscriptionsData } from './hooks/useSubscriptionsData';
+import SubscriptionRow from './components/SubscriptionRow';
+import SubscriptionFormModal from './components/SubscriptionFormModal';
 
 const AdminSubscriptions = () => {
-  // Custom hooks
-  const { plans, loading, error, refetch } = useSubscriptionsData();
+  const { plans, isLoading, error, refetch, handleCreate, handleUpdate } = useSubscriptionsData();
   
-  const {
-    handleCreatePlan,
-    handleUpdatePlan,
-    handleDeletePlan,
-    actionLoading
-  } = useSubscriptionsActions(refetch);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingPlan, setEditingPlan] = useState(null);
 
-  const {
-    showAddModal,
-    editingPlan,
-    formData,
-    handleOpenCreate,
-    handleOpenEdit,
-    handleClose,
-    handleFieldChange
-  } = useSubscriptionForm();
+  const handleOpenCreateModal = () => {
+    setEditingPlan(null);
+    setIsModalOpen(true);
+  };
 
-  // Event handlers
-  const handleSubmit = async () => {
-    let result;
-    
-    if (editingPlan) {
-      result = await handleUpdatePlan(editingPlan.id, formData);
+  const handleOpenEditModal = (plan) => {
+    setEditingPlan(plan);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingPlan(null);
+  };
+
+  const handleSave = async (formData, planId) => {
+    let response;
+    if (planId) {
+      response = await handleUpdate(planId, formData);
     } else {
-      result = await handleCreatePlan(formData);
+      response = await handleCreate(formData);
     }
-
-    if (result.success) {
-      handleClose();
+    if (response.success) {
+      handleCloseModal();
+    } else {
+      alert(response.message); // Hiển thị lỗi
     }
   };
 
-  const handleDelete = async (planId) => {
-    await handleDeletePlan(planId);
-  };
+  const renderContent = () => {
+    if (isLoading) return <p style={{ color: '#9ca3af', textAlign: 'center' }}>Đang tải danh sách gói cước...</p>;
+    if (error) return ( <div style={{ color: '#ef4444', textAlign: 'center' }}><p>Lỗi: {error}</p><button onClick={refetch}>Thử lại</button></div> );
+    if (plans.length === 0) return <p style={{ color: '#9ca3af', textAlign: 'center' }}>Không tìm thấy gói cước nào.</p>;
 
-  // Loading state (initial load)
-  if (loading && plans.length === 0) {
     return (
-      <DashboardLayout role="admin">
-        <div style={{ padding: '20px', textAlign: 'center' }}>
-          <div style={{ color: '#19c37d', fontSize: '1.5rem' }}>
-            ⏳ Đang tải...
-          </div>
-        </div>
-      </DashboardLayout>
+      <div style={{ background: '#1f2937', borderRadius: '12px', overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+          <thead>
+            <tr style={{ background: '#374151' }}>
+              <th style={{ padding: '15px 20px' }}>ID</th>
+              <th style={{ padding: '15px 20px' }}>Tên Gói cước</th>
+              <th style={{ padding: '15px 20px' }}>Phí (VNĐ)</th>
+              <th style={{ padding: '15px 20px' }}>Quãng đường</th>
+              <th style={{ padding: '15px 20px' }}>Mô tả</th>
+              <th style={{ padding: '15px 20px' }}>Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            {plans.map(plan => <SubscriptionRow key={plan.planId} plan={plan} onEdit={handleOpenEditModal} />)}
+          </tbody>
+        </table>
+      </div>
     );
-  }
+  };
 
-  // Error state
-  if (error) {
-    return (
-      <DashboardLayout role="admin">
-        <div style={{ padding: '20px', textAlign: 'center' }}>
-          <div style={{ color: '#ff6b6b', fontSize: '1.2rem' }}>
-            ⚠️ {error}
+  return (
+    <>
+      <div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+          <div>
+            <h1 style={{ margin: 0, fontSize: '28px' }}>Quản lý Gói cước</h1>
+            <p style={{ margin: '5px 0 0 0', color: '#9ca3af' }}>Tạo, sửa và quản lý các gói cước dịch vụ.</p>
           </div>
-          <button 
-            onClick={refetch}
-            style={{
-              marginTop: '20px',
-              padding: '10px 20px',
-              background: '#19c37d',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer'
-            }}
-          >
-            Thử lại
+          <button onClick={handleOpenCreateModal} style={{ background: '#f59e0b', color: '#111827', border: 'none', padding: '10px 15px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
+            + Thêm Gói cước
           </button>
         </div>
-      </DashboardLayout>
-    );
-  }
-
-  // Main render
-  return (
-    <DashboardLayout role="admin">
-      <div style={{ padding: '20px' }}>
-        {/* Header */}
-        <SubscriptionsHeader onAddClick={handleOpenCreate} />
-
-        {/* Plans Grid */}
-        <PlansGrid
-          plans={plans}
-          onEditPlan={handleOpenEdit}
-          onDeletePlan={handleDelete}
-        />
-
-        {/* Add/Edit Modal */}
-        <PlanFormModal
-          isOpen={showAddModal}
-          editingPlan={editingPlan}
-          formData={formData}
-          loading={actionLoading}
-          onFieldChange={handleFieldChange}
-          onSubmit={handleSubmit}
-          onClose={handleClose}
-        />
+        {renderContent()}
       </div>
-    </DashboardLayout>
+      <SubscriptionFormModal 
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSave={handleSave}
+        plan={editingPlan}
+      />
+    </>
   );
 };
 

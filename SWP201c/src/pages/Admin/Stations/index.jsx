@@ -1,165 +1,106 @@
-// Admin/Stations/index.jsx
-// Container for Stations page - orchestrates all components and hooks
-
-import React from 'react';
-import DashboardLayout from '../../../layouts/DashboardLayout';
-import { useStationsData, useStationsActions, useStationsFilters, useStationForm } from './hooks';
-import {
-  StationsHeader,
-  StationsStats,
-  StationsControls,
-  StationsGrid,
-  StationFormModal
-} from './components';
+import React, { useState } from 'react';
+import { useStationsData } from './hooks/useStationsData';
+import StationRow from './components/StationRow';
+import StationFormModal from './components/StationFormModal';
 
 const AdminStations = () => {
-  // Custom hooks for data, actions, filters, and form management
-  const { stations, loading, error } = useStationsData();
-  const { createStation, updateStation, deleteStation } = useStationsActions();
-  const { 
-    searchQuery, 
-    sortBy, 
-    filteredStations, 
-    setSearchQuery, 
-    setSortBy 
-  } = useStationsFilters(stations);
-  const {
-    showModal,
-    editingStation,
-    formData,
-    formErrors,
-    openCreateModal,
-    openEditModal,
-    closeModal,
-    updateField,
-    validateForm,
-    isEditMode
-  } = useStationForm();
+  const { stations, isLoading, error, refetch, filterStatus, setFilterStatus, searchQuery, setSearchQuery, handleCreate, handleUpdate } = useStationsData();
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingStation, setEditingStation] = useState(null);
 
-  // Handle form submission (create or update)
-  const handleFormSubmit = async () => {
-    // Validate form first
-    if (!validateForm()) {
-      return;
-    }
+  const handleOpenCreateModal = () => {
+    setEditingStation(null);
+    setIsModalOpen(true);
+  };
 
-    let result;
-    if (isEditMode) {
-      result = await updateStation(editingStation.id, formData);
+  const handleOpenEditModal = (station) => {
+    setEditingStation(station);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingStation(null);
+  };
+
+  const handleSave = async (formData, stationId) => {
+    let response;
+    if (stationId) {
+      response = await handleUpdate(stationId, formData);
     } else {
-      result = await createStation(formData);
+      response = await handleCreate(formData);
     }
-
-    if (result.success) {
-      closeModal();
+    if (response.success) {
+      handleCloseModal();
     } else {
-      alert(result.error || 'Đã xảy ra lỗi');
+      alert(response.message); // Hiển thị lỗi
     }
   };
 
-  // Handle station deletion
-  const handleDelete = async (stationId) => {
-    const result = await deleteStation(stationId);
-    if (!result.success) {
-      alert(result.error || 'Không thể xóa trạm');
-    }
+  const renderContent = () => {
+    if (isLoading) return <p style={{ color: '#9ca3af', textAlign: 'center' }}>Đang tải danh sách trạm...</p>;
+    if (error) return ( <div style={{ color: '#ef4444', textAlign: 'center' }}><p>Lỗi: {error}</p><button onClick={refetch}>Thử lại</button></div> );
+    if (stations.length === 0) return <p style={{ color: '#9ca3af', textAlign: 'center' }}>Không tìm thấy trạm nào.</p>;
+
+    return (
+      <div style={{ background: '#1f2937', borderRadius: '12px', overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+          <thead>
+            <tr style={{ background: '#374151' }}>
+              <th style={{ padding: '15px 20px' }}>ID</th>
+              <th style={{ padding: '15px 20px' }}>Tên Trạm</th>
+              <th style={{ padding: '15px 20px' }}>Địa chỉ</th>
+              <th style={{ padding: '15px 20px' }}>Trạng thái</th>
+              <th style={{ padding: '15px 20px' }}>Tổng hộc</th>
+              <th style={{ padding: '15px 20px' }}>Pin sẵn sàng</th>
+              <th style={{ padding: '15px 20px' }}>Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            {stations.map(station => <StationRow key={station.id} station={station} onEdit={handleOpenEditModal} />)}
+          </tbody>
+        </table>
+      </div>
+    );
   };
-
-  // Loading state
-  if (loading) {
-    return (
-      <DashboardLayout role="admin">
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '60vh'
-        }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{
-              width: '60px',
-              height: '60px',
-              border: '4px solid rgba(106, 183, 255, 0.2)',
-              borderTop: '4px solid #6ab7ff',
-              borderRadius: '50%',
-              animation: 'spin 1s linear infinite',
-              margin: '0 auto 20px'
-            }} />
-            <p style={{ color: '#B0B0B0', fontSize: '1.1rem' }}>
-              Đang tải danh sách trạm...
-            </p>
-          </div>
-        </div>
-      </DashboardLayout>
-    );
-  }
-
-  // Error state
-  if (error) {
-    return (
-      <DashboardLayout role="admin">
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '60vh'
-        }}>
-          <div style={{
-            background: 'rgba(239, 68, 68, 0.1)',
-            borderRadius: '12px',
-            padding: '30px',
-            border: '1px solid rgba(239, 68, 68, 0.3)',
-            textAlign: 'center',
-            maxWidth: '500px'
-          }}>
-            <div style={{ fontSize: '3rem', marginBottom: '15px' }}>⚠️</div>
-            <h3 style={{ color: '#EF4444', marginBottom: '10px' }}>
-              Lỗi tải dữ liệu
-            </h3>
-            <p style={{ color: '#B0B0B0' }}>{error}</p>
-          </div>
-        </div>
-      </DashboardLayout>
-    );
-  }
 
   return (
-    <DashboardLayout role="admin">
-      <style>
-        {`
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
-        `}
-      </style>
-
-      <StationsHeader onAddStation={openCreateModal} />
-
-      <StationsStats stations={stations} />
-
-      <StationsControls
-        searchQuery={searchQuery}
-        sortBy={sortBy}
-        onSearchChange={setSearchQuery}
-        onSortChange={setSortBy}
+    <>
+      <div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+          <div>
+            <h1 style={{ margin: 0, fontSize: '28px' }}>Quản lý Trạm</h1>
+            <p style={{ margin: '5px 0 0 0', color: '#9ca3af' }}>Thêm, sửa và theo dõi tất cả các trạm trong hệ thống.</p>
+          </div>
+          <button onClick={handleOpenCreateModal} style={{ background: '#f59e0b', color: '#111827', border: 'none', padding: '10px 15px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
+            + Thêm Trạm Mới
+          </button>
+        </div>
+        <div style={{ display: 'flex', gap: '15px', marginBottom: '20px' }}>
+          <input 
+            type="text" 
+            placeholder="Tìm theo tên hoặc địa chỉ..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ flex: 1, background: '#374151', color: 'white', border: '1px solid #4b5563', padding: '10px', borderRadius: '8px' }}
+          />
+          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} style={{ background: '#374151', color: 'white', border: '1px solid #4b5563', padding: '10px', borderRadius: '8px' }}>
+            <option value="">Tất cả trạng thái</option>
+            <option value="active">Hoạt động</option>
+            <option value="maintenance">Bảo trì</option>
+            <option value="offline">Ngoại tuyến</option>
+          </select>
+        </div>
+        {renderContent()}
+      </div>
+      <StationFormModal 
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSave={handleSave}
+        station={editingStation}
       />
-
-      <StationsGrid
-        stations={filteredStations}
-        onEdit={openEditModal}
-        onDelete={handleDelete}
-      />
-
-      <StationFormModal
-        show={showModal}
-        isEditMode={isEditMode}
-        formData={formData}
-        formErrors={formErrors}
-        onClose={closeModal}
-        onSubmit={handleFormSubmit}
-        onFieldChange={updateField}
-      />
-    </DashboardLayout>
+    </>
   );
 };
 
