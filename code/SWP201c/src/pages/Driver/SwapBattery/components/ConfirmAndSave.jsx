@@ -1,7 +1,7 @@
 // Confirm and Save to Database Component - Step 8
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../../context/AuthContext';
-import { batteryService, vehicleService } from '../../../../assets/js/services';
+import { batteryService, vehicleService } from '../../../../assets/js/services/index.js';
 import { getUserId, getVehicleId } from '../utils/swapHelpers';
 
 const ConfirmAndSave = ({

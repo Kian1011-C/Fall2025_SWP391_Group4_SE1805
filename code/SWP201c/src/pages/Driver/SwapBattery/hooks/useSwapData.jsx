@@ -1,6 +1,6 @@
 // Custom Hook for managing swap data fetching
 import { useState } from 'react';
-import { stationService, batteryService, contractService } from '../../../../assets/js/services';
+import { stationService, batteryService as _batteryService, contractService, vehicleService } from '../../../../assets/js/services/index.js';
 import { filterSlotsByStatus } from '../utils/swapHelpers';
 
 export const useSwapData = (currentUser) => {
@@ -39,7 +39,7 @@ export const useSwapData = (currentUser) => {
       // Fetch user vehicles if needed
       if (currentUser && !vehicleFromNavigation) {
         try {
-          const vehiclesResponse = await batteryService.getUserVehicles(currentUser.id || currentUser.user_id);
+          const vehiclesResponse = await vehicleService.getUserVehicles(currentUser.id || currentUser.user_id);
           console.log('🚗 Vehicles response:', vehiclesResponse);
           
           if (vehiclesResponse.success && vehiclesResponse.data) {

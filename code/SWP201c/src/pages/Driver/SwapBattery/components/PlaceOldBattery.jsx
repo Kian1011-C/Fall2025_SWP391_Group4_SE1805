@@ -1,16 +1,21 @@
-// Place Old Battery Component - Step 6
-import React, { useState, useEffect } from 'react';
+// Place Old Battery Component - Step 4
+import React, { useState, useEffect, useCallback } from 'react';
+// import { swapService } from '../../../../assets/js/services/index.js';
 
 const PlaceOldBattery = ({
   selectedStation,
   selectedTower,
   selectedEmptySlot,
   currentBatteryLevel,
+  swapSessionId,
+  oldBatteryId,
   onComplete,
-  onShowQR
+  onError
 }) => {
   const [progress, setProgress] = useState(0);
   const [isPlacing, setIsPlacing] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [_error, setError] = useState(null);
 
   useEffect(() => {
     // Auto-start after 1 second
@@ -20,6 +25,57 @@ const PlaceOldBattery = ({
 
     return () => clearTimeout(timer);
   }, []);
+
+  const handlePlaceOldBattery = useCallback(async () => {
+    try {
+      setIsCompleted(true);
+      
+      console.log('🚀 Placing old battery...', {
+        swapSessionId,
+        oldBatteryId,
+        placedInSlot: selectedEmptySlot?.slotId || selectedEmptySlot?.id
+      });
+
+      // TODO: Uncomment when backend API is ready
+      // const response = await swapService.placeOldBattery({
+      //   swapSessionId,
+      //   oldBatteryId,
+      //   placedInSlot: selectedEmptySlot?.slotId || selectedEmptySlot?.id
+      // });
+
+      // Mock response for testing
+      const mockResponse = {
+        success: true,
+        data: {
+          nextStep: 'TAKE_NEW_BATTERY',
+          newBatterySlot: 5,
+          newBatteryId: 123
+        },
+        message: 'Pin cũ đã được đặt thành công'
+      };
+
+      console.log('🧪 Using mock response for testing');
+      const response = mockResponse;
+
+      if (response.success) {
+        console.log('✅ Old battery placed successfully:', response.data);
+        
+        // Call onComplete with the response data
+        setTimeout(() => {
+          onComplete(response.data);
+        }, 1000);
+      } else {
+        throw new Error(response.message || 'Không thể đặt pin cũ');
+      }
+
+    } catch (error) {
+      console.error('❌ Error placing old battery:', error);
+      setError(error.message || 'Lỗi khi đặt pin cũ');
+      if (onError) {
+        onError(error);
+      }
+    }
+  }, [swapSessionId, oldBatteryId, selectedEmptySlot, onComplete, onError]);
 
   useEffect(() => {
     if (isPlacing && progress < 100) {
@@ -36,6 +92,12 @@ const PlaceOldBattery = ({
       return () => clearInterval(interval);
     }
   }, [isPlacing, progress]);
+
+  useEffect(() => {
+    if (progress >= 100 && !isCompleted) {
+      handlePlaceOldBattery();
+    }
+  }, [progress, isCompleted, handlePlaceOldBattery]);
 
   const handleComplete = () => {
     onComplete();
@@ -140,33 +202,6 @@ const PlaceOldBattery = ({
         </div>
       )}
 
-      {/* QR Code button */}
-      <div style={{ marginBottom: '32px' }}>
-        <button
-          onClick={onShowQR}
-          style={{
-            padding: '14px 32px',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '12px',
-            fontSize: '15px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
-            transition: 'all 0.3s ease',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '10px'
-          }}
-        >
-          <span style={{ fontSize: '20px' }}>📱</span>
-          <span>Hiển thị mã QR cho nhân viên</span>
-        </button>
-        <p style={{ marginTop: '12px', fontSize: '13px', color: '#666' }}>
-          Nhân viên quét mã để xác nhận
-        </p>
-      </div>
 
       {/* Next button */}
       {progress >= 100 && (

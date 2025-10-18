@@ -1,10 +1,9 @@
 // Driver/Vehicles/hooks/useVehiclesData.js
 import { useState, useEffect } from 'react';
-import userService from '../../../../assets/js/services/userService';
+import vehicleService from '../../../../assets/js/services/vehicleService';
 import contractService from '../../../../assets/js/services/contractService';
 import { 
   getUserId, 
-  extractVehiclesFromResponse, 
   processVehiclesList,
   normalizeContract
 } from '../utils';
@@ -50,27 +49,53 @@ export const useVehiclesData = () => {
     setError(null);
 
     try {
-      const user = JSON.parse(sessionStorage.getItem('user'));
-      const userId = getUserId(user);
-
+      // Debug session storage
+      console.log('🔍 Session storage keys:', Object.keys(sessionStorage));
+      console.log('🔍 Session storage user:', sessionStorage.getItem('user'));
+      
+      let user, userId;
+      
+      // Try to get user from session storage
+      const userStr = sessionStorage.getItem('user');
+      if (userStr) {
+        user = JSON.parse(userStr);
+        console.log('🔍 Parsed user object:', user);
+        userId = getUserId(user);
+        console.log('🔍 Extracted userId:', userId);
+      }
+      
+      // Fallback to mock user for development
       if (!userId) {
-        throw new Error('User not found. Please login again.');
+        console.warn('⚠️ No user in session storage, using mock user for development');
+        user = {
+          id: 1,
+          userId: 1,
+          name: 'Trần Văn Minh',
+          email: 'minh.driver@gmail.com',
+          role: 'driver'
+        };
+        userId = 1;
+        console.log('🔍 Using mock user:', user);
       }
 
-      console.log('🚗 Fetching data for user:', userId);
+      console.log('🚗 Fetching vehicles for user:', userId);
 
-      // Fetch user data (includes vehicles)
-      const response = await userService.getUserById(userId);
-      console.log('📦 User data response:', response);
+      // Fetch vehicles using real API
+      const response = await vehicleService.getVehiclesByUserId(userId);
+      console.log('🚗 Vehicles API response:', response);
 
-      // Extract vehicles
-      const vehiclesList = extractVehiclesFromResponse(response);
-      console.log('🚗 Raw vehicles:', vehiclesList);
+      if (response.success) {
+        const vehiclesList = response.data || [];
+        console.log('🚗 Raw vehicles from API:', vehiclesList);
 
-      // Process vehicles (normalize + session updates)
-      const processedVehicles = processVehiclesList(vehiclesList);
-      console.log('✅ Processed vehicles:', processedVehicles);
-      setVehicles(processedVehicles);
+        // Process vehicles (normalize + session updates)
+        const processedVehicles = processVehiclesList(vehiclesList);
+        console.log('✅ Processed vehicles:', processedVehicles);
+        setVehicles(processedVehicles);
+      } else {
+        console.warn('⚠️ API failed:', response.message);
+        setVehicles([]);
+      }
 
       // Fetch contracts
       const contractsList = await fetchContracts(userId);

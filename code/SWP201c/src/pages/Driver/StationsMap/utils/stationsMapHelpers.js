@@ -59,9 +59,9 @@ export const getAvailabilityStatus = (availableSlots, totalSlots) => {
  * Get operating status
  */
 export const getOperatingStatus = (station) => {
-  if (station.status === 'active' || station.status === 'Active') {
+  if (station.status === 'active' || station.status === 'Active' || station.status === 'Hoạt động') {
     return { status: 'active', color: '#19c37d', label: 'Đang hoạt động' };
-  } else if (station.status === 'maintenance') {
+  } else if (station.status === 'maintenance' || station.status === 'Bảo trì') {
     return { status: 'maintenance', color: '#ffa500', label: 'Bảo trì' };
   } else {
     return { status: 'inactive', color: '#ff6b6b', label: 'Ngưng hoạt động' };
@@ -118,10 +118,33 @@ export const searchStations = (stations, query) => {
  */
 export const getStationsStats = (stations) => {
   const total = stations.length;
-  const active = stations.filter(s => s.status === 'active' || s.status === 'Active').length;
-  const totalSlots = stations.reduce((sum, s) => sum + (s.totalSlots || 0), 0);
-  const availableSlots = stations.reduce((sum, s) => sum + (s.availableSlots || 0), 0);
+  const active = stations.filter(s => 
+    s.status === 'active' || 
+    s.status === 'Active' || 
+    s.status === 'Hoạt động'
+  ).length;
+  
+  // Handle different field names for slots
+  const totalSlots = stations.reduce((sum, s) => 
+    sum + (s.totalSlots || s.totalSlotCount || s.slotCount || 0), 0);
+  const availableSlots = stations.reduce((sum, s) => 
+    sum + (s.availableSlots || s.availableSlotCount || s.availableCount || 0), 0);
+  
   const occupancyRate = totalSlots > 0 ? ((totalSlots - availableSlots) / totalSlots * 100) : 0;
+  
+  console.log('📊 Stations stats calculation:', {
+    total,
+    active,
+    totalSlots,
+    availableSlots,
+    occupancyRate: Math.round(occupancyRate),
+    stations: stations.map(s => ({ 
+      name: s.name || s.stationName, 
+      status: s.status, 
+      slots: s.availableSlots || s.availableSlotCount || s.availableCount,
+      totalSlots: s.totalSlots || s.totalSlotCount || s.slotCount
+    }))
+  });
   
   return {
     total,
@@ -129,6 +152,35 @@ export const getStationsStats = (stations) => {
     totalSlots,
     availableSlots,
     occupancyRate: Math.round(occupancyRate)
+  };
+};
+
+/**
+ * Get station by ID (supports both id and stationId)
+ */
+export const getStationById = (stations, stationId) => {
+  return stations.find(station => 
+    station.id === stationId || 
+    station.stationId === stationId ||
+    station.id === parseInt(stationId) ||
+    station.stationId === parseInt(stationId)
+  );
+};
+
+/**
+ * Get station name (supports both name and stationName)
+ */
+export const getStationName = (station) => {
+  return station.stationName || station.name || 'Trạm không tên';
+};
+
+/**
+ * Get station coordinates
+ */
+export const getStationCoordinates = (station) => {
+  return {
+    latitude: station.latitude,
+    longitude: station.longitude
   };
 };
 

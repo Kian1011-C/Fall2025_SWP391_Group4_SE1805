@@ -72,7 +72,34 @@ class ContractService {
     }
   }
 
-  // Get active contract for a user
+  // Get user contract details (updated endpoint)
+  async getUserContractDetails(userId) {
+    try {
+      console.log('ContractService: Get user contract details', userId);
+      
+      const response = await apiUtils.get(`/api/contracts/user/${userId}`);
+      
+      if (response.success) {
+        return {
+          success: true,
+          data: response.data,
+          message: 'Lấy thông tin hợp đồng thành công'
+        };
+      } else {
+        throw new Error(response.message || 'Không thể lấy thông tin hợp đồng');
+      }
+    } catch (error) {
+      console.error('Get user contract details error:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return {
+        success: false,
+        message: errorInfo.message || 'Lỗi khi lấy thông tin hợp đồng',
+        error: errorInfo
+      };
+    }
+  }
+
+  // Get active contract for a user (legacy method)
   async getActiveContract(userId) {
     try {
       const response = await apiUtils.get(`/api/contracts/user/${userId}`);

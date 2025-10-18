@@ -80,9 +80,14 @@ const NewBatterySelector = ({
             <div
               style={{ fontSize: '14px', color: '#19c37d', fontWeight: '600', marginBottom: '8px' }}
             >
-              {slot.batteryLevel ? `⚡ ${slot.batteryLevel}% pin` : '⚡ Pin có sẵn'}
+              {slot.status === 'full' ? '⚡ 100% pin' : 
+               slot.batteryLevel ? `⚡ ${slot.batteryLevel}% pin` : '⚡ Pin có sẵn'}
             </div>
-            <div style={{ fontSize: '12px', color: '#666' }}>Trạng thái: {slot.status}</div>
+            <div style={{ fontSize: '12px', color: slot.status === 'full' ? '#19c37d' : '#666' }}>
+              {slot.status === 'full' ? '✅ Sẵn sàng lấy' : 
+               slot.status === 'charging' ? '🔄 Đang sạc' : 
+               slot.status === 'empty' ? '❌ Trống' : slot.status}
+            </div>
           </div>
         ))}
       </div>

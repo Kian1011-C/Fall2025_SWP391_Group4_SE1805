@@ -321,6 +321,33 @@ class BatteryService {
       };
     }
   }
+
+  // Get batteries by station
+  async getBatteriesByStation(stationId) {
+    try {
+      console.log('BatteryService: Get batteries by station', stationId);
+      
+      const response = await apiUtils.get(`/api/batteries/station/${stationId}`);
+      
+      if (response.success) {
+        return {
+          success: true,
+          data: response.data,
+          message: 'Lấy danh sách pin tại trạm thành công'
+        };
+      } else {
+        throw new Error(response.message || 'Không thể lấy danh sách pin tại trạm');
+      }
+    } catch (error) {
+      console.error('Get batteries by station error:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return {
+        success: false,
+        message: errorInfo.message || 'Lỗi khi lấy danh sách pin tại trạm',
+        error: errorInfo
+      };
+    }
+  }
 }
 
 export default new BatteryService();

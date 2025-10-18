@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
-import { swapService } from '../../../assets/js/services/swapService';
+import { swapService } from '../../../assets/js/services/index.js';
 import { devLog } from '../../../assets/js/config/development';
 import '../../../assets/css/battery-swap.css';
 
@@ -21,6 +21,7 @@ import {
   TakeNewBattery,
   ConfirmAndSave,
   SwapSuccess,
+  SwapCompletion,
   StaffAssistanceButton,
   ApiErrorModal
 } from './components';
@@ -67,7 +68,7 @@ const SwapBatteryContainer = () => {
     selectedTower,
     selectedNewBatterySlot,
     selectedEmptySlot,
-    swapResult,
+    swapResult: _swapResult,
     setCurrentStep,
     setSelectedStation,
     setSelectedTower,
@@ -84,6 +85,78 @@ const SwapBatteryContainer = () => {
   const [apiLoading, setApiLoading] = useState(false); // eslint-disable-line no-unused-vars
   const [apiError, setApiError] = useState(null);
   const [showApiErrorModal, setShowApiErrorModal] = useState(false);
+  
+  // Start swap state
+  const [isStartingSwap, setIsStartingSwap] = useState(false);
+  const [_swapSessionData, setSwapSessionData] = useState(null);
+  const [oldBatteryId, setOldBatteryId] = useState(null);
+  const [_newBatteryData, setNewBatteryData] = useState(null);
+
+  // Handle initiate swap
+  const handleStartSwap = async () => {
+    try {
+      setIsStartingSwap(true);
+      setApiError(null);
+
+      console.log('🚀 Initiating swap process...');
+
+      // Validate required data
+      if (!currentUser?.id && !currentUser?.user_id) {
+        throw new Error('Không tìm thấy thông tin người dùng');
+      }
+      if (!selectedStation?.id) {
+        throw new Error('Vui lòng chọn trạm');
+      }
+      if (!selectedTower?.id) {
+        throw new Error('Vui lòng chọn trụ sạc');
+      }
+      if (!selectedVehicle?.id && !selectedVehicle?.vehicle_id) {
+        throw new Error('Vui lòng chọn xe');
+      }
+
+      const swapData = {
+        userId: currentUser?.id || currentUser?.user_id,
+        stationId: selectedStation?.id,
+        towerId: selectedTower?.id,
+        vehicleId: selectedVehicle?.id || selectedVehicle?.vehicle_id,
+        selectedSlotId: selectedNewBatterySlot?.slotId || selectedNewBatterySlot?.id
+      };
+      
+      console.log('📋 Swap data:', swapData);
+      
+      // Call initiate API
+      const response = await swapService.initiateSwap(swapData);
+      
+      if (response.success) {
+        console.log('✅ Swap initiated successfully:', response.data);
+        
+        // Store swap session data
+        setSwapSessionData(response.data);
+        setSwapId(response.data.swapSessionId);
+        setOldBatteryId(response.data.oldBatteryId || 456);
+        
+        // Log swap session data for debugging
+        console.log('📋 Swap session data:', {
+          swapSessionId: response.data.swapSessionId,
+          instructions: response.data.instructions,
+          emptySlotNumber: response.data.emptySlotNumber,
+          newBatterySlot: response.data.newBatterySlot,
+          estimatedTime: response.data.estimatedTime
+        });
+        
+        // Continue to next step in the same page
+        setCurrentStep(4); // Move to PlaceOldBattery step
+      } else {
+        throw new Error(response.message || 'Không thể khởi tạo quy trình đổi pin');
+      }
+    } catch (error) {
+      console.error('❌ Error initiating swap:', error);
+      setApiError(error.message || 'Lỗi khi khởi tạo quy trình đổi pin');
+      setShowApiErrorModal(true);
+    } finally {
+      setIsStartingSwap(false);
+    }
+  };
 
   // Initialize - Get vehicle from navigation
   useEffect(() => {
@@ -424,13 +497,17 @@ const SwapBatteryContainer = () => {
             </div>
             
             <div className="step-confirmation-actions">
-            <button
-                className="btn-swap btn-confirm btn-large"
-              onClick={handleNext}
-            >
-                <span className="btn-icon">🔋</span>
-                <span className="btn-text">Đổi pin</span>
-            </button>
+              <SwapConfirmation
+                selectedStation={selectedStation}
+                selectedTower={selectedTower}
+                selectedVehicle={selectedVehicle}
+                selectedNewBatterySlot={selectedNewBatterySlot}
+                selectedEmptySlot={selectedEmptySlot}
+                currentBatteryLevel={currentBatteryLevel}
+                error={apiError}
+                onStartSwap={handleStartSwap}
+                isStartingSwap={isStartingSwap}
+              />
             </div>
           </div>
         );
@@ -443,7 +520,18 @@ const SwapBatteryContainer = () => {
             selectedEmptySlot={selectedEmptySlot}
             selectedVehicle={selectedVehicle}
             currentBatteryLevel={currentBatteryLevel}
-            onComplete={() => {}}
+            swapSessionId={_swapSessionData?.swapSessionId}
+            oldBatteryId={oldBatteryId}
+            onComplete={(data) => {
+              console.log('✅ Place old battery completed:', data);
+              setNewBatteryData(data);
+              setCurrentStep(5); // Move to TakeNewBattery step
+            }}
+            onError={(error) => {
+              console.error('❌ Place old battery error:', error);
+              setApiError(error.message || 'Lỗi khi đặt pin cũ');
+              setShowApiErrorModal(true);
+            }}
           />
         );
 
@@ -497,8 +585,19 @@ const SwapBatteryContainer = () => {
   };
 
   return (
-    <div style={{ padding: '20px' }}>
-      <div className="battery-swap-container">
+    <div style={{ 
+      padding: '20px', 
+      width: '100%', 
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+    }}>
+      <div className="battery-swap-container" style={{ 
+        maxWidth: 'none', 
+        width: '100%',
+        margin: '0 auto',
+        maxHeight: 'none',
+        overflowY: 'visible'
+      }}>
           {/* Header */}
           <div className="battery-swap-header">
             <h2 className="battery-swap-title">
@@ -513,11 +612,16 @@ const SwapBatteryContainer = () => {
           {/* Content */}
           <div className="swap-content">
             {currentStep === 6 ? (
-              <SwapSuccess
-                swapResult={swapResult}
+              <SwapCompletion
                 selectedStation={selectedStation}
+                selectedTower={selectedTower}
                 selectedVehicle={selectedVehicle}
-                currentBatteryLevel={currentBatteryLevel}
+                swapId={swapId}
+                onError={(error) => {
+                  console.error('❌ SwapCompletion error:', error);
+                  setApiError(error.message || 'Lỗi khi hoàn tất đổi pin');
+                  setShowApiErrorModal(true);
+                }}
               />
             ) : (
               renderStepContent()

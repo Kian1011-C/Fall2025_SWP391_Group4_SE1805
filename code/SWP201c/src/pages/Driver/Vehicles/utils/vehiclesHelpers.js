@@ -5,8 +5,18 @@
  * Get user ID from user object
  */
 export const getUserId = (user) => {
-  if (!user) return null;
-  return user.id || user.user_id || user.userId;
+  if (!user) {
+    console.warn('⚠️ No user object provided to getUserId');
+    return null;
+  }
+  
+  console.log('🔍 getUserId - User object:', user);
+  console.log('🔍 getUserId - Available fields:', Object.keys(user));
+  
+  const userId = user.id || user.user_id || user.userId || user.userId;
+  console.log('🔍 getUserId - Found userId:', userId);
+  
+  return userId;
 };
 
 /**

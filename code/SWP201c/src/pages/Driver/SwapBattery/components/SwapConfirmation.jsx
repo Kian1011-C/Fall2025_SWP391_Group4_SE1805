@@ -1,6 +1,5 @@
 import React from 'react';
-import StaffAssistanceButton from './StaffAssistanceButton';
-import { getBatteryLevel, getVehiclePlate } from '../utils/swapHelpers';
+import { getVehiclePlate } from '../utils/swapHelpers';
 
 const SwapConfirmation = ({
   selectedStation,
@@ -8,25 +7,12 @@ const SwapConfirmation = ({
   selectedVehicle,
   selectedNewBatterySlot,
   selectedEmptySlot,
-  currentBatteryLevel,
   error,
-  onShowQR,
-  onRequestStaffAssistance
+  onStartSwap,
+  isStartingSwap = false
 }) => {
   const vehiclePlate = getVehiclePlate(selectedVehicle);
-  const batteryLevel = getBatteryLevel(selectedVehicle, currentBatteryLevel);
   
-  // Get new battery level from selected slot
-  const newBatteryLevel = selectedNewBatterySlot?.batteryLevel || 100;
-  
-  console.log('🔋 SwapConfirmation DEBUG:');
-  console.log('  - selectedVehicle:', selectedVehicle);
-  console.log('  - vehicle.health:', selectedVehicle?.health);
-  console.log('  - vehicle.batteryLevel:', selectedVehicle?.batteryLevel);
-  console.log('  - currentBatteryLevel (fallback):', currentBatteryLevel);
-  console.log('  - Final batteryLevel:', batteryLevel);
-  console.log('  - New battery level:', newBatteryLevel, 'from slot:', selectedNewBatterySlot);
-  console.log('  - Empty slot:', selectedEmptySlot);
 
   return (
     <div>
@@ -69,6 +55,20 @@ const SwapConfirmation = ({
         )}
       </div>
 
+      {/* Thông báo hệ thống tự động quét pin */}
+      <div style={{ marginBottom: '32px', padding: '20px', background: '#e3f2fd', borderRadius: '12px', border: '1px solid #1976d2' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+          <div style={{ fontSize: '24px' }}>🤖</div>
+          <h4 style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: '#1976d2' }}>
+            Hệ thống IoT tự động
+          </h4>
+        </div>
+        <p style={{ margin: 0, fontSize: '14px', color: '#1976d2', lineHeight: '1.5' }}>
+          Khi bạn bấm "BẮT ĐẦU ĐỔI PIN", hệ thống sẽ tự động quét và tìm pin đầy (100%) trong trụ. 
+          Không cần chọn pin trước, hệ thống IoT sẽ tự động xử lý.
+        </p>
+      </div>
+
       {error && (
         <div
           style={{
@@ -82,40 +82,6 @@ const SwapConfirmation = ({
           <p style={{ margin: 0, color: '#f44336', fontSize: '14px' }}>⚠️ {error}</p>
         </div>
       )}
-
-      <div className="battery-comparison">
-        {/* Pin cũ */}
-        <div className="battery-display">
-          <div className="battery-icon-large battery-old">🔋</div>
-          <div className="battery-label">Pin hiện tại</div>
-          <div className="battery-percentage" style={{ 
-            color: batteryLevel < 50 ? '#f44336' : batteryLevel < 80 ? '#ff9800' : '#4caf50'
-          }}>
-            {batteryLevel}%
-          </div>
-          <span style={{ 
-            fontSize: '14px', 
-            color: batteryLevel < 50 ? '#f44336' : batteryLevel < 80 ? '#ff9800' : '#4caf50'
-          }}>
-            {batteryLevel < 50 ? '⚠️ Pin yếu' : batteryLevel < 80 ? '⚡ Pin trung bình' : '✅ Pin tốt'}
-          </span>
-        </div>
-
-        {/* Mũi tên */}
-        <div className="arrow-icon">→</div>
-
-        {/* Pin mới */}
-        <div className="battery-display">
-          <div className="battery-icon-large battery-new">🔋</div>
-          <div className="battery-label">Pin mới</div>
-          <div className="battery-percentage" style={{ color: '#4caf50' }}>
-            {newBatteryLevel}%
-          </div>
-          <span style={{ fontSize: '14px', color: '#4caf50' }}>
-            {newBatteryLevel >= 95 ? '✅ Pin đầy' : '✅ Pin tốt'}
-          </span>
-        </div>
-      </div>
 
       <div
         style={{
@@ -131,48 +97,59 @@ const SwapConfirmation = ({
         </p>
       </div>
 
-      {/* Nút hiển thị QR Code */}
+      {/* Nút bắt đầu đổi pin */}
       <div style={{ marginTop: '32px', textAlign: 'center' }}>
         <button
-          onClick={onShowQR}
+          onClick={onStartSwap}
+          disabled={isStartingSwap}
           style={{
-            padding: '14px 32px',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            padding: '16px 40px',
+            background: isStartingSwap 
+              ? 'linear-gradient(135deg, #ccc 0%, #999 100%)'
+              : 'linear-gradient(135deg, #19c37d 0%, #4ecdc4 100%)',
             color: '#fff',
             border: 'none',
             borderRadius: '12px',
-            fontSize: '15px',
+            fontSize: '16px',
             fontWeight: '600',
-            cursor: 'pointer',
-            boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
+            cursor: isStartingSwap ? 'not-allowed' : 'pointer',
+            boxShadow: isStartingSwap 
+              ? '0 2px 8px rgba(0, 0, 0, 0.1)'
+              : '0 4px 12px rgba(25, 195, 125, 0.3)',
             transition: 'all 0.3s ease',
             display: 'flex',
             alignItems: 'center',
-            gap: '10px',
-            margin: '0 auto'
+            gap: '12px',
+            margin: '0 auto',
+            opacity: isStartingSwap ? 0.7 : 1
           }}
           onMouseOver={(e) => {
-            e.target.style.transform = 'translateY(-2px)';
-            e.target.style.boxShadow = '0 6px 16px rgba(102, 126, 234, 0.4)';
+            if (!isStartingSwap) {
+              e.target.style.transform = 'translateY(-2px)';
+              e.target.style.boxShadow = '0 6px 16px rgba(25, 195, 125, 0.4)';
+            }
           }}
           onMouseOut={(e) => {
-            e.target.style.transform = 'translateY(0)';
-            e.target.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)';
+            if (!isStartingSwap) {
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = '0 4px 12px rgba(25, 195, 125, 0.3)';
+            }
           }}
         >
-          <span style={{ fontSize: '20px' }}>📱</span>
-          <span>Hiển thị mã QR</span>
+          <span style={{ fontSize: '20px' }}>
+            {isStartingSwap ? '⏳' : '🔋'}
+          </span>
+          <span>
+            {isStartingSwap ? 'Đang bắt đầu...' : 'BẮT ĐẦU ĐỔI PIN'}
+          </span>
         </button>
         <p style={{ marginTop: '12px', fontSize: '13px', color: '#666' }}>
-          Nhân viên sẽ quét mã để xác nhận xe của bạn
+          {isStartingSwap 
+            ? 'Đang khởi tạo quy trình đổi pin...' 
+            : 'Nhấn để bắt đầu quy trình đổi pin'
+          }
         </p>
       </div>
-
-      <StaffAssistanceButton
-        selectedStation={selectedStation}
-        onRequestAssistance={onRequestStaffAssistance}
-        position="bottom"
-      />
     </div>
   );
 };

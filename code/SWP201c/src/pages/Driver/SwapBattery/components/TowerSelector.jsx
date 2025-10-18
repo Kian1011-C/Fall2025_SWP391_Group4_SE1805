@@ -41,12 +41,19 @@ const TowerSelector = ({
         <p style={{ margin: 0, fontSize: '14px', color: '#1976d2' }}>
           📍 Trạm: {selectedStation?.name}
         </p>
+        {towers.length > 0 && (
+          <div style={{ marginTop: '8px', fontSize: '12px', color: '#666' }}>
+            🔌 {towers.length} trụ sạc • 
+            🔋 {towers.reduce((sum, t) => sum + (t.availableBatteries || 0), 0)} pin khả dụng • 
+            📊 SOH TB: {towers.length > 0 ? Math.round(towers.reduce((sum, t) => sum + (t.averageSOH || 0), 0) / towers.length) : 0}%
+          </div>
+        )}
       </div>
 
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
           gap: '16px'
         }}
       >
@@ -85,7 +92,30 @@ const TowerSelector = ({
             </div>
             {tower.status === 'active' && (
               <div style={{ fontSize: '12px', color: '#666', marginTop: '8px' }}>
-                {tower.availableSlots} slot trống
+                <div>🔋 {tower.availableBatteries || 0}/{tower.totalSlots || 0} pin</div>
+                {tower.averageSOH && (
+                  <div>📊 SOH TB: {tower.averageSOH}%</div>
+                )}
+                {tower.bestBatterySOH && (
+                  <div>⭐ SOH tốt nhất: {tower.bestBatterySOH}%</div>
+                )}
+                {tower.recommendedSlots && tower.recommendedSlots.length > 0 && (
+                  <div style={{ marginTop: '4px', padding: '4px', background: '#e8f5e8', borderRadius: '4px' }}>
+                    <div style={{ fontSize: '10px', color: '#2e7d32', fontWeight: '600' }}>
+                      💡 Khuyến nghị: {tower.recommendedSlots.length} slot
+                    </div>
+                    {tower.recommendedSlots.slice(0, 2).map((slot, idx) => (
+                      <div key={idx} style={{ fontSize: '10px', color: '#4caf50' }}>
+                        Slot {slot.slotId}: SOH {slot.batterySOH}%
+                      </div>
+                    ))}
+                    {tower.recommendedSlots.length > 2 && (
+                      <div style={{ fontSize: '10px', color: '#666' }}>
+                        +{tower.recommendedSlots.length - 2} khác
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>

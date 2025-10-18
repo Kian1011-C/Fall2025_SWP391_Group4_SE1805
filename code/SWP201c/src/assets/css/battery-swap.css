@@ -29,9 +29,9 @@
         0 25px 50px rgba(0, 0, 0, 0.15),
         0 0 0 1px rgba(255, 255, 255, 0.1);
     width: 100%;
-    max-width: 1000px;
-    max-height: 95vh;
-    overflow-y: auto;
+    max-width: 1200px;
+    min-height: 100vh;
+    overflow-y: visible;
     animation: scaleIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
@@ -385,6 +385,9 @@
     border-radius: 16px;
     border: 1px solid rgba(226, 232, 240, 0.5);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    min-height: auto;
+    max-height: none;
+    overflow-y: visible;
 }
 
 .step-confirmation-header {

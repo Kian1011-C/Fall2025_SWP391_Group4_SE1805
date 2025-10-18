@@ -4,7 +4,7 @@
 import PropTypes from 'prop-types';
 import { getAvailabilityStatus, getOperatingStatus } from '../utils';
 
-const StationCard = ({ station, onBook, booking, onSelect }) => {
+const StationCard = ({ station, onSelect, onViewDetail }) => {
   const availability = getAvailabilityStatus(
     station.availableSlots || 0,
     station.totalSlots || 10
@@ -17,9 +17,12 @@ const StationCard = ({ station, onBook, booking, onSelect }) => {
     }
   };
 
-  const handleBookClick = (e) => {
+
+  const handleViewDetailClick = (e) => {
     e.stopPropagation();
-    onBook(station.id);
+    if (onViewDetail) {
+      onViewDetail(station.stationId || station.id);
+    }
   };
 
   return (
@@ -61,7 +64,7 @@ const StationCard = ({ station, onBook, booking, onSelect }) => {
           fontSize: '1.25rem',
           fontWeight: '700'
         }}>
-          {station.name}
+          {station.stationName || station.name}
         </h3>
         <span style={{
           padding: '4px 12px',
@@ -83,6 +86,28 @@ const StationCard = ({ station, onBook, booking, onSelect }) => {
       }}>
         📍 {station.address || 'Địa chỉ không rõ'}
       </p>
+
+      {/* Operating Hours */}
+      {station.operatingHours && (
+        <p style={{ 
+          color: '#B0B0B0', 
+          margin: '0 0 12px 0',
+          fontSize: '0.875rem'
+        }}>
+          🕒 {station.operatingHours}
+        </p>
+      )}
+
+      {/* Coordinates (Debug) */}
+      {station.latitude && station.longitude && import.meta.env.VITE_ENABLE_DEBUG === 'true' && (
+        <p style={{ 
+          color: '#666', 
+          margin: '0 0 12px 0',
+          fontSize: '0.75rem'
+        }}>
+          📍 {station.latitude}, {station.longitude}
+        </p>
+      )}
 
       {/* Availability */}
       <div style={{
@@ -109,67 +134,38 @@ const StationCard = ({ station, onBook, booking, onSelect }) => {
         </span>
       </div>
 
-      {/* Book Button */}
-      {operatingStatus.status === 'active' && (station.availableSlots || 0) > 0 && (
-        <button
-          onClick={handleBookClick}
-          disabled={booking}
-          style={{
-            padding: '10px 20px',
-            background: booking ? '#666' : '#19c37d',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: booking ? 'not-allowed' : 'pointer',
-            fontSize: '0.95rem',
-            fontWeight: '600',
-            width: '100%',
-            transition: 'all 0.3s ease'
-          }}
-          onMouseEnter={(e) => {
-            if (!booking) {
-              e.currentTarget.style.background = '#17b370';
+      {/* Action Buttons */}
+      <div style={{ display: 'flex', gap: '10px' }}>
+        {/* View Detail Button */}
+        {onViewDetail && (
+          <button
+            onClick={handleViewDetailClick}
+            style={{
+              padding: '10px 20px',
+              background: 'rgba(0, 123, 255, 0.2)',
+              color: '#007bff',
+              border: '1px solid rgba(0, 123, 255, 0.3)',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontSize: '0.9rem',
+              fontWeight: '600',
+              width: '100%',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(0, 123, 255, 0.3)';
               e.currentTarget.style.transform = 'translateY(-1px)';
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (!booking) {
-              e.currentTarget.style.background = '#19c37d';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(0, 123, 255, 0.2)';
               e.currentTarget.style.transform = 'translateY(0)';
-            }
-          }}
-        >
-          {booking ? 'Đang đặt...' : '📅 Đặt chỗ'}
-        </button>
-      )}
+            }}
+          >
+            🔍 Chi tiết
+          </button>
+        )}
+      </div>
 
-      {operatingStatus.status !== 'active' && (
-        <div style={{
-          padding: '10px',
-          background: 'rgba(255, 165, 0, 0.1)',
-          border: '1px solid rgba(255, 165, 0, 0.3)',
-          borderRadius: '8px',
-          textAlign: 'center',
-          color: '#ffa500',
-          fontSize: '0.875rem'
-        }}>
-          Trạm đang bảo trì
-        </div>
-      )}
-
-      {operatingStatus.status === 'active' && (station.availableSlots || 0) === 0 && (
-        <div style={{
-          padding: '10px',
-          background: 'rgba(255, 107, 107, 0.1)',
-          border: '1px solid rgba(255, 107, 107, 0.3)',
-          borderRadius: '8px',
-          textAlign: 'center',
-          color: '#ff6b6b',
-          fontSize: '0.875rem'
-        }}>
-          Hết chỗ
-        </div>
-      )}
     </div>
   );
 };
@@ -177,15 +173,19 @@ const StationCard = ({ station, onBook, booking, onSelect }) => {
 StationCard.propTypes = {
   station: PropTypes.shape({
     id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    stationId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     name: PropTypes.string.isRequired,
+    stationName: PropTypes.string,
     address: PropTypes.string,
+    latitude: PropTypes.number,
+    longitude: PropTypes.number,
+    status: PropTypes.string,
+    operatingHours: PropTypes.string,
     availableSlots: PropTypes.number,
-    totalSlots: PropTypes.number,
-    status: PropTypes.string
+    totalSlots: PropTypes.number
   }).isRequired,
-  onBook: PropTypes.func.isRequired,
-  booking: PropTypes.bool.isRequired,
-  onSelect: PropTypes.func
+  onSelect: PropTypes.func,
+  onViewDetail: PropTypes.func
 };
 
 export default StationCard;

@@ -5,6 +5,114 @@ import { apiUtils } from '../config/api.js';
 import { devLog, handleApiError, shouldUseDemoMode, DEV_CONFIG } from '../config/development.js';
 
 class SwapService {
+  // Initiate battery swap process
+  async initiateSwap(swapData) {
+    try {
+      console.log('SwapService: Initiate swap', swapData);
+      
+      const response = await apiUtils.post('/api/batteries/swap/initiate', swapData);
+      
+      if (response.success) {
+        return {
+          success: true,
+          data: response.data,
+          message: response.message || 'Khởi tạo quy trình đổi pin thành công'
+        };
+      } else {
+        throw new Error(response.message || 'Không thể khởi tạo quy trình đổi pin');
+      }
+    } catch (error) {
+      console.error('Initiate swap error:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return {
+        success: false,
+        message: errorInfo.message || 'Lỗi khi khởi tạo quy trình đổi pin',
+        error: errorInfo
+      };
+    }
+  }
+
+  // Start battery swap process
+  async startSwap(swapData) {
+    try {
+      console.log('SwapService: Start swap', swapData);
+      
+      const response = await apiUtils.post('/api/batteries/swap/start', swapData);
+      
+      if (response.success) {
+        return {
+          success: true,
+          data: response.data,
+          message: response.message || 'Quy trình đổi pin đã bắt đầu'
+        };
+      } else {
+        throw new Error(response.message || 'Không thể bắt đầu quy trình đổi pin');
+      }
+    } catch (error) {
+      console.error('Start swap error:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return {
+        success: false,
+        message: errorInfo.message || 'Lỗi khi bắt đầu quy trình đổi pin',
+        error: errorInfo
+      };
+    }
+  }
+
+  // Place old battery in slot
+  async placeOldBattery(placeData) {
+    try {
+      console.log('SwapService: Place old battery', placeData);
+      
+      const response = await apiUtils.post('/api/batteries/swap/place-old-battery', placeData);
+      
+      if (response.success) {
+        return {
+          success: true,
+          data: response.data,
+          message: response.message || 'Pin cũ đã được đặt thành công'
+        };
+      } else {
+        throw new Error(response.message || 'Không thể đặt pin cũ');
+      }
+    } catch (error) {
+      console.error('Place old battery error:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return {
+        success: false,
+        message: errorInfo.message || 'Lỗi khi đặt pin cũ',
+        error: errorInfo
+      };
+    }
+  }
+
+  // Confirm swap completion
+  async confirmSwap(swapId) {
+    try {
+      console.log('SwapService: Confirm swap', swapId);
+      
+      const response = await apiUtils.post(`/api/batteries/swap/${swapId}/confirm`);
+      
+      if (response.success) {
+        return {
+          success: true,
+          data: response.data,
+          message: response.message || 'Xác nhận hoàn tất đổi pin thành công'
+        };
+      } else {
+        throw new Error(response.message || 'Không thể xác nhận hoàn tất đổi pin');
+      }
+    } catch (error) {
+      console.error('Confirm swap error:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return {
+        success: false,
+        message: errorInfo.message || 'Lỗi khi xác nhận hoàn tất đổi pin',
+        error: errorInfo
+      };
+    }
+  }
+
   // Get active swap sessions for user
   async getActiveSwaps(userId) {
     try {

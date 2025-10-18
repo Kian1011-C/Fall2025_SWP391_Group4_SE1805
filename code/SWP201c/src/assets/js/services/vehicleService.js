@@ -33,6 +33,35 @@ class VehicleService {
     }
   }
 
+  // Get vehicles by user ID (corrected endpoint)
+  async getVehiclesByUserId(userId) {
+    try {
+      console.log('VehicleService: Get vehicles by user ID', userId);
+      
+      const response = await apiUtils.get(`/api/users/${userId}/vehicles`);
+      
+      if (response.success) {
+        return {
+          success: true,
+          data: response.data || [],
+          total: response.total || 0,
+          message: 'Lấy danh sách xe của user thành công'
+        };
+      } else {
+        throw new Error(response.message || 'Không thể lấy danh sách xe của user');
+      }
+    } catch (error) {
+      console.error('Get vehicles by user ID error:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return {
+        success: false,
+        message: errorInfo.message || 'Lỗi khi lấy danh sách xe của user',
+        data: [],
+        error: errorInfo
+      };
+    }
+  }
+
   // Get vehicle by ID
   async getVehicleById(vehicleId) {
     try {

@@ -7,6 +7,7 @@ import stationService from '../assets/js/services/stationService.js';
 import batteryService from '../assets/js/services/batteryService.js';
 import contractService from '../assets/js/services/contractService.js';
 import paymentService from '../assets/js/services/paymentService.js';
+import swapService from '../assets/js/services/swapService.js';
 
 const APITestComponent = () => {
   const [testResults, setTestResults] = useState([]);
@@ -36,6 +37,7 @@ const APITestComponent = () => {
     // Test Station Service
     await testAPI('Get All Stations', () => stationService.getAllStations());
     await testAPI('Get Station by ID', () => stationService.getStationById(1));
+    await testAPI('Get Towers by Station', () => stationService.getTowersByStation(1));
     
     // Test Contract Service
     await testAPI('Get Contract Plans', () => contractService.getContractPlans());
@@ -45,6 +47,21 @@ const APITestComponent = () => {
     
     // Test Battery Service
     await testAPI('Get All Batteries', () => batteryService.getAllBatteries());
+    
+    // Test Swap Service
+    await testAPI('Start Swap', () => swapService.startSwap({
+      userId: 'user123',
+      stationId: 1,
+      towerId: 2,
+      vehicleId: 789,
+      selectedSlotId: 5
+    }));
+    
+    await testAPI('Place Old Battery', () => swapService.placeOldBattery({
+      swapSessionId: 'SWAP_100',
+      oldBatteryId: 456,
+      placedInSlot: 8
+    }));
     
     console.log('All API tests completed');
   };

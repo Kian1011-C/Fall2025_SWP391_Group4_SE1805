@@ -17,6 +17,8 @@ export const useStationsData = () => {
       const result = await stationService.getAllStations();
       
       if (result.success) {
+        console.log('🔍 Stations list data:', result.data);
+        console.log('🔍 First station status:', result.data?.[0]?.status);
         setStations(result.data || []);
       } else {
         setError(result.message || 'Không thể tải dữ liệu trạm');

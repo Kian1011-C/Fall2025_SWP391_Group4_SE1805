@@ -7,15 +7,18 @@ import {
   formatShortDate,
   getStatusColor,
   getStatusLabel,
-  getPaymentStatusColor,
-  getPaymentStatusLabel,
   calculateUsagePercentage,
   getUsageColor
 } from '../utils';
 
 const ContractCard = ({ contract, onClick }) => {
-  const usagePercentage = calculateUsagePercentage(contract.usedSwaps, contract.swapLimit);
+  // Calculate usage percentage based on distance
+  const usagePercentage = calculateUsagePercentage(contract.usedDistance, contract.baseDistance);
   const usageColor = getUsageColor(usagePercentage);
+  
+  // Calculate overage fee if applicable
+  const overageDistance = Math.max(0, contract.usedDistance - contract.baseDistance);
+  const hasOverage = overageDistance > 0;
 
   return (
     <div
@@ -72,7 +75,7 @@ const ContractCard = ({ contract, onClick }) => {
             fontSize: '0.875rem',
             color: '#666'
           }}>
-            Mã: {contract.id}
+            Mã: {contract.contractNumber}
           </p>
         </div>
         <div style={{ textAlign: 'right' }}>
@@ -82,13 +85,13 @@ const ContractCard = ({ contract, onClick }) => {
             color: '#9c88ff',
             marginBottom: '0.25rem'
           }}>
-            {formatCurrency(contract.amount)}
+            {formatCurrency(contract.monthlyTotalFee)}
           </p>
           <p style={{
             fontSize: '0.875rem',
             color: '#666'
           }}>
-            {contract.swapLimit} lần đổi
+            {contract.baseDistance} km/tháng
           </p>
         </div>
       </div>
@@ -149,7 +152,7 @@ const ContractCard = ({ contract, onClick }) => {
             fontWeight: '600',
             color: usageColor
           }}>
-            {contract.usedSwaps}/{contract.swapLimit} lần ({usagePercentage}%)
+            {contract.usedDistance}/{contract.baseDistance} km ({usagePercentage}%)
           </p>
         </div>
         
@@ -159,20 +162,35 @@ const ContractCard = ({ contract, onClick }) => {
             color: '#666',
             marginBottom: '0.25rem'
           }}>
-            Thanh toán
+            Phí cơ bản
           </p>
-          <span style={{
-            display: 'inline-block',
-            padding: '0.25rem 0.5rem',
-            borderRadius: '6px',
-            fontSize: '0.75rem',
+          <p style={{
+            fontSize: '0.875rem',
             fontWeight: '600',
-            backgroundColor: getPaymentStatusColor(contract.paymentStatus) + '20',
-            color: getPaymentStatusColor(contract.paymentStatus)
+            color: '#1a1a1a'
           }}>
-            {getPaymentStatusLabel(contract.paymentStatus)}
-          </span>
+            {formatCurrency(contract.monthlyBaseFee)}
+          </p>
         </div>
+        
+        {hasOverage && (
+          <div style={{ gridColumn: '1 / -1' }}>
+            <p style={{
+              fontSize: '0.75rem',
+              color: '#666',
+              marginBottom: '0.25rem'
+            }}>
+              Phí vượt quá ({overageDistance} km)
+            </p>
+            <p style={{
+              fontSize: '0.875rem',
+              fontWeight: '600',
+              color: '#ff6b6b'
+            }}>
+              +{formatCurrency(contract.monthlyOverageFee)}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -180,15 +198,22 @@ const ContractCard = ({ contract, onClick }) => {
 
 ContractCard.propTypes = {
   contract: PropTypes.shape({
-    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    planName: PropTypes.string.isRequired,
+    contractId: PropTypes.number.isRequired,
+    vehicleId: PropTypes.number.isRequired,
+    contractNumber: PropTypes.string.isRequired,
     status: PropTypes.string.isRequired,
-    amount: PropTypes.number.isRequired,
-    swapLimit: PropTypes.number.isRequired,
     startDate: PropTypes.string.isRequired,
     endDate: PropTypes.string.isRequired,
-    usedSwaps: PropTypes.number,
-    paymentStatus: PropTypes.string
+    planId: PropTypes.number.isRequired,
+    planType: PropTypes.string.isRequired,
+    planName: PropTypes.string.isRequired,
+    monthlyFee: PropTypes.number.isRequired,
+    baseDistance: PropTypes.number.isRequired,
+    depositFee: PropTypes.number.isRequired,
+    usedDistance: PropTypes.number.isRequired,
+    monthlyBaseFee: PropTypes.number.isRequired,
+    monthlyOverageFee: PropTypes.number.isRequired,
+    monthlyTotalFee: PropTypes.number.isRequired
   }).isRequired,
   onClick: PropTypes.func.isRequired
 };
