@@ -3,3 +3,5 @@
 
 export * from './useSwapData';
 export * from './useSwapSteps';
+export * from './useSwapProcess';
+export * from './useSwapHandlers';

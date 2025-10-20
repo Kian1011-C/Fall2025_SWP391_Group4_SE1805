@@ -4,9 +4,7 @@ import React, { useState, useEffect } from 'react';
 const TakeNewBattery = ({
   selectedStation,
   selectedTower,
-  selectedNewBatterySlot,
-  onComplete,
-  onShowQR
+  selectedNewBatterySlot
 }) => {
   const [progress, setProgress] = useState(0);
   const [isTaking, setIsTaking] = useState(false);
@@ -36,9 +34,7 @@ const TakeNewBattery = ({
     }
   }, [isTaking, progress]);
 
-  const handleComplete = () => {
-    onComplete();
-  };
+  // Completion handled via parent action button
 
   const newBatteryLevel = selectedNewBatterySlot?.batteryLevel || 100;
 
@@ -141,54 +137,18 @@ const TakeNewBattery = ({
         </div>
       )}
 
-      {/* QR Code button */}
-      <div style={{ marginBottom: '32px' }}>
-        <button
-          onClick={onShowQR}
-          style={{
-            padding: '14px 32px',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '12px',
-            fontSize: '15px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
-            transition: 'all 0.3s ease',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '10px'
-          }}
-        >
-          <span style={{ fontSize: '20px' }}>📱</span>
-          <span>Hiển thị mã QR cho nhân viên</span>
-        </button>
-        <p style={{ marginTop: '12px', fontSize: '13px', color: '#666' }}>
-          Nhân viên quét mã để xác nhận
-        </p>
-      </div>
+      {/* QR button removed */}
 
-      {/* Next button */}
+      {/* Completion message */}
       {progress >= 100 && (
-        <button
-          onClick={handleComplete}
-          style={{
-            padding: '16px 48px',
-            background: 'linear-gradient(135deg, #4caf50 0%, #45a049 100%)',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '12px',
-            fontSize: '16px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            boxShadow: '0 4px 16px rgba(76, 175, 80, 0.3)',
-            transition: 'all 0.3s ease',
-            animation: 'fadeIn 0.5s ease'
-          }}
-        >
-          Hoàn tất đổi pin →
-        </button>
+        <div style={{ marginTop: '24px' }}>
+          <p style={{ fontSize: '16px', color: '#4caf50', fontWeight: '600' }}>
+            ✅ Pin mới đã được lắp thành công!
+          </p>
+          <p style={{ fontSize: '14px', color: '#666', marginTop: '8px' }}>
+            Nhấn nút "Hoàn tất đổi pin" ở dưới để hoàn tất quy trình
+          </p>
+        </div>
       )}
     </div>
   );

@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../../../context/AuthContext';
 import userService from '../../../../assets/js/services/userService';
 import contractService from '../../../../assets/js/services/contractService';
-import paymentService from '../../../../assets/js/services/paymentService';
+import swapService from '../../../../assets/js/services/swapService';
 import { normalizeDashboardStats, extractErrorMessage } from '../../../../assets/js/utils/apiHelpers';
 import {
   validateUser,
@@ -18,7 +18,7 @@ export const useDashboardData = (selectedVehicle = null) => {
   const { currentUser } = useAuth();
   const [vehicles, setVehicles] = useState([]);
   const [contracts, setContracts] = useState([]);
-  const [recentPayments, setRecentPayments] = useState([]);
+  const [recentSwaps, setRecentSwaps] = useState([]);
   const [stats, setStats] = useState({
     totalSwaps: 0,
     currentPlans: [],
@@ -66,9 +66,9 @@ export const useDashboardData = (selectedVehicle = null) => {
         const userContracts = await fetchContracts(userId, userDashboard);
         setContracts(userContracts);
         
-        // Fetch payments (current status)
-        const payments = await fetchPayments(userId);
-        setRecentPayments(payments.slice(0, 5));
+        // Fetch swap history (recent)
+        const swapsList = await fetchSwaps(userId);
+        setRecentSwaps(Array.isArray(swapsList) ? swapsList : []);
         
         // Calculate stats
         let calculatedStats = normalizeDashboardStats(
@@ -101,8 +101,8 @@ export const useDashboardData = (selectedVehicle = null) => {
           setVehicles(selectedVehicle ? [selectedVehicle] : finalVehicles);
           const userContracts = await fetchContracts(userId, userDashboard);
           setContracts(userContracts);
-          const payments = await fetchPayments(userId);
-          setRecentPayments(payments.slice(0, 5));
+          const swapsList = await fetchSwaps(userId);
+          setRecentSwaps(Array.isArray(swapsList) ? swapsList : []);
           let calculatedStats = normalizeDashboardStats(
             userDashboard, processedVehicles, userContracts, []
           );
@@ -125,7 +125,7 @@ export const useDashboardData = (selectedVehicle = null) => {
       // Set empty data
       setVehicles([]);
       setContracts([]);
-      setRecentPayments([]);
+      setRecentSwaps([]);
       setStats({
         totalSwaps: 0,
         currentPlans: ['Không có dữ liệu'],
@@ -155,18 +155,17 @@ export const useDashboardData = (selectedVehicle = null) => {
     }
   };
 
-  // Fetch payments helper
-  const fetchPayments = async (userId) => {
+  // Fetch swaps helper
+  const fetchSwaps = async (userId) => {
     try {
-      const paymentsResponse = await paymentService.getPaymentHistory(userId);
-      console.log('💰 Payment service response:', paymentsResponse);
-      
-      if (paymentsResponse.success && paymentsResponse.data) {
-        return Array.isArray(paymentsResponse.data) ? paymentsResponse.data : [];
+      const response = await swapService.getUserSwaps(userId);
+      console.log('🔄 Swap history response:', response);
+      if (response.success && response.data) {
+        return Array.isArray(response.data) ? response.data : (response.data.items || []);
       }
       return [];
     } catch (err) {
-      console.warn('⚠️ Payment API failed:', err);
+      console.warn('⚠️ Swap history API failed:', err);
       return [];
     }
   };
@@ -180,7 +179,7 @@ export const useDashboardData = (selectedVehicle = null) => {
   return {
     vehicles,
     contracts,
-    recentPayments,
+    recentSwaps,
     stats,
     loading,
     error,

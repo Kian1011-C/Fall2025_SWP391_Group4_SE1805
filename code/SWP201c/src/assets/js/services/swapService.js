@@ -1,587 +1,171 @@
-// Swap Service
+// Swap Service (Monolithic - restored)
 // Handle battery swap transactions and operations
 
 import { apiUtils } from '../config/api.js';
-import { devLog, handleApiError, shouldUseDemoMode, DEV_CONFIG } from '../config/development.js';
+import stationService from './stationService.js';
+import { devLog, DEV_CONFIG } from '../config/development.js';
 
 class SwapService {
-  // Initiate battery swap process
-  async initiateSwap(swapData) {
-    try {
-      console.log('SwapService: Initiate swap', swapData);
-      
-      const response = await apiUtils.post('/api/batteries/swap/initiate', swapData);
-      
-      if (response.success) {
-        return {
-          success: true,
-          data: response.data,
-          message: response.message || 'Khởi tạo quy trình đổi pin thành công'
-        };
-      } else {
-        throw new Error(response.message || 'Không thể khởi tạo quy trình đổi pin');
-      }
-    } catch (error) {
-      console.error('Initiate swap error:', error);
-      const errorInfo = apiUtils.handleError(error);
-      return {
-        success: false,
-        message: errorInfo.message || 'Lỗi khi khởi tạo quy trình đổi pin',
-        error: errorInfo
-      };
-    }
+  // ------------- Helpers -------------
+  normalizeSwapItem(item) {
+    if (!item || typeof item !== 'object') return item;
+    const station = item.station || item.stationInfo || {};
+    const stationName = item.stationName || station.name || station.stationName || item.station_name || null;
+    const id = item.swapId || item.id || item.swap_id || null;
+    const time = item.time || item.swapDate || item.swapTime || item.timestamp || item.performedAt || null;
+    const createdAt = item.createdAt || item.created_at || time || null;
+    const oldBattery = item.oldBattery ?? item.oldBatteryLevel ?? item.beforeLevel ?? item.before_battery_level ?? null;
+    const newBattery = item.newBattery ?? item.newBatteryLevel ?? item.afterLevel ?? item.after_battery_level ?? null;
+    return { ...item, swapId: id, stationName, time, createdAt, oldBattery, newBattery };
   }
 
-  // Start battery swap process
+  getDefaultStatistics() {
+    return {
+      totalSwaps: 0,
+      successRate: 0,
+      averageTime: 0,
+      totalTimeSaved: 0,
+      favoriteStation: null,
+      monthlySummary: { thisMonth: 0, lastMonth: 0, change: 0 }
+    };
+  }
+
+  isSwapInProgress(status) { return ['INITIATED', 'IN_PROGRESS'].includes(status); }
+  canCancelSwap(status) { return ['INITIATED'].includes(status); }
+  canRateSwap(status, hasRating) { return status === 'COMPLETED' && !hasRating; }
+  formatSwapDuration(startTime, endTime) {
+    if (!startTime || !endTime) return 'N/A';
+    const duration = new Date(endTime) - new Date(startTime);
+    const minutes = Math.floor(duration / 60000);
+    const seconds = Math.floor((duration % 60000) / 1000);
+    return minutes > 0 ? `${minutes}:${String(seconds).padStart(2, '0')}` : `${seconds}s`;
+  }
+
+  // ------------- Core APIs -------------
+  async initiateSwap(swapData) {
+    const response = await apiUtils.post('/api/batteries/swap/initiate', swapData);
+    return response;
+  }
+
   async startSwap(swapData) {
-    try {
-      console.log('SwapService: Start swap', swapData);
-      
-      const response = await apiUtils.post('/api/batteries/swap/start', swapData);
-      
-      if (response.success) {
-        return {
-          success: true,
-          data: response.data,
-          message: response.message || 'Quy trình đổi pin đã bắt đầu'
-        };
-      } else {
-        throw new Error(response.message || 'Không thể bắt đầu quy trình đổi pin');
-      }
-    } catch (error) {
-      console.error('Start swap error:', error);
-      const errorInfo = apiUtils.handleError(error);
-      return {
-        success: false,
-        message: errorInfo.message || 'Lỗi khi bắt đầu quy trình đổi pin',
-        error: errorInfo
-      };
-    }
+    const response = await apiUtils.post('/api/batteries/swap/start', swapData);
+    return response;
   }
 
-  // Place old battery in slot
   async placeOldBattery(placeData) {
-    try {
-      console.log('SwapService: Place old battery', placeData);
-      
-      const response = await apiUtils.post('/api/batteries/swap/place-old-battery', placeData);
-      
-      if (response.success) {
-        return {
-          success: true,
-          data: response.data,
-          message: response.message || 'Pin cũ đã được đặt thành công'
-        };
-      } else {
-        throw new Error(response.message || 'Không thể đặt pin cũ');
-      }
-    } catch (error) {
-      console.error('Place old battery error:', error);
-      const errorInfo = apiUtils.handleError(error);
-      return {
-        success: false,
-        message: errorInfo.message || 'Lỗi khi đặt pin cũ',
-        error: errorInfo
-      };
-    }
+    const response = await apiUtils.post('/api/batteries/swap/place-old-battery', placeData);
+    return response;
   }
 
-  // Confirm swap completion
   async confirmSwap(swapId) {
-    try {
-      console.log('SwapService: Confirm swap', swapId);
-      
-      const response = await apiUtils.post(`/api/batteries/swap/${swapId}/confirm`);
-      
-      if (response.success) {
-        return {
-          success: true,
-          data: response.data,
-          message: response.message || 'Xác nhận hoàn tất đổi pin thành công'
-        };
-      } else {
-        throw new Error(response.message || 'Không thể xác nhận hoàn tất đổi pin');
-      }
-    } catch (error) {
-      console.error('Confirm swap error:', error);
-      const errorInfo = apiUtils.handleError(error);
-      return {
-        success: false,
-        message: errorInfo.message || 'Lỗi khi xác nhận hoàn tất đổi pin',
-        error: errorInfo
-      };
-    }
+    const response = await apiUtils.post(`/api/batteries/swap/${swapId}/confirm`);
+    return response;
   }
 
-  // Get active swap sessions for user
   async getActiveSwaps(userId) {
-    try {
-      console.log('SwapService: Get active swaps', userId);
-      
-      const response = await apiUtils.get('/api/batteries/swap/active', { userId });
-      
-      if (response.success) {
-        return {
-          success: true,
-          data: response.data || [],
-          total: response.total || 0,
-          message: 'Lấy giao dịch đang thực hiện thành công'
-        };
-      } else {
-        throw new Error(response.message || 'Không thể lấy giao dịch đang thực hiện');
-      }
-    } catch (error) {
-      console.error('Get active swaps error:', error);
-      const errorInfo = apiUtils.handleError(error);
-      return {
-        success: false,
-        message: errorInfo.message || 'Lỗi khi lấy giao dịch đang thực hiện',
-        data: [],
-        error: errorInfo
-      };
-    }
+    const response = await apiUtils.get('/api/batteries/swap/active', { userId });
+    return response;
   }
 
-  // Get swap history for user
   async getSwapHistory(userId, filters = {}) {
+    const response = await apiUtils.get(`/api/users/${userId}/swaps`, filters);
+    return response;
+  }
+
+  // Used by dashboard - includes normalization and station name enrichment
+  async getUserSwaps(userId, filters = {}) {
     try {
-      console.log('SwapService: Get swap history', userId);
-      
       const response = await apiUtils.get(`/api/users/${userId}/swaps`, filters);
-      
-      if (response.success) {
-        return {
-          success: true,
-          data: response.data || [],
-          total: response.total || 0,
-          message: 'Lấy lịch sử đổi pin thành công'
-        };
-      } else {
-        throw new Error(response.message || 'Không thể lấy lịch sử đổi pin');
-      }
-    } catch (error) {
-      console.error('Get swap history error:', error);
-      const errorInfo = apiUtils.handleError(error);
-      
-      // SwapController chưa được implement, return empty data
-      console.warn('SwapController chưa được implement, trả về dữ liệu rỗng');
-      return {
-        success: true,
-        data: [],
-        total: 0,
-        message: 'Chưa có lịch sử đổi pin (API chưa được triển khai)',
-        error: errorInfo
-      };
-    }
-  }
+      const raw = Array.isArray(response?.data) ? response.data : (response?.data?.items || response?.data?.swaps || []);
+      const normalized = (raw || []).map((s) => this.normalizeSwapItem(s));
 
-  // Get swap details by ID
-  async getSwapDetails(swapId) {
-    try {
-      console.log('SwapService: Get swap details', swapId);
-      
-      const response = await apiUtils.get(`/api/swaps/${swapId}`);
-      
-      if (response.success) {
-        return {
-          success: true,
-          data: response.data,
-          message: 'Lấy chi tiết giao dịch thành công'
-        };
-      } else {
-        throw new Error(response.message || 'Không thể lấy chi tiết giao dịch');
-      }
-    } catch (error) {
-      console.error('Get swap details error:', error);
-      const errorInfo = apiUtils.handleError(error);
-      return {
-        success: false,
-        message: errorInfo.message || 'Lỗi khi lấy chi tiết giao dịch',
-        error: errorInfo
-      };
-    }
-  }
-
-  // Initiate battery swap
-  async initiateSwap(swapData) {
-    try {
-      console.log('SwapService: Initiate swap', swapData);
-      
-      const response = await apiUtils.post('/api/batteries/swap/initiate', swapData);
-      
-      if (response.success) {
-        return {
-          success: true,
-          data: response.data,
-          message: 'Khởi tạo đổi pin thành công'
-        };
-      } else {
-        throw new Error(response.message || 'Không thể khởi tạo đổi pin');
-      }
-    } catch (error) {
-      console.error('Initiate swap error:', error);
-      const errorInfo = apiUtils.handleError(error);
-      return {
-        success: false,
-        message: errorInfo.message || 'Lỗi khi khởi tạo đổi pin',
-        error: errorInfo
-      };
-    }
-  }
-
-  // New unified request for quick swap
-  async requestSwap(payload) {
-    try {
-      devLog('info', 'Request swap with payload:', payload);
-      
-      // Demo mode is disabled, try real API calls
-      devLog('info', 'Demo mode disabled, attempting real API calls');
-      
-      // Check backend availability first
-      if (DEV_CONFIG.BACKEND_CHECK.ENABLED) {
-        devLog('info', 'Checking backend availability');
-        const isBackendAvailable = await this.checkBackendHealth();
-        if (!isBackendAvailable) {
-          devLog('error', 'Backend not available');
-          return { 
-            success: false, 
-            message: 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.',
-            error: 'Backend not available',
-            endpoint: 'none'
-          };
-        }
-        devLog('info', 'Backend is available, proceeding with API calls');
-      }
-      
-      // Try multiple endpoints that might exist
-      const endpoints = [
-        '/api/swaps',
-        '/api/batteries/swap',
-        '/api/swaps/request',
-        '/api/battery-swaps'
-      ];
-      
-      for (const endpoint of endpoints) {
+      let enriched = normalized;
+      const needStationNames = normalized.some(s => !s.stationName && (s.stationId || s.station_id));
+      if (needStationNames) {
         try {
-          devLog('debug', `Trying endpoint: ${endpoint}`);
-          const response = await apiUtils.post(endpoint, payload);
-          if (response?.success || response?.data) {
-            devLog('info', `Success with endpoint: ${endpoint}`);
-            return { 
-              success: true, 
-              data: response.data || response, 
-              message: response.message || 'Yêu cầu đổi pin thành công',
-              endpoint: endpoint
-            };
-          }
-        } catch (error) {
-          // Log specific error types for debugging
-          if (error.code === 'ERR_NETWORK' || error.message.includes('CORS')) {
-            devLog('warn', `CORS/Network error for ${endpoint}:`, error.message);
-          } else if (error.response?.status === 404) {
-            devLog('warn', `404 Not Found for ${endpoint}`);
-          } else if (error.response?.status === 405) {
-            devLog('warn', `405 Method Not Allowed for ${endpoint}`);
-          } else {
-            devLog('debug', `Endpoint ${endpoint} failed:`, error.message);
-          }
-          continue;
+          const stationsResp = await stationService.getAllStations();
+          const list = stationsResp?.data || [];
+          const map = new Map(list.map(st => [st.id || st.stationId, st.name || st.stationName]));
+          enriched = normalized.map(s => {
+            const sid = s.stationId || s.station_id;
+            const name = s.stationName || (sid ? map.get(sid) : null);
+            return name ? { ...s, stationName: name } : s;
+          });
+        } catch (e) {
+          console.warn('SwapService: station enrichment failed:', e?.message);
         }
       }
-      
-      // If all endpoints fail, return real error
-      devLog('error', 'All swap endpoints failed');
-      return { 
-        success: false, 
-        message: 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng và thử lại.',
-        error: 'All endpoints failed',
-        endpoint: 'none'
-      };
+
+      return { success: true, data: enriched, total: enriched.length, message: 'Lấy lịch sử đổi pin thành công' };
     } catch (error) {
-      devLog('error', 'Request swap error:', error);
-      // Return real error instead of demo mode
-      return { 
-        success: false, 
-        message: 'Lỗi hệ thống khi gửi yêu cầu đổi pin. Vui lòng thử lại sau.',
-        error: error.message || 'Unknown error',
-        endpoint: 'none'
-      };
+      const err = apiUtils.handleError(error);
+      return { success: false, data: [], total: 0, message: err.message || 'Lỗi khi lấy lịch sử đổi pin', error: err };
     }
   }
 
-  // Check if backend is available
-  async checkBackendHealth() {
-    try {
-      // Try to use existing endpoints that we know exist
-      const response = await apiUtils.get('/api/stations', {}, { timeout: 5000 });
-      return response?.success || response?.data !== undefined;
-    } catch (error) {
-      // Try alternative endpoints that might exist
-      try {
-        const response = await apiUtils.get('/api/vehicles', {}, { timeout: 5000 });
-        return response?.success || response?.data !== undefined;
-      } catch (error2) {
-        // If all health checks fail, assume backend is not available
-        devLog('warn', 'Backend health check failed, assuming backend is not available');
-        return false;
-      }
-    }
+  async getSwapDetails(swapId) {
+    const response = await apiUtils.get(`/api/swaps/${swapId}`);
+    return response;
   }
 
-  // Confirm battery swap
-  async confirmSwap(swapId, confirmationData = {}) {
-    try {
-      console.log('SwapService: Confirm swap', swapId, confirmationData);
-      
-      const response = await apiUtils.post(`/api/batteries/swap/${swapId}/confirm`, confirmationData);
-      
-      if (response.success) {
-        return {
-          success: true,
-          data: response.data,
-          message: 'Xác nhận đổi pin thành công'
-        };
-      } else {
-        throw new Error(response.message || 'Không thể xác nhận đổi pin');
-      }
-    } catch (error) {
-      console.error('Confirm swap error:', error);
-      const errorInfo = apiUtils.handleError(error);
-      return {
-        success: false,
-        message: errorInfo.message || 'Lỗi khi xác nhận đổi pin',
-        error: errorInfo
-      };
-    }
-  }
-
-  // Cancel battery swap
   async cancelSwap(swapId, cancelReason = '') {
-    try {
-      console.log('SwapService: Cancel swap', swapId, cancelReason);
-      
-      const response = await apiUtils.post(`/api/swaps/${swapId}/cancel`, { reason: cancelReason });
-      
-      if (response.success) {
-        return {
-          success: true,
-          data: response.data,
-          message: 'Hủy đổi pin thành công'
-        };
-      } else {
-        throw new Error(response.message || 'Không thể hủy đổi pin');
-      }
-    } catch (error) {
-      console.error('Cancel swap error:', error);
-      const errorInfo = apiUtils.handleError(error);
-      return {
-        success: false,
-        message: errorInfo.message || 'Lỗi khi hủy đổi pin',
-        error: errorInfo
-      };
-    }
+    const response = await apiUtils.post(`/api/swaps/${swapId}/cancel`, { reason: cancelReason });
+    return response;
   }
 
-  // Book a swap slot at station
   async bookSwapSlot(bookingData) {
-    try {
-      console.log('SwapService: Book swap slot', bookingData);
-      
-      const response = await apiUtils.post('/api/swaps/book-slot', bookingData);
-      
-      if (response.success) {
-        return {
-          success: true,
-          data: response.data,
-          message: 'Đặt chỗ đổi pin thành công'
-        };
-      } else {
-        throw new Error(response.message || 'Không thể đặt chỗ đổi pin');
-      }
-    } catch (error) {
-      console.error('Book swap slot error:', error);
-      const errorInfo = apiUtils.handleError(error);
-      return {
-        success: false,
-        message: errorInfo.message || 'Lỗi khi đặt chỗ đổi pin',
-        error: errorInfo
-      };
-    }
+    const response = await apiUtils.post('/api/swaps/book-slot', bookingData);
+    return response;
   }
 
-  // Get available slots at station
   async getAvailableSlots(stationId, dateTime) {
-    try {
-      console.log('SwapService: Get available slots', stationId, dateTime);
-      
-      const response = await apiUtils.get(`/api/stations/${stationId}/available-slots`, { dateTime });
-      
-      if (response.success) {
-        return {
-          success: true,
-          data: response.data || [],
-          message: 'Lấy chỗ trống thành công'
-        };
-      } else {
-        throw new Error(response.message || 'Không thể lấy chỗ trống');
-      }
-    } catch (error) {
-      console.error('Get available slots error:', error);
-      const errorInfo = apiUtils.handleError(error);
-      return {
-        success: false,
-        message: errorInfo.message || 'Lỗi khi lấy chỗ trống',
-        data: [],
-        error: errorInfo
-      };
-    }
+    const response = await apiUtils.get(`/api/stations/${stationId}/available-slots`, { dateTime });
+    return response;
   }
 
-  // Get estimated swap time
   async getEstimatedSwapTime(stationId) {
-    try {
-      console.log('SwapService: Get estimated swap time', stationId);
-      
-      const response = await apiUtils.get(`/api/stations/${stationId}/estimated-time`);
-      
-      if (response.success) {
-        return {
-          success: true,
-          data: response.data,
-          message: 'Lấy thời gian ước tính thành công'
-        };
-      } else {
-        // Return default estimate if API fails
-        return {
-          success: true,
-          data: { estimatedTime: 300, queueLength: 0 }, // 5 minutes default
-          message: 'Thời gian ước tính mặc định'
-        };
-      }
-    } catch (error) {
-      console.error('Get estimated swap time error:', error);
-      return {
-        success: true,
-        data: { estimatedTime: 300, queueLength: 0 },
-        message: 'Thời gian ước tính mặc định'
-      };
-    }
+    const response = await apiUtils.get(`/api/stations/${stationId}/estimated-time`);
+    return response;
   }
 
-  // Rate swap experience
   async rateSwapExperience(swapId, rating, feedback = '') {
-    try {
-      console.log('SwapService: Rate swap experience', swapId, rating);
-      
-      const response = await apiUtils.post(`/api/swaps/${swapId}/rate`, { 
-        rating, 
-        feedback 
-      });
-      
-      if (response.success) {
-        return {
-          success: true,
-          data: response.data,
-          message: 'Đánh giá thành công'
-        };
-      } else {
-        throw new Error(response.message || 'Không thể đánh giá');
-      }
-    } catch (error) {
-      console.error('Rate swap experience error:', error);
-      const errorInfo = apiUtils.handleError(error);
-      return {
-        success: false,
-        message: errorInfo.message || 'Lỗi khi đánh giá',
-        error: errorInfo
-      };
-    }
+    const response = await apiUtils.post(`/api/swaps/${swapId}/rate`, { rating, feedback });
+    return response;
   }
 
-  // Get swap statistics for user
   async getUserSwapStatistics(userId, period = 'month') {
     try {
-      console.log('SwapService: Get user swap statistics', userId, period);
-      
       const response = await apiUtils.get(`/api/users/${userId}/swap-statistics`, { period });
-      
-      if (response.success) {
-        return {
-          success: true,
-          data: response.data,
-          message: 'Lấy thống kê đổi pin thành công'
-        };
-      } else {
-        throw new Error(response.message || 'Không thể lấy thống kê đổi pin');
-      }
+      if (response?.success) return response;
+      return { success: false, data: this.getDefaultStatistics() };
     } catch (error) {
-      console.error('Get user swap statistics error:', error);
-      const errorInfo = apiUtils.handleError(error);
-      return {
-        success: false,
-        message: errorInfo.message || 'Lỗi khi lấy thống kê đổi pin',
-        data: this.getDefaultStatistics(),
-        error: errorInfo
-      };
+      return { success: false, data: this.getDefaultStatistics(), message: error?.message };
     }
   }
 
-  // Get swap count summary for a user (current/month/total)
   async getSwapCountSummary(userId) {
     try {
-      console.log('SwapService: Get swap count summary for user:', userId);
-      
-      // Try multiple endpoints that might exist
       const endpoints = [
         `/api/users/${userId}/swaps`,
         `/api/swaps?userId=${userId}`,
         `/api/batteries/swap/user/${userId}`,
         `/api/swaps/user/${userId}`
       ];
-      
       for (const endpoint of endpoints) {
         try {
           const response = await apiUtils.get(endpoint);
           if (response?.success) {
             const swaps = Array.isArray(response.data) ? response.data : (response.data?.swaps || []);
-            console.log(`SwapService: Found swaps via ${endpoint}:`, swaps.length);
-            return { 
-              success: true, 
-              data: { 
-                totalSwaps: swaps.length,
-                endpoint: endpoint
-              } 
-            };
+            return { success: true, data: { totalSwaps: swaps.length, endpoint } };
           }
-        } catch (error) {
-          console.log(`SwapService: Endpoint ${endpoint} failed:`, error.message);
-          continue;
-        }
+        } catch { /* try next */ }
       }
-      
-      // If all endpoints fail, return empty data
-      console.warn('SwapService: All swap endpoints failed, returning empty data');
-      return { 
-        success: false, 
-        data: { 
-          totalSwaps: 0,
-          endpoint: 'none'
-        },
-        message: 'Không thể kết nối đến server'
-      };
+      return { success: false, data: { totalSwaps: 0, endpoint: 'none' }, message: 'Không thể kết nối đến server' };
     } catch (error) {
-      console.error('SwapService: Get swap count summary error:', error);
-      return { 
-        success: false, 
-        data: { 
-          totalSwaps: 0,
-          error: error.message
-        } 
-      };
+      return { success: false, data: { totalSwaps: 0, error: error?.message } };
     }
   }
 
-  // Get swap statuses
   getSwapStatuses() {
     return [
       { id: 'INITIATED', name: 'Đã khởi tạo', color: '#ffa726', icon: '⏳' },
@@ -592,7 +176,6 @@ class SwapService {
     ];
   }
 
-  // Get cancel reasons
   getCancelReasons() {
     return [
       'Không tìm thấy pin phù hợp',
@@ -603,169 +186,59 @@ class SwapService {
     ];
   }
 
-  // Format swap duration
-  formatSwapDuration(startTime, endTime) {
-    if (!startTime || !endTime) return 'N/A';
-    
-    const duration = new Date(endTime) - new Date(startTime);
-    const minutes = Math.floor(duration / 60000);
-    const seconds = Math.floor((duration % 60000) / 1000);
-    
-    if (minutes > 0) {
-      return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-    }
-    return `${seconds}s`;
-  }
-
-  // Calculate swap efficiency
-  calculateSwapEfficiency(estimatedTime, actualTime) {
-    if (!estimatedTime || !actualTime) return null;
-    
-    const efficiency = (estimatedTime / actualTime) * 100;
-    return Math.round(efficiency * 10) / 10; // Round to 1 decimal place
-  }
-
-  // Get default statistics (fallback)
-  getDefaultStatistics() {
-    return {
-      totalSwaps: 0,
-      successRate: 0,
-      averageTime: 0,
-      totalTimeSaved: 0,
-      favoriteStation: null,
-      monthlySummary: {
-        thisMonth: 0,
-        lastMonth: 0,
-        change: 0
-      }
-    };
-  }
-
-  // Check if swap is in progress
-  isSwapInProgress(swapStatus) {
-    return ['INITIATED', 'IN_PROGRESS'].includes(swapStatus);
-  }
-
-  // Check if swap can be cancelled
-  canCancelSwap(swapStatus) {
-    return ['INITIATED'].includes(swapStatus);
-  }
-
-  // Check if swap can be rated
-  canRateSwap(swapStatus, hasRating) {
-    return swapStatus === 'COMPLETED' && !hasRating;
-  }
-
-  // Request staff assistance for battery swap
+  // ------------- Assistance (Staff) -------------
   async requestStaffAssistance(assistanceData) {
-    try {
-      console.log('SwapService: Request staff assistance', assistanceData);
-      
-      // NOTE: Backend does not have /api/swaps/request-assistance endpoint yet
-      // Try to call the actual API endpoint
-      const response = await apiUtils.post('/api/swaps/request-assistance', assistanceData);
-      
-      if (response.success) {
-        return {
-          success: true,
-          data: response.data,
-          message: 'Yêu cầu hỗ trợ đã được gửi thành công'
-        };
-      } else {
-        throw new Error(response.message || 'Không thể gửi yêu cầu hỗ trợ');
-      }
-    } catch (error) {
-      console.error('Request staff assistance error:', error);
-      const errorInfo = apiUtils.handleError(error);
-      return {
-        success: false,
-        message: errorInfo.message || 'Lỗi khi gửi yêu cầu hỗ trợ từ nhân viên',
-        error: errorInfo
-      };
-    }
+    const response = await apiUtils.post('/api/swaps/request-assistance', assistanceData);
+    return response;
   }
-
-  // Get pending assistance requests for staff
   async getPendingAssistanceRequests(stationId = null) {
-    try {
-      console.log('SwapService: Get pending assistance requests', stationId);
-      
-      const params = stationId ? { stationId } : {};
-      const response = await apiUtils.get('/api/swaps/assistance-requests', params);
-      
-      if (response.success) {
-        return {
-          success: true,
-          data: response.data || [],
-          total: response.total || 0,
-          message: 'Lấy danh sách yêu cầu hỗ trợ thành công'
-        };
-      } else {
-        throw new Error(response.message || 'Không thể lấy danh sách yêu cầu hỗ trợ');
-      }
-    } catch (error) {
-      console.error('Get pending assistance requests error:', error);
-      const errorInfo = apiUtils.handleError(error);
-      return {
-        success: false,
-        message: errorInfo.message || 'Lỗi khi lấy danh sách yêu cầu hỗ trợ',
-        data: [],
-        error: errorInfo
-      };
-    }
+    const params = stationId ? { stationId } : {};
+    const response = await apiUtils.get('/api/swaps/assistance-requests', params);
+    return response;
   }
-
-  // Accept assistance request (for staff)
   async acceptAssistanceRequest(requestId, staffId) {
+    const response = await apiUtils.post(`/api/swaps/assistance-requests/${requestId}/accept`, { staffId });
+    return response;
+  }
+  async completeAssistanceRequest(requestId, completionData) {
+    const response = await apiUtils.post(`/api/swaps/assistance-requests/${requestId}/complete`, completionData);
+    return response;
+  }
+
+  // ------------- Misc -------------
+  async checkBackendHealth() {
     try {
-      console.log('SwapService: Accept assistance request', requestId, staffId);
-      
-      const response = await apiUtils.post(`/api/swaps/assistance-requests/${requestId}/accept`, { staffId });
-      
-      if (response.success) {
-        return {
-          success: true,
-          data: response.data,
-          message: 'Chấp nhận yêu cầu hỗ trợ thành công'
-        };
-      } else {
-        throw new Error(response.message || 'Không thể chấp nhận yêu cầu hỗ trợ');
+      const response = await apiUtils.get('/api/stations', {}, { timeout: 5000 });
+      return response?.success || response?.data !== undefined;
+    } catch {
+      try {
+        const response = await apiUtils.get('/api/vehicles', {}, { timeout: 5000 });
+        return response?.success || response?.data !== undefined;
+      } catch {
+        devLog('warn', 'Backend health check failed, assuming backend is not available');
+        return false;
       }
-    } catch (error) {
-      console.error('Accept assistance request error:', error);
-      const errorInfo = apiUtils.handleError(error);
-      return {
-        success: false,
-        message: errorInfo.message || 'Lỗi khi chấp nhận yêu cầu hỗ trợ',
-        error: errorInfo
-      };
     }
   }
 
-  // Complete assistance request (for staff)
-  async completeAssistanceRequest(requestId, completionData) {
+  async requestSwap(payload) {
     try {
-      console.log('SwapService: Complete assistance request', requestId, completionData);
-      
-      const response = await apiUtils.post(`/api/swaps/assistance-requests/${requestId}/complete`, completionData);
-      
-      if (response.success) {
-        return {
-          success: true,
-          data: response.data,
-          message: 'Hoàn thành hỗ trợ đổi pin thành công'
-        };
-      } else {
-        throw new Error(response.message || 'Không thể hoàn thành hỗ trợ');
+      if (DEV_CONFIG.BACKEND_CHECK.ENABLED) {
+        const ok = await this.checkBackendHealth();
+        if (!ok) return { success: false, message: 'Không thể kết nối đến server.', endpoint: 'none' };
       }
+      const endpoints = ['/api/swaps', '/api/batteries/swap', '/api/swaps/request', '/api/battery-swaps'];
+      for (const endpoint of endpoints) {
+        try {
+          const response = await apiUtils.post(endpoint, payload);
+          if (response?.success || response?.data) {
+            return { success: true, data: response.data || response, message: response.message || 'Yêu cầu đổi pin thành công', endpoint };
+          }
+        } catch { continue; }
+      }
+      return { success: false, message: 'Không thể kết nối đến server. Vui lòng thử lại.', endpoint: 'none' };
     } catch (error) {
-      console.error('Complete assistance request error:', error);
-      const errorInfo = apiUtils.handleError(error);
-      return {
-        success: false,
-        message: errorInfo.message || 'Lỗi khi hoàn thành hỗ trợ đổi pin',
-        error: errorInfo
-      };
+      return { success: false, message: 'Lỗi hệ thống khi gửi yêu cầu đổi pin.', error: error?.message, endpoint: 'none' };
     }
   }
 }
@@ -773,3 +246,4 @@ class SwapService {
 const swapService = new SwapService();
 export default swapService;
 export { swapService };
+

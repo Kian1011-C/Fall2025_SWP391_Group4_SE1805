@@ -99,42 +99,7 @@ const SwapCompletion = ({
           </div>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
-          <button
-            onClick={() => navigate('/driver/dashboard')}
-            style={{
-              padding: '15px 35px',
-              background: 'linear-gradient(135deg, #007bff 0%, #0056b3 100%)',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '10px',
-              fontSize: '16px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              boxShadow: '0 4px 12px rgba(0, 123, 255, 0.3)',
-              transition: 'all 0.3s ease'
-            }}
-          >
-            Thanh toán
-          </button>
-          <button
-            onClick={() => navigate('/driver/dashboard')}
-            style={{
-              padding: '15px 35px',
-              background: '#6c757d',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '10px',
-              fontSize: '16px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              boxShadow: '0 4px 12px rgba(108, 117, 125, 0.3)',
-              transition: 'all 0.3s ease'
-            }}
-          >
-            Về trang chủ
-          </button>
-        </div>
+        {/* Top finish button removed - only keep bottom action button */}
       </div>
     );
   }
@@ -155,7 +120,7 @@ const SwapCompletion = ({
       } else {
         throw new Error(response.message || 'Không thể xác nhận hoàn tất đổi pin');
       }
-    } catch (error) {
+  } catch (error) {
       console.error('❌ Error confirming swap:', error);
       setError(error.message || 'Lỗi khi xác nhận hoàn tất đổi pin');
       if (onError) {
@@ -166,19 +131,29 @@ const SwapCompletion = ({
     }
   };
 
-  const handlePayment = () => {
-    // Navigate to payment page
-    navigate('/driver/payments', { 
-      state: { 
-        swapResult,
-        fromSwap: true 
+  const handleGoHome = async () => {
+    // Ensure confirmation API is called before leaving (saves history and increments dashboard count)
+    try {
+      if (swapId && !swapResult && !isConfirming) {
+        await handleConfirmSwap();
       }
-    });
-  };
+    } catch {
+      // ignore navigation confirmation errors
+    }
 
-  const handleGoHome = () => {
-    // Navigate to dashboard
-    navigate('/driver/dashboard');
+    // Keep the updated vehicle preselected on Dashboard
+    let updatedVehicle = selectedVehicle;
+    try {
+      const fromSession = sessionStorage.getItem('selectedVehicle');
+      if (fromSession) {
+        updatedVehicle = JSON.parse(fromSession);
+      }
+    } catch {
+      // ignore session parsing errors
+    }
+
+    try { sessionStorage.setItem('selectedVehicle', JSON.stringify(updatedVehicle)); } catch { /* ignore */ }
+    navigate('/driver/dashboard', { state: { updatedVehicle }, replace: true });
   };
 
   if (isConfirming) {
@@ -336,36 +311,8 @@ const SwapCompletion = ({
         </div>
       </div>
 
-      {/* Action Buttons */}
+      {/* Action Button */}
       <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
-        {swapResult.cost && swapResult.cost > 0 && (
-          <button
-            onClick={handlePayment}
-            style={{
-              padding: '16px 32px',
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '12px',
-              fontSize: '16px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
-              transition: 'all 0.3s ease'
-            }}
-            onMouseOver={(e) => {
-              e.target.style.transform = 'translateY(-2px)';
-              e.target.style.boxShadow = '0 6px 16px rgba(102, 126, 234, 0.4)';
-            }}
-            onMouseOut={(e) => {
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)';
-            }}
-          >
-            💳 Thanh toán
-          </button>
-        )}
-
         <button
           onClick={handleGoHome}
           style={{
@@ -389,7 +336,7 @@ const SwapCompletion = ({
             e.target.style.boxShadow = '0 4px 12px rgba(25, 195, 125, 0.3)';
           }}
         >
-          🏠 Về trang chủ
+          🏁 Hoàn tất đổi pin
         </button>
       </div>
     </div>

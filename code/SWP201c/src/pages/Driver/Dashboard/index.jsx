@@ -2,7 +2,7 @@
 // Container for Driver Dashboard - orchestrates all components and hooks
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import { useDashboardData, useSelectedVehicle } from './hooks';
@@ -12,24 +12,23 @@ import {
   StatsCards,
   QuickActions,
   VehicleManagement,
-  PaymentHistory,
-  DebugInfo,
+  SwapHistory,
   SelectVehicleModal
 } from './components';
 
 const DriverDashboard = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const { currentUser } = useAuth();
   
   // Custom hooks for data and vehicle selection
   // Read selected vehicle from session to avoid circular dependency
   let sessionSelectedVehicle = null;
-  try { sessionSelectedVehicle = JSON.parse(sessionStorage.getItem('selectedVehicle')); } catch {}
+  try { sessionSelectedVehicle = JSON.parse(sessionStorage.getItem('selectedVehicle')); } catch { /* ignore */ }
 
   const {
     vehicles,
     contracts,
-    recentPayments,
+    recentSwaps,
     stats,
     loading,
     error,
@@ -147,7 +146,7 @@ const DriverDashboard = () => {
             </div>
             <button
               onClick={() => {
-                try { sessionStorage.removeItem('selectedVehicle'); } catch {}
+                try { sessionStorage.removeItem('selectedVehicle'); } catch { /* ignore */ }
                 setSelectedVehicle(null);
               }}
               style={{
@@ -168,21 +167,12 @@ const DriverDashboard = () => {
           <SelectVehicleModal
             vehicles={vehicles}
             onSelect={(v) => {
-              try { sessionStorage.setItem('selectedVehicle', JSON.stringify(v)); } catch {}
+              try { sessionStorage.setItem('selectedVehicle', JSON.stringify(v)); } catch { /* ignore */ }
               setSelectedVehicle(v);
             }}
           />
         )}
         {/* TEST Settings button removed */}
-        
-        {/* Debug Info */}
-        <DebugInfo 
-          currentUser={currentUser}
-          vehicles={vehicles}
-          contracts={contracts}
-          error={error}
-          onRefresh={refetch}
-        />
         
         {/* Welcome Header */}
         <WelcomeHeader 
@@ -209,9 +199,11 @@ const DriverDashboard = () => {
           onSelectVehicle={setSelectedVehicle}
         />
         
-        {/* Payment History */}
-        <PaymentHistory 
-          payments={recentPayments} 
+        {/* Swap History with pagination (5 per page) */}
+        <SwapHistory 
+          swaps={recentSwaps}
+          page={1}
+          pageSize={5}
         />
       </div>
     </DashboardLayout>
