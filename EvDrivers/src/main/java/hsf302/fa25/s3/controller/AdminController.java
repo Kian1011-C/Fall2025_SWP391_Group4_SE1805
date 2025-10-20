@@ -36,12 +36,30 @@ public class AdminController {
         try {
             List<User> allUsers = userDao.getAllUsers();
 
-            // Filter by role when provided (supports driver/staff/admin)
-            List<User> filtered = allUsers;
+            // Normalize incoming role query param to match stored role values.
+            // Frontend may send values like: "driver", "staff", "admin"
+            // but DB stores values like: "EV Driver", "Staff", "Admin".
+            String normalizedRole = null;
             if (role != null && !role.trim().isEmpty()) {
-                final String roleParam = role.trim();
+                String rp = role.trim().toLowerCase();
+                if (rp.equals("driver") || rp.equals("drivers") || rp.equals("ev driver") || rp.equals("ev_driver")) {
+                    normalizedRole = "EV Driver";
+                } else if (rp.equals("staff") || rp.equals("staffs") || rp.equals("staff_member")) {
+                    normalizedRole = "Staff";
+                } else if (rp.equals("admin") || rp.equals("administrator")) {
+                    normalizedRole = "Admin";
+                } else {
+                    // Unknown mapping: use raw value and rely on equalsIgnoreCase
+                    normalizedRole = role.trim();
+                }
+            }
+
+            // Filter by role when provided
+            List<User> filtered = allUsers;
+            if (normalizedRole != null) {
+                final String roleToMatch = normalizedRole;
                 filtered = filtered.stream()
-                        .filter(u -> roleParam.equalsIgnoreCase(u.getRole()))
+                        .filter(u -> roleToMatch.equalsIgnoreCase(u.getRole()))
                         .collect(Collectors.toList());
             }
 
