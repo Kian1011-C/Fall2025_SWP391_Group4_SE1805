@@ -1,0 +1,665 @@
+/**
+ * ========================================
+ * MODAL & OVERLAY STYLES
+ * CSS cho Modal dialog và Backdrop overlay
+ * ========================================
+ */
+
+/* ==================== OVERLAY (Backdrop) ==================== */
+.modal-overlay {
+  /* Position cố định để cover toàn bộ viewport */
+  position: fixed;
+  
+  /* Căn chỉnh overlay phủ full màn hình */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  
+  /* Background tối với độ trong suốt 70% */
+  background: rgba(0, 0, 0, 0.7);
+  
+  /* Hiệu ứng làm mờ phía sau (backdrop blur) */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px); /* Safari compatibility */
+  
+  /* Flexbox để căn giữa modal */
+  display: flex;
+  align-items: center;      /* Căn giữa theo chiều dọc */
+  justify-content: center;  /* Căn giữa theo chiều ngang */
+  
+  /* Z-index cao để hiển thị trên tất cả content */
+  z-index: 1000;
+  
+  /* Padding để modal không chạm viền màn hình trên mobile */
+  padding: 20px;
+  
+  /* Animation khi modal xuất hiện */
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Hiệu ứng fade in cho overlay */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ==================== MODAL CONTAINER ==================== */
+.modal-container {
+  /* Background tối cho modal */
+  background: #1a202c;
+  
+  /* Bo tròn các góc modal */
+  border-radius: 20px;
+  
+  /* Padding bên trong modal */
+  padding: 30px;
+  
+  /* Giới hạn chiều rộng tối đa */
+  max-width: 450px;
+  
+  /* Chiều rộng full trong giới hạn max-width */
+  width: 100%;
+  
+  /* Border mờ để tạo hiệu ứng glass */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  
+  /* Shadow sâu để tạo độ nổi */
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  
+  /* Transition mượt khi có thay đổi */
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  
+  /* Animation hiệu ứng scale khi xuất hiện */
+  animation: scaleIn 0.3s ease-in-out;
+  
+  /* Chiều cao tối đa và scroll khi content dài */
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* Hiệu ứng scale in cho modal */
+@keyframes scaleIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Custom scrollbar cho modal */
+.modal-container::-webkit-scrollbar {
+  /* Độ rộng scrollbar */
+  width: 8px;
+}
+
+.modal-container::-webkit-scrollbar-track {
+  /* Background của track scrollbar */
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.modal-container::-webkit-scrollbar-thumb {
+  /* Màu của thanh scrollbar */
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+
+.modal-container::-webkit-scrollbar-thumb:hover {
+  /* Màu khi hover vào scrollbar */
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* ==================== MODAL HEADER ==================== */
+.modal-header {
+  /* Flexbox để căn chỉnh title và close button */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+  /* Khoảng cách dưới header */
+  margin-bottom: 25px;
+}
+
+.modal-title {
+  /* Màu chữ trắng cho title */
+  color: #FFFFFF;
+  
+  /* Loại bỏ margin mặc định */
+  margin: 0;
+  
+  /* Kích thước font lớn */
+  font-size: 1.5rem;
+  
+  /* Font weight đậm */
+  font-weight: 600;
+  
+  /* Flexbox để hiển thị icon và text */
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ==================== CLOSE BUTTON ==================== */
+.modal-close-btn {
+  /* Loại bỏ background mặc định */
+  background: none;
+  
+  /* Loại bỏ border */
+  border: none;
+  
+  /* Màu chữ xám */
+  color: #B0B0B0;
+  
+  /* Font size lớn cho icon X */
+  font-size: 1.5rem;
+  
+  /* Cursor pointer khi hover */
+  cursor: pointer;
+  
+  /* Padding cho vùng click lớn hơn */
+  padding: 5px;
+  
+  /* Bo tròn nhẹ */
+  border-radius: 5px;
+  
+  /* Transition mượt */
+  transition: all 0.3s ease;
+  
+  /* Độ trong suốt mặc định */
+  opacity: 1;
+}
+
+.modal-close-btn:hover:not(:disabled) {
+  /* Màu sáng hơn khi hover */
+  color: #FFFFFF;
+  
+  /* Background nhẹ khi hover */
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.modal-close-btn:disabled {
+  /* Giảm opacity khi disabled */
+  opacity: 0.5;
+  
+  /* Cursor not-allowed khi disabled */
+  cursor: not-allowed;
+}
+
+/* ==================== MODAL CONTENT ==================== */
+.modal-content {
+  /* Màu chữ trắng cho nội dung */
+  color: #FFFFFF;
+}
+
+/* ==================== INFO BOX ==================== */
+.modal-info-box {
+  /* Background xanh lá mờ */
+  background: rgba(25, 195, 125, 0.1);
+  
+  /* Border xanh lá */
+  border: 1px solid rgba(25, 195, 125, 0.3);
+  
+  /* Bo tròn */
+  border-radius: 10px;
+  
+  /* Padding bên trong */
+  padding: 15px;
+  
+  /* Khoảng cách dưới */
+  margin-bottom: 20px;
+}
+
+.modal-info-title {
+  /* Màu xanh lá */
+  color: #19c37d;
+  
+  /* Loại bỏ margin */
+  margin: 0 0 10px 0;
+  
+  /* Font size nhỏ */
+  font-size: 0.9rem;
+  
+  /* Font weight đậm */
+  font-weight: 600;
+}
+
+.modal-info-content {
+  /* Font size nhỏ */
+  font-size: 0.8rem;
+  
+  /* Màu xám */
+  color: #B0B0B0;
+  
+  /* Line height rộng */
+  line-height: 1.4;
+}
+
+.modal-info-content div {
+  /* Khoảng cách giữa các dòng */
+  margin-bottom: 4px;
+}
+
+.modal-info-content strong {
+  /* Màu sáng hơn cho label */
+  color: #E0E0E0;
+  
+  /* Khoảng cách bên phải */
+  margin-right: 5px;
+}
+
+/* ==================== FORM ELEMENTS ==================== */
+.modal-form-group {
+  /* Khoảng cách dưới mỗi form group */
+  margin-bottom: 20px;
+}
+
+.modal-label {
+  /* Màu chữ sáng */
+  color: #E0E0E0;
+  
+  /* Display block để label chiếm full width */
+  display: block;
+  
+  /* Khoảng cách dưới label */
+  margin-bottom: 8px;
+  
+  /* Font size nhỏ */
+  font-size: 0.9rem;
+  
+  /* Font weight đậm */
+  font-weight: 500;
+}
+
+.modal-input {
+  /* Full width */
+  width: 100%;
+  
+  /* Padding bên trong input */
+  padding: 12px;
+  
+  /* Background mờ */
+  background: rgba(255, 255, 255, 0.1);
+  
+  /* Border mặc định */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  
+  /* Bo tròn */
+  border-radius: 8px;
+  
+  /* Màu chữ trắng */
+  color: #FFFFFF;
+  
+  /* Font size */
+  font-size: 1rem;
+  
+  /* Loại bỏ outline mặc định */
+  outline: none;
+  
+  /* Transition mượt */
+  transition: border-color 0.3s ease, background 0.3s ease;
+  
+  /* Box sizing để padding không ảnh hưởng width */
+  box-sizing: border-box;
+}
+
+.modal-input:focus {
+  /* Border xanh lá khi focus */
+  border-color: #19c37d;
+  
+  /* Background sáng hơn khi focus */
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.modal-input.error {
+  /* Border đỏ khi có lỗi */
+  border-color: #f44336;
+}
+
+.modal-input::placeholder {
+  /* Màu placeholder */
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* ==================== ERROR MESSAGE ==================== */
+.modal-error-message {
+  /* Màu đỏ cho error */
+  color: #f44336;
+  
+  /* Font size nhỏ */
+  font-size: 0.8rem;
+  
+  /* Khoảng cách trên */
+  margin-top: 5px;
+  
+  /* Flexbox để hiển thị icon và text */
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ==================== BUTTONS ==================== */
+.modal-actions {
+  /* Flexbox để căn chỉnh buttons */
+  display: flex;
+  gap: 10px;
+  
+  /* Khoảng cách trên */
+  margin-top: 25px;
+}
+
+.modal-btn {
+  /* Padding bên trong button */
+  padding: 12px;
+  
+  /* Border radius */
+  border-radius: 8px;
+  
+  /* Font size */
+  font-size: 1rem;
+  
+  /* Font weight đậm */
+  font-weight: 600;
+  
+  /* Cursor pointer */
+  cursor: pointer;
+  
+  /* Transition mượt */
+  transition: all 0.3s ease;
+  
+  /* Loại bỏ border mặc định */
+  border: none;
+  
+  /* Flex để button chiếm không gian đều */
+  flex: 1;
+}
+
+/* Button Cancel */
+.modal-btn-cancel {
+  /* Background mờ */
+  background: rgba(255, 255, 255, 0.1);
+  
+  /* Màu chữ trắng */
+  color: #FFFFFF;
+  
+  /* Border mờ */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.modal-btn-cancel:hover:not(:disabled) {
+  /* Background sáng hơn khi hover */
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.modal-btn-cancel:disabled {
+  /* Opacity giảm khi disabled */
+  opacity: 0.5;
+  
+  /* Cursor not-allowed */
+  cursor: not-allowed;
+}
+
+/* Button Primary (Submit) */
+.modal-btn-primary {
+  /* Flex lớn hơn để nổi bật */
+  flex: 2;
+  
+  /* Background gradient xanh lá */
+  background: linear-gradient(135deg, #19c37d, #15a36a);
+  
+  /* Màu chữ trắng */
+  color: white;
+  
+  /* Shadow để tạo độ nổi */
+  box-shadow: 0 4px 15px rgba(25, 195, 125, 0.3);
+  
+  /* Flexbox để căn giữa content */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.modal-btn-primary:hover:not(:disabled) {
+  /* Transform nhẹ khi hover */
+  transform: translateY(-2px);
+  
+  /* Shadow lớn hơn khi hover */
+  box-shadow: 0 6px 20px rgba(25, 195, 125, 0.4);
+}
+
+.modal-btn-primary:disabled {
+  /* Background xám khi disabled */
+  background: #666;
+  
+  /* Loại bỏ shadow */
+  box-shadow: none;
+  
+  /* Cursor not-allowed */
+  cursor: not-allowed;
+}
+
+/* ==================== LOADING SPINNER ==================== */
+.modal-spinner {
+  /* Kích thước spinner */
+  width: 16px;
+  height: 16px;
+  
+  /* Border cho spinner */
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid #ffffff;
+  
+  /* Bo tròn để tạo hình tròn */
+  border-radius: 50%;
+  
+  /* Animation quay */
+  animation: spin 1s linear infinite;
+}
+
+/* Animation quay cho spinner */
+@keyframes spin {
+  0% { 
+    transform: rotate(0deg); 
+  }
+  100% { 
+    transform: rotate(360deg); 
+  }
+}
+
+/* ==================== QUICK LOGIN SECTION ==================== */
+.modal-divider {
+  /* Khoảng cách trên */
+  margin-top: 20px;
+  
+  /* Padding trên */
+  padding-top: 20px;
+  
+  /* Border trên */
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-quick-login-title {
+  /* Màu xám */
+  color: #B0B0B0;
+  
+  /* Font size nhỏ */
+  font-size: 0.8rem;
+  
+  /* Khoảng cách dưới */
+  margin-bottom: 10px;
+  
+  /* Căn giữa */
+  text-align: center;
+}
+
+.modal-quick-login-buttons {
+  /* Flexbox để căn chỉnh buttons */
+  display: flex;
+  gap: 8px;
+  
+  /* Wrap khi không đủ chỗ */
+  flex-wrap: wrap;
+}
+
+.modal-quick-btn {
+  /* Flex để chia đều không gian */
+  flex: 1;
+  
+  /* Padding nhỏ */
+  padding: 8px;
+  
+  /* Border radius */
+  border-radius: 6px;
+  
+  /* Font size nhỏ */
+  font-size: 0.8rem;
+  
+  /* Cursor pointer */
+  cursor: pointer;
+  
+  /* Transition mượt */
+  transition: all 0.3s ease;
+  
+  /* Min width để không quá nhỏ */
+  min-width: 80px;
+}
+
+.modal-quick-btn:disabled {
+  /* Opacity giảm */
+  opacity: 0.5;
+  
+  /* Cursor not-allowed */
+  cursor: not-allowed;
+}
+
+/* Quick button variants theo role */
+.modal-quick-btn.admin {
+  background: rgba(244, 67, 54, 0.2);
+  border: 1px solid rgba(244, 67, 54, 0.5);
+  color: #f44336;
+}
+
+.modal-quick-btn.staff {
+  background: rgba(255, 152, 0, 0.2);
+  border: 1px solid rgba(255, 152, 0, 0.5);
+  color: #ff9800;
+}
+
+.modal-quick-btn.driver {
+  background: rgba(33, 150, 243, 0.2);
+  border: 1px solid rgba(33, 150, 243, 0.5);
+  color: #2196f3;
+}
+
+.modal-quick-btn:hover:not(:disabled) {
+  /* Transform nhẹ khi hover */
+  transform: translateY(-2px);
+  
+  /* Opacity tăng */
+  opacity: 0.9;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+  .modal-overlay {
+    /* Giảm padding trên mobile */
+    padding: 10px;
+  }
+  
+  .modal-container {
+    /* Giảm padding trên mobile */
+    padding: 20px;
+    
+    /* Giảm border radius */
+    border-radius: 15px;
+  }
+  
+  .modal-title {
+    /* Giảm font size trên mobile */
+    font-size: 1.25rem;
+  }
+  
+  .modal-actions {
+    /* Stack buttons theo chiều dọc trên mobile */
+    flex-direction: column;
+  }
+  
+  .modal-btn {
+    /* Full width cho buttons */
+    width: 100%;
+  }
+  
+  .modal-quick-login-buttons {
+    /* Stack quick buttons */
+    flex-direction: column;
+  }
+  
+  .modal-quick-btn {
+    /* Full width */
+    width: 100%;
+    min-width: unset;
+  }
+}
+
+/* ==================== DARK MODE SUPPORT ==================== */
+@media (prefers-color-scheme: light) {
+  .modal-container {
+    /* Background sáng cho light mode */
+    background: #ffffff;
+    
+    /* Border tối hơn */
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  .modal-title,
+  .modal-label,
+  .modal-content {
+    /* Màu chữ tối cho light mode */
+    color: #1a202c;
+  }
+  
+  .modal-input {
+    /* Background sáng */
+    background: rgba(0, 0, 0, 0.05);
+    
+    /* Border tối */
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    
+    /* Màu chữ tối */
+    color: #1a202c;
+  }
+  
+  .modal-close-btn {
+    /* Màu tối */
+    color: #666;
+  }
+}
+
+/* ==================== ACCESSIBILITY ==================== */
+/* Focus visible cho keyboard navigation */
+.modal-btn:focus-visible,
+.modal-input:focus-visible,
+.modal-close-btn:focus-visible {
+  /* Outline rõ ràng cho accessibility */
+  outline: 2px solid #19c37d;
+  outline-offset: 2px;
+}
+
+/* Reduced motion cho users có preferences */
+@media (prefers-reduced-motion: reduce) {
+  .modal-overlay,
+  .modal-container,
+  * {
+    /* Loại bỏ animations */
+    animation: none !important;
+    transition: none !important;
+  }
+}
+

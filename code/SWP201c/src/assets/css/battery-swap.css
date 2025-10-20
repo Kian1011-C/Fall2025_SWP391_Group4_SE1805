@@ -1,0 +1,1061 @@
+/* ========================================
+   BATTERY SWAP PROCESS CSS - ENHANCED
+   Quy trình đổi pin xe điện - 6 bước với giao diện hiện đại
+   ======================================== */
+
+/* ===== MODAL OVERLAY - Lớp phủ mờ ===== */
+.battery-swap-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.6) 100%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== MODAL CONTAINER - Khung chính ===== */
+.battery-swap-container {
+    background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.15),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+    width: 100%;
+    max-width: 1200px;
+    min-height: 100vh;
+    overflow-y: visible;
+    animation: scaleIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* ===== HEADER - Tiêu đề ===== */
+.battery-swap-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+    padding: 32px;
+    border-radius: 24px 24px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.battery-swap-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%, rgba(255, 255, 255, 0.1) 100%);
+    animation: shimmer 3s infinite;
+}
+
+.battery-swap-title {
+    font-size: 28px;
+    font-weight: 800;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.battery-swap-title span {
+    font-size: 32px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.battery-swap-close-btn {
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    z-index: 1;
+    backdrop-filter: blur(10px);
+}
+
+.battery-swap-close-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: rotate(90deg) scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* ===== PROGRESS BAR - Thanh tiến trình ===== */
+.swap-progress-bar {
+    display: flex;
+    justify-content: space-between;
+    padding: 40px 50px;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+    position: relative;
+}
+
+.swap-progress-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(102, 126, 234, 0.3) 50%, transparent 100%);
+}
+
+.progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Đường nối giữa các bước */
+.progress-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 28px;
+    left: 50%;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #e2e8f0 0%, #cbd5e1 100%);
+    z-index: 0;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+/* Đường nối khi bước đã hoàn thành */
+.progress-step.completed:not(:last-child)::after {
+    background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+}
+
+/* Đường nối khi bước đang active */
+.progress-step.active:not(:last-child)::after {
+    background: linear-gradient(90deg, #667eea 50%, #e2e8f0 50%);
+}
+
+.step-circle {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: #64748b;
+    font-weight: 700;
+    z-index: 1;
+    border: 4px solid white;
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.1),
+        0 0 0 1px rgba(226, 232, 240, 0.5);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.step-circle::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.3) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Bước đã hoàn thành */
+.progress-step.completed .step-circle {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    box-shadow: 
+        0 6px 16px rgba(16, 185, 129, 0.3),
+        0 0 0 1px rgba(16, 185, 129, 0.2);
+}
+
+.progress-step.completed .step-circle::before {
+    opacity: 1;
+}
+
+/* Bước đang active */
+.progress-step.active .step-circle {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    animation: pulseGlow 2s infinite;
+    box-shadow: 
+        0 8px 20px rgba(102, 126, 234, 0.4),
+        0 0 0 1px rgba(102, 126, 234, 0.3);
+    transform: scale(1.05);
+}
+
+.progress-step.active .step-circle::before {
+    opacity: 1;
+}
+
+.step-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    text-align: center;
+    transition: all 0.3s ease;
+    line-height: 1.3;
+}
+
+/* Label của bước active */
+.progress-step.active .step-label {
+    color: #667eea;
+    font-weight: 700;
+    transform: scale(1.05);
+}
+
+/* Label của bước completed */
+.progress-step.completed .step-label {
+    color: #10b981;
+    font-weight: 600;
+}
+
+/* ===== CONTENT - Nội dung chính ===== */
+.swap-content {
+    padding: 50px;
+    min-height: 450px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    position: relative;
+}
+
+.swap-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(102, 126, 234, 0.2) 50%, transparent 100%);
+}
+
+/* ===== STEP 1: CHỌN TRẠM SẠC ===== */
+.station-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    margin-top: 20px;
+}
+
+.station-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border: 2px solid rgba(226, 232, 240, 0.6);
+    border-radius: 16px;
+    padding: 24px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.station-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.station-card:hover {
+    border-color: #667eea;
+    box-shadow: 
+        0 8px 24px rgba(102, 126, 234, 0.15),
+        0 0 0 1px rgba(102, 126, 234, 0.1);
+    transform: translateY(-4px);
+}
+
+.station-card:hover::before {
+    transform: scaleX(1);
+}
+
+.station-card.selected {
+    border-color: #667eea;
+    background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%);
+    box-shadow: 
+        0 8px 24px rgba(102, 126, 234, 0.2),
+        0 0 0 1px rgba(102, 126, 234, 0.2);
+    transform: translateY(-2px);
+}
+
+.station-card.selected::before {
+    transform: scaleX(1);
+}
+
+/* Checkmark khi selected */
+.station-card.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: bold;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    animation: checkmarkPop 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.station-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+    line-height: 1.3;
+}
+
+.station-location {
+    font-size: 14px;
+    color: #64748b;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    line-height: 1.4;
+}
+
+.station-status {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.station-status.active {
+    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+    color: #166534;
+    border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.station-status.maintenance {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+/* ===== STEP 3: CONFIRMATION CONTAINER ===== */
+.step-confirmation-container {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    padding: 24px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 16px;
+    border: 1px solid rgba(226, 232, 240, 0.5);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    min-height: auto;
+    max-height: none;
+    overflow-y: visible;
+}
+
+.step-confirmation-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+}
+
+.step-icon {
+    font-size: 32px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.step-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.step-confirmation-content {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.location-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.location-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%);
+    border-radius: 12px;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    transition: all 0.3s ease;
+}
+
+.location-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.location-icon {
+    font-size: 24px;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    color: white;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.location-details {
+    flex: 1;
+}
+
+.location-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.location-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1.3;
+}
+
+.instructions {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.instruction-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border-radius: 12px;
+    border-left: 4px solid #667eea;
+    transition: all 0.3s ease;
+}
+
+.instruction-item:hover {
+    background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%);
+    transform: translateX(4px);
+}
+
+.instruction-icon {
+    font-size: 20px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    color: white;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
+}
+
+.instruction-item p {
+    margin: 0;
+    font-size: 14px;
+    color: #475569;
+    line-height: 1.5;
+    font-weight: 500;
+}
+
+.step-confirmation-actions {
+    display: flex;
+    justify-content: center;
+    padding-top: 20px;
+    border-top: 1px solid rgba(226, 232, 240, 0.5);
+}
+
+.btn-large {
+    padding: 18px 48px;
+    font-size: 18px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 200px;
+    justify-content: center;
+}
+
+.btn-icon {
+    font-size: 20px;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.btn-text {
+    font-weight: 700;
+}
+
+/* ===== STEP 2: XÁC NHẬN ĐỔI PIN ===== */
+.battery-comparison {
+    display: flex; /* Flexbox */
+    justify-content: center; /* Căn giữa */
+    align-items: center; /* Căn giữa dọc */
+    gap: 40px; /* Khoảng cách giữa 2 pin */
+    margin: 40px 0; /* Margin trên dưới */
+}
+
+.battery-display {
+    display: flex; /* Flexbox */
+    flex-direction: column; /* Xếp dọc */
+    align-items: center; /* Căn giữa */
+    gap: 16px; /* Khoảng cách */
+}
+
+.battery-icon-large {
+    font-size: 120px; /* Icon rất lớn */
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2)); /* Đổ bóng */
+    animation: batteryPulse 2s infinite; /* Animation nhấp nháy */
+}
+
+.battery-old {
+    color: #ccc; /* Màu xám cho pin cũ */
+}
+
+.battery-new {
+    color: #4caf50; /* Màu xanh cho pin mới */
+}
+
+.battery-label {
+    font-size: 18px; /* Kích thước chữ */
+    font-weight: 700; /* Chữ đậm */
+    color: #333; /* Màu đen */
+}
+
+.battery-percentage {
+    font-size: 32px; /* Số to */
+    font-weight: 700; /* Chữ đậm */
+    color: #667eea; /* Màu tím */
+}
+
+.arrow-icon {
+    font-size: 48px; /* Mũi tên lớn */
+    color: #667eea; /* Màu tím */
+    animation: arrowSlide 1.5s infinite; /* Animation trượt */
+}
+
+/* ===== STEP 3: ĐANG XỬ LÝ ===== */
+.processing-container {
+    display: flex; /* Flexbox */
+    flex-direction: column; /* Xếp dọc */
+    align-items: center; /* Căn giữa */
+    justify-content: center; /* Căn giữa dọc */
+    gap: 24px; /* Khoảng cách */
+    padding: 60px 20px; /* Padding lớn */
+}
+
+.loading-spinner {
+    width: 80px; /* Chiều rộng */
+    height: 80px; /* Chiều cao */
+    border: 6px solid #f3f3f3; /* Viền xám nhạt */
+    border-top: 6px solid #667eea; /* Viền trên màu tím */
+    border-radius: 50%; /* Hình tròn */
+    animation: spin 1s linear infinite; /* Animation quay */
+}
+
+.processing-text {
+    font-size: 20px; /* Chữ lớn */
+    font-weight: 600; /* Chữ đậm */
+    color: #667eea; /* Màu tím */
+    text-align: center; /* Căn giữa */
+}
+
+.processing-subtext {
+    font-size: 14px; /* Chữ nhỏ */
+    color: #999; /* Màu xám */
+    text-align: center; /* Căn giữa */
+}
+
+/* ===== STEP 4: HOÀN TẤT ===== */
+.success-container {
+    display: flex; /* Flexbox */
+    flex-direction: column; /* Xếp dọc */
+    align-items: center; /* Căn giữa */
+    justify-content: center; /* Căn giữa dọc */
+    gap: 24px; /* Khoảng cách */
+    padding: 60px 20px; /* Padding lớn */
+}
+
+.success-icon {
+    font-size: 100px; /* Icon rất lớn */
+    color: #4caf50; /* Màu xanh lá */
+    animation: successBounce 0.6s ease-in-out; /* Animation nảy */
+}
+
+.success-title {
+    font-size: 28px; /* Chữ lớn */
+    font-weight: 700; /* Chữ đậm */
+    color: #4caf50; /* Màu xanh lá */
+    text-align: center; /* Căn giữa */
+}
+
+.success-message {
+    font-size: 16px; /* Chữ vừa */
+    color: #666; /* Màu xám */
+    text-align: center; /* Căn giữa */
+    max-width: 400px; /* Chiều rộng tối đa */
+}
+
+.success-details {
+    background: #f8f9fa; /* Nền xám nhạt */
+    border-radius: 12px; /* Bo góc */
+    padding: 24px; /* Padding */
+    width: 100%; /* Chiều rộng đầy */
+    max-width: 500px; /* Tối đa 500px */
+    margin-top: 20px; /* Margin trên */
+}
+
+.detail-row {
+    display: flex; /* Flexbox */
+    justify-content: space-between; /* Căn đều 2 đầu */
+    padding: 12px 0; /* Padding trên dưới */
+    border-bottom: 1px solid #e0e0e0; /* Đường kẻ dưới */
+}
+
+.detail-row:last-child {
+    border-bottom: none; /* Bỏ đường kẻ ở row cuối */
+}
+
+.detail-label {
+    font-size: 14px; /* Chữ nhỏ */
+    color: #666; /* Màu xám */
+    font-weight: 600; /* Chữ hơi đậm */
+}
+
+.detail-value {
+    font-size: 14px; /* Chữ nhỏ */
+    color: #333; /* Màu đen */
+    font-weight: 700; /* Chữ đậm */
+}
+
+/* ===== ACTION BUTTONS - Các nút hành động ===== */
+.swap-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+    padding: 32px 50px;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border-radius: 0 0 24px 24px;
+    border-top: 1px solid rgba(226, 232, 240, 0.5);
+}
+
+.btn-swap {
+    padding: 14px 32px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    min-width: 120px;
+}
+
+.btn-swap::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-swap:hover::before {
+    left: 100%;
+}
+
+.btn-swap:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.btn-back {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    color: #64748b;
+    border: 2px solid rgba(226, 232, 240, 0.6);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.btn-back:hover:not(:disabled) {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border-color: #cbd5e1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.btn-next {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-next:hover:not(:disabled) {
+    background: linear-gradient(135deg, #5568d3 0%, #6a3d8f 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.btn-confirm {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 14px 48px;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-confirm:hover:not(:disabled) {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+.btn-finish {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 14px 48px;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-finish:hover {
+    background: linear-gradient(135deg, #5568d3 0%, #6a3d8f 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+/* ===== ANIMATIONS - Hiệu ứng động ===== */
+
+/* Animation hiện từ từ */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Animation phóng to */
+@keyframes scaleIn {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Animation shimmer cho header */
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* Animation nhấp nháy cho step active */
+@keyframes pulseGlow {
+    0%, 100% {
+        transform: scale(1.05);
+        box-shadow: 
+            0 8px 20px rgba(102, 126, 234, 0.4),
+            0 0 0 1px rgba(102, 126, 234, 0.3);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 
+            0 12px 24px rgba(102, 126, 234, 0.5),
+            0 0 0 2px rgba(102, 126, 234, 0.4);
+    }
+}
+
+/* Animation checkmark pop */
+@keyframes checkmarkPop {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Animation quay cho loading spinner */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Animation mũi tên trượt */
+@keyframes arrowSlide {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    50% {
+        transform: translateX(10px);
+    }
+}
+
+/* Animation nảy cho success icon */
+@keyframes successBounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-20px);
+    }
+    60% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Animation pin nhấp nháy */
+@keyframes batteryPulse {
+    0%, 100% {
+        transform: scale(1);
+        filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));
+    }
+    50% {
+        transform: scale(1.05);
+        filter: drop-shadow(0 8px 20px rgba(102, 126, 234, 0.4));
+    }
+}
+
+/* ===== RESPONSIVE - Tối ưu cho mobile ===== */
+@media (max-width: 768px) {
+    .battery-swap-container {
+        max-width: 100%;
+        margin: 0;
+        border-radius: 0;
+        max-height: 100vh;
+    }
+
+    .battery-swap-header {
+        padding: 24px 20px;
+        border-radius: 0;
+    }
+
+    .battery-swap-title {
+        font-size: 24px;
+        gap: 12px;
+    }
+
+    .battery-swap-title span {
+        font-size: 28px;
+    }
+
+    .swap-progress-bar {
+        padding: 24px 20px;
+    }
+
+    .step-circle {
+        width: 48px;
+        height: 48px;
+        font-size: 18px;
+    }
+
+    .step-label {
+        font-size: 11px;
+    }
+
+    .swap-content {
+        padding: 24px 20px;
+        min-height: 300px;
+    }
+
+    .station-list {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .station-card {
+        padding: 20px;
+    }
+
+    .battery-comparison {
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .battery-icon-large {
+        font-size: 80px;
+    }
+
+    .arrow-icon {
+        transform: rotate(90deg);
+    }
+
+    .swap-actions {
+        flex-direction: column;
+        padding: 24px 20px;
+        gap: 12px;
+    }
+
+    .btn-swap {
+        width: 100%;
+        padding: 16px 24px;
+    }
+}
+
+@media (max-width: 480px) {
+    .battery-swap-header {
+        padding: 20px 16px;
+    }
+
+    .battery-swap-title {
+        font-size: 20px;
+    }
+
+    .swap-progress-bar {
+        padding: 20px 16px;
+    }
+
+    .step-circle {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+
+    .step-label {
+        font-size: 10px;
+    }
+
+    .swap-content {
+        padding: 20px 16px;
+    }
+
+    .station-card {
+        padding: 16px;
+    }
+
+    .swap-actions {
+        padding: 20px 16px;
+    }
+
+    .step-confirmation-container {
+        padding: 16px;
+        gap: 24px;
+    }
+
+    .step-confirmation-header {
+        gap: 12px;
+        padding-bottom: 16px;
+    }
+
+    .step-icon {
+        font-size: 24px;
+    }
+
+    .step-title {
+        font-size: 18px;
+    }
+
+    .location-info {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .location-card {
+        padding: 16px;
+        gap: 12px;
+    }
+
+    .location-icon {
+        font-size: 20px;
+        width: 40px;
+        height: 40px;
+    }
+
+    .instruction-item {
+        padding: 12px;
+        gap: 12px;
+    }
+
+    .instruction-icon {
+        font-size: 16px;
+        width: 28px;
+        height: 28px;
+    }
+
+    .btn-large {
+        padding: 16px 32px;
+        font-size: 16px;
+        min-width: 160px;
+    }
+}
+
