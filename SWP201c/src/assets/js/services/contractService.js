@@ -82,6 +82,11 @@ const contractService = {
       return { success: false, message: errorInfo.message || 'Lỗi API', data: [] };
     }
   },
+
+  // Alias to match hook naming
+  getContractPlans: async () => {
+    return await contractService.getPlans();
+  }
 };
 
 export default contractService;

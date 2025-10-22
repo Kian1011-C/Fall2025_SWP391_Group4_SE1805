@@ -16,10 +16,13 @@
   --radius-lg:20px;
 }
 
-*{box-sizing:border-box}
-html,body{margin:0;padding:0;background:linear-gradient(180deg,#0b1020 0%,#0e1430 100%);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;line-height:1.6}
+*{box-sizing:border-box;margin:0;padding:0}
+*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+div,section,article,aside,header,footer,nav,main{box-sizing:border-box;margin:0;padding:0}
+html,body{margin:0;padding:0;background:linear-gradient(180deg,#0b1020 0%,#0e1430 100%);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;line-height:1.6;overflow-x:hidden;box-sizing:border-box}
 a{color:inherit;text-decoration:none}
 .container{max-width:1120px;margin:0 auto;padding:0 20px}
+.App{margin:0;padding:0;width:100%;overflow-x:hidden;box-sizing:border-box}
 
 /* Header */
 header{position:sticky;top:0;z-index:40;backdrop-filter:saturate(1.2) blur(10px);background:rgba(10,14,32,.55);border-bottom:1px solid rgba(255,255,255,.06)}
@@ -163,20 +166,28 @@ form{padding:24px}
   display: flex;
   min-height: 100vh;
   background: var(--bg);
+  width: 100%;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 .driver-sidebar {
   width: 280px;
+  min-width: 280px;
   background: linear-gradient(180deg, #0f1419 0%, #121831 100%);
   border-right: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   flex-direction: column;
-  position: fixed;
+  position: relative;
   height: 100vh;
-  left: 0;
-  top: 0;
-  z-index: 100;
+  flex-shrink: 0;
   box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 .sidebar-header {
@@ -331,6 +342,15 @@ form{padding:24px}
   color: var(--brand);
 }
 
+/* emoji icon variant */
+.nav-item .icon-emoji{
+  width: 18px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+}
+
 .sidebar-footer {
   padding: 20px;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
@@ -420,10 +440,78 @@ form{padding:24px}
 
 .driver-main {
   flex: 1;
-  margin-left: 280px;
+  margin-left: 0;
   padding: 0;
   background: var(--bg);
   min-height: 100vh;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* Topbar sticky like screenshot */
+.driver-topbar{
+  height: 64px;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  padding: 0 24px;
+  position: sticky;
+  top:0;
+  z-index: 10;
+  backdrop-filter: blur(10px);
+  background: rgba(18,24,49,.6);
+  border-bottom:1px solid rgba(255,255,255,.1);
+  margin: 0;
+  width: 100%;
+}
+
+.driver-page-title{
+  margin:0;
+  font-size:20px;
+  font-weight:600;
+  padding: 0;
+}
+
+.driver-topbar-actions{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  margin: 0;
+  padding: 0;
+}
+
+.driver-topbar-actions .btn{
+  margin: 0;
+  padding: 8px 16px;
+}
+
+.driver-content{
+  padding: 16px 24px 24px 24px;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* container spacing like screenshot */
+.driver-content > * + *{ margin-top: 16px; }
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .driver-sidebar {
+    position: fixed;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+  }
+  
+  .driver-sidebar.open {
+    transform: translateX(0);
+  }
+  
+  .driver-main {
+    margin-left: 0;
+    width: 100%;
+  }
 }
 
 /* Scrollbar styling for sidebar */
@@ -448,6 +536,25 @@ form{padding:24px}
 .driver-dashboard {
   padding: 20px;
   min-height: 100vh;
+}
+
+/* Active vehicle banner */
+.active-vehicle-banner{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  padding:14px 18px;
+  border-radius:12px;
+  background: rgba(18,24,49,.6);
+  border:1px solid rgba(255,255,255,.08);
+}
+.active-vehicle-banner .banner-title{
+  font-weight:700;
+}
+.active-vehicle-banner .banner-sub{
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 4px;
 }
 
 .dashboard-loading {
@@ -546,3 +653,9 @@ form{padding:24px}
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(255, 107, 107, 0.5);
 }
+
+/* Modal base (reused) */
+.modal-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:1000;background:rgba(0,0,0,.5)}
+.modal-container{border-radius:16px;overflow:hidden}
+.modal-btn{transition:transform .15s ease, box-shadow .2s ease}
+.modal-btn:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(0,0,0,.35)}

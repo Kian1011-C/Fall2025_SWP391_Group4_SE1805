@@ -6,13 +6,14 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { useDashboardData, useSelectedVehicle } from './hooks';
 import { formatCurrency } from './utils';
+import SelectVehicleModal from './components/SelectVehicleModal';
+import SelectedVehicleDisplay from './components/SelectedVehicleDisplay';
 import {
   WelcomeHeader,
   StatsCards,
   QuickActions,
   VehicleManagement,
-  PaymentHistory,
-  DebugInfo
+  PaymentHistory
 } from './components';
 
 const DriverDashboard = () => {
@@ -31,6 +32,24 @@ const DriverDashboard = () => {
   } = useDashboardData();
   
   const { selectedVehicle, setSelectedVehicle } = useSelectedVehicle(vehicles);
+  const [showSelectModal, setShowSelectModal] = React.useState(false);
+
+  // Open modal automatically when no vehicle selected
+  React.useEffect(() => {
+    if (!selectedVehicle) {
+      // mở modal khi chưa có xe được chọn (ưu tiên từ localStorage)
+      let persisted = null;
+      try { persisted = JSON.parse(localStorage.getItem('selectedVehicle')); } catch {}
+      if (persisted) {
+        setSelectedVehicle(persisted);
+        setShowSelectModal(false);
+      } else {
+        setShowSelectModal(true);
+      }
+    } else {
+      setShowSelectModal(false);
+    }
+  }, [selectedVehicle, setSelectedVehicle]);
 
   // Loading state
   if (loading) {
@@ -60,6 +79,11 @@ const DriverDashboard = () => {
 
   return (
     <div className="driver-dashboard">
+      {/* Selected vehicle summary */}
+      <SelectedVehicleDisplay selectedVehicle={selectedVehicle} contracts={contracts} />
+      <div style={{ marginBottom: 12 }}>
+        <button className="btn" onClick={() => setShowSelectModal(true)}>Chọn xe khác</button>
+      </div>
       {/* TEST BUTTON FOR SETTINGS */}
       <button
         className="test-settings-btn"
@@ -70,14 +94,6 @@ const DriverDashboard = () => {
       >
         🧪 TEST Settings
       </button>
-      
-      {/* Debug Info */}
-      <DebugInfo 
-        currentUser={currentUser}
-        vehicles={vehicles}
-        contracts={contracts}
-        error={error}
-      />
       
       {/* Welcome Header */}
       <WelcomeHeader 
@@ -108,6 +124,19 @@ const DriverDashboard = () => {
       <PaymentHistory 
         payments={recentPayments} 
       />
+    {showSelectModal && (
+      <SelectVehicleModal
+        vehicles={vehicles}
+        onSelect={(v) => {
+          try { 
+            sessionStorage.setItem('selectedVehicle', JSON.stringify(v));
+            localStorage.setItem('selectedVehicle', JSON.stringify(v));
+          } catch {}
+          setSelectedVehicle(v);
+          setShowSelectModal(false);
+        }}
+      />
+    )}
     </div>
   );
 };

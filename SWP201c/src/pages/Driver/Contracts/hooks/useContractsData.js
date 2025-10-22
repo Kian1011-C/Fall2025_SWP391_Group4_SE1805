@@ -21,15 +21,11 @@ export const useContractsData = () => {
         throw new Error('Không tìm thấy thông tin người dùng');
       }
 
-      // Use getAllContracts for now (backend needs user-specific contracts API)
-      const response = await contractService.getAllContracts();
+      // Gọi API đúng: /api/contracts/user/{userId}
+      const response = await contractService.getUserContracts(user.id);
       
       if (response.success && response.data) {
-        // Filter contracts for current user (temporary solution)
-        const userContracts = response.data.filter(contract => 
-          contract.userId === user.id || contract.driverId === user.id
-        );
-        setContracts(userContracts);
+        setContracts(response.data || []);
       } else {
         // Mock data for development
         setContracts([]);

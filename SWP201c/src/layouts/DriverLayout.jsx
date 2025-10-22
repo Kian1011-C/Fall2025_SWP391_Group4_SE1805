@@ -8,24 +8,21 @@ import { useAuth } from '../context/AuthContext';
 const DriverLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { currentUser, logout } = useAuth();
+  const { currentUser, handleLogout } = useAuth();
 
   const menuItems = [
-    { path: '/driver/dashboard', icon: 'fas fa-home', label: 'Trang chủ' },
-    { path: '/driver/swap-battery', icon: 'fas fa-battery-half', label: 'Đổi pin' },
-    { path: '/driver/stations-map', icon: 'fas fa-map-marker-alt', label: 'Bản đồ trạm' },
-    { path: '/driver/vehicles', icon: 'fas fa-car', label: 'Xe của tôi' },
-    { path: '/driver/subscriptions', icon: 'fas fa-gem', label: 'Gói dịch vụ' },
-    { path: '/driver/contracts', icon: 'fas fa-file-contract', label: 'Hợp đồng' },
-    { path: '/driver/payments', icon: 'fas fa-credit-card', label: 'Thanh toán' },
-    { path: '/driver/support', icon: 'fas fa-question-circle', label: 'Hỗ trợ' },
-    { path: '/driver/profile', icon: 'fas fa-cog', label: 'Cài đặt' }
+    { path: '/driver/dashboard', icon: '🏠', label: 'Trang chủ' },
+    { path: '/driver/swap-battery', icon: '🔋', label: 'Đổi pin' },
+    { path: '/driver/stations-map', icon: '🗺️', label: 'Bản đồ trạm' },
+    { path: '/driver/vehicles', icon: '🚗', label: 'Xe của tôi' },
+    { path: '/driver/subscriptions', icon: '💎', label: 'Gói dịch vụ' },
+    { path: '/driver/contracts', icon: '📋', label: 'Hợp đồng' },
+    { path: '/driver/payments', icon: '💳', label: 'Thanh toán' },
+    { path: '/driver/support', icon: '❓', label: 'Hỗ trợ' },
+    { path: '/driver/profile', icon: '⚙️', label: 'Cài đặt' }
   ];
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
+  // use handleLogout từ AuthContext
 
   const isActive = (path) => {
     return location.pathname === path;
@@ -54,7 +51,7 @@ const DriverLayout = () => {
               className={`nav-item ${isActive(item.path) ? 'active' : ''}`}
               onClick={() => navigate(item.path)}
             >
-              <i className={item.icon}></i>
+              <span className="icon-emoji">{item.icon}</span>
               <span>{item.label}</span>
             </button>
           ))}
@@ -79,7 +76,30 @@ const DriverLayout = () => {
 
       {/* Main Content */}
       <main className="driver-main">
-        <Outlet />
+        <div className="driver-topbar">
+          <h2 className="driver-page-title">
+            {(() => {
+              const p = location.pathname;
+              if (p.includes('/driver/dashboard') || p === '/driver') return 'Dashboard';
+              if (p.includes('/driver/swap-battery')) return 'Đổi pin';
+              if (p.includes('/driver/stations-map')) return 'Bản đồ trạm';
+              if (p.includes('/driver/vehicles')) return 'Xe của tôi';
+              if (p.includes('/driver/subscriptions')) return 'Gói dịch vụ';
+              if (p.includes('/driver/contracts')) return 'Hợp đồng';
+              if (p.includes('/driver/payments')) return 'Thanh toán';
+              if (p.includes('/driver/support')) return 'Hỗ trợ';
+              if (p.includes('/driver/profile')) return 'Cài đặt';
+              return 'Driver';
+            })()}
+          </h2>
+          <div className="driver-topbar-actions">
+            {/* placeholder action button similar to screenshot */}
+            <button className="btn btn-primary" onClick={() => navigate('/driver/vehicles')}>Đổi xe</button>
+          </div>
+        </div>
+        <div className="driver-content">
+          <Outlet />
+        </div>
       </main>
     </div>
   );

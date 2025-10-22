@@ -19,7 +19,7 @@ import { DriverRoute, StaffRoute, AdminRoute } from './components/ProtectedRoute
 // --- Layouts & Screens ---
 import DriverLayout from './layouts/DriverLayout';
 import StaffLayout from './layouts/StaffLayout';
-import VehicleSelectionScreen from './pages/Driver/Vehicles';
+import SelectVehiclePage from './pages/Driver/SelectVehicle';
 import AdminLayout from './layouts/AdminLayout';
 
 // --- Driver Pages ---
@@ -31,6 +31,7 @@ import DriverSupport from './pages/Driver/Support';
 import DriverProfile from './pages/Driver/Profile';
 import DriverStationsMap from './pages/Driver/StationsMap';
 import DriverSubscriptions from './pages/Driver/Subscriptions';
+import DriverVehicles from './pages/Driver/Vehicles';
 
 // --- Staff Pages ---
 import StaffDashboard from './pages/Staff/Dashboard';
@@ -59,6 +60,7 @@ L.Icon.Default.mergeOptions({
 
 // Driver Layout Component
 function ProtectedDriverLayout() {
+  // Hiển thị chọn xe bằng modal trong Dashboard; không chặn bằng redirect
   return <DriverLayout />;
 }
 
@@ -71,11 +73,12 @@ function AppContent() {
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           {/* === DRIVER ROUTES === */}
+          <Route path="/driver/select-vehicle" element={<DriverRoute><SelectVehiclePage /></DriverRoute>} />
           <Route path="/driver" element={<DriverRoute><ProtectedDriverLayout /></DriverRoute>}>
             <Route index element={<Navigate to="dashboard" replace />} /> 
             <Route path="dashboard" element={<DriverDashboard />} />
             <Route path="swap-battery" element={<DriverSwapBattery />} />
-            <Route path="vehicles" element={<VehicleSelectionScreen />} />
+            <Route path="vehicles" element={<DriverVehicles />} />
             <Route path="stations-map" element={<DriverStationsMap />} />
             <Route path="subscriptions" element={<DriverSubscriptions />} />
             <Route path="contracts" element={<DriverContracts />} />

@@ -17,7 +17,7 @@ function DashboardLayout({ children, role = 'driver' }) {
       {/* Main Content */}
       <div style={{
         flex: 1,
-        marginLeft: '280px',
+        marginLeft: '0',
         display: 'flex',
         flexDirection: 'column',
         willChange: 'contents'

@@ -57,6 +57,11 @@ export const AuthProvider = ({ children }) => {
         const dashboardPath = normalizedRole === 'admin' ? '/admin/dashboard' :
                              normalizedRole === 'staff' ? '/staff/dashboard' :
                              '/driver/dashboard';
+        // Force chọn xe sau mỗi lần đăng nhập mới
+        try {
+          localStorage.removeItem('selectedVehicle');
+          sessionStorage.removeItem('selectedVehicle');
+        } catch {}
         
         console.log('🚀 AuthContext: Navigating to dashboard:', dashboardPath, 'for role:', normalizedRole);
         showToast(`Chào mừng ${userData.name}! Đang chuyển đến ${normalizedRole.toUpperCase()} Dashboard...`, 'success');

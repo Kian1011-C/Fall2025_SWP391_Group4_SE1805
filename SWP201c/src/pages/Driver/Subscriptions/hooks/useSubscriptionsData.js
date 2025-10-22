@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import contractService from '../../../../assets/js/services/contractService';
 import { validateUser, findActiveSubscription, formatSubscription } from '../utils';
+import vehicleService from '../../../../assets/js/services/vehicleService';
 
 export const useSubscriptionsData = (currentUser) => {
   const [plans, setPlans] = useState([]);
@@ -42,39 +43,28 @@ export const useSubscriptionsData = (currentUser) => {
         setPlans([]);
       }
 
-      // Get current user contracts/subscriptions
+      // Get current user contracts via dedicated API
       console.log('📋 Fetching user contracts for userId:', userId);
-      try {
-        const contractsResponse = await contractService.getAllContracts();
-        console.log('📋 User contracts response:', contractsResponse);
-        
-        if (contractsResponse.success && contractsResponse.data) {
-          // Filter contracts for current user
-          const userContracts = contractsResponse.data.filter(contract => 
-            contract.userId === userId || contract.driverId === userId
-          );
-          setUserContracts(userContracts);
-          
-          // Find active subscription
-          const activeContract = findActiveSubscription(userContracts);
-          
-          if (activeContract) {
-            console.log('✅ Found active contract:', activeContract);
-            setCurrentSubscription(formatSubscription(activeContract));
-          } else {
-            console.log('ℹ️ No active contracts found');
-            setCurrentSubscription(null);
-          }
-        } else {
-          console.log('ℹ️ No contracts found for user');
-          setUserContracts([]);
-          setCurrentSubscription(null);
-        }
-      } catch (contractError) {
-        console.warn('⚠️ Contract API failed:', contractError);
+      const contractsResponse = await contractService.getUserContracts(userId);
+      if (contractsResponse.success && contractsResponse.data) {
+        const userContracts = contractsResponse.data;
+        setUserContracts(userContracts);
+      } else {
         setUserContracts([]);
-        setCurrentSubscription(null);
       }
+
+      // If there is a selected vehicle, fetch its active plan
+      try {
+        let selected = null;
+        try { selected = JSON.parse(localStorage.getItem('selectedVehicle')) || JSON.parse(sessionStorage.getItem('selectedVehicle')); } catch {}
+        if (selected?.id || selected?.vehicleId) {
+          const vehicleId = selected.id || selected.vehicleId;
+          const planResp = await contractService.getVehiclePlan(vehicleId);
+          if (planResp.success && planResp.data) {
+            setCurrentSubscription(formatSubscription(planResp.data));
+          }
+        }
+      } catch {}
 
     } catch (err) {
       console.error('❌ Error fetching subscription data:', err);

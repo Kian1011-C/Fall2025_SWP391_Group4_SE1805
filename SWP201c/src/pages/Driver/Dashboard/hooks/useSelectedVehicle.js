@@ -27,15 +27,21 @@ export const useSelectedVehicle = (vehicles) => {
     }
   }, [location.state]);
 
-  // Auto-select vehicle when vehicles change
+  // Khi danh sách xe thay đổi: chỉ chọn xe nếu đã có trong session (người dùng chọn trước đó)
+  // Không tự động chọn xe đầu tiên để buộc người dùng chọn qua popup
   useEffect(() => {
     if (vehicles.length > 0) {
       const sessionVehicle = getUpdatedVehicleFromSession();
-      const autoSelected = getAutoSelectedVehicle(vehicles, selectedVehicle, sessionVehicle);
-      
-      if (autoSelected && autoSelected !== selectedVehicle) {
-        setSelectedVehicle(autoSelected);
+      if (sessionVehicle) {
+        const autoSelected = getAutoSelectedVehicle(vehicles, selectedVehicle, sessionVehicle);
+        if (autoSelected && autoSelected !== selectedVehicle) {
+          setSelectedVehicle(autoSelected);
+        }
+      } else {
+        setSelectedVehicle(null);
       }
+    } else {
+      setSelectedVehicle(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [vehicles]);

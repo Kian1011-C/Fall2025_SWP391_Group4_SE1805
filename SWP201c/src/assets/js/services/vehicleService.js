@@ -78,18 +78,7 @@ class VehicleService {
       console.error('Get user vehicles error:', error);
       const errorInfo = apiUtils.handleError(error);
       
-      // Nếu backend lỗi và demo fallback được bật, trả về demo data
-      if (API_CONFIG.USE_DEMO_FALLBACK && (errorInfo.status === 405 || errorInfo.status === 0 || errorInfo.status === 404)) {
-        console.warn('Backend không khả dụng, sử dụng demo vehicles data');
-        const demoVehicles = DEMO_VEHICLES[userId] || [];
-        return {
-          success: true,
-          data: demoVehicles,
-          total: demoVehicles.length,
-          message: '⚠️ Đang dùng dữ liệu demo (Backend chưa sẵn sàng)',
-          isDemo: true
-        };
-      }
+      // Yêu cầu: Không sử dụng mock data cho màn chọn xe → không fallback demo
       
       return {
         success: false,
