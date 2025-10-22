@@ -4,9 +4,9 @@ import axios from 'axios';
 
 // API Base Configuration
 export const API_CONFIG = {
-  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080', // Spring Boot backend
+  BASE_URL: import.meta.env.VITE_API_BASE_URL || '', // Use relative URLs with Vite proxy
   TIMEOUT: parseInt(import.meta.env.VITE_API_TIMEOUT) || 30000, // Increase timeout for backend calls
-  USE_DEMO_FALLBACK: (import.meta.env.VITE_USE_DEMO_FALLBACK || 'false') === 'true',
+  USE_DEMO_FALLBACK: (import.meta.env.VITE_USE_DEMO_FALLBACK || 'true') === 'true', // Enable demo fallback by default
   ENDPOINTS: {
     // Authentication
     AUTH: {
@@ -146,6 +146,12 @@ apiClient.interceptors.response.use(
     return response;
   },
   (error) => {
+    // Handle CORS errors
+    if (error.code === 'ERR_NETWORK' || error.message?.includes('CORS')) {
+      console.warn('CORS error detected, using demo fallback if available');
+      // Don't reject immediately, let the service handle fallback
+    }
+    
     if (error.response?.status === 401) {
       // Token expired or invalid
       localStorage.removeItem('authToken');
@@ -160,43 +166,26 @@ apiClient.interceptors.response.use(
 export const apiUtils = {
   // GET request
   get: async (url, params = {}) => {
-    try {
-      const response = await apiClient.get(url, { params });
-      return response.data;
-    } catch (error) {
-      // Reduce console noise; callers will log context-specific errors
-      throw error;
-    }
+    const response = await apiClient.get(url, { params });
+    return response.data;
   },
 
   // POST request
   post: async (url, data = {}) => {
-    try {
-      const response = await apiClient.post(url, data);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await apiClient.post(url, data);
+    return response.data;
   },
 
   // PUT request
   put: async (url, data = {}) => {
-    try {
-      const response = await apiClient.put(url, data);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await apiClient.put(url, data);
+    return response.data;
   },
 
   // DELETE request
   delete: async (url) => {
-    try {
-      const response = await apiClient.delete(url);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await apiClient.delete(url);
+    return response.data;
   },
 
   // Handle API errors

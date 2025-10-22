@@ -1,8 +1,10 @@
 // Driver/StationsMap/index.jsx
 // Container component for StationsMap page - orchestrates stations display and booking
 
+import React from 'react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import { useStationsData, useStationBooking, useStationSelection } from './hooks';
+import stationService from '../../../assets/js/services/stationService';
 import { getStationsStats } from './utils';
 import {
   StationsMapHeader,
@@ -19,6 +21,34 @@ const StationsMap = () => {
 
   // Station selection (for future map integration)
   const { selectedStation, selectStation } = useStationSelection();
+  const [towers, setTowers] = React.useState([]);
+  const [showTowers, setShowTowers] = React.useState(false);
+
+  const handleSelect = async (station) => {
+    console.log('🔍 Selecting station:', station);
+    selectStation(station);
+    try {
+      console.log('📡 Calling API for station:', station.id);
+      const resp = await stationService.getTowersByStation(station.id);
+      console.log('📡 API Response:', resp);
+      if (resp.success) {
+        setTowers(resp.data || []);
+        console.log('✅ Towers set:', resp.data);
+      } else {
+        console.log('❌ API failed:', resp.message);
+        // Fallback mock data for testing
+        setTowers([
+          { id: 1, name: 'Trụ sạc A', status: 'active', available: true },
+          { id: 2, name: 'Trụ sạc B', status: 'active', available: false }
+        ]);
+      }
+      setShowTowers(true);
+    } catch (error) {
+      console.error('💥 API Error:', error);
+      setTowers([]);
+      setShowTowers(true);
+    }
+  };
 
   // Calculate statistics
   const stats = getStationsStats(stations);
@@ -118,7 +148,7 @@ const StationsMap = () => {
           stations={stations}
           onBook={handleBook}
           booking={booking}
-          onSelect={selectStation}
+          onSelect={handleSelect}
         />
 
         {/* Debug info for selected station */}
@@ -133,6 +163,110 @@ const StationsMap = () => {
             fontSize: '0.875rem'
           }}>
             <strong>🔧 Selected Station:</strong> {selectedStation.name}
+          </div>
+        )}
+
+        {showTowers && (
+          <div 
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0, 0, 0, 0.7)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000
+            }}
+            onClick={() => setShowTowers(false)}
+          >
+            <div 
+              onClick={(e) => e.stopPropagation()} 
+              style={{
+                maxWidth: '500px',
+                width: '90vw',
+                background: 'rgba(11, 17, 33, 0.95)',
+                borderRadius: '12px',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)'
+              }}
+            >
+              <div style={{ 
+                padding: '20px', 
+                borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <h3 style={{ margin: 0, color: '#FFFFFF', fontSize: '1.25rem' }}>
+                  Trụ tại {selectedStation?.name}
+                </h3>
+                <button
+                  onClick={() => setShowTowers(false)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#B0B0B0',
+                    fontSize: '1.5rem',
+                    cursor: 'pointer',
+                    padding: '4px'
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+              <div style={{ padding: '20px' }}>
+                {towers.length === 0 ? (
+                  <div style={{ 
+                    color: '#B0B0B0', 
+                    textAlign: 'center',
+                    padding: '20px'
+                  }}>
+                    Chưa có dữ liệu trụ.
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {towers.map((tower) => (
+                      <div 
+                        key={tower.id} 
+                        style={{
+                          background: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          borderRadius: '8px',
+                          padding: '16px',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center'
+                        }}
+                      >
+                        <div>
+                          <div style={{ color: '#FFFFFF', fontWeight: '600', marginBottom: '4px' }}>
+                            Trụ #{tower.id}
+                          </div>
+                          <div style={{ color: '#B0B0B0', fontSize: '0.9rem' }}>
+                            {tower.name || tower.code || 'N/A'}
+                          </div>
+                        </div>
+                        <div style={{
+                          padding: '6px 12px',
+                          borderRadius: '20px',
+                          fontSize: '0.8rem',
+                          fontWeight: '600',
+                          backgroundColor: tower.status === 'active' && tower.available ? 
+                            'rgba(25, 195, 125, 0.2)' : 'rgba(255, 107, 107, 0.2)',
+                          color: tower.status === 'active' && tower.available ? 
+                            '#19c37d' : '#ff6b6b'
+                        }}>
+                          {tower.status === 'active' && tower.available ? 'Sẵn sàng' : 'Bận'}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </div>

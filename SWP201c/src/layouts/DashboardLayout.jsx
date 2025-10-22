@@ -3,24 +3,24 @@ import React from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 
-const DashboardLayout = ({ children, role = 'driver' }) => {
-  console.log('🔍 DashboardLayout: role =', role);
-
+function DashboardLayout({ children, role = 'driver' }) {
   return (
     <div style={{
       display: 'flex',
       minHeight: '100vh',
       background: 'linear-gradient(180deg, #0b1020 0%, #0e1430 100%)',
-      color: '#FFFFFF'
+      color: '#FFFFFF',
+      willChange: 'contents'
     }}>
       <Sidebar role={role} />
 
       {/* Main Content */}
       <div style={{
         flex: 1,
-        marginLeft: '280px',
+        marginLeft: '0',
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        willChange: 'contents'
       }}>
         <Header title="Dashboard" />
 
@@ -28,14 +28,14 @@ const DashboardLayout = ({ children, role = 'driver' }) => {
         <div style={{
           flex: 1,
           overflowY: 'auto',
-          padding: '0'
+          padding: '0',
+          willChange: 'scroll-position'
         }}>
           {children}
         </div>
       </div>
     </div>
   );
-};
+}
 
-export default DashboardLayout;
-
+export default React.memo(DashboardLayout);

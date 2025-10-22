@@ -57,15 +57,16 @@ export const useSwapData = (currentUser) => {
       // Fetch user contract
       if (currentUser) {
         try {
-          const contractResponse = await contractService.getContracts(currentUser.id || currentUser.user_id);
+          const contractResponse = await contractService.getAllContracts();
           console.log('📄 Contract response:', contractResponse);
           
           if (contractResponse.success && contractResponse.data) {
+            // Filter contracts for current user
+            const userContracts = contractResponse.data.filter(contract => 
+              contract.userId === currentUser.id || contract.driverId === currentUser.id
+            );
             // Get the first active contract or the first contract in the list
-            const contracts = Array.isArray(contractResponse.data) 
-              ? contractResponse.data 
-              : contractResponse.data.contracts || [];
-            const activeContract = contracts.find(c => c.status === 'active') || contracts[0];
+            const activeContract = userContracts.find(c => c.status === 'active') || userContracts[0];
             setUserContract(activeContract);
             console.log('📄 Loaded contract:', activeContract);
             console.log('📋 Contract IDs:', {
