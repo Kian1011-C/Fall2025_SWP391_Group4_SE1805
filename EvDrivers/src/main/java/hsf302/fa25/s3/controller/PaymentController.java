@@ -4,13 +4,12 @@ import hsf302.fa25.s3.dao.PaymentDao;
 import hsf302.fa25.s3.model.Payment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.*;
 
 @RestController
 @RequestMapping("/api/payments")
 public class PaymentController {
-
+    
     private final PaymentDao paymentDao = new PaymentDao();
 
     @PostMapping("/process")
@@ -20,15 +19,15 @@ public class PaymentController {
             String method = (String) paymentData.get("method");
             String type = (String) paymentData.get("type");
             String userId = paymentData.get("userId").toString();
-
+            
             // Calculate fees
             double fee = amount * 0.02; // 2% processing fee
             double netAmount = amount - fee;
-
+            
             // Create payment record using PaymentDao
             PaymentDao paymentDao = new PaymentDao();
             int paymentId = paymentDao.createPayment(userId, amount, method, type, "SUCCESS");
-
+            
             if (paymentId > 0) {
                 Map<String, Object> paymentResult = new HashMap<>();
                 paymentResult.put("paymentId", paymentId);
@@ -41,12 +40,12 @@ public class PaymentController {
                 paymentResult.put("processedAt", new Date());
                 paymentResult.put("fee", fee);
                 paymentResult.put("netAmount", netAmount);
-
+                
                 Map<String, Object> response = new HashMap<>();
                 response.put("success", true);
                 response.put("message", "Payment processed successfully");
                 response.put("data", paymentResult);
-
+                
                 return ResponseEntity.ok(response);
             } else {
                 Map<String, Object> response = new HashMap<>();
@@ -68,7 +67,7 @@ public class PaymentController {
                                                @RequestParam(defaultValue = "10") int size) {
         try {
             List<Payment> payments = paymentDao.getPaymentsByUserId(userId.toString());
-
+            
             List<Map<String, Object>> paymentMaps = new ArrayList<>();
             for (Payment payment : payments) {
                 Map<String, Object> paymentMap = new HashMap<>();
@@ -81,20 +80,20 @@ public class PaymentController {
                 paymentMap.put("transactionId", payment.getTransactionRef());
                 paymentMap.put("processedAt", payment.getCreatedAt());
                 paymentMap.put("contractId", payment.getContractId());
-
+                
                 paymentMaps.add(paymentMap);
             }
-
+            
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("data", paymentMaps);
             response.put("pagination", Map.of(
-                    "page", page,
-                    "size", size,
-                    "total", paymentMaps.size(),
-                    "totalPages", 1
+                "page", page,
+                "size", size,
+                "total", paymentMaps.size(),
+                "totalPages", 1
             ));
-
+            
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Map<String, Object> response = new HashMap<>();
@@ -109,7 +108,7 @@ public class PaymentController {
         String paymentMethod = (String) autoPaymentData.get("paymentMethod");
         String frequency = (String) autoPaymentData.get("frequency");
         Double amount = Double.valueOf(autoPaymentData.get("amount").toString());
-
+        
         // Mock data - AutoPayment table not implemented yet
         Map<String, Object> autoPaymentSetup = new HashMap<>();
         autoPaymentSetup.put("autoPaymentId", System.currentTimeMillis());
@@ -120,13 +119,13 @@ public class PaymentController {
         autoPaymentSetup.put("status", "ACTIVE");
         autoPaymentSetup.put("nextPaymentDate", new Date(System.currentTimeMillis() + 30L * 24 * 60 * 60 * 1000));
         autoPaymentSetup.put("createdAt", new Date());
-
+        
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
         response.put("message", "Auto payment setup successfully (mock)");
         response.put("data", autoPaymentSetup);
         response.put("note", "Mock data - AutoPayment table not implemented");
-
+        
         return ResponseEntity.ok(response);
     }
 
@@ -137,7 +136,7 @@ public class PaymentController {
         response.put("success", true);
         response.put("message", "Auto payment cancelled successfully");
         response.put("cancelledAt", new Date());
-
+        
         return ResponseEntity.ok(response);
     }
 
@@ -145,7 +144,7 @@ public class PaymentController {
     public ResponseEntity<?> refundPayment(@PathVariable Long paymentId, @RequestBody Map<String, Object> refundData) {
         String reason = (String) refundData.get("reason");
         Double refundAmount = Double.valueOf(refundData.get("amount").toString());
-
+        
         // TODO: Implement actual refund processing
         Map<String, Object> refundResult = new HashMap<>();
         refundResult.put("refundId", System.currentTimeMillis());
@@ -155,12 +154,12 @@ public class PaymentController {
         refundResult.put("status", "PROCESSED");
         refundResult.put("processedAt", new Date());
         refundResult.put("estimatedRefundDate", new Date(System.currentTimeMillis() + 3L * 24 * 60 * 60 * 1000)); // 3 days
-
+        
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
         response.put("message", "Refund processed successfully");
         response.put("data", refundResult);
-
+        
         return ResponseEntity.ok(response);
     }
 
@@ -168,7 +167,7 @@ public class PaymentController {
     public ResponseEntity<?> getPaymentMethods(@PathVariable String userId) {
         // Mock data - PaymentMethods table not implemented yet
         List<Map<String, Object>> paymentMethods = new ArrayList<>();
-
+        
         Map<String, Object> creditCard = new HashMap<>();
         creditCard.put("id", 1);
         creditCard.put("type", "CREDIT_CARD");
@@ -178,7 +177,7 @@ public class PaymentController {
         creditCard.put("holderName", "NGUYEN VAN A");
         creditCard.put("isDefault", true);
         creditCard.put("isActive", true);
-
+        
         Map<String, Object> bankAccount = new HashMap<>();
         bankAccount.put("id", 2);
         bankAccount.put("type", "BANK_TRANSFER");
@@ -187,7 +186,7 @@ public class PaymentController {
         bankAccount.put("holderName", "NGUYEN VAN A");
         bankAccount.put("isDefault", false);
         bankAccount.put("isActive", true);
-
+        
         Map<String, Object> wallet = new HashMap<>();
         wallet.put("id", 3);
         wallet.put("type", "WALLET");
@@ -196,16 +195,16 @@ public class PaymentController {
         wallet.put("balance", 150000);
         wallet.put("isDefault", false);
         wallet.put("isActive", true);
-
+        
         paymentMethods.add(creditCard);
         paymentMethods.add(bankAccount);
         paymentMethods.add(wallet);
-
+        
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
         response.put("data", paymentMethods);
         response.put("note", "Mock data - PaymentMethods table not implemented");
-
+        
         return ResponseEntity.ok(response);
     }
 
@@ -217,12 +216,12 @@ public class PaymentController {
         newPaymentMethod.put("userId", userId);
         newPaymentMethod.put("isActive", true);
         newPaymentMethod.put("addedAt", new Date());
-
+        
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
         response.put("message", "Payment method added successfully");
         response.put("data", newPaymentMethod);
-
+        
         return ResponseEntity.ok(response);
     }
 
@@ -232,7 +231,7 @@ public class PaymentController {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
         response.put("message", "Payment method removed successfully");
-
+        
         return ResponseEntity.ok(response);
     }
 
@@ -246,12 +245,12 @@ public class PaymentController {
         balance.put("pendingAmount", 25000);
         balance.put("availableAmount", 125000);
         balance.put("lastUpdated", new Date());
-
+        
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
         response.put("data", balance);
         response.put("note", "Mock data - UserBalance table not implemented");
-
+        
         return ResponseEntity.ok(response);
     }
 
@@ -259,7 +258,7 @@ public class PaymentController {
     public ResponseEntity<?> topupBalance(@PathVariable String userId, @RequestBody Map<String, Object> topupData) {
         Double amount = Double.valueOf(topupData.get("amount").toString());
         String method = (String) topupData.get("method");
-
+        
         // Mock topup - UserBalance table not implemented yet
         Map<String, Object> topupResult = new HashMap<>();
         topupResult.put("topupId", System.currentTimeMillis());
@@ -269,13 +268,13 @@ public class PaymentController {
         topupResult.put("status", "SUCCESS");
         topupResult.put("newBalance", 150000 + amount);
         topupResult.put("processedAt", new Date());
-
+        
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
         response.put("message", "Balance topped up successfully (mock)");
         response.put("data", topupResult);
         response.put("note", "Mock data - UserBalance table not implemented");
-
+        
         return ResponseEntity.ok(response);
     }
 
@@ -284,14 +283,14 @@ public class PaymentController {
         try {
             // Sử dụng ContractDao để tính phí monthly
             hsf302.fa25.s3.dao.ContractDao contractDao = new hsf302.fa25.s3.dao.ContractDao();
-
+            
             // Tính toán phí dựa trên usage hiện tại
             boolean calculated = contractDao.calculateAndUpdateMonthlyFees(contractId);
-
+            
             if (calculated) {
                 // Lấy thông tin contract sau khi tính toán
                 hsf302.fa25.s3.model.Contract contract = contractDao.getContractById(contractId);
-
+                
                 Map<String, Object> billDetails = new HashMap<>();
                 billDetails.put("contractId", contractId);
                 billDetails.put("currentMonth", contract.getCurrentMonth());
@@ -300,7 +299,7 @@ public class PaymentController {
                 billDetails.put("overageDistance", contract.getMonthlyOverageDistance());
                 billDetails.put("overageFee", contract.getMonthlyOverageFee());
                 billDetails.put("totalFee", contract.getMonthlyTotalFee());
-
+                
                 // Thêm thông tin service plan
                 hsf302.fa25.s3.dao.ServicePlanDao servicePlanDao = new hsf302.fa25.s3.dao.ServicePlanDao();
                 hsf302.fa25.s3.model.ServicePlan plan = servicePlanDao.getPlanById(contract.getPlanId());
@@ -309,12 +308,12 @@ public class PaymentController {
                     billDetails.put("baseDistance", plan.getBaseDistance());
                     billDetails.put("isUnlimited", plan.isUnlimited());
                 }
-
+                
                 Map<String, Object> response = new HashMap<>();
                 response.put("success", true);
                 response.put("message", "Monthly bill calculated successfully");
                 response.put("data", billDetails);
-
+                
                 return ResponseEntity.ok(response);
             } else {
                 Map<String, Object> response = new HashMap<>();
@@ -331,14 +330,14 @@ public class PaymentController {
     }
 
     @PostMapping("/process-monthly-payment/{contractId}")
-    public ResponseEntity<?> processMonthlyPayment(@PathVariable Integer contractId,
+    public ResponseEntity<?> processMonthlyPayment(@PathVariable Integer contractId, 
                                                    @RequestBody Map<String, Object> paymentData) {
         try {
             String method = (String) paymentData.get("method");
             String userId = paymentData.get("userId").toString();
-
+            
             hsf302.fa25.s3.dao.ContractDao contractDao = new hsf302.fa25.s3.dao.ContractDao();
-
+            
             // Lấy thông tin contract và tổng phí
             hsf302.fa25.s3.model.Contract contract = contractDao.getContractById(contractId);
             if (contract == null) {
@@ -347,16 +346,16 @@ public class PaymentController {
                 response.put("message", "Contract not found");
                 return ResponseEntity.status(404).body(response);
             }
-
+            
             double totalAmount = contract.getMonthlyTotalFee().doubleValue();
-
+            
             // Tạo payment record
             int paymentId = paymentDao.createPayment(userId, totalAmount, method, "MONTHLY_BILLING", "SUCCESS");
-
+            
             if (paymentId > 0) {
                 // Process monthly billing (reset usage for next month)
                 boolean billingProcessed = contractDao.processMonthlyBilling(contractId);
-
+                
                 Map<String, Object> paymentResult = new HashMap<>();
                 paymentResult.put("paymentId", paymentId);
                 paymentResult.put("contractId", contractId);
@@ -371,12 +370,12 @@ public class PaymentController {
                 paymentResult.put("overageFee", contract.getMonthlyOverageFee());
                 paymentResult.put("processedAt", new Date());
                 paymentResult.put("billingReset", billingProcessed);
-
+                
                 Map<String, Object> response = new HashMap<>();
                 response.put("success", true);
                 response.put("message", "Monthly payment processed successfully");
                 response.put("data", paymentResult);
-
+                
                 return ResponseEntity.ok(response);
             } else {
                 Map<String, Object> response = new HashMap<>();
@@ -397,16 +396,16 @@ public class PaymentController {
         try {
             hsf302.fa25.s3.dao.ContractDao contractDao = new hsf302.fa25.s3.dao.ContractDao();
             hsf302.fa25.s3.dao.ServicePlanDao servicePlanDao = new hsf302.fa25.s3.dao.ServicePlanDao();
-
+            
             hsf302.fa25.s3.model.Contract contract = contractDao.getContractById(contractId);
-
+            
             if (contract != null) {
                 // Tính toán latest fees
                 contractDao.calculateAndUpdateMonthlyFees(contractId);
                 contract = contractDao.getContractById(contractId); // Refresh data
-
+                
                 hsf302.fa25.s3.model.ServicePlan plan = servicePlanDao.getPlanById(contract.getPlanId());
-
+                
                 Map<String, Object> summary = new HashMap<>();
                 summary.put("contractId", contractId);
                 summary.put("currentMonth", contract.getCurrentMonth());
@@ -414,7 +413,7 @@ public class PaymentController {
                 summary.put("baseDistance", plan != null ? plan.getBaseDistance() : 0);
                 summary.put("distanceUsed", contract.getMonthlyDistance());
                 summary.put("overageDistance", contract.getMonthlyOverageDistance());
-
+                
                 // Tính % usage
                 if (plan != null && !plan.isUnlimited() && plan.getBaseDistance() > 0) {
                     double usagePercent = contract.getMonthlyDistance().doubleValue() / plan.getBaseDistance() * 100;
@@ -422,27 +421,27 @@ public class PaymentController {
                 } else {
                     summary.put("usagePercentage", plan != null && plan.isUnlimited() ? "Unlimited" : 0);
                 }
-
+                
                 summary.put("baseFee", contract.getMonthlyBaseFee());
                 summary.put("overageFee", contract.getMonthlyOverageFee());
                 summary.put("totalFee", contract.getMonthlyTotalFee());
                 summary.put("lastResetDate", contract.getLastResetDate());
-
+                
                 // Calculate current overage charge (if any)
-                if (plan != null && !plan.isUnlimited() &&
-                        contract.getMonthlyDistance().compareTo(java.math.BigDecimal.valueOf(plan.getBaseDistance())) > 0) {
+                if (plan != null && !plan.isUnlimited() && 
+                    contract.getMonthlyDistance().compareTo(java.math.BigDecimal.valueOf(plan.getBaseDistance())) > 0) {
                     // Calculate overage charge for distances beyond base
                     java.math.BigDecimal overageCharge = servicePlanDao.calculateOverageCharge(
-                            contract.getMonthlyDistance().intValue(), plan.getBaseDistance());
+                        contract.getMonthlyDistance().intValue(), plan.getBaseDistance());
                     summary.put("calculatedOverageCharge", overageCharge);
                 } else {
                     summary.put("calculatedOverageCharge", 0);
                 }
-
+                
                 Map<String, Object> response = new HashMap<>();
                 response.put("success", true);
                 response.put("data", summary);
-
+                
                 return ResponseEntity.ok(response);
             } else {
                 Map<String, Object> response = new HashMap<>();
@@ -463,25 +462,25 @@ public class PaymentController {
         try {
             hsf302.fa25.s3.dao.ContractDao contractDao = new hsf302.fa25.s3.dao.ContractDao();
             hsf302.fa25.s3.dao.ServicePlanDao servicePlanDao = new hsf302.fa25.s3.dao.ServicePlanDao();
-
+            
             // Get active contracts for user
             List<hsf302.fa25.s3.model.Contract> contracts = contractDao.getContractsByUserId(userId.toString());
             List<Map<String, Object>> billStatuses = new ArrayList<>();
-
+            
             for (hsf302.fa25.s3.model.Contract contract : contracts) {
                 if ("ACTIVE".equals(contract.getStatus())) {
                     // Calculate current fees
                     contractDao.calculateAndUpdateMonthlyFees(contract.getContractId());
-
+                    
                     // Refresh contract data
                     hsf302.fa25.s3.model.Contract updatedContract = contractDao.getContractById(contract.getContractId());
                     hsf302.fa25.s3.model.ServicePlan plan = servicePlanDao.getPlanById(contract.getPlanId());
-
+                    
                     Map<String, Object> billStatus = new HashMap<>();
                     billStatus.put("contractId", contract.getContractId());
                     billStatus.put("contractNumber", contract.getContractNumber());
                     billStatus.put("currentMonth", updatedContract.getCurrentMonth());
-
+                    
                     if (plan != null) {
                         billStatus.put("planName", plan.getPlanName());
                         billStatus.put("planType", plan.getPlanName().toUpperCase());
@@ -489,18 +488,18 @@ public class PaymentController {
                         billStatus.put("basePrice", plan.getBasePrice());
                         billStatus.put("isUnlimited", plan.isUnlimited());
                     }
-
+                    
                     billStatus.put("distanceUsed", updatedContract.getMonthlyDistance());
                     billStatus.put("baseFee", updatedContract.getMonthlyBaseFee());
                     billStatus.put("overageDistance", updatedContract.getMonthlyOverageDistance());
                     billStatus.put("overageFee", updatedContract.getMonthlyOverageFee());
                     billStatus.put("currentTotalFee", updatedContract.getMonthlyTotalFee());
-
+                    
                     // Calculate progress percentage
                     if (plan != null && !plan.isUnlimited() && plan.getBaseDistance() > 0) {
                         double progress = updatedContract.getMonthlyDistance().doubleValue() / plan.getBaseDistance() * 100;
                         billStatus.put("usageProgress", Math.min(100.0, Math.round(progress * 100.0) / 100.0));
-
+                        
                         if (progress > 80) {
                             billStatus.put("warningLevel", "HIGH");
                             billStatus.put("warningMessage", "Approaching distance limit");
@@ -514,28 +513,28 @@ public class PaymentController {
                         billStatus.put("usageProgress", "UNLIMITED");
                         billStatus.put("warningLevel", "NONE");
                     }
-
+                    
                     // Days remaining in current month
                     java.time.LocalDate now = java.time.LocalDate.now();
                     int daysInMonth = now.lengthOfMonth();
                     int currentDay = now.getDayOfMonth();
                     billStatus.put("daysRemainingInMonth", daysInMonth - currentDay);
-
+                    
                     billStatuses.add(billStatus);
                 }
             }
-
+            
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("data", billStatuses);
             response.put("totalActiveContracts", billStatuses.size());
-
+            
             // Calculate total pending amount across all contracts
             double totalPending = billStatuses.stream()
-                    .mapToDouble(bill -> ((java.math.BigDecimal) bill.get("currentTotalFee")).doubleValue())
-                    .sum();
+                .mapToDouble(bill -> ((java.math.BigDecimal) bill.get("currentTotalFee")).doubleValue())
+                .sum();
             response.put("totalPendingAmount", totalPending);
-
+            
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Map<String, Object> response = new HashMap<>();

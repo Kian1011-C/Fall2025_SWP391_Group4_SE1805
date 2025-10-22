@@ -1,498 +1,166 @@
 {
   "info": {
-    "name": "EV Battery Swap APIs",
-    "description": "Collection for EV Battery Swap Management System",
+    "name": "EvDrivers - All APIs (exclude PageController)",
+    "_postman_id": "evdrivers-all-apis-2025-10-17",
+    "description": "Collection of API endpoints for the EvDrivers backend (all controllers except PageController).",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     {
-      "key": "base_url",
+      "key": "baseUrl",
       "value": "http://localhost:8080",
-      "type": "string"
-    },
-    {
-      "key": "auth_token",
-      "value": "",
       "type": "string"
     }
   ],
   "item": [
     {
-      "name": "Authentication",
+      "name": "Auth",
       "item": [
         {
-          "name": "Login Admin",
+          "name": "Login",
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@evswap.com\",\n  \"password\": \"admin123\"\n}"
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
             },
-            "url": {
-              "raw": "{{base_url}}/api/auth/login",
-              "host": ["{{base_url}}"],
-              "path": ["api", "auth", "login"]
-            }
-          }
+            "url": { "raw": "{{baseUrl}}/api/auth/login" }
+          },
+          "response": []
         },
         {
-          "name": "Login Driver",
+          "name": "Get current user (mock)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/auth/me" }
+          },
+          "response": []
+        },
+        {
+          "name": "Check auth",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/auth/check" } },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get user dashboard",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/users/USER_ID" } },
+          "response": []
+        },
+        {
+          "name": "Get user profile",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/users/USER_ID/profile" } },
+          "response": []
+        },
+        {
+          "name": "Get user vehicles",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/users/USER_ID/vehicles" } },
+          "response": []
+        },
+        {
+          "name": "Get user notifications",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/users/USER_ID/notifications" } },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "List drivers",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/admin/drivers" } },
+          "response": []
+        },
+        {
+          "name": "Get driver by id",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/admin/drivers/USER_ID" } },
+          "response": []
+        },
+        {
+          "name": "Create driver",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"minh.driver@gmail.com\",\n  \"password\": \"driver123\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/auth/login",
-              "host": ["{{base_url}}"],
-              "path": ["api", "auth", "login"]
-            }
-          }
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"driver1@example.com\",\n  \"password\": \"secret\",\n  \"firstName\": \"Nguyen\",\n  \"lastName\": \"Van A\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/admin/drivers" }
+          },
+          "response": []
+        },
+        {
+          "name": "List staff",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/admin/staff" } },
+          "response": []
         }
       ]
     },
     {
-      "name": "User Management",
+      "name": "Driver (frontend)",
       "item": [
-        {
-          "name": "Get User Dashboard",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/users/admin001",
-              "host": ["{{base_url}}"],
-              "path": ["api", "users", "admin001"]
-            }
-          }
-        },
-        {
-          "name": "Get User Profile",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/users/driver001/profile",
-              "host": ["{{base_url}}"],
-              "path": ["api", "users", "driver001", "profile"]
-            }
-          }
-        },
-        {
-          "name": "Get User Vehicles",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/users/driver001/vehicles",
-              "host": ["{{base_url}}"],
-              "path": ["api", "users", "driver001", "vehicles"]
-            }
-          }
-        }
+        { "name": "Get towers by station", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/driver/towers?stationId=1" } }, "response": [] },
+        { "name": "Get slots by tower", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/driver/slots?towerId=1" } }, "response": [] },
+        { "name": "Get one empty slot in tower", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/driver/slot/empty?towerId=1" } }, "response": [] }
       ]
     },
     {
-      "name": "Station Management",
+      "name": "Stations",
       "item": [
-        {
-          "name": "Get All Stations",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/stations",
-              "host": ["{{base_url}}"],
-              "path": ["api", "stations"]
-            }
-          }
-        },
-        {
-          "name": "Get Station by ID",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/stations/1",
-              "host": ["{{base_url}}"],
-              "path": ["api", "stations", "1"]
-            }
-          }
-        },
-        {
-          "name": "Get Station Stats",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/stations/stats",
-              "host": ["{{base_url}}"],
-              "path": ["api", "stations", "stats"]
-            }
-          }
-        }
+        { "name": "List stations", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/stations" } }, "response": [] },
+        { "name": "Get station by id", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/stations/1" } }, "response": [] },
+        { "name": "Stations stats", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/stations/stats" } }, "response": [] }
       ]
     },
     {
-      "name": "Battery Management",
+      "name": "Batteries",
       "item": [
-        {
-          "name": "Get Battery Status",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/batteries/1/status",
-              "host": ["{{base_url}}"],
-              "path": ["api", "batteries", "1", "status"]
-            }
-          }
-        },
-        {
-          "name": "Get Battery Health",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/batteries/1/health",
-              "host": ["{{base_url}}"],
-              "path": ["api", "batteries", "1", "health"]
-            }
-          }
-        },
-        {
-          "name": "Initiate Battery Swap",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"userId\": \"driver001\",\n  \"stationId\": 1,\n  \"batteryId\": 1\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/batteries/swap/initiate",
-              "host": ["{{base_url}}"],
-              "path": ["api", "batteries", "swap", "initiate"]
-            }
-          }
-        },
-        {
-          "name": "Confirm Battery Swap",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/batteries/swap/1/confirm",
-              "host": ["{{base_url}}"],
-              "path": ["api", "batteries", "swap", "1", "confirm"]
-            }
-          }
-        }
+        { "name": "Get battery status", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/batteries/1/status" } }, "response": [] },
+        { "name": "Get battery history", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/batteries/1/history" } }, "response": [] },
+        { "name": "Initiate swap (driver)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"userId\": \"user1\",\n  \"stationId\": 1,\n  \"batteryId\": 10,\n  \"vehicleId\": 100\n}" }, "url": { "raw": "{{baseUrl}}/api/batteries/swap/initiate" } }, "response": [] },
+        { "name": "Confirm swap", "request": { "method": "POST", "url": { "raw": "{{baseUrl}}/api/batteries/swap/123/confirm" } }, "response": [] },
+        { "name": "Get active swaps", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/batteries/swap/active" } }, "response": [] }
       ]
     },
     {
-      "name": "Swap Management",
+      "name": "Contracts",
       "item": [
-        {
-          "name": "Get User Swap History",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/users/driver001/swaps?limit=10",
-              "host": ["{{base_url}}"],
-              "path": ["api", "users", "driver001", "swaps"],
-              "query": [
-                {
-                  "key": "limit",
-                  "value": "10"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get All Swaps (Admin)",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/swaps",
-              "host": ["{{base_url}}"],
-              "path": ["api", "swaps"]
-            }
-          }
-        }
+        { "name": "Create contract (mock)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"userId\": \"user1\",\n  \"vehicleId\": 100,\n  \"planId\": 1\n}" }, "url": { "raw": "{{baseUrl}}/api/contracts" } }, "response": [] },
+        { "name": "Get contracts by user", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/contracts/user/user1" } }, "response": [] },
+        { "name": "Get available plans", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/contracts/plans" } }, "response": [] }
       ]
     },
     {
-      "name": "Reports (Admin)",
+      "name": "Swaps",
       "item": [
-        {
-          "name": "Get Overview Report",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/reports/overview",
-              "host": ["{{base_url}}"],
-              "path": ["api", "reports", "overview"]
-            }
-          }
-        },
-        {
-          "name": "Get Revenue Report",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/reports/revenue",
-              "host": ["{{base_url}}"],
-              "path": ["api", "reports", "revenue"]
-            }
-          }
-        }
+        { "name": "Get user swap history", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/users/user1/swaps?limit=10" } }, "response": [] },
+        { "name": "Get all swaps (admin)", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/swaps" } }, "response": [] },
+        { "name": "Create swap (manual)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"userId\": \"user1\",\n  \"stationId\": 1,\n  \"newBatteryId\": 20\n}" }, "url": { "raw": "{{baseUrl}}/api/swaps" } }, "response": [] },
+        { "name": "Create auto swap (system)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"userId\": \"user1\",\n  \"stationId\": 1,\n  \"newBatteryId\": 20\n}" }, "url": { "raw": "{{baseUrl}}/api/swaps/auto" } }, "response": [] }
       ]
     },
     {
-      "name": "Contract Management",
+      "name": "Reports",
       "item": [
-        {
-          "name": "Get User Contracts",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/contracts/user/driver001",
-              "host": ["{{base_url}}"],
-              "path": ["api", "contracts", "user", "driver001"]
-            }
-          }
-        },
-        {
-          "name": "Get Available Plans",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/contracts/plans",
-              "host": ["{{base_url}}"],
-              "path": ["api", "contracts", "plans"]
-            }
-          }
-        }
+        { "name": "Overview report", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/reports/overview" } }, "response": [] },
+        { "name": "Revenue report", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/reports/revenue" } }, "response": [] },
+        { "name": "Export report", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"reportType\": \"overview\",\n  \"format\": \"csv\"\n}" }, "url": { "raw": "{{baseUrl}}/api/reports/export" } }, "response": [] }
       ]
     },
     {
-      "name": "Payment Management",
+      "name": "Payments",
       "item": [
-        {
-          "name": "Get Payment History",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/payments/user/driver001/history",
-              "host": ["{{base_url}}"],
-              "path": ["api", "payments", "user", "driver001", "history"]
-            }
-          }
-        },
-        {
-          "name": "Calculate Monthly Bill",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/payments/calculate-monthly-bill/1",
-              "host": ["{{base_url}}"],
-              "path": ["api", "payments", "calculate-monthly-bill", "1"]
-            }
-          }
-        },
-        {
-          "name": "Process Payment",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"amount\": 250000,\n  \"userId\": \"driver001\",\n  \"method\": \"CREDIT_CARD\",\n  \"type\": \"MONTHLY_BILLING\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/payments/process",
-              "host": ["{{base_url}}"],
-              "path": ["api", "payments", "process"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Driver Specific",
-      "item": [
-        {
-          "name": "Get Towers by Station",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/driver/towers?stationId=1",
-              "host": ["{{base_url}}"],
-              "path": ["api", "driver", "towers"],
-              "query": [
-                {
-                  "key": "stationId",
-                  "value": "1"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get Slots by Tower",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/driver/slots?towerId=1",
-              "host": ["{{base_url}}"],
-              "path": ["api", "driver", "slots"],
-              "query": [
-                {
-                  "key": "towerId",
-                  "value": "1"
-                }
-              ]
-            }
-          }
-        }
+        { "name": "Process payment", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"userId\": \"user1\",\n  \"amount\": 50000,\n  \"method\": \"CREDIT_CARD\",\n  \"type\": \"TOPUP\"\n}" }, "url": { "raw": "{{baseUrl}}/api/payments/process" } }, "response": [] },
+        { "name": "Get user payment history", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/payments/user/user1/history" } }, "response": [] },
+        { "name": "Setup auto payment (mock)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"paymentMethod\": \"CREDIT_CARD\",\n  \"frequency\": \"monthly\",\n  \"amount\": 270000\n}" }, "url": { "raw": "{{baseUrl}}/api/payments/user/user1/auto-payment" } }, "response": [] }
       ]
     }
   ]

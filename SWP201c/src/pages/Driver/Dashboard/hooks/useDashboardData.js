@@ -4,8 +4,10 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../../context/AuthContext';
 import userService from '../../../../assets/js/services/userService';
+import vehicleService from '../../../../assets/js/services/vehicleService';
 import contractService from '../../../../assets/js/services/contractService';
 import paymentService from '../../../../assets/js/services/paymentService';
+import swapService from '../../../../assets/js/services/swapService';
 import { normalizeDashboardStats, extractErrorMessage } from '../../../../assets/js/utils/apiHelpers';
 import {
   validateUser,
@@ -46,15 +48,15 @@ export const useDashboardData = () => {
       const userId = validation.userId;
       console.log('🆔 Using userId for API:', userId);
       
-      // Prefer aggregated dashboard API with flexible shape + offline fallback
+      // Prefer aggregated dashboard API for stats; vehicles luôn lấy từ API chuyên biệt
       const dashboardResp = await userService.getUserDashboard(userId);
       console.log('📊 Dashboard API Response:', dashboardResp);
       
       if (dashboardResp.success && dashboardResp.data) {
         const root = dashboardResp.data;
-        // Normalize shape: some backends wrap in { user, vehicles, dashboard }
-        const userData = root.user || root;
-        const userVehicles = root.vehicles || userData.vehicles || [];
+        // Vehicles: gọi endpoint chuyên biệt
+        const vehiclesResp = await vehicleService.getUserVehicles(userId);
+        const userVehicles = vehiclesResp.success ? (vehiclesResp.data || []) : [];
         const userDashboard = root.dashboard || {};
         
         // Process vehicles
@@ -81,12 +83,14 @@ export const useDashboardData = () => {
         
         console.log('✅ Successfully loaded dashboard data');
       } else {
-        // Fallback: try basic user API or local demo
-        const userResponse = await userService.getUserById(userId);
+        // Fallback: try driver profile API
+        const userResponse = await userService.getDriverProfile(userId);
         console.log('📄 User API Response (fallback):', userResponse);
         if (userResponse.success && userResponse.data) {
           const userData = userResponse.data;
-          const userVehicles = userData.vehicles || [];
+          // Still fetch vehicles via API chuyên biệt
+          const vehiclesResp = await vehicleService.getUserVehicles(userId);
+          const userVehicles = vehiclesResp.success ? (vehiclesResp.data || []) : [];
           const userDashboard = userData.dashboard || {};
           const processedVehicles = processVehicles(userVehicles);
           const finalVehicles = updateVehiclesFromSession(processedVehicles);
@@ -124,19 +128,24 @@ export const useDashboardData = () => {
     }
   };
 
-  // Fetch contracts helper
+  // Fetch contracts helper: use vehicle plan API
   const fetchContracts = async (userId, userDashboard) => {
     try {
-      const contractsResponse = await contractService.getContracts(userId);
-      console.log('📝 Contract service response:', contractsResponse);
-      
-      if (contractsResponse.success && contractsResponse.data?.length > 0) {
-        return processContracts(contractsResponse.data, userDashboard);
+      let selected = null;
+      try { selected = JSON.parse(sessionStorage.getItem('selectedVehicle')); } catch {}
+      if (!selected?.id && !selected?.vehicleId) {
+        return processContracts([], userDashboard);
       }
-      
+      const vehicleId = selected.id || selected.vehicleId;
+      const planResp = await contractService.getVehiclePlan(vehicleId);
+      console.log('📝 Vehicle plan response:', planResp);
+      if (planResp.success && planResp.data) {
+        const contractsArr = Array.isArray(planResp.data) ? planResp.data : [planResp.data];
+        return processContracts(contractsArr, userDashboard);
+      }
       return processContracts([], userDashboard);
     } catch (err) {
-      console.warn('⚠️ Contract service failed:', err);
+      console.warn('⚠️ Vehicle plan API failed:', err);
       return processContracts([], userDashboard);
     }
   };
@@ -157,6 +166,18 @@ export const useDashboardData = () => {
       return [];
     }
   };
+
+  // After initial loads, optionally fetch swaps count for "Tổng lượt đổi pin"
+  useEffect(() => {
+    (async () => {
+      try {
+        const resp = await swapService.getAllSwaps();
+        if (resp.success) {
+          setStats((s) => ({ ...s, totalSwaps: Array.isArray(resp.data) ? resp.data.length : 0 }));
+        }
+      } catch {}
+    })();
+  }, []);
 
   // Fetch on mount
   useEffect(() => {

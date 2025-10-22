@@ -127,4 +127,64 @@ public class SwapController {
         
         return response;
     }
+
+    /**
+     * Create an automatic swap record (system-generated)
+     * This endpoint uses the DAO method that defaults status to 'AUTO' and sets swap_date to current time.
+     * Accessible at POST /api/swaps/auto
+     */
+    @PostMapping("/swaps/auto")
+    public Map<String, Object> createAutoSwap(@RequestBody Swap swap) {
+        System.out.println("SwapController: Creating AUTO swap for user: " + swap.getUserId());
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            boolean created = swapDao.createAutoSwap(swap);
+
+            if (created) {
+                response.put("success", true);
+                response.put("data", swap);
+                response.put("message", "Tạo bản ghi auto swap thành công");
+            } else {
+                response.put("success", false);
+                response.put("message", "Không thể tạo bản ghi auto swap");
+                response.put("data", null);
+            }
+
+        } catch (Exception e) {
+            System.err.println("SwapController Error (auto): " + e.getMessage());
+            e.printStackTrace();
+            response.put("success", false);
+            response.put("message", "Lỗi khi tạo bản ghi auto swap: " + e.getMessage());
+            response.put("data", null);
+        }
+
+        return response;
+    }
+
+    /**
+     * Confirm (complete) a swap and apply related updates (vehicle, batteries, slot)
+     * POST /api/swaps/{swapId}/confirm
+     */
+    @PostMapping("/swaps/{swapId}/confirm")
+    public Map<String, Object> confirmSwap(@PathVariable int swapId) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            boolean ok = swapDao.completeSwap(swapId);
+            if (ok) {
+                response.put("success", true);
+                response.put("message", "Swap completed and related records updated");
+                // Return the updated swap and related rows for verification
+                response.put("data", swapDao.getSwapById(swapId));
+            } else {
+                response.put("success", false);
+                response.put("message", "Could not complete swap or no changes applied");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.put("success", false);
+            response.put("message", "Error while confirming swap: " + e.getMessage());
+        }
+        return response;
+    }
 }

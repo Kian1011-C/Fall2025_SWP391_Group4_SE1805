@@ -75,6 +75,62 @@ class UserService {
       return { success: false, message: errorInfo.message || 'Lỗi khi tạo người dùng', error: errorInfo };
     }
   }
+
+  /**
+   * Lấy thông tin dashboard của người dùng (Driver).
+   * @param {string} userId - ID của người dùng
+   */
+  async getUserDashboard(userId) {
+    try {
+      console.log(`UserService: Lấy dashboard cho user ${userId}`);
+      
+      // Thử endpoint có sẵn trước
+      const response = await apiUtils.get(`/api/users/${userId}/statistics`);
+      
+      if (response.success) {
+        // Tạo cấu trúc dashboard từ dữ liệu statistics
+        const dashboardData = {
+          user: response.data.user || { id: userId },
+          vehicles: response.data.vehicles || [],
+          dashboard: {
+            totalSwaps: response.data.totalSwaps || 0,
+            activeVehicles: response.data.activeVehicles || 0,
+            monthlySpent: response.data.monthlySpent || 0,
+            totalDistance: response.data.totalDistance || 0
+          }
+        };
+        
+        return { success: true, data: dashboardData, message: 'Lấy dashboard thành công' };
+      } else {
+        throw new Error(response.message || 'Không thể lấy dashboard');
+      }
+    } catch (error) {
+      console.error('Lỗi khi lấy dashboard:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return { success: false, message: errorInfo.message || 'Lỗi khi lấy dashboard', error: errorInfo };
+    }
+  }
+
+  /**
+   * Lấy thông tin profile của driver.
+   * @param {string} userId - ID của driver
+   */
+  async getDriverProfile(userId) {
+    try {
+      console.log(`UserService: Lấy profile driver ${userId}`);
+      const response = await apiUtils.get(`/api/driver/profile/${userId}`);
+      
+      if (response.success) {
+        return { success: true, data: response.data, message: 'Lấy profile driver thành công' };
+      } else {
+        throw new Error(response.message || 'Không thể lấy profile driver');
+      }
+    } catch (error) {
+      console.error('Lỗi khi lấy profile driver:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return { success: false, message: errorInfo.message || 'Lỗi khi lấy profile driver', error: errorInfo };
+    }
+  }
 }
 
 export default new UserService();

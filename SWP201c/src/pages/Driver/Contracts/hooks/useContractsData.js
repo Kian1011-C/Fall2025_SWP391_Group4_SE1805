@@ -14,17 +14,18 @@ export const useContractsData = () => {
     setError(null);
 
     try {
-      const user = JSON.parse(localStorage.getItem('user'));
+      // Get user from localStorage (where authService saves it)
+      const user = JSON.parse(localStorage.getItem('currentUser'));
       
       if (!user || !user.id) {
         throw new Error('Không tìm thấy thông tin người dùng');
       }
 
-      // Note: Backend cần API GET /api/users/:userId/contracts
-      const response = await contractService.getContracts(user.id);
+      // Gọi API đúng: /api/contracts/user/{userId}
+      const response = await contractService.getUserContracts(user.id);
       
-      if (response && Array.isArray(response)) {
-        setContracts(response);
+      if (response.success && response.data) {
+        setContracts(response.data || []);
       } else {
         // Mock data for development
         setContracts([]);

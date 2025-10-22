@@ -9,23 +9,23 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/stations")
 public class StationController {
-    
+
     private final StationDao stationDao = new StationDao();
 
     @GetMapping
     public ResponseEntity<?> getStations(
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String search) {
-        
+
         try {
             List<Station> stations;
-            
+
             if (status != null && !status.isEmpty()) {
                 stations = stationDao.getStationsByStatus(status);
             } else {
                 stations = stationDao.getAllStations();
             }
-            
+
             List<Map<String, Object>> stationMaps = new ArrayList<>();
             for (Station station : stations) {
                 Map<String, Object> stationMap = new HashMap<>();
@@ -33,10 +33,10 @@ public class StationController {
                 stationMap.put("name", station.getName());
                 stationMap.put("address", station.getLocation());
                 stationMap.put("status", "active".equals(station.getStatus()) ? "Hoạt động" : "Bảo trì");
-                
+
                 // Lấy thông tin chi tiết từ database
                 Map<String, Object> details = stationDao.getStationDetails(station.getStationId());
-                
+
                 stationMap.put("totalSlots", details.getOrDefault("totalSlots", 0));
                 stationMap.put("availableSlots", details.getOrDefault("availableSlots", 0));
                 // Ensure availableSlots is the count of full batteries (ready to use)
@@ -47,7 +47,7 @@ public class StationController {
                 stationMap.put("totalBatteries", details.getOrDefault("totalBatteries", 0));
                 stationMap.put("availableBatteries", details.getOrDefault("availableBatteries", 0));
                 stationMap.put("chargingBatteries", details.getOrDefault("chargingBatteries", 0));
-                
+
                 // Các field khác có thể hardcode tạm thời (sẽ cần thêm vào DB sau)
                 stationMap.put("phone", "028-1234-567" + station.getStationId());
                 stationMap.put("manager", "Manager " + station.getStationId());
@@ -61,7 +61,7 @@ public class StationController {
                 stationMap.put("services", Arrays.asList("Đổi pin", "Sạc nhanh", "Bảo trì"));
                 stationMap.put("amenities", Arrays.asList("Parking", "Restroom"));
                 stationMap.put("totalTransactions", ((Integer) details.getOrDefault("todayTransactions", 0)) * 30); // Estimate monthly
-                
+
                 // Apply search filter if provided
                 if (search == null || search.isEmpty() ||
                     station.getName().toLowerCase().contains(search.toLowerCase()) ||
@@ -69,12 +69,12 @@ public class StationController {
                     stationMaps.add(stationMap);
                 }
             }
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("data", stationMaps);
             response.put("total", stationMaps.size());
-            
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Map<String, Object> response = new HashMap<>();
@@ -82,7 +82,7 @@ public class StationController {
             response.put("message", "Error fetching stations: " + e.getMessage());
             response.put("data", new ArrayList<>());
             response.put("total", 0);
-            
+
             return ResponseEntity.status(500).body(response);
         }
     }
@@ -91,7 +91,7 @@ public class StationController {
     public ResponseEntity<?> getStationById(@PathVariable Long id) {
         try {
             Station station = stationDao.getStationById(id.intValue());
-            
+
             Map<String, Object> response = new HashMap<>();
             if (station != null) {
                 Map<String, Object> stationMap = new HashMap<>();
@@ -99,7 +99,7 @@ public class StationController {
                 stationMap.put("name", station.getName());
                 stationMap.put("address", station.getLocation());
                 stationMap.put("status", "active".equals(station.getStatus()) ? "Hoạt động" : "Bảo trì");
-                
+
                 response.put("success", true);
                 response.put("data", stationMap);
             } else {
@@ -107,7 +107,7 @@ public class StationController {
                 response.put("message", "Station not found");
                 return ResponseEntity.status(404).body(response);
             }
-            
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Map<String, Object> response = new HashMap<>();
@@ -121,11 +121,11 @@ public class StationController {
     public ResponseEntity<?> getAllStationsStats() {
         try {
             Map<String, Object> statistics = stationDao.getStationStatistics();
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("data", statistics);
-            
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Map<String, Object> response = new HashMap<>();
