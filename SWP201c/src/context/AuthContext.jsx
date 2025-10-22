@@ -1,5 +1,5 @@
 // Auth Context - Quản lý authentication
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { showToast } from '../assets/js/helpers/helpers';
 import authService from '../assets/js/services/authService';
@@ -22,11 +22,7 @@ export const AuthProvider = ({ children }) => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [currentView, setCurrentView] = useState('landing');
 
-  // Thêm log để kiểm tra giá trị currentView
-  console.log('🔍 AuthContext: currentView =', currentView);
-
-  const handleLogin = async (email, password) => {
-    console.log('🔐 AuthContext: Starting login process for:', email);
+  const handleLogin = useCallback(async (email, password) => {
     setIsLoggingIn(true);
     try {
       const response = await authService.login({ email, password });
@@ -79,9 +75,9 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setIsLoggingIn(false);
     }
-  };
+  }, [navigate]);
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     try {
       await authService.logout();
       setCurrentUser(null);
@@ -92,9 +88,9 @@ export const AuthProvider = ({ children }) => {
       console.error('Logout error:', error);
       showToast('Có lỗi xảy ra khi đăng xuất!', 'error');
     }
-  };
+  }, [navigate]);
 
-  const value = {
+  const value = useMemo(() => ({
     currentUser,
     setCurrentUser,
     showLoginModal,
@@ -106,7 +102,15 @@ export const AuthProvider = ({ children }) => {
     setCurrentView,
     handleLogin,
     handleLogout,
-  };
+  }), [
+    currentUser,
+    showLoginModal,
+    showRegisterModal,
+    isLoggingIn,
+    currentView,
+    handleLogin,
+    handleLogout
+  ]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

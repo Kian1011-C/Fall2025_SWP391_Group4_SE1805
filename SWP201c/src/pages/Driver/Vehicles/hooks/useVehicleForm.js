@@ -48,7 +48,8 @@ export const useVehicleForm = (onSuccess) => {
     setFormErrors({});
 
     try {
-      const user = JSON.parse(sessionStorage.getItem('user'));
+      // Get user from localStorage (where authService saves it)
+      const user = JSON.parse(localStorage.getItem('currentUser'));
       const userId = getUserId(user);
 
       if (!userId) {

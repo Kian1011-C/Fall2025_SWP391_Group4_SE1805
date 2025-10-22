@@ -57,12 +57,8 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// "Gatekeeper" component for Driver
+// Driver Layout Component
 function ProtectedDriverLayout() {
-  const { selectedVehicle } = useAuth();
-  if (!selectedVehicle) {
-    return <Navigate to="/driver/select-vehicle" replace />;
-  }
   return <DriverLayout />;
 }
 
@@ -75,12 +71,11 @@ function AppContent() {
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           {/* === DRIVER ROUTES === */}
-          <Route path="/driver/select-vehicle" element={<DriverRoute><VehicleSelectionScreen /></DriverRoute>} />
           <Route path="/driver" element={<DriverRoute><ProtectedDriverLayout /></DriverRoute>}>
             <Route index element={<Navigate to="dashboard" replace />} /> 
             <Route path="dashboard" element={<DriverDashboard />} />
             <Route path="swap-battery" element={<DriverSwapBattery />} />
-            <Route path="vehicles" element={<div>Trang Quản lý Xe</div>} />
+            <Route path="vehicles" element={<VehicleSelectionScreen />} />
             <Route path="stations-map" element={<DriverStationsMap />} />
             <Route path="subscriptions" element={<DriverSubscriptions />} />
             <Route path="contracts" element={<DriverContracts />} />

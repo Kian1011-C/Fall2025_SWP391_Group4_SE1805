@@ -23,19 +23,22 @@
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px); /* Safari compatibility */
   
-  /* Flexbox để căn giữa modal */
+  /* Flexbox để căn modal lên trên */
   display: flex;
-  align-items: center;      /* Căn giữa theo chiều dọc */
-  justify-content: center;  /* Căn giữa theo chiều ngang */
+  align-items: flex-start;      /* Căn lên trên thay vì center */
+  justify-content: center;      /* Căn giữa theo chiều ngang */
   
   /* Z-index cao để hiển thị trên tất cả content */
   z-index: 1000;
   
-  /* Padding để modal không chạm viền màn hình trên mobile */
-  padding: 20px;
+  /* Padding để modal không chạm viền màn hình + thêm padding-top */
+  padding: 80px 20px 20px 20px;  /* top right bottom left */
   
   /* Animation khi modal xuất hiện */
   animation: fadeIn 0.3s ease-in-out;
+  
+  /* Cho phép scroll nếu modal quá cao */
+  overflow-y: auto;
 }
 
 /* Hiệu ứng fade in cho overlay */

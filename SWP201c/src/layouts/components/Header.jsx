@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Header = ({ title = 'Dashboard' }) => {
+function Header({ title = 'Dashboard' }) {
   return (
     <div style={{
       height: '70px',
@@ -19,8 +19,7 @@ const Header = ({ title = 'Dashboard' }) => {
       </h2>
     </div>
   );
-};
+}
 
-export default Header;
-
+export default React.memo(Header);
 

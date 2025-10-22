@@ -81,8 +81,8 @@ export const useDashboardData = () => {
         
         console.log('✅ Successfully loaded dashboard data');
       } else {
-        // Fallback: try basic user API or local demo
-        const userResponse = await userService.getUserById(userId);
+        // Fallback: try driver profile API
+        const userResponse = await userService.getDriverProfile(userId);
         console.log('📄 User API Response (fallback):', userResponse);
         if (userResponse.success && userResponse.data) {
           const userData = userResponse.data;
@@ -127,11 +127,15 @@ export const useDashboardData = () => {
   // Fetch contracts helper
   const fetchContracts = async (userId, userDashboard) => {
     try {
-      const contractsResponse = await contractService.getContracts(userId);
+      const contractsResponse = await contractService.getAllContracts();
       console.log('📝 Contract service response:', contractsResponse);
       
       if (contractsResponse.success && contractsResponse.data?.length > 0) {
-        return processContracts(contractsResponse.data, userDashboard);
+        // Filter contracts for current user
+        const userContracts = contractsResponse.data.filter(contract => 
+          contract.userId === userId || contract.driverId === userId
+        );
+        return processContracts(userContracts, userDashboard);
       }
       
       return processContracts([], userDashboard);

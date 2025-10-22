@@ -14,17 +14,22 @@ export const useContractsData = () => {
     setError(null);
 
     try {
-      const user = JSON.parse(localStorage.getItem('user'));
+      // Get user from localStorage (where authService saves it)
+      const user = JSON.parse(localStorage.getItem('currentUser'));
       
       if (!user || !user.id) {
         throw new Error('Không tìm thấy thông tin người dùng');
       }
 
-      // Note: Backend cần API GET /api/users/:userId/contracts
-      const response = await contractService.getContracts(user.id);
+      // Use getAllContracts for now (backend needs user-specific contracts API)
+      const response = await contractService.getAllContracts();
       
-      if (response && Array.isArray(response)) {
-        setContracts(response);
+      if (response.success && response.data) {
+        // Filter contracts for current user (temporary solution)
+        const userContracts = response.data.filter(contract => 
+          contract.userId === user.id || contract.driverId === user.id
+        );
+        setContracts(userContracts);
       } else {
         // Mock data for development
         setContracts([]);

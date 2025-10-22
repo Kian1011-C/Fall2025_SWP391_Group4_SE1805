@@ -52,12 +52,6 @@ export const normalizePlateNumber = (plate) => {
 export const findVehicleContract = (vehicle, contracts) => {
   if (!vehicle || !contracts || contracts.length === 0) return null;
 
-  console.log('🔍 Finding contract for vehicle:', {
-    vehicleId: vehicle.id,
-    plateNumber: vehicle.plateNumber,
-    availableContracts: contracts.length
-  });
-
   const foundContract = contracts.find(contract => {
     // Match by ID (if both exist)
     const matchById = vehicle.id && contract.vehicleId && 
@@ -70,18 +64,9 @@ export const findVehicleContract = (vehicle, contracts) => {
     const matchByPlate = vehiclePlateNorm && contractPlateNorm && 
                         vehiclePlateNorm === contractPlateNorm;
 
-    console.log('  Checking contract:', {
-      contractId: contract.id,
-      contractNumber: contract.contractNumber,
-      matchById,
-      matchByPlate,
-      matched: matchById || matchByPlate
-    });
-
     return matchById || matchByPlate;
   });
 
-  console.log(foundContract ? '✅ Found contract' : '❌ No contract found');
   return foundContract;
 };
 

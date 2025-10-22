@@ -1,6 +1,6 @@
 // Driver/Vehicles/index.jsx
 // Vehicles page (container inlined)
-import React from 'react';
+import React, { useMemo } from 'react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import { useVehiclesData, useVehicleModals, useVehicleForm } from './hooks';
 import { findVehicleContract } from './utils';
@@ -42,10 +42,10 @@ const VehiclesContainer = () => {
     refetch();
   });
 
-  // Get contract for selected vehicle
-  const selectedVehicleContract = selectedVehicle
-    ? findVehicleContract(selectedVehicle, contracts)
-    : null;
+  // Get contract for selected vehicle - useMemo để tránh tính toán lại mỗi lần render
+  const selectedVehicleContract = useMemo(() => {
+    return selectedVehicle ? findVehicleContract(selectedVehicle, contracts) : null;
+  }, [selectedVehicle, contracts]);
 
   // Handle add vehicle
   const handleAddVehicle = async () => {

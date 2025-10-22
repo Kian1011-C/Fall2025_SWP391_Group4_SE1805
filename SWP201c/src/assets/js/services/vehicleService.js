@@ -1,7 +1,60 @@
 // Vehicle Service
 // Handle vehicle operations and management
 
-import { apiUtils } from '../config/api.js';
+import { apiUtils, API_CONFIG } from '../config/api.js';
+
+// Demo fallback data khi backend không khả dụng
+const DEMO_VEHICLES = {
+  'driver001': [
+    {
+      id: 'vehicle001',
+      userId: 'driver001',
+      licensePlate: '30B-67890',
+      brand: 'VinFast',
+      model: 'VF-8',
+      year: 2024,
+      color: 'Đỏ',
+      vin: '__90IBCDEF',
+      batteryType: 'LiFePO4-60kWh',
+      status: 'active',
+      currentBatteryId: 'battery001',
+      batteryHealth: 91.2,
+      mileage: 8785.6
+    },
+    {
+      id: 'vehicle002',
+      userId: 'driver001',
+      licensePlate: '30A-12345',
+      brand: 'VinFast',
+      model: 'VF-e34',
+      year: 2024,
+      color: 'Xanh',
+      vin: '__89OABCDE',
+      batteryType: 'LiFePO4-60kWh',
+      status: 'active',
+      currentBatteryId: 'battery002',
+      batteryHealth: 88.7,
+      mileage: 15490.7
+    }
+  ],
+  'driver002': [
+    {
+      id: 'vehicle003',
+      userId: 'driver002',
+      licensePlate: '29C-54321',
+      brand: 'VinFast',
+      model: 'VF-9',
+      year: 2024,
+      color: 'Trắng',
+      vin: '__88XYZABC',
+      batteryType: 'LiFePO4-90kWh',
+      status: 'active',
+      currentBatteryId: 'battery003',
+      batteryHealth: 95.5,
+      mileage: 12300
+    }
+  ]
+};
 
 class VehicleService {
   // Get all vehicles for a user
@@ -24,6 +77,20 @@ class VehicleService {
     } catch (error) {
       console.error('Get user vehicles error:', error);
       const errorInfo = apiUtils.handleError(error);
+      
+      // Nếu backend lỗi và demo fallback được bật, trả về demo data
+      if (API_CONFIG.USE_DEMO_FALLBACK && (errorInfo.status === 405 || errorInfo.status === 0 || errorInfo.status === 404)) {
+        console.warn('Backend không khả dụng, sử dụng demo vehicles data');
+        const demoVehicles = DEMO_VEHICLES[userId] || [];
+        return {
+          success: true,
+          data: demoVehicles,
+          total: demoVehicles.length,
+          message: '⚠️ Đang dùng dữ liệu demo (Backend chưa sẵn sàng)',
+          isDemo: true
+        };
+      }
+      
       return {
         success: false,
         message: errorInfo.message || 'Lỗi khi lấy danh sách phương tiện',

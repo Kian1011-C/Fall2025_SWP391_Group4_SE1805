@@ -45,15 +45,18 @@ export const useSubscriptionsData = (currentUser) => {
       // Get current user contracts/subscriptions
       console.log('📋 Fetching user contracts for userId:', userId);
       try {
-        const contractsResponse = await contractService.getContracts(userId);
+        const contractsResponse = await contractService.getAllContracts();
         console.log('📋 User contracts response:', contractsResponse);
         
         if (contractsResponse.success && contractsResponse.data) {
-          const contracts = contractsResponse.data;
-          setUserContracts(contracts);
+          // Filter contracts for current user
+          const userContracts = contractsResponse.data.filter(contract => 
+            contract.userId === userId || contract.driverId === userId
+          );
+          setUserContracts(userContracts);
           
           // Find active subscription
-          const activeContract = findActiveSubscription(contracts);
+          const activeContract = findActiveSubscription(userContracts);
           
           if (activeContract) {
             console.log('✅ Found active contract:', activeContract);

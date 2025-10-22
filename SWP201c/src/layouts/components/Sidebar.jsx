@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import menuItems from '../config/menuItems';
@@ -8,23 +8,23 @@ const Sidebar = ({ role = 'driver' }) => {
   const location = useLocation();
   const { currentUser, handleLogout } = useAuth();
 
-  const isActive = (path) => location.pathname === path;
+  const isActive = useCallback((path) => location.pathname === path, [location.pathname]);
 
-  const getRoleColor = () => {
+  const getRoleColor = useMemo(() => {
     switch (role) {
       case 'admin': return '#ffa500';
       case 'staff': return '#19c37d';
       default: return '#6ab7ff';
     }
-  };
+  }, [role]);
 
-  const getRoleLabel = () => {
+  const getRoleLabel = useMemo(() => {
     switch (role) {
       case 'admin': return 'Admin';
       case 'staff': return 'Staff';
       default: return 'Driver';
     }
-  };
+  }, [role]);
 
   return (
     <div style={{
@@ -52,7 +52,7 @@ const Sidebar = ({ role = 'driver' }) => {
             width: '40px',
             height: '40px',
             borderRadius: '12px',
-            background: `linear-gradient(135deg, ${getRoleColor()}, ${getRoleColor()}dd)`,
+            background: `linear-gradient(135deg, ${getRoleColor}, ${getRoleColor}dd)`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -62,7 +62,7 @@ const Sidebar = ({ role = 'driver' }) => {
           </div>
           <div>
             <div style={{ fontWeight: '700', fontSize: '18px' }}>SWP201</div>
-            <div style={{ fontSize: '12px', color: '#9aa4c7' }}>{getRoleLabel()} Panel</div>
+            <div style={{ fontSize: '12px', color: '#9aa4c7' }}>{getRoleLabel}</div>
           </div>
         </div>
       </div>
@@ -79,6 +79,7 @@ const Sidebar = ({ role = 'driver' }) => {
             <button
               key={index}
               onClick={() => navigate(item.path)}
+              className="sidebar-menu-item"
               style={{
                 width: '100%',
                 display: 'flex',
@@ -89,25 +90,20 @@ const Sidebar = ({ role = 'driver' }) => {
                 marginBottom: '8px',
                 cursor: 'pointer',
                 transition: 'all 0.2s',
-                background: active ? `${getRoleColor()}33` : 'transparent',
-                borderLeft: active ? `3px solid ${getRoleColor()}` : '3px solid transparent',
+                background: active ? `${getRoleColor}33` : 'transparent',
+                borderLeft: active ? `3px solid ${getRoleColor}` : '3px solid transparent',
                 borderTop: 'none',
                 borderRight: 'none',
                 borderBottom: 'none',
-                textAlign: 'left'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = `${getRoleColor()}22`;
-              }}
-              onMouseLeave={(e) => {
-                if (!active) e.currentTarget.style.background = 'transparent';
+                textAlign: 'left',
+                color: '#FFFFFF'
               }}
             >
               <span style={{ fontSize: '20px' }}>{item.icon}</span>
               <span style={{ 
                 fontSize: '14px', 
                 fontWeight: active ? '600' : '500',
-                color: active ? getRoleColor() : '#FFFFFF'
+                color: active ? getRoleColor : '#FFFFFF'
               }}>
                 {item.label}
               </span>
@@ -131,7 +127,7 @@ const Sidebar = ({ role = 'driver' }) => {
             width: '40px',
             height: '40px',
             borderRadius: '50%',
-            background: `linear-gradient(135deg, ${getRoleColor()}, ${getRoleColor()}dd)`,
+            background: `linear-gradient(135deg, ${getRoleColor}, ${getRoleColor}dd)`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -154,6 +150,7 @@ const Sidebar = ({ role = 'driver' }) => {
               handleLogout();
             }
           }}
+          className="logout-button"
           style={{
             width: '100%',
             padding: '10px',
@@ -166,12 +163,6 @@ const Sidebar = ({ role = 'driver' }) => {
             fontWeight: '600',
             transition: 'all 0.2s'
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'rgba(255, 71, 87, 0.3)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'rgba(255, 71, 87, 0.2)';
-          }}
         >
           🚪 Đăng xuất
         </button>
@@ -180,6 +171,5 @@ const Sidebar = ({ role = 'driver' }) => {
   );
 };
 
-export default Sidebar;
-
+export default React.memo(Sidebar);
 
