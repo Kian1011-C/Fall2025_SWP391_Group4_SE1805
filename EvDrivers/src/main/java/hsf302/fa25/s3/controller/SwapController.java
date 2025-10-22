@@ -161,4 +161,30 @@ public class SwapController {
 
         return response;
     }
+
+    /**
+     * Confirm (complete) a swap and apply related updates (vehicle, batteries, slot)
+     * POST /api/swaps/{swapId}/confirm
+     */
+    @PostMapping("/swaps/{swapId}/confirm")
+    public Map<String, Object> confirmSwap(@PathVariable int swapId) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            boolean ok = swapDao.completeSwap(swapId);
+            if (ok) {
+                response.put("success", true);
+                response.put("message", "Swap completed and related records updated");
+                // Return the updated swap and related rows for verification
+                response.put("data", swapDao.getSwapById(swapId));
+            } else {
+                response.put("success", false);
+                response.put("message", "Could not complete swap or no changes applied");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.put("success", false);
+            response.put("message", "Error while confirming swap: " + e.getMessage());
+        }
+        return response;
+    }
 }

@@ -108,7 +108,8 @@
       "name": "Driver (frontend)",
       "item": [
         { "name": "Get towers by station", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/driver/towers?stationId=1" } }, "response": [] },
-        { "name": "Get slots by tower", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/driver/slots?towerId=1" } }, "response": [] }
+        { "name": "Get slots by tower", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/driver/slots?towerId=1" } }, "response": [] },
+        { "name": "Get one empty slot in tower", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/driver/slot/empty?towerId=1" } }, "response": [] }
       ]
     },
     {
