@@ -1,9 +1,22 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { SwapContext } from '../index';
 import { formatPercentage } from '../utils/swapHelpers'; 
 
 const SwapSuccess = ({ onFinish }) => {
     const { summary } = useContext(SwapContext);
+
+    // XÓA SESSION STORAGE KHI HOÀN THÀNH ĐỔI PIN
+    useEffect(() => {
+        try {
+            sessionStorage.removeItem('selectedStation');
+            sessionStorage.removeItem('selectedCabinet');
+            sessionStorage.removeItem('oldBatteryId');
+            sessionStorage.removeItem('newBatteryId');
+            console.log('Đã xóa sessionStorage sau khi hoàn thành đổi pin');
+        } catch (error) {
+            console.error('Lỗi khi xóa sessionStorage:', error);
+        }
+    }, []);
 
     if (!summary) {
         return <div>Đang tải tóm tắt giao dịch...</div>;

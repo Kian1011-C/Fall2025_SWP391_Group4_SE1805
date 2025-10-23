@@ -1,5 +1,5 @@
 // hooks/useSwapData.js
-import { useState, useContext } from 'react'; // Thêm useContext
+import { useState } from 'react';
 import swapService from '/src/assets/js/services/swapService.js';
 import stationService from '/src/assets/js/services/stationService.js'; // Import API của trạm
 // !!! GIẢ ĐỊNH QUAN TRỌNG:
@@ -123,6 +123,29 @@ export const useSwapData = (goToStep, STEPS) => {
         setIsLoading(false);
     };
 
+    // Hàm hoàn thành đổi pin (gọi từ TakeNewBattery)
+    const completeSwap = async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            // Lấy thông tin pin cũ từ sessionStorage
+            const oldBatteryId = sessionStorage.getItem('oldBatteryId');
+            const newBatteryId = sessionStorage.getItem('newBatteryId');
+            
+            console.log('Hoàn thành đổi pin với:', { oldBatteryId, newBatteryId });
+            
+            // Gọi confirmSwap với thông tin pin cũ
+            await confirmSwap({
+                batteryCode: oldBatteryId,
+                batteryPercent: Math.floor(Math.random() * 56) + 5 // Random 5-60%
+            });
+        } catch (err) {
+            console.error('Lỗi khi hoàn thành đổi pin:', err);
+            setError('Lỗi khi hoàn thành đổi pin');
+        }
+        setIsLoading(false);
+    };
+
     // Hàm reset state khi hoàn thành hoặc hủy
     const resetSwapData = () => {
         setSelectedStation(null);
@@ -143,6 +166,7 @@ export const useSwapData = (goToStep, STEPS) => {
         setSelectedStation,
         initiateSwap,
         confirmSwap,
+        completeSwap,
         resetSwapData,
         setError,
         // Cung cấp ID pin cũ thật cho component PlaceOldBattery.jsx
