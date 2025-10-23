@@ -1,0 +1,184 @@
+/* Dán vào file: src/assets/css/battery-swap.css */
+
+/* --- CSS cho Thanh Tiến Trình (ProgressBar) --- */
+.swap-progress-bar {
+  width: 100%;
+  padding: 24px;
+  background-color: #1f2937; /* Tương đương bg-gray-800 */
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.progress-bar-title {
+  font-size: 1.125rem; /* 18px */
+  font-weight: 600;
+  color: white;
+  margin-bottom: 16px;
+}
+
+.progress-steps-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 8px;
+}
+
+.step-line {
+  flex: 1;
+  height: 4px;
+  background-color: #4b5563; /* gray-600 */
+}
+.step-line.completed {
+  background-color: #22c55e; /* green-500 */
+}
+
+.step-circle {
+  width: 32px; /* w-8 */
+  height: 32px; /* h-8 */
+  border-radius: 9999px; /* rounded-full */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  background-color: #4b5563; /* bg-gray-600 */
+  color: #9ca3af; /* text-gray-400 */
+}
+
+.step-circle.current {
+  background-color: #3b82f6; /* bg-blue-500 */
+  color: white;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3); /* ring-4 ring-blue-300 */
+}
+
+.step-circle.completed {
+  background-color: #22c55e; /* bg-green-500 */
+  color: white;
+}
+
+.step-label {
+  margin-top: 8px;
+  font-size: 0.75rem; /* text-xs */
+  font-weight: 500;
+  color: #9ca3af; /* text-gray-400 */
+}
+.step-label.current {
+  color: #93c5fd; /* text-blue-300 */
+}
+
+
+/* --- CSS cho Chọn Trạm (StationSelector) --- */
+.station-selector-container {
+  margin-top: 32px;
+}
+
+.station-selector-title {
+  font-size: 1.5rem; /* text-2xl */
+  font-weight: 700;
+  color: white;
+  margin-bottom: 24px;
+}
+
+.station-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr)); /* grid-cols-1 */
+  gap: 24px; /* gap-6 */
+}
+/* Cho màn hình lớn hơn */
+@media (min-width: 768px) {
+  .station-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)); /* md:grid-cols-2 */
+  }
+}
+
+.station-card {
+  background-color: #1f2937; /* bg-gray-800 */
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+  transition: all 0.2s ease-in-out;
+}
+
+.station-card:not(.maintenance) {
+  cursor: pointer;
+}
+.station-card:not(.maintenance):hover {
+  background-color: #374151; /* hover:bg-gray-700 */
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  transform: translateY(-4px);
+}
+
+.station-card.maintenance {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.station-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.station-name {
+  font-size: 1.25rem; /* text-xl */
+  font-weight: 700;
+  color: white;
+}
+
+.station-status {
+  padding: 4px 12px;
+  font-size: 0.75rem; /* text-xs */
+  font-weight: 600;
+  border-radius: 9999px;
+}
+.station-status.active {
+  background-color: #065f46; /* bg-green-700 */
+  color: #a7f3d0; /* text-green-200 */
+}
+.station-status.maintenance {
+  background-color: #991b1b; /* bg-red-700 */
+  color: #fecaca; /* text-red-200 */
+}
+
+.station-address {
+  display: flex;
+  align-items: center;
+  color: #9ca3af; /* text-gray-400 */
+  font-size: 0.875rem; /* text-sm */
+}/* Thêm vào file: src/assets/css/battery-swap.css */
+
+/* Style cho thẻ Trụ khi được chọn */
+.station-card.selected {
+  background-color: #1d4ed8; /* Màu xanh blue */
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+  transform: translateY(-4px);
+}
+
+/* Nút Bắt đầu Đổi pin */
+.start-swap-button {
+  background-color: #2563eb; /* bg-blue-600 */
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 12px 32px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.start-swap-button:hover {
+  background-color: #1d4ed8; /* bg-blue-700 */
+}
+
+.start-swap-button:disabled {
+  background-color: #4b5563; /* bg-gray-600 */
+  opacity: 0.7;
+  cursor: not-allowed;
+}
