@@ -1,594 +1,184 @@
-/* ========================================
-   BATTERY SWAP PROCESS CSS
-   Quy trình đổi pin xe điện - 4 bước
-   ======================================== */
+/* Dán vào file: src/assets/css/battery-swap.css */
 
-/* ===== MODAL OVERLAY - Lớp phủ mờ ===== */
-.battery-swap-overlay {
-    position: fixed; /* Cố định toàn màn hình */
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.7); /* Nền đen trong suốt 70% */
-    backdrop-filter: blur(8px); /* Làm mờ background phía sau */
-    -webkit-backdrop-filter: blur(8px); /* Hỗ trợ Safari */
-    display: flex; /* Flexbox để căn giữa */
-    align-items: center; /* Căn giữa theo chiều dọc */
-    justify-content: center; /* Căn giữa theo chiều ngang */
-    z-index: 1000; /* Hiển thị trên tất cả các element khác */
-    padding: 20px; /* Khoảng cách với mép màn hình */
-    animation: fadeIn 0.3s ease-in-out; /* Animation hiện từ từ */
-}
-
-/* ===== MODAL CONTAINER - Khung chính ===== */
-.battery-swap-container {
-    background: white; /* Nền trắng */
-    border-radius: 16px; /* Bo góc mềm mại */
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3); /* Đổ bóng mạnh */
-    width: 100%; /* Chiều rộng 100% */
-    max-width: 900px; /* Tối đa 900px */
-    max-height: 90vh; /* Tối đa 90% chiều cao viewport */
-    overflow-y: auto; /* Cho phép cuộn nếu nội dung dài */
-    animation: scaleIn 0.3s ease-in-out; /* Animation phóng to */
-}
-
-/* ===== HEADER - Tiêu đề ===== */
-.battery-swap-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* Gradient tím */
-    padding: 24px; /* Padding rộng rãi */
-    border-radius: 16px 16px 0 0; /* Bo góc trên */
-    display: flex; /* Flexbox */
-    justify-content: space-between; /* Căn đều 2 đầu */
-    align-items: center; /* Căn giữa theo chiều dọc */
-    color: white; /* Chữ màu trắng */
-}
-
-.battery-swap-title {
-    font-size: 24px; /* Kích thước chữ lớn */
-    font-weight: 700; /* Chữ đậm */
-    margin: 0; /* Bỏ margin mặc định */
-    display: flex; /* Flexbox */
-    align-items: center; /* Căn giữa icon và text */
-    gap: 12px; /* Khoảng cách giữa icon và text */
-}
-
-.battery-swap-close-btn {
-    background: rgba(255, 255, 255, 0.2); /* Nền trắng trong suốt */
-    border: none; /* Bỏ border */
-    color: white; /* Chữ trắng */
-    font-size: 28px; /* Kích thước lớn */
-    width: 40px; /* Chiều rộng cố định */
-    height: 40px; /* Chiều cao cố định */
-    border-radius: 50%; /* Hình tròn */
-    cursor: pointer; /* Con trỏ pointer khi hover */
-    display: flex; /* Flexbox */
-    align-items: center; /* Căn giữa */
-    justify-content: center; /* Căn giữa */
-    transition: all 0.3s ease; /* Chuyển động mượt */
-}
-
-.battery-swap-close-btn:hover {
-    background: rgba(255, 255, 255, 0.3); /* Sáng hơn khi hover */
-    transform: rotate(90deg); /* Xoay 90 độ */
-}
-
-/* ===== PROGRESS BAR - Thanh tiến trình ===== */
+/* --- CSS cho Thanh Tiến Trình (ProgressBar) --- */
 .swap-progress-bar {
-    display: flex; /* Flexbox */
-    justify-content: space-between; /* Căn đều các bước */
-    padding: 30px 40px; /* Padding rộng */
-    background: #f8f9fa; /* Nền xám nhạt */
-    border-bottom: 1px solid #e0e0e0; /* Đường viền dưới */
+  width: 100%;
+  padding: 24px;
+  background-color: #1f2937; /* Tương đương bg-gray-800 */
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.progress-bar-title {
+  font-size: 1.125rem; /* 18px */
+  font-weight: 600;
+  color: white;
+  margin-bottom: 16px;
+}
+
+.progress-steps-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .progress-step {
-    display: flex; /* Flexbox */
-    flex-direction: column; /* Xếp dọc */
-    align-items: center; /* Căn giữa */
-    gap: 8px; /* Khoảng cách giữa icon và text */
-    flex: 1; /* Chiếm đều không gian */
-    position: relative; /* Để vẽ đường nối */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 8px;
 }
 
-/* Đường nối giữa các bước */
-.progress-step:not(:last-child)::after {
-    content: ''; /* Tạo element ảo */
-    position: absolute; /* Vị trí tuyệt đối */
-    top: 20px; /* Vị trí từ trên xuống */
-    left: 50%; /* Bắt đầu từ giữa */
-    width: 100%; /* Chiều rộng 100% */
-    height: 3px; /* Độ dày đường */
-    background: #e0e0e0; /* Màu xám nhạt mặc định */
-    z-index: 0; /* Nằm dưới icon */
+.step-line {
+  flex: 1;
+  height: 4px;
+  background-color: #4b5563; /* gray-600 */
 }
-
-/* Đường nối khi bước đã hoàn thành */
-.progress-step.completed:not(:last-child)::after {
-    background: #4caf50; /* Màu xanh lá */
-}
-
-/* Đường nối khi bước đang active */
-.progress-step.active:not(:last-child)::after {
-    background: linear-gradient(to right, #4caf50 50%, #e0e0e0 50%); /* Gradient nửa xanh nửa xám */
+.step-line.completed {
+  background-color: #22c55e; /* green-500 */
 }
 
 .step-circle {
-    width: 50px; /* Chiều rộng */
-    height: 50px; /* Chiều cao */
-    border-radius: 50%; /* Hình tròn */
-    background: #e0e0e0; /* Màu xám mặc định */
-    display: flex; /* Flexbox */
-    align-items: center; /* Căn giữa */
-    justify-content: center; /* Căn giữa */
-    font-size: 24px; /* Kích thước icon */
-    color: #999; /* Màu icon xám */
-    font-weight: 700; /* Chữ đậm */
-    z-index: 1; /* Hiển thị trên đường nối */
-    border: 4px solid white; /* Viền trắng */
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Đổ bóng nhẹ */
-    transition: all 0.3s ease; /* Chuyển động mượt */
+  width: 32px; /* w-8 */
+  height: 32px; /* h-8 */
+  border-radius: 9999px; /* rounded-full */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  background-color: #4b5563; /* bg-gray-600 */
+  color: #9ca3af; /* text-gray-400 */
 }
 
-/* Bước đã hoàn thành */
-.progress-step.completed .step-circle {
-    background: #4caf50; /* Màu xanh lá */
-    color: white; /* Icon trắng */
+.step-circle.current {
+  background-color: #3b82f6; /* bg-blue-500 */
+  color: white;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3); /* ring-4 ring-blue-300 */
 }
 
-/* Bước đang active */
-.progress-step.active .step-circle {
-    background: #667eea; /* Màu tím */
-    color: white; /* Icon trắng */
-    animation: pulse 2s infinite; /* Animation nhấp nháy */
+.step-circle.completed {
+  background-color: #22c55e; /* bg-green-500 */
+  color: white;
 }
 
 .step-label {
-    font-size: 14px; /* Kích thước chữ nhỏ */
-    font-weight: 600; /* Chữ hơi đậm */
-    color: #666; /* Màu xám */
-    text-align: center; /* Căn giữa */
+  margin-top: 8px;
+  font-size: 0.75rem; /* text-xs */
+  font-weight: 500;
+  color: #9ca3af; /* text-gray-400 */
+}
+.step-label.current {
+  color: #93c5fd; /* text-blue-300 */
 }
 
-/* Label của bước active */
-.progress-step.active .step-label {
-    color: #667eea; /* Màu tím */
-    font-weight: 700; /* Chữ đậm hơn */
+
+/* --- CSS cho Chọn Trạm (StationSelector) --- */
+.station-selector-container {
+  margin-top: 32px;
 }
 
-/* Label của bước completed */
-.progress-step.completed .step-label {
-    color: #4caf50; /* Màu xanh lá */
+.station-selector-title {
+  font-size: 1.5rem; /* text-2xl */
+  font-weight: 700;
+  color: white;
+  margin-bottom: 24px;
 }
 
-/* ===== CONTENT - Nội dung chính ===== */
-.swap-content {
-    padding: 40px; /* Padding rộng rãi */
-    min-height: 400px; /* Chiều cao tối thiểu */
+.station-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr)); /* grid-cols-1 */
+  gap: 24px; /* gap-6 */
 }
-
-/* ===== STEP 1: CHỌN TRẠM SẠC ===== */
-.station-list {
-    display: grid; /* Grid layout */
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Tự động chia cột */
-    gap: 20px; /* Khoảng cách giữa các card */
+/* Cho màn hình lớn hơn */
+@media (min-width: 768px) {
+  .station-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)); /* md:grid-cols-2 */
+  }
 }
 
 .station-card {
-    background: white; /* Nền trắng */
-    border: 2px solid #e0e0e0; /* Viền xám */
-    border-radius: 12px; /* Bo góc */
-    padding: 20px; /* Padding */
-    cursor: pointer; /* Con trỏ pointer */
-    transition: all 0.3s ease; /* Chuyển động mượt */
-    position: relative; /* Để thêm checkmark */
+  background-color: #1f2937; /* bg-gray-800 */
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+  transition: all 0.2s ease-in-out;
 }
 
-.station-card:hover {
-    border-color: #667eea; /* Viền tím khi hover */
-    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2); /* Đổ bóng tím */
-    transform: translateY(-4px); /* Nâng lên */
+.station-card:not(.maintenance) {
+  cursor: pointer;
+}
+.station-card:not(.maintenance):hover {
+  background-color: #374151; /* hover:bg-gray-700 */
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  transform: translateY(-4px);
 }
 
-.station-card.selected {
-    border-color: #667eea; /* Viền tím */
-    background: #f3f4ff; /* Nền tím nhạt */
-    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3); /* Đổ bóng tím đậm */
+.station-card.maintenance {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-/* Checkmark khi selected */
-.station-card.selected::after {
-    content: '✓'; /* Icon check */
-    position: absolute; /* Vị trí tuyệt đối */
-    top: 12px; /* Từ trên xuống */
-    right: 12px; /* Từ phải sang */
-    width: 28px; /* Chiều rộng */
-    height: 28px; /* Chiều cao */
-    background: #667eea; /* Nền tím */
-    color: white; /* Chữ trắng */
-    border-radius: 50%; /* Hình tròn */
-    display: flex; /* Flexbox */
-    align-items: center; /* Căn giữa */
-    justify-content: center; /* Căn giữa */
-    font-size: 16px; /* Kích thước icon */
-    font-weight: bold; /* Chữ đậm */
+.station-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
 }
 
 .station-name {
-    font-size: 18px; /* Kích thước chữ */
-    font-weight: 700; /* Chữ đậm */
-    color: #333; /* Màu đen */
-    margin-bottom: 8px; /* Khoảng cách dưới */
-}
-
-.station-location {
-    font-size: 14px; /* Kích thước nhỏ */
-    color: #666; /* Màu xám */
-    margin-bottom: 12px; /* Khoảng cách dưới */
-    display: flex; /* Flexbox */
-    align-items: center; /* Căn giữa */
-    gap: 6px; /* Khoảng cách icon */
+  font-size: 1.25rem; /* text-xl */
+  font-weight: 700;
+  color: white;
 }
 
 .station-status {
-    display: inline-block; /* Inline block */
-    padding: 4px 12px; /* Padding */
-    border-radius: 20px; /* Bo góc tròn */
-    font-size: 12px; /* Chữ nhỏ */
-    font-weight: 600; /* Chữ đậm */
+  padding: 4px 12px;
+  font-size: 0.75rem; /* text-xs */
+  font-weight: 600;
+  border-radius: 9999px;
 }
-
 .station-status.active {
-    background: #e8f5e9; /* Nền xanh nhạt */
-    color: #4caf50; /* Chữ xanh */
+  background-color: #065f46; /* bg-green-700 */
+  color: #a7f3d0; /* text-green-200 */
 }
-
 .station-status.maintenance {
-    background: #fff3e0; /* Nền cam nhạt */
-    color: #ff9800; /* Chữ cam */
+  background-color: #991b1b; /* bg-red-700 */
+  color: #fecaca; /* text-red-200 */
 }
 
-/* ===== STEP 2: XÁC NHẬN ĐỔI PIN ===== */
-.battery-comparison {
-    display: flex; /* Flexbox */
-    justify-content: center; /* Căn giữa */
-    align-items: center; /* Căn giữa dọc */
-    gap: 40px; /* Khoảng cách giữa 2 pin */
-    margin: 40px 0; /* Margin trên dưới */
+.station-address {
+  display: flex;
+  align-items: center;
+  color: #9ca3af; /* text-gray-400 */
+  font-size: 0.875rem; /* text-sm */
+}/* Thêm vào file: src/assets/css/battery-swap.css */
+
+/* Style cho thẻ Trụ khi được chọn */
+.station-card.selected {
+  background-color: #1d4ed8; /* Màu xanh blue */
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+  transform: translateY(-4px);
 }
 
-.battery-display {
-    display: flex; /* Flexbox */
-    flex-direction: column; /* Xếp dọc */
-    align-items: center; /* Căn giữa */
-    gap: 16px; /* Khoảng cách */
+/* Nút Bắt đầu Đổi pin */
+.start-swap-button {
+  background-color: #2563eb; /* bg-blue-600 */
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 12px 32px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.battery-icon-large {
-    font-size: 120px; /* Icon rất lớn */
-    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2)); /* Đổ bóng */
-    animation: batteryPulse 2s infinite; /* Animation nhấp nháy */
+.start-swap-button:hover {
+  background-color: #1d4ed8; /* bg-blue-700 */
 }
 
-.battery-old {
-    color: #ccc; /* Màu xám cho pin cũ */
+.start-swap-button:disabled {
+  background-color: #4b5563; /* bg-gray-600 */
+  opacity: 0.7;
+  cursor: not-allowed;
 }
-
-.battery-new {
-    color: #4caf50; /* Màu xanh cho pin mới */
-}
-
-.battery-label {
-    font-size: 18px; /* Kích thước chữ */
-    font-weight: 700; /* Chữ đậm */
-    color: #333; /* Màu đen */
-}
-
-.battery-percentage {
-    font-size: 32px; /* Số to */
-    font-weight: 700; /* Chữ đậm */
-    color: #667eea; /* Màu tím */
-}
-
-.arrow-icon {
-    font-size: 48px; /* Mũi tên lớn */
-    color: #667eea; /* Màu tím */
-    animation: arrowSlide 1.5s infinite; /* Animation trượt */
-}
-
-/* ===== STEP 3: ĐANG XỬ LÝ ===== */
-.processing-container {
-    display: flex; /* Flexbox */
-    flex-direction: column; /* Xếp dọc */
-    align-items: center; /* Căn giữa */
-    justify-content: center; /* Căn giữa dọc */
-    gap: 24px; /* Khoảng cách */
-    padding: 60px 20px; /* Padding lớn */
-}
-
-.loading-spinner {
-    width: 80px; /* Chiều rộng */
-    height: 80px; /* Chiều cao */
-    border: 6px solid #f3f3f3; /* Viền xám nhạt */
-    border-top: 6px solid #667eea; /* Viền trên màu tím */
-    border-radius: 50%; /* Hình tròn */
-    animation: spin 1s linear infinite; /* Animation quay */
-}
-
-.processing-text {
-    font-size: 20px; /* Chữ lớn */
-    font-weight: 600; /* Chữ đậm */
-    color: #667eea; /* Màu tím */
-    text-align: center; /* Căn giữa */
-}
-
-.processing-subtext {
-    font-size: 14px; /* Chữ nhỏ */
-    color: #999; /* Màu xám */
-    text-align: center; /* Căn giữa */
-}
-
-/* ===== STEP 4: HOÀN TẤT ===== */
-.success-container {
-    display: flex; /* Flexbox */
-    flex-direction: column; /* Xếp dọc */
-    align-items: center; /* Căn giữa */
-    justify-content: center; /* Căn giữa dọc */
-    gap: 24px; /* Khoảng cách */
-    padding: 60px 20px; /* Padding lớn */
-}
-
-.success-icon {
-    font-size: 100px; /* Icon rất lớn */
-    color: #4caf50; /* Màu xanh lá */
-    animation: successBounce 0.6s ease-in-out; /* Animation nảy */
-}
-
-.success-title {
-    font-size: 28px; /* Chữ lớn */
-    font-weight: 700; /* Chữ đậm */
-    color: #4caf50; /* Màu xanh lá */
-    text-align: center; /* Căn giữa */
-}
-
-.success-message {
-    font-size: 16px; /* Chữ vừa */
-    color: #666; /* Màu xám */
-    text-align: center; /* Căn giữa */
-    max-width: 400px; /* Chiều rộng tối đa */
-}
-
-.success-details {
-    background: #f8f9fa; /* Nền xám nhạt */
-    border-radius: 12px; /* Bo góc */
-    padding: 24px; /* Padding */
-    width: 100%; /* Chiều rộng đầy */
-    max-width: 500px; /* Tối đa 500px */
-    margin-top: 20px; /* Margin trên */
-}
-
-.detail-row {
-    display: flex; /* Flexbox */
-    justify-content: space-between; /* Căn đều 2 đầu */
-    padding: 12px 0; /* Padding trên dưới */
-    border-bottom: 1px solid #e0e0e0; /* Đường kẻ dưới */
-}
-
-.detail-row:last-child {
-    border-bottom: none; /* Bỏ đường kẻ ở row cuối */
-}
-
-.detail-label {
-    font-size: 14px; /* Chữ nhỏ */
-    color: #666; /* Màu xám */
-    font-weight: 600; /* Chữ hơi đậm */
-}
-
-.detail-value {
-    font-size: 14px; /* Chữ nhỏ */
-    color: #333; /* Màu đen */
-    font-weight: 700; /* Chữ đậm */
-}
-
-/* ===== ACTION BUTTONS - Các nút hành động ===== */
-.swap-actions {
-    display: flex; /* Flexbox */
-    justify-content: flex-end; /* Căn phải */
-    gap: 12px; /* Khoảng cách giữa các nút */
-    padding: 24px 40px; /* Padding */
-    background: #f8f9fa; /* Nền xám nhạt */
-    border-radius: 0 0 16px 16px; /* Bo góc dưới */
-}
-
-.btn-swap {
-    padding: 12px 32px; /* Padding */
-    border: none; /* Bỏ border */
-    border-radius: 8px; /* Bo góc */
-    font-size: 16px; /* Kích thước chữ */
-    font-weight: 600; /* Chữ đậm */
-    cursor: pointer; /* Con trỏ pointer */
-    transition: all 0.3s ease; /* Chuyển động mượt */
-}
-
-.btn-swap:disabled {
-    opacity: 0.5; /* Mờ đi */
-    cursor: not-allowed; /* Con trỏ not-allowed */
-}
-
-.btn-back {
-    background: white; /* Nền trắng */
-    color: #666; /* Chữ xám */
-    border: 2px solid #e0e0e0; /* Viền xám */
-}
-
-.btn-back:hover:not(:disabled) {
-    background: #f8f9fa; /* Nền xám nhạt khi hover */
-    border-color: #999; /* Viền đậm hơn */
-}
-
-.btn-next {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* Gradient tím */
-    color: white; /* Chữ trắng */
-}
-
-.btn-next:hover:not(:disabled) {
-    background: linear-gradient(135deg, #5568d3 0%, #6a3d8f 100%); /* Gradient đậm hơn */
-    transform: translateY(-2px); /* Nâng lên */
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); /* Đổ bóng */
-}
-
-.btn-confirm {
-    background: #4caf50; /* Nền xanh lá */
-    color: white; /* Chữ trắng */
-    padding: 12px 48px; /* Padding lớn hơn */
-}
-
-.btn-confirm:hover:not(:disabled) {
-    background: #45a049; /* Xanh đậm hơn */
-    transform: translateY(-2px); /* Nâng lên */
-    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4); /* Đổ bóng xanh */
-}
-
-.btn-finish {
-    background: #667eea; /* Nền tím */
-    color: white; /* Chữ trắng */
-    padding: 12px 48px; /* Padding lớn */
-}
-
-.btn-finish:hover {
-    background: #5568d3; /* Tím đậm hơn */
-    transform: translateY(-2px); /* Nâng lên */
-}
-
-/* ===== ANIMATIONS - Hiệu ứng động ===== */
-
-/* Animation hiện từ từ */
-@keyframes fadeIn {
-    from {
-        opacity: 0; /* Bắt đầu trong suốt */
-    }
-    to {
-        opacity: 1; /* Kết thúc hiển thị */
-    }
-}
-
-/* Animation phóng to */
-@keyframes scaleIn {
-    from {
-        transform: scale(0.9); /* Bắt đầu nhỏ hơn */
-        opacity: 0; /* Trong suốt */
-    }
-    to {
-        transform: scale(1); /* Kích thước đầy */
-        opacity: 1; /* Hiển thị */
-    }
-}
-
-/* Animation nhấp nháy cho step active */
-@keyframes pulse {
-    0%, 100% {
-        transform: scale(1); /* Kích thước bình thường */
-    }
-    50% {
-        transform: scale(1.1); /* Phóng to */
-    }
-}
-
-/* Animation quay cho loading spinner */
-@keyframes spin {
-    0% {
-        transform: rotate(0deg); /* Bắt đầu 0 độ */
-    }
-    100% {
-        transform: rotate(360deg); /* Quay 360 độ */
-    }
-}
-
-/* Animation mũi tên trượt */
-@keyframes arrowSlide {
-    0%, 100% {
-        transform: translateX(0); /* Vị trí ban đầu */
-    }
-    50% {
-        transform: translateX(10px); /* Trượt sang phải */
-    }
-}
-
-/* Animation nảy cho success icon */
-@keyframes successBounce {
-    0%, 20%, 50%, 80%, 100% {
-        transform: translateY(0); /* Vị trí ban đầu */
-    }
-    40% {
-        transform: translateY(-20px); /* Nhảy lên */
-    }
-    60% {
-        transform: translateY(-10px); /* Nhảy lên nhẹ */
-    }
-}
-
-/* Animation pin nhấp nháy */
-@keyframes batteryPulse {
-    0%, 100% {
-        transform: scale(1); /* Kích thước bình thường */
-        filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2)); /* Bóng nhạt */
-    }
-    50% {
-        transform: scale(1.05); /* Phóng to nhẹ */
-        filter: drop-shadow(0 8px 20px rgba(102, 126, 234, 0.4)); /* Bóng tím */
-    }
-}
-
-/* ===== RESPONSIVE - Tối ưu cho mobile ===== */
-@media (max-width: 768px) {
-    .battery-swap-container {
-        max-width: 100%; /* Chiếm đầy màn hình */
-        margin: 0; /* Bỏ margin */
-        border-radius: 0; /* Bỏ bo góc */
-    }
-
-    .swap-progress-bar {
-        padding: 20px; /* Giảm padding */
-    }
-
-    .step-circle {
-        width: 40px; /* Giảm kích thước */
-        height: 40px;
-        font-size: 20px;
-    }
-
-    .step-label {
-        font-size: 12px; /* Giảm kích thước chữ */
-    }
-
-    .swap-content {
-        padding: 20px; /* Giảm padding */
-    }
-
-    .station-list {
-        grid-template-columns: 1fr; /* 1 cột trên mobile */
-    }
-
-    .battery-comparison {
-        flex-direction: column; /* Xếp dọc trên mobile */
-        gap: 20px;
-    }
-
-    .battery-icon-large {
-        font-size: 80px; /* Giảm kích thước icon */
-    }
-
-    .arrow-icon {
-        transform: rotate(90deg); /* Xoay mũi tên xuống dưới */
-    }
-
-    .swap-actions {
-        flex-direction: column; /* Xếp dọc nút */
-        padding: 20px;
-    }
-
-    .btn-swap {
-        width: 100%; /* Nút chiếm đầy chiều rộng */
-    }
-}
-
