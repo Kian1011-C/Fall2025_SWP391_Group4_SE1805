@@ -1,26 +1,17 @@
 // src/pages/Driver/SwapBattery/components/TowerSelector.jsx
 import React, { useContext, useState, useEffect } from 'react';
 import { SwapContext } from '../index'; 
-// Import service để gọi API thật
 import stationService from '/src/assets/js/services/stationService.js'; 
 
 const TowerSelector = () => {
-    // 1. LẤY DỮ LIỆU TỪ "BỘ NÃO" (CONTEXT)
-    // - selectedStation: Trạm mà người dùng đã chọn ở bước 1.
-    // - initiateSwap: Hàm API POST 1 (để bắt đầu đổi).
-    // - isLoading: Trạng thái chờ của API POST (true khi đang gọi initiateSwap).
-    // - goToStep, STEPS: Để điều hướng.
     const { selectedStation, initiateSwap, isLoading, goToStep, STEPS } = useContext(SwapContext);
     
-    // State nội bộ của component này
-    const [cabinets, setCabinets] = useState([]); // Danh sách các trụ (towers)
+    const [cabinets, setCabinets] = useState([]); 
     const [selectedCabinet, setSelectedCabinet] = useState(null);
-    const [loading, setLoading] = useState(true); // Trạng thái chờ của API GET (lấy danh sách trụ)
+    const [loading, setLoading] = useState(true); 
     const [error, setError] = useState(null);
 
-    // 2. GỌI API GET ĐỂ LẤY DANH SÁCH TRỤ
     useEffect(() => {
-        // Nếu không có trạm nào (ví dụ: người dùng F5 trang), quay lại bước 1
         if (!selectedStation) {
             goToStep(STEPS.SELECT_STATION);
             return;
@@ -29,18 +20,16 @@ const TowerSelector = () => {
         const fetchCabinets = async () => {
             setLoading(true);
             setError(null);
-            console.log(`Đang tải trụ cho trạm: ${selectedStation.id || selectedStation.stationId}`);
             try {
-                // Gọi API thật bằng ID của trạm đã chọn
+                // Gọi API thật: GET /api/driver/towers?stationId=...
+                // (stationService đã được sửa để gọi API này)
                 const data = await stationService.getCabinetsByStation(selectedStation.id || selectedStation.stationId);
                 
-                // Xử lý dữ liệu trả về (có thể là {success, data} hoặc mảng [..])
-                if (data && data.success && Array.isArray(data.data)) {
-                    setCabinets(data.data);
-                } else if (Array.isArray(data)) {
-                    setCabinets(data); // Nếu BE trả về mảng trực tiếp
+                // data trả về là một mảng đã được service xử lý
+                if (Array.isArray(data)) {
+                    setCabinets(data); 
                 } else {
-                    console.warn("Dữ liệu trụ không đúng định dạng:", data);
+                    console.warn("Dữ liệu trụ không phải là mảng:", data);
                     setCabinets([]);
                 }
             } catch (err) {
@@ -52,17 +41,14 @@ const TowerSelector = () => {
         };
 
         fetchCabinets();
-    }, [selectedStation, goToStep, STEPS]); // Hook này chạy lại khi trạm được chọn thay đổi
+    }, [selectedStation, goToStep, STEPS]); 
 
-    // 3. HÀM XỬ LÝ KHI NHẤN "BẮT ĐẦU"
     const handleStartSwap = () => {
         if (selectedCabinet) {
-            // Gọi API POST 1 (hàm này nằm trong useSwapData.js)
             initiateSwap(selectedCabinet);
         }
     };
 
-    // 4. HIỂN THỊ TRẠNG THÁI (LOADING, LỖI, HOẶC DỮ LIỆU)
     if (loading) {
         return <div style={{ color: 'white', textAlign: 'center', padding: '40px' }}>Đang tải danh sách trụ...</div>;
     }
@@ -74,18 +60,16 @@ const TowerSelector = () => {
     }
 
     return (
-        // Dùng lại class CSS từ StationSelector cho đồng bộ
         <div className="station-selector-container"> 
             <h2 className="station-selector-title">2. Chọn trụ tại trạm {selectedStation?.name}</h2>
             
-            <div className="station-grid"> {/* Dùng lại class grid */}
+            <div className="station-grid"> 
                 {cabinets.length > 0 ? (
                     cabinets.map(cab => (
                         <CabinetCard 
-                            key={cab.id || cab.cabinetId} // Dùng key từ DB
+                            key={cab.id || cab.cabinetId}
                             cabinet={cab}
-                            // Đánh dấu thẻ được chọn
-                            isSelected={selectedCabinet?.id === cab.id || selectedCabinet?.cabinetId === cab.cabinetId}
+                            isSelected={selectedCabinet?.id === cab.id}
                             onSelect={() => setSelectedCabinet(cab)}
                         />
                     ))
@@ -94,13 +78,11 @@ const TowerSelector = () => {
                 )}
             </div>
 
-            {/* Nút Bắt đầu (chỉ hiện khi có trụ để chọn) */}
             {cabinets.length > 0 && (
                 <div style={{ marginTop: '24px', textAlign: 'center' }}>
                     <button 
-                        className="start-swap-button" // Class CSS bạn đã thêm
+                        className="start-swap-button" 
                         onClick={handleStartSwap} 
-                        // Tắt nút khi chưa chọn trụ HOẶC khi API POST 1 đang chạy
                         disabled={!selectedCabinet || isLoading}
                     >
                         {isLoading ? "Đang xử lý..." : "Bắt đầu đổi pin"}
@@ -111,31 +93,33 @@ const TowerSelector = () => {
     );
 };
 
-// Component con để hiển thị thẻ Trụ
+// Component con (CabinetCard)
 const CabinetCard = ({ cabinet, isSelected, onSelect }) => {
-    // (Kiểm tra status trả về từ API, có thể là "HOAT_DONG")
-    const isMaintenance = (cabinet.status !== 'HOAT_DONG' && cabinet.status !== 'Hoạt động');
     
-    // Thêm class 'selected' nếu thẻ này được chọn
+    // ==========================================================
+    // SỬA LỖI "BẢO TRÌ":
+    // Logic cũ: cabinet.status !== 'Hoạt động' (SAI)
+    // Logic mới: Kiểm tra xem status có phải là "active" không
+    // (Đây là status mà DriverController.java trả về)
+    // ==========================================================
+    const isMaintenance = (cabinet.status !== 'active'); 
+    
     let cardClass = `station-card ${isMaintenance ? 'maintenance' : ''}`;
-    if (isSelected) {
-        cardClass += ' selected'; // Class 'selected' từ file battery-swap.css
+    if (isSelected && !isMaintenance) { // Chỉ 'selected' khi không bảo trì
+        cardClass += ' selected'; 
     }
     
-    // Lấy thông tin từ API (tên có thể khác)
-    const availableSlots = cabinet.availableSlots || 0;
-    const totalSlots = cabinet.totalSlots || 8; // Giả sử 1 trụ có 8 hộc
-
     return (
+        // Chỉ cho phép click (onSelect) khi không bảo trì
         <div className={cardClass} onClick={isMaintenance ? null : onSelect}>
             <div className="station-card-header">
-                <h3 className="station-name">{cabinet.name || `Trụ ${cabinet.cabinetId}`}</h3>
+                <h3 className="station-name">{cabinet.name}</h3>
                 <span className={`station-status ${isMaintenance ? 'maintenance' : 'active'}`}>
                     {isMaintenance ? 'Bảo trì' : 'Hoạt động'}
                 </span>
             </div>
             <div className="station-address">
-                <span>Số hộc trống: {availableSlots} / {totalSlots}</span>
+                <span>Số hộc trống: {cabinet.availableSlots} / {cabinet.totalSlots}</span>
             </div>
         </div>
     );

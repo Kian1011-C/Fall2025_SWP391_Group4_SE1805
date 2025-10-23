@@ -15,6 +15,12 @@ export const API_CONFIG = {
       ME: '/api/auth/me',
       REFRESH: '/api/auth/refresh'
     },
+
+    DRIVER: {
+      GET_TOWERS_BY_STATION: '/api/driver/towers',   // GET /api/driver/towers?stationId=...
+      GET_SLOTS_BY_TOWER: '/api/driver/slots',       // GET /api/driver/slots?towerId=...
+      GET_EMPTY_SLOT: '/api/driver/slot/empty'       // GET /api/driver/slot/empty?towerId=...
+    },
     
     // Battery Management
     BATTERIES: {
@@ -61,6 +67,7 @@ export const API_CONFIG = {
       REFUND: (paymentId) => `/api/payments/${paymentId}/refund`,
       AUTO_PAYMENT: '/api/payments/auto-payment'
     },
+    
     
     // Station Management
     STATIONS: {

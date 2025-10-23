@@ -1,7 +1,4 @@
 // src/services/stationService.js
-
-// Import file API gốc (đường dẫn này bạn cần kiểm tra lại)
-// Nó có thể là '../config/api.js' hoặc '/src/config/api.js'
 import { apiUtils, API_CONFIG } from '../config/api.js';
 
 const { ENDPOINTS } = API_CONFIG;
@@ -9,35 +6,57 @@ const { ENDPOINTS } = API_CONFIG;
 const stationService = {
     /**
      * API 1 (Driver - Bước 1): Lấy tất cả các trạm
-     * Dùng: STATIONS.BASE
+     * (Hàm này vẫn đúng, gọi GET /api/stations)
      */
     getAllStations: async () => {
         try {
             console.log("StationService: Đang lấy tất cả trạm...");
-            // Dùng hằng số từ file config
             const response = await apiUtils.get(ENDPOINTS.STATIONS.BASE);
-            return response; // Trả về dữ liệu
+            return response;
         } catch (error) {
             console.error('Lỗi khi lấy danh sách trạm:', error);
-            throw error; // Ném lỗi để component (StationSelector) bắt được
+            throw error; 
         }
     },
 
     /**
-     * API 2 (Driver - Bước 2): Lấy các trụ/hộc của 1 trạm
-     * @param {string} stationId
+     * API 2 (Driver - Bước 2): Lấy các trụ của 1 trạm
+     * SỬA LỖI 404: Gọi đúng API từ DriverController
+     * (GET /api/driver/towers?stationId=...)
      */
     getCabinetsByStation: async (stationId) => {
         try {
-            console.log(`StationService: Lấy trụ/hộc của trạm ${stationId}...`);
+            console.log(`StationService: Lấy trụ của trạm ${stationId}...`);
             
-            // ĐÃ SỬA LỖI 404: Dùng endpoint AVAILABLE_SLOTS
-            const endpoint = ENDPOINTS.STATIONS.AVAILABLE_SLOTS(stationId);
+            // 1. Lấy đúng endpoint
+            const endpoint = ENDPOINTS.DRIVER.GET_TOWERS_BY_STATION;
             
-            console.log("Đang gọi URL:", endpoint); // Để kiểm tra
+            // 2. API này dùng Query Param (không phải Path Variable)
+            // apiUtils.get(url, params) sẽ tự động chuyển thành ?stationId=...
+            const params = { stationId: stationId };
             
-            const response = await apiUtils.get(endpoint);
-            return response;
+            console.log("Đang gọi URL:", endpoint, "với params:", params);
+            
+            // 3. Gọi API
+            const response = await apiUtils.get(endpoint, params);
+            
+            // BE trả về { success: true, data: [...] }
+            // FE (TowerSelector) mong đợi một mảng
+            if (response && response.success && Array.isArray(response.data)) {
+                 // Đổi tên "id" thành "cabinetId" và "towerNumber" thành "name"
+                 // để component TowerSelector (đã code) hiểu được
+                const adaptedData = response.data.map(tower => ({
+                    ...tower,
+                    id: tower.id, // Giữ nguyên id (TowerSelector dùng .id)
+                    cabinetId: tower.id, // Thêm cabinetId (nếu cần)
+                    name: `Trụ ${tower.towerNumber}`, // Đổi tên cho đẹp
+                    // status, availableSlots, totalSlots (đã khớp)
+                }));
+                return adaptedData;
+            }
+            
+            return []; // Trả về mảng rỗng nếu không thành công
+            
         } catch (error) {
             console.error(`Lỗi khi lấy trụ của trạm ${stationId}:`, error);
             throw error;

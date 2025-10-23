@@ -1,0 +1,13 @@
+package hsf302.fa25.s3.evdrivers;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+class EvDriversApplicationTests {
+
+    @Test
+    void contextLoads() {
+    }
+
+}
