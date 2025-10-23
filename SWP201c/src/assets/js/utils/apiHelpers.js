@@ -107,10 +107,13 @@ export const normalizeDashboardStats = (userDashboard, vehicles, contracts, swap
                        userDashboard?.totalKilometers ?? 
                        vehicles.reduce((total, vehicle) => total + (vehicle.currentOdometer || 0), 0);
 
+  // Ưu tiên lấy activeVehicles từ userDashboard API, nếu không có thì dùng vehicles.length
+  const activeVehicles = userDashboard?.activeVehicles ?? vehicles.length;
+
   return {
     totalSwaps: Math.max(0, totalSwaps), // Đảm bảo không âm
     currentPlans,
-    activeVehicles: vehicles.length,
+    activeVehicles: Math.max(0, activeVehicles), // Đảm bảo không âm
     monthlySpent,
     totalDistance: Math.round(Math.max(0, totalDistance)) // Đảm bảo không âm và làm tròn
   };

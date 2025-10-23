@@ -61,7 +61,15 @@ export const useDashboardData = () => {
         
         // Process vehicles
         const processedVehicles = processVehicles(userVehicles);
+        console.log('🚗 Raw userVehicles from API:', userVehicles);
+        console.log('🚗 Processed vehicles from API:', processedVehicles);
+        
+        // Check for stored vehicles in localStorage
+        const storedVehiclesStr = localStorage.getItem('vehicles');
+        console.log('🔍 Stored vehicles in localStorage:', storedVehiclesStr);
+        
         const finalVehicles = updateVehiclesFromSession(processedVehicles);
+        console.log('🚗 Final vehicles after session update:', finalVehicles);
         setVehicles(finalVehicles);
         
         // Fetch contracts
@@ -132,7 +140,9 @@ export const useDashboardData = () => {
   const fetchContracts = async (userId, userDashboard) => {
     try {
       let selected = null;
-      try { selected = JSON.parse(sessionStorage.getItem('selectedVehicle')); } catch {}
+      try { selected = JSON.parse(sessionStorage.getItem('selectedVehicle')); } catch (err) {
+        console.warn('Failed to parse selectedVehicle from sessionStorage:', err);
+      }
       if (!selected?.id && !selected?.vehicleId) {
         return processContracts([], userDashboard);
       }
@@ -175,7 +185,9 @@ export const useDashboardData = () => {
         if (resp.success) {
           setStats((s) => ({ ...s, totalSwaps: Array.isArray(resp.data) ? resp.data.length : 0 }));
         }
-      } catch {}
+      } catch (err) {
+        console.warn('Failed to fetch swaps:', err);
+      }
     })();
   }, []);
 

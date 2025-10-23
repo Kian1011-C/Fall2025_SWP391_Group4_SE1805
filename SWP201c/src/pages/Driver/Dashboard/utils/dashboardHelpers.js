@@ -55,29 +55,48 @@ export const processVehicles = (userVehicles) => {
  */
 export const updateVehiclesFromSession = (processedVehicles) => {
   const updatedVehicleStr = sessionStorage.getItem('selectedVehicle');
-  if (!updatedVehicleStr) return processedVehicles;
+  const localVehicleStr = localStorage.getItem('selectedVehicle');
+  const vehiclesStr = localStorage.getItem('vehicles');
+  console.log('🔍 Session storage selectedVehicle:', updatedVehicleStr);
+  console.log('🔍 Local storage selectedVehicle:', localVehicleStr);
+  console.log('🔍 Local storage vehicles:', vehiclesStr);
+  console.log('🔍 Input processedVehicles:', processedVehicles);
+  if (!updatedVehicleStr && !localVehicleStr && !vehiclesStr) return processedVehicles;
 
   try {
-    const updatedVehicle = JSON.parse(updatedVehicleStr);
-    console.log('🔄 Found updated vehicle in session:', updatedVehicle);
+    // If we have vehicles in localStorage, use them instead of processed vehicles
+    if (vehiclesStr) {
+      const storedVehicles = JSON.parse(vehiclesStr);
+      console.log('🚗 Found vehicles in localStorage:', storedVehicles);
+      return Array.isArray(storedVehicles) ? storedVehicles : processedVehicles;
+    }
     
-    return processedVehicles.map(vehicle => {
-      const idMatch = vehicle.id === updatedVehicle.id;
-      const plateMatch = vehicle.plateNumber === updatedVehicle.plateNumber;
+    // Try sessionStorage first, then localStorage for selected vehicle
+    const vehicleStr = updatedVehicleStr || localVehicleStr;
+    if (vehicleStr) {
+      const updatedVehicle = JSON.parse(vehicleStr);
+      console.log('🔄 Found updated vehicle in storage:', updatedVehicle);
       
-      if (idMatch || plateMatch) {
-        console.log('✅ MATCH! Updating vehicle battery:', vehicle.plateNumber, 
-                   'from', vehicle.batteryLevel, 'to', updatedVehicle.batteryLevel);
-        return {
-          ...vehicle,
-          batteryLevel: updatedVehicle.batteryLevel || updatedVehicle.health,
-          health: updatedVehicle.batteryLevel || updatedVehicle.health
-        };
-      }
-      return vehicle;
-    });
+      return processedVehicles.map(vehicle => {
+        const idMatch = vehicle.id === updatedVehicle.id;
+        const plateMatch = vehicle.plateNumber === updatedVehicle.plateNumber;
+        
+        if (idMatch || plateMatch) {
+          console.log('✅ MATCH! Updating vehicle battery:', vehicle.plateNumber, 
+                     'from', vehicle.batteryLevel, 'to', updatedVehicle.batteryLevel);
+          return {
+            ...vehicle,
+            batteryLevel: updatedVehicle.batteryLevel || updatedVehicle.health,
+            health: updatedVehicle.batteryLevel || updatedVehicle.health
+          };
+        }
+        return vehicle;
+      });
+    }
+    
+    return processedVehicles;
   } catch (err) {
-    console.warn('⚠️ Failed to parse updated vehicle:', err);
+    console.warn('⚠️ Failed to parse stored data:', err);
     return processedVehicles;
   }
 };
