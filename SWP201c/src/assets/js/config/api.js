@@ -67,7 +67,7 @@ export const API_CONFIG = {
       BASE: '/api/stations',
       BY_ID: (id) => `/api/stations/${id}`,
       NEARBY: '/api/stations/nearby',
-      STATS: '/api/stations/stats',
+      AVAILABLE_SLOTS: (id) => `/api/stations/stats`,
       BOOK: (id) => `/api/stations/${id}/book`,
       AVAILABLE_SLOTS: (id) => `/api/stations/${id}/available-slots`,
       ESTIMATED_TIME: (id) => `/api/stations/${id}/estimated-time`
