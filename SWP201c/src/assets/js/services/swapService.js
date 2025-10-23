@@ -1,114 +1,105 @@
-// src/services/swapService.js
-import { apiUtils, API_CONFIG } from '../config/api.js'; // (Đảm bảo đường dẫn này đúng)
+// src/assets/js/services/swapService.js
+import { apiUtils, API_CONFIG } from '../config/api.js'; // (Ensure path is correct)
 
 const { ENDPOINTS } = API_CONFIG;
 
 const swapService = {
     /**
-     * API 1 (Driver): Bắt đầu một phiên đổi pin mới.
-     * (Sử dụng POST /api/swaps của BE)
+     * API 1 (Driver): Initiate a new battery swap.
+     * (Uses POST /api/swaps from your BE)
      */
-    initiateSwap: async (cabinetData) => {
+    initiateSwap: async (realSwapData) => {
+        // realSwapData: { cabinetId, stationId, towerId } (towerId = cabinetId)
         try {
-            console.log("SwapService: Bắt đầu đổi pin (dùng POST /api/swaps)...", cabinetData);
-            
-            // ==========================================================
-            // SỬA LỖI DATABASE: CUNG CẤP CÁC ID CÓ THẬT
-            // HÃY MỞ DATABASE VÀ THAY THẾ CÁC SỐ (1, 123, 456, 101, 102)
-            // BẰNG CÁC ID CÓ THẬT TRONG BẢNG CỦA BẠN.
-            // ==========================================================
-            const fakeSwapData = {
-                // 1. User ID thật (ví dụ: 'user1' hoặc '1')
-                userId: 1, 
-                
-                // 2. Contract ID thật (từ bảng Contracts)
-                contractId: 123, // <-- THAY SỐ NÀY
-                
-                // 3. Vehicle ID thật (từ bảng Vehicles)
-                vehicleId: 456, // <-- THAY SỐ NÀY
-                
-                // 4. Station ID thật (đã lấy từ bước 1)
-                stationId: cabinetData.stationId || cabinetData.id,
-                
-                // 5. Tower ID thật (đã lấy từ bước 2)
-                towerId: cabinetData.id, // (cabinetData.id là ID của trụ/tower)
+            console.log("SwapService: Initiating swap (using POST /api/swaps)...", realSwapData);
 
-                // 6. Battery ID thật (từ bảng Batteries)
-                oldBatteryId: 101, // <-- THAY SỐ NÀY
-                
-                // 7. Battery ID thật khác (từ bảng Batteries)
-                newBatteryId: 102, // <-- THAY SỐ NÀY
-                
-                // 8. Các trường khác (có thể là NULL)
+            // ==========================================================
+            // PREPARE REAL DATA FOR BE (USING CORRECT IDs FROM SQL)
+            // ==========================================================
+            const swapDataForBE = {
+                userId: 'driver001',         // Real ID
+                contractId: 1,               // Real ID
+                vehicleId: 1,                // Real ID
+                // ------------------------------------------
+                // CORRECTED ID: Based on SQL UPDATE statement
+                // ------------------------------------------
+                oldBatteryId: 20,              // <<<<<<<<<< CORRECT ID
+                // ------------------------------------------
+                newBatteryId: 1,               // Real ID (Any available battery except 20)
+
+                // IDs FE already has
+                stationId: realSwapData.stationId,
+                towerId: realSwapData.towerId,
+
+                // Other fields (nullable or default)
                 staffId: null,
-                odometerBefore: 10000,
+                odometerBefore: 10000, // (Get real odometer?)
                 odometerAfter: null,
-                status: "INITIATED" // Dùng 'INITIATED' (DAO của bạn có check)
+                status: "INITIATED"
             };
-            
-            console.log("Đang gửi data giả lên BE:", fakeSwapData);
 
-            // Gọi API (BE sẽ trả về { success, data, message })
-            const responseData = await apiUtils.post(ENDPOINTS.SWAPS.BASE, fakeSwapData); 
-            
+            console.log("Sending data to BE:", swapDataForBE);
+
+            // 2. CALL API POST /api/swaps
+            const responseData = await apiUtils.post(ENDPOINTS.SWAPS.BASE, swapDataForBE);
+
             if (!responseData.success || !responseData.data) {
-                throw new Error(responseData.message || "Backend không thể tạo giao dịch swap");
+                throw new Error(responseData.message || "Backend could not create swap transaction");
             }
 
-            // BE thành công, 'responseData.data' chứa swap
-            // BE của bạn (hàm createSwap) KHÔNG trả về swapId, 
-            // nó chỉ trả về { success: true, data: { ...swap object... } }
-            
             const returnedSwap = responseData.data;
 
-            // Giả lập dữ liệu trả về (gộp data thật từ BE và data giả)
-            const simulatedResponse = { 
-                ...returnedSwap, 
-                
-                // Lấy swapId thật (BE của bạn KHÔNG trả về ID sau khi INSERT)
-                // Chúng ta phải gọi 1 API khác để lấy swapId vừa tạo
-                // TẠM THỜI: Dùng ID giả 999 để test
-                swapId: returnedSwap.swapId || 999, 
-                
-                // Thêm dữ liệu giả lập (vì BE không trả về)
-                emptySlot: 5, 
-                newBattery: { code: "P13", slot: 8, percent: 100 }
+            // 3. FIND EMPTY SLOT
+            const emptySlotResponse = await apiUtils.get(ENDPOINTS.DRIVER.GET_EMPTY_SLOT, {
+                 towerId: realSwapData.towerId
+            });
+
+            if (!emptySlotResponse.success || !emptySlotResponse.data) {
+                console.warn(emptySlotResponse.message || "Could not find an empty slot in this tower");
+            }
+
+            // 4. SIMULATE RESPONSE FOR FE (STEP 3)
+            const simulatedResponse = {
+                ...returnedSwap,
+                swapId: returnedSwap.swapId || 999, // (Temporary ID if BE doesn't return)
+                emptySlot: emptySlotResponse?.data?.slotNumber || 'N/A', // Real empty slot
+                newBattery: {
+                    code: `BAT-${swapDataForBE.newBatteryId}`, // Use real new battery ID
+                    slot: "N/A", // (Need another API call to find)
+                    percent: 100 // Simulate
+                }
             };
-            
-            return simulatedResponse; // Trả về đối tượng đã gộp
-        } catch (error) { 
-            console.error('Lỗi khi bắt đầu đổi pin:', error);
-            // Ném lỗi với message từ BE (nếu có)
-            throw new Error(error.message || "Lỗi không xác định"); 
+
+            return simulatedResponse;
+        } catch (error) {
+            console.error('Error initiating swap:', error);
+            throw new Error(error.message || "Unknown error during swap initiation");
         }
     },
 
     /**
-     * API 2 (Driver): Xác nhận hoàn tất đổi pin.
-     * (Sử dụng POST /api/swaps/{id}/confirm của BE)
+     * API 2 (Driver): Confirm swap completion.
+     * (Uses POST /api/swaps/{id}/confirm from your BE)
      */
     confirmSwap: async (swapId, oldBatteryData) => {
+        // oldBatteryData is not used by BE, but keep for FE logic
         try {
-            console.log(`SwapService: Xác nhận swap ${swapId}...`);
-            
-            // Lấy endpoint từ API_CONFIG
+            console.log(`SwapService: Confirming swap ${swapId}...`);
             const endpoint = ENDPOINTS.SWAPS.CONFIRM(swapId);
-            
-            // API BE (confirmSwap) không cần body, nên chúng ta gọi POST rỗng
-            const response = await apiUtils.post(endpoint); 
-            
+            const response = await apiUtils.post(endpoint); // No body needed for BE
+
             if (response.success) {
-                return response.data; // Trả về tóm tắt (swap đã update)
+                return response.data; // Return summary (updated swap)
             } else {
-                throw new Error(response.message || "Lỗi khi xác nhận swap");
+                throw new Error(response.message || "Error confirming swap");
             }
         } catch (error) {
-            console.error('Lỗi khi xác nhận đổi pin:', error);
+            console.error('Error confirming swap:', error);
             throw error;
         }
     },
-    
-    // Giữ nguyên các hàm cũ của bạn (getAllSwaps, updateSwapStatus)
+
+    // Other functions (getAllSwaps, updateSwapStatus) remain the same
     getAllSwaps: async () => { /* ... */ },
     updateSwapStatus: async (swapId, status) => { /* ... */ },
 };

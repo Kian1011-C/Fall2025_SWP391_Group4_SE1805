@@ -1,12 +1,13 @@
-// src/services/stationService.js
-import { apiUtils, API_CONFIG } from '../config/api.js';
+// src/assets/js/services/stationService.js
 
+// (Đảm bảo đường dẫn này đúng, có thể là ../../config/api.js)
+import { apiUtils, API_CONFIG } from '../config/api.js';
 const { ENDPOINTS } = API_CONFIG;
 
 const stationService = {
     /**
      * API 1 (Driver - Bước 1): Lấy tất cả các trạm
-     * (Hàm này vẫn đúng, gọi GET /api/stations)
+     * (Hàm này đã có)
      */
     getAllStations: async () => {
         try {
@@ -21,47 +22,65 @@ const stationService = {
 
     /**
      * API 2 (Driver - Bước 2): Lấy các trụ của 1 trạm
-     * SỬA LỖI 404: Gọi đúng API từ DriverController
-     * (GET /api/driver/towers?stationId=...)
+     * (Hàm này đã có)
      */
     getCabinetsByStation: async (stationId) => {
         try {
             console.log(`StationService: Lấy trụ của trạm ${stationId}...`);
             
-            // 1. Lấy đúng endpoint
             const endpoint = ENDPOINTS.DRIVER.GET_TOWERS_BY_STATION;
-            
-            // 2. API này dùng Query Param (không phải Path Variable)
-            // apiUtils.get(url, params) sẽ tự động chuyển thành ?stationId=...
             const params = { stationId: stationId };
             
             console.log("Đang gọi URL:", endpoint, "với params:", params);
             
-            // 3. Gọi API
             const response = await apiUtils.get(endpoint, params);
             
-            // BE trả về { success: true, data: [...] }
-            // FE (TowerSelector) mong đợi một mảng
             if (response && response.success && Array.isArray(response.data)) {
-                 // Đổi tên "id" thành "cabinetId" và "towerNumber" thành "name"
-                 // để component TowerSelector (đã code) hiểu được
+                // Đổi tên để Component (FE) hiểu được
                 const adaptedData = response.data.map(tower => ({
                     ...tower,
-                    id: tower.id, // Giữ nguyên id (TowerSelector dùng .id)
-                    cabinetId: tower.id, // Thêm cabinetId (nếu cần)
-                    name: `Trụ ${tower.towerNumber}`, // Đổi tên cho đẹp
-                    // status, availableSlots, totalSlots (đã khớp)
+                    id: tower.id, 
+                    cabinetId: tower.id, 
+                    name: `Trụ ${tower.towerNumber}`, 
                 }));
                 return adaptedData;
             }
-            
-            return []; // Trả về mảng rỗng nếu không thành công
-            
+            return []; 
         } catch (error) {
             console.error(`Lỗi khi lấy trụ của trạm ${stationId}:`, error);
             throw error;
         }
     },
+    
+    // ==========================================================
+    // SỬA LỖI: THÊM HÀM BỊ THIẾU
+    // (Hàm này được gọi bởi useSwapData.js để tìm pin mới)
+    // ==========================================================
+    /**
+     * API 3 (Driver - Bước 3): Lấy TẤT CẢ các hộc (slots) của 1 trụ
+     * Gọi: GET /api/driver/slots?towerId=...
+     */
+    getSlotsByTower: async (towerId) => {
+        try {
+            console.log(`StationService: Lấy hộc của trụ ${towerId}...`);
+            
+            const endpoint = ENDPOINTS.DRIVER.GET_SLOTS_BY_TOWER;
+            const params = { towerId: towerId };
+            
+            console.log("Đang gọi URL:", endpoint, "với params:", params);
+            
+            // BE trả về { success: true, data: [...] }
+            const response = await apiUtils.get(endpoint, params);
+            
+            // Trả về toàn bộ response để useSwapData xử lý (check success, data)
+            return response;
+            
+        } catch (error) {
+            console.error(`Lỗi khi lấy hộc của trụ ${towerId}:`, error);
+            throw error;
+        }
+    },
 };
 
+// Đảm bảo bạn dùng 'export default'
 export default stationService;

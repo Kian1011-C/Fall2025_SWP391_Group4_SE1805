@@ -182,3 +182,96 @@
   opacity: 0.7;
   cursor: not-allowed;
 }
+/* Thêm vào file: src/assets/css/battery-swap.css */
+
+.place-battery-card {
+  background-color: #1f2937; /* bg-gray-800 */
+  border-radius: 8px;
+  padding: 32px;
+  text-align: center;
+  max-width: 400px;
+  margin: 32px auto 0; /* Thêm margin-top */
+}
+
+.place-battery-label {
+  font-size: 1.125rem; /* text-lg */
+  color: #d1d5db; /* text-gray-300 */
+}
+
+.place-battery-slot-number {
+  font-size: 4.5rem; /* text-7xl */
+  font-weight: 700;
+  color: #3b82f6; /* text-blue-500 */
+  margin: 16px 0;
+}
+
+.simulation-form {
+  margin-top: 24px;
+  text-align: left;
+}
+
+.simulation-label {
+  font-size: 0.875rem; /* text-sm */
+  color: #9ca3af; /* text-gray-400 */
+  font-weight: 500;
+  margin-bottom: 16px;
+  border-top: 1px solid #374151; /* border-gray-700 */
+  padding-top: 16px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #d1d5db; /* text-gray-300 */
+  font-weight: 500;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px 12px;
+  background-color: #374151; /* bg-gray-700 */
+  border: 1px solid #4b5563; /* border-gray-600 */
+  border-radius: 6px;
+  color: white;
+  box-sizing: border-box; /* Thêm cái này để padding không làm input tràn */
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #3b82f6; /* focus:border-blue-500 */
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+/* Nút "Tôi đã đặt pin" */
+.place-battery-button {
+  /* Sao chép style từ start-swap-button */
+  background-color: #2563eb; 
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 12px 32px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 20px; 
+  width: 100%;
+}
+
+.place-battery-button:hover {
+  background-color: #1d4ed8; 
+}
+
+.place-battery-button:disabled {
+  background-color: #4b5563; 
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+.readonly-input {
+  background-color: #4b5563; /* bg-gray-600 */
+  cursor: default;
+}
