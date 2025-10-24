@@ -6,71 +6,62 @@ const { ENDPOINTS } = API_CONFIG;
 const swapService = {
     /**
      * API 1 (Driver): Initiate a new battery swap.
-     * (Uses POST /api/swaps from your BE)
+     * (Uses POST /api/batteries/swap/initiate from your BE)
      */
     initiateSwap: async (realSwapData) => {
-        // realSwapData: { cabinetId, stationId, towerId } (towerId = cabinetId)
+        // realSwapData: { userId, contractId, vehicleId, oldBatteryId, stationId, towerId, newBatteryId }
         try {
-            console.log("SwapService: Initiating swap (using POST /api/swaps)...", realSwapData);
+            console.log("SwapService: Initiating swap (using POST /api/batteries/swap/initiate)...", realSwapData);
 
-            // ==========================================================
-            // PREPARE REAL DATA FOR BE (USING CORRECT IDs FROM SQL)
-            // ==========================================================
+            // Gửi đúng dữ liệu thật từ FE
             const swapDataForBE = {
-                userId: 'driver001',         // Real ID
-                contractId: 1,               // Real ID
-                vehicleId: 1,                // Real ID
-                // ------------------------------------------
-                // CORRECTED ID: Based on SQL UPDATE statement
-                // ------------------------------------------
-                oldBatteryId: 20,              // <<<<<<<<<< CORRECT ID
-                // ------------------------------------------
-                newBatteryId: 1,               // Real ID (Any available battery except 20)
-
-                // IDs FE already has
+                userId: realSwapData.userId,
+                contractId: realSwapData.contractId,
+                vehicleId: realSwapData.vehicleId,
+                oldBatteryId: realSwapData.oldBatteryId,
+                newBatteryId: realSwapData.newBatteryId,
                 stationId: realSwapData.stationId,
                 towerId: realSwapData.towerId,
-
-                // Other fields (nullable or default)
-                staffId: null,
-                odometerBefore: 10000, // (Get real odometer?)
-                odometerAfter: null,
                 status: "INITIATED"
             };
 
             console.log("Sending data to BE:", swapDataForBE);
 
-            // 2. CALL API POST /api/swaps
-            const responseData = await apiUtils.post(ENDPOINTS.SWAPS.BASE, swapDataForBE);
+            // 2. CALL API POST /api/batteries/swap/initiate
+            const responseData = await apiUtils.post(ENDPOINTS.BATTERIES.SWAP_INITIATE, swapDataForBE);
 
-            if (!responseData.success || !responseData.data) {
-                throw new Error(responseData.message || "Backend could not create swap transaction");
+            if (!responseData?.success || !responseData?.data) {
+                throw new Error(responseData?.message || "Backend could not create swap transaction");
             }
 
             const returnedSwap = responseData.data;
+            const normalizedSwapId = returnedSwap.swapId || returnedSwap.id || returnedSwap.swap_id;
 
-            // 3. FIND EMPTY SLOT
-            const emptySlotResponse = await apiUtils.get(ENDPOINTS.DRIVER.GET_EMPTY_SLOT, {
-                 towerId: realSwapData.towerId
-            });
+            console.log('Backend response data:', returnedSwap);
+            console.log('Normalized swapId:', normalizedSwapId);
 
-            if (!emptySlotResponse.success || !emptySlotResponse.data) {
-                console.warn(emptySlotResponse.message || "Could not find an empty slot in this tower");
+            // 3. FIND EMPTY SLOT (optional helper, nếu BE đã trả thì bỏ qua)
+            let emptySlotNumber = returnedSwap.emptySlot || returnedSwap.emptySlotNumber;
+            if (!emptySlotNumber) {
+                try {
+                    const emptySlotResponse = await apiUtils.get(ENDPOINTS.DRIVER.GET_EMPTY_SLOT, {
+                        towerId: realSwapData.towerId
+                    });
+                    if (emptySlotResponse?.success && emptySlotResponse?.data) {
+                        emptySlotNumber = emptySlotResponse.data.slotNumber;
+                    }
+                } catch (e) {
+                    console.warn('Could not fetch empty slot:', e);
+                }
             }
 
-            // 4. SIMULATE RESPONSE FOR FE (STEP 3)
-            const simulatedResponse = {
-                ...returnedSwap,
-                swapId: returnedSwap.swapId || 999, // (Temporary ID if BE doesn't return)
-                emptySlot: emptySlotResponse?.data?.slotNumber || 'N/A', // Real empty slot
-                newBattery: {
-                    code: `BAT-${swapDataForBE.newBatteryId}`, // Use real new battery ID
-                    slot: "N/A", // (Need another API call to find)
-                    percent: 100 // Simulate
-                }
-            };
 
-            return simulatedResponse;
+            return {
+                ...returnedSwap,
+                swapId: normalizedSwapId,
+                emptySlot: emptySlotNumber ?? null,
+                emptySlotNumber: emptySlotNumber ?? null,
+            };
         } catch (error) {
             console.error('Error initiating swap:', error);
             throw new Error(error.message || "Unknown error during swap initiation");
@@ -79,19 +70,18 @@ const swapService = {
 
     /**
      * API 2 (Driver): Confirm swap completion.
-     * (Uses POST /api/swaps/{id}/confirm from your BE)
+     * (Uses POST /api/batteries/swap/{id}/confirm from your BE)
      */
-    confirmSwap: async (swapId, oldBatteryData) => {
-        // oldBatteryData is not used by BE, but keep for FE logic
+    confirmSwap: async (swapId, confirmData) => {
         try {
-            console.log(`SwapService: Confirming swap ${swapId}...`);
-            const endpoint = ENDPOINTS.SWAPS.CONFIRM(swapId);
-            const response = await apiUtils.post(endpoint); // No body needed for BE
+            console.log(`SwapService: Confirming swap ${swapId} with data:`, confirmData);
+            const endpoint = ENDPOINTS.BATTERIES.SWAP_CONFIRM(swapId);
+            const response = await apiUtils.post(endpoint, confirmData);
 
             if (response.success) {
                 return response.data; // Return summary (updated swap)
             } else {
-                throw new Error(response.message || "Error confirming swap");
+                throw new Error(response.message || 'Error confirming swap');
             }
         } catch (error) {
             console.error('Error confirming swap:', error);

@@ -88,7 +88,8 @@ export const API_CONFIG = {
       CANCEL: (id) => `/api/swaps/${id}/cancel`,
       RATE: (id) => `/api/swaps/${id}/rate`,
       BOOK_SLOT: '/api/swaps/book-slot',
-      STATISTICS: (userId) => `/api/users/${userId}/swap-statistics`
+      STATISTICS: (userId) => `/api/users/${userId}/swap-statistics`,
+      COMPLETE: '/api/swaps/complete'
     },
     
     // Notification Management

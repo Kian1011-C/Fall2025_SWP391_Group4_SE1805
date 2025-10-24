@@ -40,7 +40,7 @@ import StaffStationManagement from './pages/Staff/StationManagement';
 import StaffIssues from './pages/Staff/Issues';
 import StaffReports from './pages/Staff/Reports';
 import StaffTransactionManagement from './pages/Staff/TransactionManagement';
-
+import {StationDetails, CabinetDetails} from './pages/Staff/StationManagement/components';
 // --- Admin Pages ---
 import AdminDashboard from './pages/Admin/Dashboard';
 import AdminUsers from './pages/Admin/Users';
@@ -99,6 +99,8 @@ function AppContent() {
             <Route path="transaction-management" element={<StaffTransactionManagement />} />
             <Route path="issues" element={<StaffIssues />} />
             <Route path="reports" element={<StaffReports />} />
+            <Route path="stations/:stationId" element={<StationDetails />} />
+            <Route path="stations/:stationId/cabinets/:cabinetId" element={<CabinetDetails />} />
           </Route>
           
           {/* === ADMIN ROUTES === */}

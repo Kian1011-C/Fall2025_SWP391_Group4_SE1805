@@ -1,5 +1,6 @@
 // pages/Driver/SwapBattery/index.jsx
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSwapSteps } from './hooks/useSwapSteps'; 
 // BẠN CŨNG CẦN DÒNG NÀY:
 import { useSwapData } from './hooks/useSwapData';
@@ -19,8 +20,10 @@ import SwapProgressBar from './components/SwapProgressBar';
 export const SwapContext = React.createContext();
 
 const SwapBatteryPage = () => {
+    const navigate = useNavigate();
+    
     // 1. Gọi hook quản lý BƯỚC
-    const { currentStep, STEPS, goToStep, resetSteps } = useSwapSteps();
+    const { currentStep, STEPS, goToStep, resetSteps } = useSwapSteps(); 
     
     // 2. Gọi hook quản lý DỮ LIỆU/API
     const dataProps = useSwapData(goToStep, STEPS);
@@ -37,6 +40,36 @@ const SwapBatteryPage = () => {
     const handleReset = () => {
         resetSteps();
         dataProps.resetSwapData();
+    };
+    
+    // Hàm điều hướng về dashboard
+    const handleGoToDashboard = () => {
+        // Xóa session trước khi điều hướng
+        try {
+            sessionStorage.removeItem('selectedStation');
+            sessionStorage.removeItem('selectedCabinet');
+            sessionStorage.removeItem('EmptySlot');
+            sessionStorage.removeItem('oldBatteryId');
+            sessionStorage.removeItem('newBatteryId');
+            sessionStorage.removeItem('newBatterySlot');
+            sessionStorage.removeItem('newBatteryLevel');
+            sessionStorage.removeItem('emptySlotNumber');
+            sessionStorage.removeItem('UserID');
+            sessionStorage.removeItem('contractID');
+            sessionStorage.removeItem('vehicleID');
+            sessionStorage.removeItem('stationID');
+            sessionStorage.removeItem('towerID');
+            sessionStorage.removeItem('old_battery_id');
+            sessionStorage.removeItem('new_battery_id');
+            sessionStorage.removeItem('distance_used');
+            sessionStorage.removeItem('swapId');
+            console.log('Đã xóa tất cả sessionStorage khi về dashboard');
+        } catch (error) {
+            console.error('Lỗi khi xóa sessionStorage:', error);
+        }
+        
+        // Điều hướng về dashboard
+        navigate('/driver/dashboard');
     };
 
     // 4. Quyết định render component nào
@@ -68,24 +101,24 @@ const SwapBatteryPage = () => {
             case STEPS.TAKE_NEW_BATTERY:
                 return <TakeNewBattery />;
             case STEPS.SUCCESS:
-                return <SwapSuccess onFinish={handleReset} />;
+                return <SwapSuccess onFinish={handleGoToDashboard} />;
             default:
                 return <div>Lỗi: Bước không xác định</div>;
         }
     };
 
     return (
-        // 5. Cung cấp "Context" cho tất cả component con
-        <SwapContext.Provider value={providerValue}>
-            <div className="swap-battery-container" style={{ padding: '20px' }}>
+        <div className="swap-battery-container" style={{ padding: '20px' }}>
+            {/* 5. Cung cấp "Context" cho tất cả component con */}
+            <SwapContext.Provider value={providerValue}>
                 <SwapProgressBar />
                 <div className="swap-content" style={{ marginTop: '20px' }}>
                     {renderCurrentStep()}
                 </div>
                 {/* Nút trợ giúp luôn hiển thị */}
                 {/* <StaffAssistanceButton /> */}
-            </div>
-        </SwapContext.Provider>
+            </SwapContext.Provider>
+        </div>
     );
 };
 

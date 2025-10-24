@@ -25,6 +25,7 @@ export const useAdminUsersData = () => {
     } finally {
       setIsLoading(false);
     }
+    
   }, []);
 
   useEffect(() => {
@@ -32,16 +33,27 @@ export const useAdminUsersData = () => {
   }, [fetchUsers]);
 
   // Logic lọc
-  const filteredUsers = useMemo(() => {
-    return users.filter(user => {
-      const roleMatch = filterRole ? user.role === filterRole : true;
-      const searchMatch = searchQuery ? 
-        ((user.firstName + ' ' + user.lastName).toLowerCase().includes(searchQuery.toLowerCase()) || 
-         user.email?.toLowerCase().includes(searchQuery.toLowerCase()))
+  // TÌM ĐẾN KHỐI useMemo NÀY
+  const filteredUsers = useMemo(() => {
+    return users.filter(user => {
+      // CODE CŨ CỦA BẠN:
+      // const roleMatch = filterRole ? user.role === filterRole : true;
+      
+      // === SỬA LẠI NHƯ SAU: ===
+      const roleMatch = filterRole 
+        ? user.role.toLowerCase().includes(filterRole.toLowerCase()) 
         : true;
-      return roleMatch && searchMatch;
-    });
-  }, [users, filterRole, searchQuery]);
+      // Ví dụ: "ev driver".includes("driver") => true
+      // Ví dụ: "staff".includes("staff") => true
+      // ==========================
+
+      const searchMatch = searchQuery ? 
+        ((user.firstName + ' ' + user.lastName).toLowerCase().includes(searchQuery.toLowerCase()) || 
+         user.email?.toLowerCase().includes(searchQuery.toLowerCase()))
+        : true;
+      return roleMatch && searchMatch;
+    });
+  }, [users, filterRole, searchQuery]);
 
   // --- HÀM XỬ LÝ CRUD ---
   const handleCreate = async (userData) => {

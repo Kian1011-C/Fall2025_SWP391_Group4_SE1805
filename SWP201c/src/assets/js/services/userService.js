@@ -6,24 +6,27 @@ class UserService {
    */
   async getAllUsers(filters = {}) {
     try {
-      console.log('UserService: Lấy tất cả người dùng (Drivers và Staff)...', filters);
+      console.log('UserService: Lấy tất cả người dùng từ /api/admin/users...', filters);
       
-      // Gọi cả hai API cùng lúc
-      const [driversResponse, staffResponse] = await Promise.all([
-        apiUtils.get('/api/admin/drivers', filters),
-        apiUtils.get('/api/admin/staff', filters)
-      ]);
+      // Gọi MỘT API duy nhất mà backend có
+      // filters (ví dụ: { role: 'driver', search: 'abc' }) 
+      // sẽ được apiUtils tự động chuyển thành query params:
+      // /api/admin/users?role=driver&search=abc
+      const response = await apiUtils.get('/api/admin/users', filters);
       
-      if (driversResponse.success && staffResponse.success) {
-        // Gộp hai danh sách lại
-        const allUsers = [
-          ...driversResponse.data.map(user => ({ ...user, role: 'driver' })),
-          ...staffResponse.data.map(user => ({ ...user, role: 'staff' }))
-        ];
-        
-        return { success: true, data: allUsers, message: 'Lấy danh sách người dùng thành công' };
+      if (response.success && Array.isArray(response.data)) {
+        // Dữ liệu trả về từ backend đã là một mảng user hoàn chỉnh
+        return { 
+          success: true, 
+          data: response.data, 
+          message: 'Lấy danh sách người dùng thành công',
+          // Chúng ta cũng nên trả về thông tin phân trang
+          total: response.total,
+          page: response.page,
+          totalPages: response.totalPages
+        };
       } else {
-        throw new Error(driversResponse.message || staffResponse.message || 'Không thể lấy danh sách người dùng');
+        throw new Error(response.message || 'Không thể lấy danh sách người dùng');
       }
     } catch (error) {
       console.error('Lỗi khi lấy danh sách người dùng:', error);

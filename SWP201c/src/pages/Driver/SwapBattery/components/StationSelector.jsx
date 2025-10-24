@@ -13,7 +13,21 @@ const StationSelector = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // 2. GỌI API THẬT KHI COMPONENT ĐƯỢC TẢI
+    // 2. LOAD LẠI TRẠM ĐÃ CHỌN TỪ SESSION STORAGE
+    useEffect(() => {
+        try {
+            const savedStation = sessionStorage.getItem('selectedStation');
+            if (savedStation) {
+                const station = JSON.parse(savedStation);
+                setSelectedStation(station);
+                console.log('Đã load lại trạm từ sessionStorage:', station);
+            }
+        } catch (error) {
+            console.error('Lỗi khi load trạm từ sessionStorage:', error);
+        }
+    }, [setSelectedStation]);
+
+    // 3. GỌI API THẬT KHI COMPONENT ĐƯỢC TẢI
     useEffect(() => {
         const fetchStations = async () => {
             setLoading(true);
@@ -51,6 +65,15 @@ const StationSelector = () => {
         if (station.status !== 'HOAT_DONG' && station.status !== 'Hoạt động') {
              return; // Không cho chọn trạm bảo trì
         }
+        
+        // 4. LƯU TRẠM VÀO SESSION STORAGE
+        try {
+            sessionStorage.setItem('selectedStation', JSON.stringify(station));
+            console.log('Đã lưu trạm vào sessionStorage:', station);
+        } catch (error) {
+            console.error('Lỗi khi lưu trạm vào sessionStorage:', error);
+        }
+        
         setSelectedStation(station);    
         goToStep(STEPS.SELECT_TOWER); 
     };

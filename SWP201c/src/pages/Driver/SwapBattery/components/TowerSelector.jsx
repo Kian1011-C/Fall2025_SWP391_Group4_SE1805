@@ -11,6 +11,20 @@ const TowerSelector = () => {
     const [loading, setLoading] = useState(true); 
     const [error, setError] = useState(null);
 
+    // LOAD LẠI TRỤ ĐÃ CHỌN TỪ SESSION STORAGE
+    useEffect(() => {
+        try {
+            const savedCabinet = sessionStorage.getItem('selectedCabinet');
+            if (savedCabinet) {
+                const cabinet = JSON.parse(savedCabinet);
+                setSelectedCabinet(cabinet);
+                console.log('Đã load lại trụ từ sessionStorage:', cabinet);
+            }
+        } catch (error) {
+            console.error('Lỗi khi load trụ từ sessionStorage:', error);
+        }
+    }, []);
+
     useEffect(() => {
         if (!selectedStation) {
             goToStep(STEPS.SELECT_STATION);
@@ -45,6 +59,14 @@ const TowerSelector = () => {
 
     const handleStartSwap = () => {
         if (selectedCabinet) {
+            // LƯU TRỤ VÀO SESSION STORAGE
+            try {
+                sessionStorage.setItem('selectedCabinet', JSON.stringify(selectedCabinet));
+                console.log('Đã lưu trụ vào sessionStorage:', selectedCabinet);
+            } catch (error) {
+                console.error('Lỗi khi lưu trụ vào sessionStorage:', error);
+            }
+            
             initiateSwap(selectedCabinet);
         }
     };

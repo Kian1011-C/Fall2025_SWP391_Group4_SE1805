@@ -4,7 +4,7 @@ import { SwapContext } from '../index';
 
 const PlaceOldBattery = () => {
     // 1. GET DATA FROM CONTEXT
-    const { transaction, confirmSwap, isLoading } = useContext(SwapContext);
+    const { transaction, isLoading, goToStep, STEPS } = useContext(SwapContext);
 
     // 2. STATE FOR THE FORM
     const [code, setCode] = useState(''); // Real ID
@@ -15,6 +15,14 @@ const PlaceOldBattery = () => {
     // 3. LOAD VEHICLE DATA AND SET BATTERY CODE
     useEffect(() => {
         try {
+            // KIỂM TRA XEM CÓ BATTERY ID ĐÃ LƯU TRƯỚC ĐÓ KHÔNG
+            const savedBatteryId = sessionStorage.getItem('oldBatteryId');
+            if (savedBatteryId) {
+                setCode(savedBatteryId);
+                console.log('Đã load lại batteryId từ sessionStorage:', savedBatteryId);
+                return; // Không cần load từ vehicle nữa
+            }
+            
             const vehicleStr = sessionStorage.getItem('selectedVehicle');
             console.log('Vehicle string from sessionStorage:', vehicleStr);
             
@@ -63,6 +71,14 @@ const PlaceOldBattery = () => {
                 
                 setCode(batteryCode);
                 console.log('Mã pin cuối cùng:', batteryCode);
+                
+                // LƯU BATTERY ID VÀO SESSION STORAGE
+                try {
+                    sessionStorage.setItem('oldBatteryId', batteryCode);
+                    console.log('Đã lưu batteryId vào sessionStorage:', batteryCode);
+                } catch (error) {
+                    console.error('Lỗi khi lưu batteryId vào sessionStorage:', error);
+                }
             } else {
                 console.log('Không có dữ liệu xe trong sessionStorage');
                 setCode('N/A');
@@ -87,11 +103,9 @@ const PlaceOldBattery = () => {
     // 4. HANDLE SUBMIT
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Send the real ID and the *randomly generated* percentage
-        confirmSwap({
-            batteryCode: code,
-            batteryPercent: percent // Send the random percentage
-        });
+        // Chỉ chuyển bước, không gọi confirmSwap ở đây
+        goToStep(STEPS.TAKE_NEW_BATTERY);
+        console.log('Đã đặt pin cũ, chuyển sang bước lấy pin mới.');
     };
 
     // Get the empty slot number
