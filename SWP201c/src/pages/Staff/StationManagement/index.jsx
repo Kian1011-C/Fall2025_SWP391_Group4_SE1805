@@ -1,63 +1,75 @@
-import React from 'react';
-// 1. IMPORT useNavigate THAY CHO LINK
-import { useNavigate } from 'react-router-dom'; 
-import { useStationData } from './hooks/useStationData'; 
-import StationCard from './components/StationCard'; 
+import React, { useState } from 'react';
+import { useStationsDrilldown } from './hooks/useStationDrilldown'; // Import hook
+import StationListView from './components/StationListView';
+import TowerListView from './components/TowerListView';
+import SlotGridView from './components/SlotGridView';
+import LoadingFallback from '../../../components/common/LoadingFallback';
+
+const Header = ({ title, onBack }) => (
+  <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '30px' }}>
+    {onBack && (
+      <button onClick={onBack} style={{ background: '#334155', color: 'white', border: 'none', padding: '10px 15px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px' }}>
+        ← Quay lại
+      </button>
+    )}
+    <h1 style={{ margin: 0, fontSize: '28px', color: 'white' }}>{title}</h1>
+  </div>
+);
 
 const StaffStationManagement = () => {
-  const { stations, isLoading, error, refetch } = useStationData();
-  const navigate = useNavigate(); // <-- 2. KHỞI TẠO HOOK NÀY
+  const [view, setView] = useState('stations');
+  const [selectedStation, setSelectedStation] = useState(null);
+  const [selectedTower, setSelectedTower] = useState(null);
 
-  const renderContent = () => {
-    if (isLoading) return <p style={{ color: '#94a3b8', textAlign: 'center' }}>Đang tải danh sách trạm...</p>;
-    if (error) return (
-      <div style={{ color: '#ef4444', textAlign: 'center' }}>
-        <p>Lỗi: {error}</p>
-        <button onClick={() => refetch()}>Thử lại</button>
-      </div>
-    );
-    if (stations.length === 0) return <p style={{ color: '#94a3b8', textAlign: 'center' }}>Không tìm thấy trạm nào.</p>;
+  const {
+    stations, towers, slots,
+    isLoading, error,
+    fetchTowers, fetchSlots,
+  } = useStationsDrilldown();
 
-    return (
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-        gap: '25px',
-      }}>
-        {stations.map(station => (
-          // 3. BỎ THẺ <Link> VÀ TRUYỀN onClick VÀO NHƯ SAU
-          <StationCard 
-            key={station.id} 
-            station={station} 
-            onClick={() => navigate(`/staff/stations/${station.id}`)} 
-          />
-        ))}
-      </div>
-    );
-  };
+  const handleSelectStation = (station) => {
+    setSelectedStation(station);
+    fetchTowers(station.id);
+    setView('towers');
+  };
 
-  return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: '28px' }}>Quản lý Trạm</h1>
-          <p style={{ margin: '5px 0 0 0', color: '#94a3b8' }}>Tổng quan trạng thái và số lượng pin tại các trạm.</p>
-        </div>
-        <div style={{ display: 'flex', gap: '15px' }}>
-          <select onChange={(e) => refetch({ status: e.target.value })} style={{ background: '#334155', color: 'white', border: '1px solid #475569', padding: '10px', borderRadius: '8px' }}>
-            <option value="">Tất cả trạng thái</option>
-            <option value="active">Hoạt động</option>
-            <option value="maintenance">Bảo trì</option>
-            <option value="offline">Ngoại tuyến</option>
-          </select>
-          <button onClick={() => refetch()} style={{ background: '#334155', color: 'white', border: 'none', padding: '8px 15px', borderRadius: '6px', cursor: 'pointer' }}>
-            🔄 Tải lại
-          </button>
-        </div>
-      </div>
-      {renderContent()}
-    </div>
-  );
+  const handleSelectTower = (tower) => {
+    setSelectedTower(tower);
+    fetchSlots(tower.id || tower.towerId);
+    setView('slots');
+  };
+
+  const renderContent = () => {
+    if (isLoading) return <LoadingFallback text="Đang tải dữ liệu..." />;
+    if (error) return <p style={{ color: '#ef4444' }}>Lỗi: {error}</p>;
+
+    if (view === 'slots') {
+      return <SlotGridView slots={slots} />;
+    }
+    if (view === 'towers') {
+      return <TowerListView towers={towers} onSelectTower={handleSelectTower} />;
+    }
+    return <StationListView stations={stations} onSelectStation={handleSelectStation} />;
+  };
+
+  const getTitle = () => {
+    if (view === 'slots') return `Trạm ${selectedStation?.name} - Trụ ${selectedTower?.towerNumber}`;
+    if (view === 'towers') return `Chi tiết Trạm: ${selectedStation?.name}`;
+    return 'Quản lý Trạm';
+  };
+
+  const getBackButtonHandler = () => {
+    if (view === 'slots') return () => setView('towers');
+    if (view === 'towers') return () => setView('stations');
+    return null;
+  };
+
+  return (
+    <div>
+      <Header title={getTitle()} onBack={getBackButtonHandler()} />
+      {renderContent()}
+    </div>
+  );
 };
 
 export default StaffStationManagement;

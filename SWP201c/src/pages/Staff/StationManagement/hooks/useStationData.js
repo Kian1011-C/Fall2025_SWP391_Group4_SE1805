@@ -1,53 +1,36 @@
-//
-// File: pages/staff/StationManagement/hooks/useStationData.js
-//
 import { useState, useEffect, useCallback } from 'react';
-// Import file service của bạn
-import stationService from '../../../../assets/js/services/stationService';
+import stationService from '../../../../assets/js/services/stationService'; // Đảm bảo đường dẫn này đúng
 
 export const useStationData = () => {
   const [stations, setStations] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  
-  // Dùng để lưu trữ filter hiện tại (ví dụ: { status: 'active' })
-  const [currentFilters, setCurrentFilters] = useState({});
 
-  const fetchData = useCallback(async (newFilters) => {
-    // Nếu có filter mới (từ dropdown), dùng nó.
-    // Nếu không (từ nút "Tải lại"), dùng filter đang lưu.
-    const filtersToUse = newFilters || currentFilters;
-
-    // Nếu có filter mới, lưu lại
-    if (newFilters) {
-      setCurrentFilters(newFilters);
-    }
-
-    setIsLoading(true);
-    setError(null);
+  // Dùng useCallback để hàm này không bị tạo lại sau mỗi lần render
+  const fetchStations = useCallback(async (filters = {}) => {
     try {
-      // **QUAN TRỌNG**: Truyền 'filtersToUse' vào hàm service
-      const response = await stationService.getAllStations(filtersToUse); 
+      setIsLoading(true);
+      setError(null);
+      const response = await stationService.getAllStations(filters);
       
       if (response.success && Array.isArray(response.data)) {
         setStations(response.data);
       } else {
+        // Ném lỗi nếu API trả về success: false
         throw new Error(response.message || "Dữ liệu trạm không hợp lệ.");
       }
     } catch (err) {
-      const errorMessage = err.message || "Không thể tải danh sách trạm.";
-      setError(errorMessage);
-      console.error(errorMessage, err);
+      setError(err.message || "Không thể tải danh sách trạm.");
     } finally {
       setIsLoading(false);
     }
-  }, [currentFilters]); // Hook sẽ tạo lại hàm fetchData nếu filter thay đổi
+  }, []); // Hàm này không phụ thuộc vào gì, chỉ tạo 1 lần
 
+  // Tải dữ liệu lần đầu khi component được mở
   useEffect(() => {
-    // Tải dữ liệu lần đầu khi component mount
-    fetchData({}); // Bắt đầu với không filter
-  }, []); // <-- Chỉ chạy 1 lần duy nhất
+    fetchStations(); // Gọi hàm với bộ lọc rỗng
+  }, [fetchStations]);
 
-  // Trả về hàm 'fetchData' dưới tên 'refetch'
-  return { stations, isLoading, error, refetch: fetchData };
+  // Trả về dữ liệu, trạng thái, và hàm để tải lại (refetch)
+  return { stations, isLoading, error, refetch: fetchStations };
 };

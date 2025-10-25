@@ -97,74 +97,21 @@ const stationService = {
      * Gọi: GET /api/staff/stations/{stationId}/cabinets
      */
     getStaffCabinetsByStation: async (stationId) => {
-        try {
-            console.log(`StationService (STAFF): Lấy trụ của trạm ${stationId}...`);
-            
-            // Do endpoint này không có trong 'ENDPOINTS' của Driver,
-            // chúng ta tạm thời hardcode.
-            // Bạn nên thêm nó vào file API_CONFIG sau.
-            const endpoint = `/api/staff/stations/${stationId}/cabinets`; 
-            
-            const response = await apiUtils.get(endpoint);
-            
-            // Trả về toàn bộ response để useStationDetailsData xử lý
-            // (response nên có dạng { success: true, data: [...], stationName: "..." })
-            return response; 
-            
-        } catch (error) {
-            console.error(`Lỗi khi lấy trụ (Staff) của trạm ${stationId}:`, error);
-            throw error; // Ném lỗi để hook (useStationDetailsData) bắt
-        }
-    },
-    
-    /**
-     * API 5 (Staff): Lấy các Hộc (Slots) của 1 Trụ
-     * Được gọi bởi hook: useCabinetDetailsData.js
-     * Gọi: GET /api/staff/cabinets/{cabinetId}/slots
-     */
-    getStaffSlotsByCabinet: async (cabinetId) => {
-        try {
-            console.log(`StationService (STAFF): Lấy hộc của trụ ${cabinetId}...`);
-            
-            // Tương tự, endpoint này là của Staff, nên tạm hardcode
-            const endpoint = `/api/staff/cabinets/${cabinetId}/slots`;
-            
-            const response = await apiUtils.get(endpoint);
-            
-            // Trả về toàn bộ response để useCabinetDetailsData xử lý
-            // (response nên có dạng { success: true, data: [...], cabinetName: "..." })
-            return response;
-            
-        } catch (error) {
-            console.error(`Lỗi khi lấy hộc (Staff) của trụ ${cabinetId}:`, error);
-            throw error; // Ném lỗi để hook (useCabinetDetailsData) bắt
-        }
-    },
-
-    /**
-     * API 6: Lấy danh sách các tháp pin có sẵn tại một trạm cụ thể
-     * Gọi: GET /api/stations/{id}/towers
-     */
-    getTowersByStationId: async (stationId) => {
-        try {
-            console.log(`StationService: Lấy towers của trạm ${stationId}...`);
-            
-            const endpoint = `/api/stations/${stationId}/towers`;
-            
-            const response = await apiUtils.get(endpoint);
-            
-            // Trả về toàn bộ response
-            return response;
-            
-        } catch (error) {
-            console.error(`Lỗi khi lấy towers của trạm ${stationId}:`, error);
-            throw error;
-        }
-        
-    },
-    // ==========================================================
-    // === CODE MỚI THÊM CHO TRANG ADMIN (BẮT ĐẦU TỪ ĐÂY) ===
-    // ==========================================================
+    // Hàm này gọi lại hàm của Driver
+    return await stationService.getTowersByStation(stationId);
+  },
+  
+  /**
+   * API 5 (Staff): Lấy các Hộc (Slots) của 1 Trụ
+   * (Hiện tại dùng chung API của Driver)
+   */
+  getStaffSlotsByCabinet: async (cabinetId) => {
+    // Hàm này gọi lại hàm của Driver
+    return await stationService.getSlotsByTower(cabinetId);
+  },
+  // ==========================================================
+  // === CODE MỚI THÊM CHO TRANG ADMIN (BẮT ĐẦU TỪ ĐÂY) ===
+  // ==========================================================
     /**
      * API 7 (Admin): Tạo một trạm mới
      * @param {object} stationData - Dữ liệu của trạm mới
@@ -207,6 +154,50 @@ const stationService = {
             return { success: false, message: errorInfo.message || 'Lỗi API' };
         }
     },
+
+   getAllStations: async (filters = {}) => {
+    try {
+      const response = await apiUtils.get(ENDPOINTS.STATIONS.BASE, filters); 
+      return response;
+    } catch (error) { 
+      console.error('Lỗi khi lấy danh sách trạm:', error);
+      throw error; 
+    }
+  },
+
+  /**
+   * API 2 (Admin - Cấp 2): Lấy các Trụ của 1 Trạm
+   * Sửa lại: Dùng chung API GET /api/driver/towers
+   */
+  getTowersByStation: async (stationId) => { // Đổi tên hàm cho rõ ràng
+    try {
+      console.log(`StationService (Admin): Lấy trụ của trạm ${stationId}...`);
+      const endpoint = '/api/driver/towers'; // <-- ĐỊA CHỈ ĐÚNG
+      const params = { stationId: stationId }; // <-- ĐÚNG PARAM
+      const response = await apiUtils.get(endpoint, params);
+      return response; 
+    } catch (error) {
+      console.error(`Lỗi khi lấy trụ (Admin) của trạm ${stationId}:`, error);
+      throw error;
+    }
+  },
+  
+  /**
+   * API 3 (Admin - Cấp 3): Lấy các Hộc (Slots) của 1 Trụ
+   * Sửa lại: Dùng chung API GET /api/driver/slots
+   */
+  getSlotsByTower: async (towerId) => { // Đổi tên hàm cho rõ ràng
+    try {
+      console.log(`StationService (Admin): Lấy hộc của trụ ${towerId}...`);
+      const endpoint = '/api/driver/slots'; // <-- ĐỊA CHỈ ĐÚNG
+      const params = { towerId: towerId }; // <-- ĐÚNG PARAM
+      const response = await apiUtils.get(endpoint, params);
+      return response;
+    } catch (error) {
+      console.error(`Lỗi khi lấy hộc (Admin) của trụ ${towerId}:`, error);
+      throw error;
+    }
+  },
 };
 
 // Đảm bảo bạn dùng 'export default'

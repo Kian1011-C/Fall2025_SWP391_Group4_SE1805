@@ -23,7 +23,7 @@ export const useStationsDrilldown = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Cấp 1: Lấy tất cả Trạm (Dùng API chung)
+  // Cấp 1: Lấy tất cả Trạm
   const fetchStations = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -42,9 +42,7 @@ export const useStationsDrilldown = () => {
     try {
       setIsLoading(true);
       setError(null);
-      // --- SỬA LỖI Ở ĐÂY ---
-      // Gọi đúng tên hàm: getTowersByStationForStaff
-      const response = await stationService.getTowersByStationForStaff(stationId); 
+      const response = await stationService.getStaffCabinetsByStation(stationId); 
       setTowers(safeExtractData(response));
     } catch (err) {
       setError(err.message || "Không thể tải danh sách trụ.");
@@ -58,9 +56,7 @@ export const useStationsDrilldown = () => {
     try {
       setIsLoading(true);
       setError(null);
-      // --- SỬA LỖI Ở ĐÂY ---
-      // Gọi đúng tên hàm: getSlotsByTowerForStaff
-      const response = await stationService.getSlotsByTowerForStaff(towerId);
+      const response = await stationService.getStaffSlotsByCabinet(towerId);
       setSlots(safeExtractData(response));
     } catch (err) {
       setError(err.message || "Không thể tải danh sách hộc pin.");
