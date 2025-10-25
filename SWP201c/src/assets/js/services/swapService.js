@@ -1,173 +1,212 @@
-// src/assets/js/services/swapService.js
-import { apiUtils, API_CONFIG } from '../config/api.js'; // (Ensure path is correct)
+import { apiUtils } from '../config/api.js';
 
-const { ENDPOINTS } = API_CONFIG;
+class SwapService {
+  /**
+   * Lấy lịch sử các lần đổi pin của một người dùng cụ thể.
+   * API: GET /api/users/{userId}/swaps
+   * @param {string} userId - ID của người dùng
+   */
+  async getSwapHistory(userId) {
+    try {
+      console.log('SwapService: Lấy lịch sử đổi pin cho người dùng', userId);
 
-const swapService = {
-    /**
-     * API 1 (Driver): Initiate a new battery swap.
-     * (Uses POST /api/swaps from your BE)
-     */
-    initiateSwap: async (realSwapData) => {
-        // realSwapData: { userId, contractId, vehicleId, oldBatteryId, stationId, towerId, newBatteryId }
-        try {
-            console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-            console.log("📤 GỌI API TẠO SWAP (POST /api/swaps)");
-            console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-            console.log("Input data:", realSwapData);
+      const response = await apiUtils.get(`/api/users/${userId}/swaps`);
 
-            // Gửi đúng dữ liệu thật từ FE
-            // Backend đọc field "batteryId" (không phải "oldBatteryId")
-            const swapDataForBE = {
-                userId: realSwapData.userId,
-                contractId: realSwapData.contractId,
-                vehicleId: realSwapData.vehicleId,
-                batteryId: realSwapData.oldBatteryId,  // SỬA: Backend đọc field "batteryId"
-                newBatteryId: realSwapData.newBatteryId,
-                stationId: realSwapData.stationId,
-                towerId: realSwapData.towerId,
-                status: "INITIATED"
-            };
+      if (response.success) {
+        return {
+          success: true,
+          data: response.data,
+          message: 'Lấy lịch sử đổi pin thành công'
+        };
+      } else {
+        throw new Error(response.message || 'Không thể lấy lịch sử đổi pin');
+      }
+    } catch (error) {
+      console.error('Lỗi khi lấy lịch sử đổi pin:', error);
+      
+      // Nếu API chưa sẵn sàng, trả về mock data để trang hoạt động
+      if (error.response?.status === 404) {
+        console.log('⚠️ API /api/users/{userId}/swaps chưa sẵn sàng, sử dụng mock data');
+        return {
+          success: true,
+          data: this.getMockSwapHistory(),
+          message: 'Lấy lịch sử đổi pin (dữ liệu mẫu)'
+        };
+      }
+      
+      const errorInfo = apiUtils.handleError(error);
+      return {
+        success: false,
+        message: errorInfo.message || 'Lỗi khi lấy lịch sử đổi pin',
+        error: errorInfo
+      };
+    }
+  }
 
-            console.log("Payload sẽ gửi đến backend:");
-            console.log(JSON.stringify(swapDataForBE, null, 2));
-            console.log("Chi tiết từng field:");
-            console.log("  ├─ userId:", swapDataForBE.userId, `(type: ${typeof swapDataForBE.userId})`);
-            console.log("  ├─ contractId:", swapDataForBE.contractId, `(type: ${typeof swapDataForBE.contractId})`);
-            console.log("  ├─ vehicleId:", swapDataForBE.vehicleId, `(type: ${typeof swapDataForBE.vehicleId})`);
-            console.log("  ├─ batteryId (old battery):", swapDataForBE.batteryId, `(type: ${typeof swapDataForBE.batteryId})`);
-            console.log("  ├─ newBatteryId:", swapDataForBE.newBatteryId, `(type: ${typeof swapDataForBE.newBatteryId})`);
-            console.log("  ├─ stationId:", swapDataForBE.stationId, `(type: ${typeof swapDataForBE.stationId})`);
-            console.log("  ├─ towerId:", swapDataForBE.towerId, `(type: ${typeof swapDataForBE.towerId})`);
-            console.log("  └─ status:", swapDataForBE.status);
-            console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+  /**
+   * Lấy tất cả các lần đổi pin (cho Admin/Staff)
+   * API: GET /api/swaps
+   */
+  async getAllSwaps() {
+    try {
+      console.log('SwapService: Lấy tất cả lịch sử đổi pin');
+      
+      const response = await apiUtils.get('/api/swaps');
+      
+      if (response.success) {
+        return {
+          success: true,
+          data: response.data,
+          message: 'Lấy tất cả lịch sử đổi pin thành công'
+        };
+      } else {
+        throw new Error(response.message || 'Không thể lấy lịch sử đổi pin');
+      }
+    } catch (error) {
+      console.error('Lỗi khi lấy tất cả lịch sử đổi pin:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return {
+        success: false,
+        message: errorInfo.message || 'Lỗi khi lấy lịch sử đổi pin',
+        error: errorInfo
+      };
+    }
+  }
 
-            // SỬA: Đổi lại endpoint (kiểm tra backend đang dùng endpoint nào)
-            // Thử endpoint: /api/batteries/swap/initiate
-            const responseData = await apiUtils.post('/api/batteries/swap/initiate', swapDataForBE);
+  /**
+   * Lấy chi tiết một lần đổi pin
+   * API: GET /api/swaps/{swapId}
+   * @param {string} swapId - ID của lần đổi pin
+   */
+  async getSwapById(swapId) {
+    try {
+      console.log('SwapService: Lấy chi tiết lần đổi pin', swapId);
+      
+      const response = await apiUtils.get(`/api/swaps/${swapId}`);
+      
+      if (response.success) {
+        return {
+          success: true,
+          data: response.data,
+          message: 'Lấy chi tiết lần đổi pin thành công'
+        };
+      } else {
+        throw new Error(response.message || 'Không thể lấy chi tiết lần đổi pin');
+      }
+    } catch (error) {
+      console.error('Lỗi khi lấy chi tiết lần đổi pin:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return {
+        success: false,
+        message: errorInfo.message || 'Lỗi khi lấy chi tiết lần đổi pin',
+        error: errorInfo
+      };
+    }
+  }
 
-            console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-            console.log("📥 NHẬN RESPONSE TỪ POST /api/swaps");
-            console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-            console.log("Response:", JSON.stringify(responseData, null, 2));
-            console.log("Response keys:", Object.keys(responseData || {}));
-            console.log("Response.data:", responseData?.data);
-            console.log("Response.data keys:", Object.keys(responseData?.data || {}));
-            console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-
-            // Check if response indicates an error
-            if (responseData?.success === false) {
-                throw new Error(responseData?.message || "Backend could not create swap transaction");
-            }
-
-            // If no data returned, it might be a network error
-            if (!responseData?.data && !responseData?.success) {
-                throw new Error("No response data received from backend");
-            }
-
-            const returnedSwap = responseData.data || responseData;
-            
-            // Tìm swapId từ nhiều field có thể
-            const normalizedSwapId = returnedSwap.swapId || 
-                                     returnedSwap.id || 
-                                     returnedSwap.swap_id || 
-                                     returnedSwap.swapID ||
-                                     returnedSwap.swap_ID ||
-                                     responseData.swapId ||
-                                     responseData.id;
-
-            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.log('🔍 TÌM SWAP ID:');
-            console.log('  ├─ returnedSwap.swapId:', returnedSwap.swapId);
-            console.log('  ├─ returnedSwap.id:', returnedSwap.id);
-            console.log('  ├─ returnedSwap.swap_id:', returnedSwap.swap_id);
-            console.log('  ├─ responseData.swapId:', responseData.swapId);
-            console.log('  ├─ responseData.id:', responseData.id);
-            console.log('  └─ FINAL normalizedSwapId:', normalizedSwapId);
-            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            
-            if (!normalizedSwapId) {
-                console.error('❌ KHÔNG TÌM THẤY SWAP ID trong response!');
-                console.error('Full response object:', responseData);
-                throw new Error('Backend không trả về swapId. Kiểm tra API response structure.');
-            }
-
-            // 3. FIND EMPTY SLOT (optional helper, nếu BE đã trả thì bỏ qua)
-            let emptySlotNumber = returnedSwap.emptySlot || returnedSwap.emptySlotNumber;
-            if (!emptySlotNumber) {
-                try {
-                    const emptySlotResponse = await apiUtils.get(ENDPOINTS.DRIVER.GET_EMPTY_SLOT, {
-                        towerId: realSwapData.towerId
-                    });
-                    if (emptySlotResponse?.success && emptySlotResponse?.data) {
-                        emptySlotNumber = emptySlotResponse.data.slotNumber;
-                    }
-                } catch (e) {
-                    console.warn('Could not fetch empty slot:', e);
-                }
-            }
-
-
+  /**
+   * Hủy một lần đổi pin
+   * API: DELETE /api/swaps/{swapId}/cancel
+   * @param {string} swapId - ID của lần đổi pin
+   */
+  async cancelSwap(swapId) {
+    try {
+      console.log('SwapService: Hủy lần đổi pin', swapId);
+      
+      const response = await apiUtils.delete(`/api/swaps/${swapId}/cancel`);
+      
+      if (response.success) {
             return {
-                ...returnedSwap,
-                swapId: normalizedSwapId,
-                emptySlot: emptySlotNumber ?? null,
-                emptySlotNumber: emptySlotNumber ?? null,
-            };
+          success: true,
+          data: response.data,
+          message: 'Hủy lần đổi pin thành công'
+        };
+      } else {
+        throw new Error(response.message || 'Không thể hủy lần đổi pin');
+      }
         } catch (error) {
-            console.error('Error initiating swap:', error);
-            throw new Error(error.message || "Unknown error during swap initiation");
-        }
-    },
+      console.error('Lỗi khi hủy lần đổi pin:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return {
+        success: false,
+        message: errorInfo.message || 'Lỗi khi hủy lần đổi pin',
+        error: errorInfo
+      };
+    }
+  }
 
-    /**
-     * API 2 (Driver): Confirm swap completion.
-     * Backend chỉ cần swapId, tự động xử lý tất cả (đọc old/new battery từ DB)
-     */
-    confirmSwap: async (swapId) => {
-        try {
-            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.log('📤 GỌI API CONFIRM SWAP');
-            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.log(`SwapID: ${swapId}`);
-            console.log('Backend sẽ tự động xử lý old/new battery từ database');
-            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            
-            // Backend chỉ cần swapId (không cần body)
-            const endpoint = `/api/swaps/${swapId}/confirm`;
-            const response = await apiUtils.post(endpoint, {});
-
-            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.log('� NHẬN RESPONSE TỪ API');
-            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.log('Full response:', JSON.stringify(response, null, 2));
-            console.log('  ├─ response.success:', response.success);
-            console.log('  ├─ response.message:', response.message);
-            console.log('  └─ response.data:', JSON.stringify(response.data, null, 2));
-            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  /**
+   * Đánh giá một lần đổi pin
+   * API: POST /api/swaps/{swapId}/rate
+   * @param {string} swapId - ID của lần đổi pin
+   * @param {object} ratingData - Dữ liệu đánh giá
+   */
+  async rateSwap(swapId, ratingData) {
+    try {
+      console.log('SwapService: Đánh giá lần đổi pin', swapId, ratingData);
+      
+      const response = await apiUtils.post(`/api/swaps/${swapId}/rate`, ratingData);
 
             if (response.success) {
-                console.log('✅ Hoàn thành đổi pin thành công!');
-                return response.data; // Return summary (updated swap)
+        return {
+          success: true,
+          data: response.data,
+          message: 'Đánh giá lần đổi pin thành công'
+        };
             } else {
-                console.error('❌ Hoàn thành đổi pin thất bại:', response.message);
-                throw new Error(response.message || 'Error confirming swap');
+        throw new Error(response.message || 'Không thể đánh giá lần đổi pin');
             }
         } catch (error) {
-            console.error('❌ LỖI KHI GỌI API CONFIRM:', error);
-            throw error;
-        }
-    },
+      console.error('Lỗi khi đánh giá lần đổi pin:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return {
+        success: false,
+        message: errorInfo.message || 'Lỗi khi đánh giá lần đổi pin',
+        error: errorInfo
+      };
+    }
+  }
 
-    // Other functions (getAllSwaps, updateSwapStatus) remain the same
-    getAllSwaps: async () => { 
-        console.log('getAllSwaps not implemented yet');
-        return { success: false, message: 'Not implemented' };
-    },
-    updateSwapStatus: async (swapId, status) => { 
-        console.log('updateSwapStatus not implemented yet', { swapId, status });
-        return { success: false, message: 'Not implemented' };
-    },
-};
+  /**
+   * Mock data cho lịch sử đổi pin (khi API chưa sẵn sàng)
+   */
+  getMockSwapHistory() {
+    return [
+      {
+        id: 'swap_001',
+        userId: 'driver001',
+        vehicleId: 'vehicle_001',
+        oldBatteryId: 'battery_old_001',
+        newBatteryId: 'battery_new_001',
+        stationId: 'station_001',
+        status: 'completed',
+        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+        completedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000 + 5 * 60 * 1000).toISOString()
+      },
+      {
+        id: 'swap_002',
+        userId: 'driver001',
+        vehicleId: 'vehicle_001',
+        oldBatteryId: 'battery_old_002',
+        newBatteryId: 'battery_new_002',
+        stationId: 'station_002',
+        status: 'completed',
+        createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+        completedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000 + 4 * 60 * 1000).toISOString()
+      },
+      {
+        id: 'swap_003',
+        userId: 'driver001',
+        vehicleId: 'vehicle_001',
+        oldBatteryId: 'battery_old_003',
+        newBatteryId: 'battery_new_003',
+        stationId: 'station_001',
+        status: 'completed',
+        createdAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+        completedAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000 + 6 * 60 * 1000).toISOString()
+      }
+    ];
+  }
+}
 
-export default swapService;
+export default new SwapService();

@@ -166,6 +166,7 @@ export const createSupportRequest = (formData, userId) => {
     subject: formData.subject.trim(),
     message: formData.message.trim(),
     priority: formData.priority,
+    type: formData.type || 'support', // Default type for support requests
     status: 'open',
     createdAt: new Date().toISOString()
   };

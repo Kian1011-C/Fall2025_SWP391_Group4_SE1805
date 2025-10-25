@@ -42,7 +42,7 @@ export const ProfileAvatar = ({ user, onEdit, isEditing }) => {
           fontSize: '1.8rem',
           fontWeight: '600'
         }}>
-          {user?.fullName || user?.username || 'Driver'}
+          {user?.name || user?.fullName || user?.username || 'Driver'}
         </h2>
         <p style={{ color: '#B0B0B0', margin: '0 0 15px 0', fontSize: '1rem' }}>
           {user?.email || 'email@example.com'}

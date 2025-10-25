@@ -134,6 +134,28 @@ class UserService {
       return { success: false, message: errorInfo.message || 'Lỗi khi lấy profile driver', error: errorInfo };
     }
   }
+
+  /**
+   * Lấy thông tin profile của user theo API backend.
+   * API: GET /api/users/{userId}/profile
+   * @param {string} userId - ID của user
+   */
+  async getUserProfile(userId) {
+    try {
+      console.log(`UserService: Lấy profile user ${userId}`);
+      const response = await apiUtils.get(`/api/users/${userId}/profile`);
+      
+      if (response.success) {
+        return { success: true, data: response.data, message: 'Lấy profile user thành công' };
+      } else {
+        throw new Error(response.message || 'Không thể lấy profile user');
+      }
+    } catch (error) {
+      console.error('Lỗi khi lấy profile user:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return { success: false, message: errorInfo.message || 'Lỗi khi lấy profile user', error: errorInfo };
+    }
+  }
 }
 
 export default new UserService();
