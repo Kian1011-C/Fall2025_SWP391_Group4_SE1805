@@ -160,6 +160,52 @@ const stationService = {
             console.error(`Lỗi khi lấy towers của trạm ${stationId}:`, error);
             throw error;
         }
+        
+    },
+    // ==========================================================
+    // === CODE MỚI THÊM CHO TRANG ADMIN (BẮT ĐẦU TỪ ĐÂY) ===
+    // ==========================================================
+    /**
+     * API 7 (Admin): Tạo một trạm mới
+     * @param {object} stationData - Dữ liệu của trạm mới
+     */
+    createStation: async (stationData) => {
+        try {
+            console.log('StationService (Admin): Tạo trạm mới', stationData);
+            const response = await apiUtils.post(ENDPOINTS.STATIONS.BASE, stationData);
+            
+            if (response.success) {
+                return { success: true, data: response.data, message: 'Tạo trạm thành công' };
+            } else {
+                throw new Error(response.message || 'Không thể tạo trạm');
+            }
+        } catch (error) {
+            console.error('Lỗi khi tạo trạm (Admin):', error);
+            const errorInfo = apiUtils.handleError(error);
+            return { success: false, message: errorInfo.message || 'Lỗi API' };
+        }
+    },
+
+    /**
+     * API 8 (Admin): Cập nhật thông tin một trạm
+     * @param {number} stationId - ID của trạm cần cập nhật
+     * @param {object} stationData - Dữ liệu cập nhật
+     */
+    updateStation: async (stationId, stationData) => {
+        try {
+            console.log(`StationService (Admin): Cập nhật trạm ${stationId}`, stationData);
+            const response = await apiUtils.put(ENDPOINTS.STATIONS.BY_ID(stationId), stationData);
+            
+            if (response.success) {
+                return { success: true, data: response.data, message: 'Cập nhật trạm thành công' };
+            } else {
+                throw new Error(response.message || 'Không thể cập nhật trạm');
+            }
+        } catch (error) {
+            console.error(`Lỗi khi cập nhật trạm ${stationId} (Admin):`, error);
+            const errorInfo = apiUtils.handleError(error);
+            return { success: false, message: errorInfo.message || 'Lỗi API' };
+        }
     },
 };
 
