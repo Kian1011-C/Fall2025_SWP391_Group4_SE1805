@@ -1,14 +1,17 @@
-import { apiUtils, API_CONFIG } from '../config/api.js';
+import { apiUtils } from '../config/api.js';
 
 const transactionService = {
   /**
-   * Lấy danh sách tất cả các giao dịch (cho Admin/Staff).
-   * Gọi đến SwapController @GetMapping("/swaps").
+   * Lấy danh sách tất cả các giao dịch đổi pin.
+   * Dành cho trang "Quản lý Giao dịch" của Nhân viên.
+   * Gọi đến SwapController.
+   * @param {object} filters - Các tham số lọc (VD: { status: 'COMPLETED' })
    */
   getAllTransactions: async (filters = {}) => {
     try {
       console.log('TransactionService: Lấy tất cả giao dịch với bộ lọc:', filters);
-      const response = await apiUtils.get(API_CONFIG.ENDPOINTS.SWAPS.BASE, filters);
+      // Gọi đến API: GET /api/swaps
+      const response = await apiUtils.get('/api/swaps', filters);
       
       if (response.success) {
         return { success: true, data: response.data, message: 'Lấy lịch sử giao dịch thành công' };

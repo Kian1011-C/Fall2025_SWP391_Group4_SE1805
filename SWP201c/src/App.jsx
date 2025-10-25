@@ -41,7 +41,6 @@ import StaffIssues from './pages/Staff/Issues';
 import StaffReports from './pages/Staff/Reports';
 import StaffTransactionManagement from './pages/Staff/TransactionManagement';
 import {StationDetails, CabinetDetails} from './pages/Staff/StationManagement/components';
-
 // --- Admin Pages ---
 import AdminDashboard from './pages/Admin/Dashboard';
 import AdminUsers from './pages/Admin/Users';
@@ -50,7 +49,6 @@ import AdminBatteries from './pages/Admin/Batteries';
 import AdminSubscriptions from './pages/Admin/Subscriptions';
 import AdminContracts from './pages/Admin/Contracts';
 import AdminReports from './pages/Admin/Reports';
-import AdminTransactions from './pages/Admin/Transactions';
 
 // Fix default markers for React Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -115,8 +113,6 @@ function AppContent() {
             <Route path="contracts" element={<AdminContracts />} />
             <Route path="subscriptions" element={<AdminSubscriptions />} />
             <Route path="reports" element={<AdminReports />} />
-            <Route path="transactions" element={<AdminTransactions />} />
-            
           </Route>
           
           {/* === PUBLIC & REDIRECT ROUTES === */}

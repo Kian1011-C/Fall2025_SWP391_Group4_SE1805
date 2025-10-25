@@ -15,7 +15,6 @@ import {
   VehicleManagement,
   PaymentHistory
 } from './components';
-import SwapHistory from './components/SwapHistory';
 
 const DriverDashboard = () => {
   const navigate = useNavigate();
@@ -26,7 +25,6 @@ const DriverDashboard = () => {
     vehicles,
     contracts,
     recentPayments,
-    swapHistory,
     stats,
     loading,
     error,
@@ -149,9 +147,9 @@ const DriverDashboard = () => {
         onSelectVehicle={setSelectedVehicle}
       />
       
-      {/* Swap History */}
-      <SwapHistory 
-        swaps={swapHistory} 
+      {/* Payment History */}
+      <PaymentHistory 
+        payments={recentPayments} 
       />
     {showSelectModal && (
       <SelectVehicleModal

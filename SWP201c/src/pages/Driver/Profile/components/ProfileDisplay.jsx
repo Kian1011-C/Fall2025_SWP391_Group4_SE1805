@@ -34,7 +34,7 @@ export const ProfileDisplay = ({ user }) => {
       <div style={infoItemStyle}>
         <div style={labelStyle}>Họ và tên</div>
         <div style={valueStyle}>
-          {user?.name || user?.fullName || user?.username || 'Chưa cập nhật'}
+          {user?.fullName || user?.username || 'Chưa cập nhật'}
         </div>
       </div>
 
@@ -54,35 +54,11 @@ export const ProfileDisplay = ({ user }) => {
         </div>
       </div>
 
-      {/* CCCD */}
+      {/* Address */}
       <div style={infoItemStyle}>
-        <div style={labelStyle}>CCCD</div>
+        <div style={labelStyle}>Địa chỉ</div>
         <div style={valueStyle}>
-          {user?.cccd || 'Chưa cập nhật'}
-        </div>
-      </div>
-
-      {/* Role */}
-      <div style={infoItemStyle}>
-        <div style={labelStyle}>Vai trò</div>
-        <div style={valueStyle}>
-          {user?.role || 'Chưa cập nhật'}
-        </div>
-      </div>
-
-      {/* Status */}
-      <div style={infoItemStyle}>
-        <div style={labelStyle}>Trạng thái</div>
-        <div style={valueStyle}>
-          {user?.status || 'Chưa cập nhật'}
-        </div>
-      </div>
-
-      {/* Join Date */}
-      <div style={infoItemStyle}>
-        <div style={labelStyle}>Ngày tham gia</div>
-        <div style={valueStyle}>
-          {user?.joinDate ? new Date(user.joinDate).toLocaleDateString('vi-VN') : 'Chưa cập nhật'}
+          {user?.address || 'Chưa cập nhật'}
         </div>
       </div>
     </div>

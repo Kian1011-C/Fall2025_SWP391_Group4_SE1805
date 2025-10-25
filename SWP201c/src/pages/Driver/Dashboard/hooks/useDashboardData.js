@@ -21,7 +21,6 @@ export const useDashboardData = () => {
   const [vehicles, setVehicles] = useState([]);
   const [contracts, setContracts] = useState([]);
   const [recentPayments, setRecentPayments] = useState([]);
-  const [swapHistory, setSwapHistory] = useState([]);
   const [stats, setStats] = useState({
     totalSwaps: 0,
     currentPlans: [],
@@ -69,46 +68,18 @@ export const useDashboardData = () => {
         const userContracts = await fetchContracts(userId, userDashboard);
         setContracts(userContracts);
         
-        // Fetch payments - Commented out until API is ready
-        // const payments = await fetchPayments(userId);
-        // setRecentPayments(payments);
-        setRecentPayments([]); // Set empty array to avoid errors
+        // Fetch payments
+        const payments = await fetchPayments(userId);
+        setRecentPayments(payments);
         
-        // Fetch swap history for accurate totalSwaps count
-        try {
-          const swapResp = await swapService.getSwapHistory(userId);
-          if (swapResp.success) {
-            const swapHistoryData = Array.isArray(swapResp.data) ? swapResp.data : [];
-            setSwapHistory(swapHistoryData);
-            const calculatedStats = normalizeDashboardStats(
-              userDashboard, 
-              processedVehicles, 
-              userContracts, 
-              swapHistoryData
-            );
-            setStats(calculatedStats);
-          } else {
-            // Fallback to dashboard data if swap API fails
-            setSwapHistory([]);
-            const calculatedStats = normalizeDashboardStats(
-              userDashboard, 
-              processedVehicles, 
-              userContracts, 
-              []
-            );
-            setStats(calculatedStats);
-          }
-        } catch (swapError) {
-          console.warn('⚠️ Swap history API failed, using dashboard data:', swapError);
-          setSwapHistory([]);
-          const calculatedStats = normalizeDashboardStats(
-            userDashboard, 
-            processedVehicles, 
-            userContracts, 
-            []
-          );
-          setStats(calculatedStats);
-        }
+        // Calculate stats
+        const calculatedStats = normalizeDashboardStats(
+          userDashboard, 
+          processedVehicles, 
+          userContracts, 
+          []
+        );
+        setStats(calculatedStats);
         
         console.log('✅ Successfully loaded dashboard data');
       } else {
@@ -126,37 +97,12 @@ export const useDashboardData = () => {
           setVehicles(finalVehicles);
           const userContracts = await fetchContracts(userId, userDashboard);
           setContracts(userContracts);
-          // const payments = await fetchPayments(userId);
-          // setRecentPayments(payments);
-          setRecentPayments([]); // Set empty array to avoid errors
-          // Try to fetch swap history for fallback too
-          try {
-            const swapResp = await swapService.getSwapHistory(userId);
-            if (swapResp.success) {
-              const swapHistoryData = Array.isArray(swapResp.data) ? swapResp.data : [];
-              setSwapHistory(swapHistoryData);
-              const calculatedStats = normalizeDashboardStats(
-                userDashboard, 
-                processedVehicles, 
-                userContracts, 
-                swapHistoryData
-              );
-              setStats(calculatedStats);
-            } else {
-              setSwapHistory([]);
-              const calculatedStats = normalizeDashboardStats(
-                userDashboard, processedVehicles, userContracts, []
-              );
-              setStats(calculatedStats);
-            }
-          } catch (swapError) {
-            console.warn('⚠️ Swap history API failed in fallback:', swapError);
-            setSwapHistory([]);
-            const calculatedStats = normalizeDashboardStats(
-              userDashboard, processedVehicles, userContracts, []
-            );
-            setStats(calculatedStats);
-          }
+          const payments = await fetchPayments(userId);
+          setRecentPayments(payments);
+          const calculatedStats = normalizeDashboardStats(
+            userDashboard, processedVehicles, userContracts, []
+          );
+          setStats(calculatedStats);
         } else {
           throw new Error('API không trả về dữ liệu hợp lệ');
         }
@@ -204,48 +150,34 @@ export const useDashboardData = () => {
     }
   };
 
-  // Fetch payments helper - Commented out until API is ready
-  // const fetchPayments = async (userId) => {
-  //   try {
-  //     const paymentsResponse = await paymentService.getPaymentHistory(userId);
-  //     console.log('💰 Payment service response:', paymentsResponse);
+  // Fetch payments helper
+  const fetchPayments = async (userId) => {
+    try {
+      const paymentsResponse = await paymentService.getPaymentHistory(userId);
+      console.log('💰 Payment service response:', paymentsResponse);
       
-  //     if (paymentsResponse.success && paymentsResponse.data) {
-  //       return Array.isArray(paymentsResponse.data) ? 
-  //         paymentsResponse.data.slice(0, 5) : [];
-  //     }
-  //     return [];
-  //   } catch (err) {
-  //     console.warn('⚠️ Payment API failed:', err);
-  //     return [];
-  //   }
-  // };
+      if (paymentsResponse.success && paymentsResponse.data) {
+        return Array.isArray(paymentsResponse.data) ? 
+          paymentsResponse.data.slice(0, 5) : [];
+      }
+      return [];
+    } catch (err) {
+      console.warn('⚠️ Payment API failed:', err);
+      return [];
+    }
+  };
 
-  // Fetch swap history for "Tổng lượt đổi pin" using the new API
+  // After initial loads, optionally fetch swaps count for "Tổng lượt đổi pin"
   useEffect(() => {
     (async () => {
       try {
-        const validation = validateUser(currentUser);
-        if (!validation.isValid) return;
-        
-        const userId = validation.userId;
-        console.log('🔄 Fetching swap history for user:', userId);
-        
-        const resp = await swapService.getSwapHistory(userId);
+        const resp = await swapService.getAllSwaps();
         if (resp.success) {
-          const swapHistoryData = Array.isArray(resp.data) ? resp.data : [];
-          setSwapHistory(swapHistoryData);
-          setStats((s) => ({ ...s, totalSwaps: swapHistoryData.length }));
-          console.log('✅ Swap history loaded:', swapHistoryData.length, 'swaps');
-        } else {
-          console.warn('⚠️ Failed to load swap history:', resp.message);
-          setSwapHistory([]);
+          setStats((s) => ({ ...s, totalSwaps: Array.isArray(resp.data) ? resp.data.length : 0 }));
         }
-      } catch (error) {
-        console.error('❌ Error fetching swap history:', error);
-      }
+      } catch {}
     })();
-  }, [currentUser]);
+  }, []);
 
   // Fetch on mount
   useEffect(() => {
@@ -257,7 +189,6 @@ export const useDashboardData = () => {
     vehicles,
     contracts,
     recentPayments,
-    swapHistory,
     stats,
     loading,
     error,

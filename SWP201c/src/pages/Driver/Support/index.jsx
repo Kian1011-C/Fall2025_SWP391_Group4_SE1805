@@ -35,17 +35,7 @@ const Support = () => {
     const result = await submitTicket(formData, userId);
 
     if (result.success) {
-      alert('✅ Gửi yêu cầu hỗ trợ thành công! Chúng tôi sẽ phản hồi sớm nhất có thể.');
       reset();
-    } else {
-      const errorMessage = result.error || 'Không thể gửi yêu cầu hỗ trợ';
-      
-      // Check if it's an API endpoint issue
-      if (errorMessage.includes('API endpoint không tồn tại')) {
-        alert('⚠️ Chức năng báo cáo đang được phát triển. Vui lòng liên hệ trực tiếp qua hotline: 1900-xxxx');
-      } else {
-        alert('❌ Có lỗi xảy ra: ' + errorMessage);
-      }
     }
   };
 
@@ -56,21 +46,8 @@ const Support = () => {
     
     console.log('📝 Reporting issue:', reportData);
     
-    // Submit the issue report using the API
-    const result = await submitTicket(reportData, userId);
-    
-    if (result.success) {
-      alert(`✅ Báo cáo ${issue.title} đã được gửi thành công!`);
-    } else {
-      const errorMessage = result.error || 'Không thể gửi báo cáo';
-      
-      // Check if it's an API endpoint issue
-      if (errorMessage.includes('API endpoint không tồn tại')) {
-        alert(`⚠️ Chức năng báo cáo ${issue.title} đang được phát triển. Vui lòng liên hệ trực tiếp qua hotline: 1900-xxxx`);
-      } else {
-        alert(`❌ Có lỗi xảy ra khi báo cáo ${issue.title}: ` + errorMessage);
-      }
-    }
+    // Note: Backend cần API POST /api/support/tickets
+    alert(`Báo cáo ${issue.title}\n\nBackend cần implement API POST /api/support/tickets`);
   };
 
   return (

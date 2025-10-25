@@ -40,29 +40,7 @@ class PaymentService {
     try {
       console.log('PaymentService: Get payment history for user', userId);
       
-      // Try the correct API endpoint first: GET /api/users/{userId}/payments
-      let response;
-      try {
-        response = await apiUtils.get(`/api/users/${userId}/payments`);
-      } catch (error) {
-        // If 404, try the old endpoint as fallback
-        if (error.response?.status === 404) {
-          console.log('⚠️ /api/users/{userId}/payments not found, trying fallback endpoint...');
-          try {
-            response = await apiUtils.get(API_CONFIG.ENDPOINTS.PAYMENTS.HISTORY(userId));
-          } catch (fallbackError) {
-            // If both endpoints fail, return mock data for development
-            console.log('⚠️ Both payment endpoints failed, returning mock data');
-            return {
-              success: true,
-              data: this.getMockPaymentHistory(),
-              message: 'Lấy lịch sử thanh toán (dữ liệu mẫu)'
-            };
-          }
-        } else {
-          throw error;
-        }
-      }
+      const response = await apiUtils.get(API_CONFIG.ENDPOINTS.PAYMENTS.HISTORY(userId));
       
       if (response.success) {
         return {
@@ -75,13 +53,11 @@ class PaymentService {
       }
     } catch (error) {
       console.error('Get payment history error:', error);
-      
-      // Nếu tất cả API đều lỗi, trả về mock data để trang hoạt động
-      console.log('⚠️ Payment API failed, returning mock data for development');
+      const errorInfo = apiUtils.handleError(error);
       return {
-        success: true,
-        data: this.getMockPaymentHistory(),
-        message: 'Lấy lịch sử thanh toán (dữ liệu mẫu)'
+        success: false,
+        message: errorInfo.message || 'Lỗi khi lấy lịch sử thanh toán',
+        error: errorInfo
       };
     }
   }
@@ -204,38 +180,6 @@ class PaymentService {
       { id: 'bank_transfer', name: 'Chuyển khoản', icon: '🏦', enabled: true },
       { id: 'e_wallet', name: 'Ví điện tử', icon: '📱', enabled: true },
       { id: 'cash', name: 'Tiền mặt', icon: '💵', enabled: false }
-    ];
-  }
-
-  getMockPaymentHistory() {
-    return [
-      {
-        id: 'payment_001',
-        amount: 500000,
-        status: 'processing',
-        type: 'payment',
-        description: 'Thanh toán gói dịch vụ tháng 10',
-        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        paymentMethod: 'credit_card'
-      },
-      {
-        id: 'payment_002', 
-        amount: 600000,
-        status: 'processing',
-        type: 'payment',
-        description: 'Thanh toán gói dịch vụ tháng 9',
-        createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-        paymentMethod: 'bank_transfer'
-      },
-      {
-        id: 'payment_003',
-        amount: 50000,
-        status: 'processing', 
-        type: 'payment',
-        description: 'Phí dịch vụ đổi pin',
-        createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-        paymentMethod: 'e_wallet'
-      }
     ];
   }
 

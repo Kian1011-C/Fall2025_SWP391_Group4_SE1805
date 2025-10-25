@@ -2,7 +2,6 @@
 // Hook for handling support ticket submission
 
 import { useState } from 'react';
-import { reportService } from '../../../../assets/js/services';
 import { createSupportRequest } from '../utils';
 
 export const useSupportSubmit = () => {
@@ -16,18 +15,16 @@ export const useSupportSubmit = () => {
       
       console.log('📝 Submitting support ticket:', requestData);
       
-      // Call the report API
-      const response = await reportService.createReport(requestData);
+      // Note: Backend cần API POST /api/support/tickets
+      // const response = await supportService.createTicket(requestData);
       
-      if (response.success) {
-        console.log('✅ Support ticket submitted successfully:', response.data);
-        return { success: true, data: response.data };
-      } else {
-        console.error('❌ Failed to submit support ticket:', response.message);
-        return { success: false, error: response.message };
-      }
+      // Mock success for now
+      alert('Backend cần implement API POST /api/support/tickets để gửi yêu cầu hỗ trợ');
+      
+      return { success: true };
     } catch (err) {
       console.error('❌ Error submitting ticket:', err);
+      alert('Có lỗi xảy ra: ' + err.message);
       return { success: false, error: err.message };
     } finally {
       setLoading(false);
