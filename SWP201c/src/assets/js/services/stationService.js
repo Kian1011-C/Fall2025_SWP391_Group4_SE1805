@@ -96,7 +96,7 @@ const stationService = {
      * Được gọi bởi hook: useStationDetailsData.js
      * Gọi: GET /api/staff/stations/{stationId}/cabinets
      */
-    getStaffCabinetsByStation: async (stationId) => {
+     getStaffCabinetsByStation: async (stationId) => {
     // Hàm này gọi lại hàm của Driver
     return await stationService.getTowersByStation(stationId);
   },
@@ -105,10 +105,10 @@ const stationService = {
    * API 5 (Staff): Lấy các Hộc (Slots) của 1 Trụ
    * (Hiện tại dùng chung API của Driver)
    */
-  getStaffSlotsByCabinet: async (cabinetId) => {
+   getStaffSlotsByCabinet: async (cabinetId) => {
     // Hàm này gọi lại hàm của Driver
-    return await stationService.getSlotsByTower(cabinetId);
-  },
+     return await stationService.getSlotsByTower(cabinetId);
+   },
   // ==========================================================
   // === CODE MỚI THÊM CHO TRANG ADMIN (BẮT ĐẦU TỪ ĐÂY) ===
   // ==========================================================
