@@ -1,5 +1,5 @@
 // pages/Driver/SwapBattery/index.jsx
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSwapSteps } from './hooks/useSwapSteps'; 
 // BẠN CŨNG CẦN DÒNG NÀY:
@@ -21,6 +21,44 @@ export const SwapContext = React.createContext();
 
 const SwapBatteryPage = () => {
     const navigate = useNavigate();
+    
+    // Kiểm tra selectedVehicle khi component mount
+    useEffect(() => {
+        const checkSelectedVehicle = () => {
+            try {
+                const selectedVehicleStr = sessionStorage.getItem('selectedVehicle');
+                if (!selectedVehicleStr) {
+                    console.warn('⚠️ Không tìm thấy selectedVehicle, redirect về Dashboard');
+                    alert('Vui lòng chọn xe trước khi đổi pin');
+                    navigate('/driver/dashboard');
+                    return;
+                }
+                
+                const selectedVehicle = JSON.parse(selectedVehicleStr);
+                const batteryId = selectedVehicle?.batteryId || 
+                                 selectedVehicle?.currentBatteryId || 
+                                 selectedVehicle?.current_battery_id ||
+                                 selectedVehicle?.battery?.id;
+                
+                if (!batteryId) {
+                    console.warn('⚠️ Xe chưa có pin (batteryId null), redirect về Dashboard');
+                    alert('Xe của bạn chưa được gắn pin.\nVui lòng kiểm tra lại thông tin xe.');
+                    navigate('/driver/dashboard');
+                    return;
+                }
+                
+                console.log('✅ selectedVehicle hợp lệ, batteryId:', batteryId);
+                // Lưu batteryId vào session để useSwapData dùng
+                sessionStorage.setItem('old_battery_id', String(batteryId));
+            } catch (err) {
+                console.error('❌ Lỗi khi kiểm tra selectedVehicle:', err);
+                alert('Có lỗi xảy ra. Vui lòng thử lại.');
+                navigate('/driver/dashboard');
+            }
+        };
+        
+        checkSelectedVehicle();
+    }, [navigate]);
     
     // 1. Gọi hook quản lý BƯỚC
     const { currentStep, STEPS, goToStep, resetSteps } = useSwapSteps(); 

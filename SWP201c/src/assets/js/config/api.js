@@ -4,9 +4,9 @@ import axios from 'axios';
 
 // API Base Configuration
 export const API_CONFIG = {
-  BASE_URL: import.meta.env.VITE_API_BASE_URL || '', // Use relative URLs with Vite proxy
+  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080', // Direct backend URL
   TIMEOUT: parseInt(import.meta.env.VITE_API_TIMEOUT) || 30000, // Increase timeout for backend calls
-  USE_DEMO_FALLBACK: (import.meta.env.VITE_USE_DEMO_FALLBACK || 'true') === 'true', // Enable demo fallback by default
+  USE_DEMO_FALLBACK: (import.meta.env.VITE_USE_DEMO_FALLBACK || 'false') === 'true', // Disable demo fallback by default
   ENDPOINTS: {
     // Authentication
     AUTH: {
@@ -74,7 +74,7 @@ export const API_CONFIG = {
       BASE: '/api/stations',
       BY_ID: (id) => `/api/stations/${id}`,
       NEARBY: '/api/stations/nearby',
-      AVAILABLE_SLOTS: (id) => `/api/stations/stats`,
+      STATS: () => `/api/stations/stats`,
       BOOK: (id) => `/api/stations/${id}/book`,
       AVAILABLE_SLOTS: (id) => `/api/stations/${id}/available-slots`,
       ESTIMATED_TIME: (id) => `/api/stations/${id}/estimated-time`
@@ -180,8 +180,20 @@ export const apiUtils = {
 
   // POST request
   post: async (url, data = {}) => {
-    const response = await apiClient.post(url, data);
-    return response.data;
+    try {
+      console.log('API POST Request:', { url, data });
+      const response = await apiClient.post(url, data);
+      console.log('API POST Response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('API POST Error:', error);
+      // Return a structured error response instead of throwing
+      return {
+        success: false,
+        message: error.response?.data?.message || error.message || 'Network error',
+        error: error.response?.data || error.message
+      };
+    }
   },
 
   // PUT request

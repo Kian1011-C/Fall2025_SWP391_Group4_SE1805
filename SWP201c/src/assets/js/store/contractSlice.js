@@ -3,7 +3,7 @@
 
 import { create } from 'zustand';
 
-const useContractStore = create((set, get) => ({
+const useContractStore = create((set) => ({
   // State
   contracts: [],
   currentContract: null,
