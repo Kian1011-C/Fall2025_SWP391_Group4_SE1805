@@ -14,7 +14,7 @@ import {
 
 const StationsMap = () => {
   // Data fetching
-  const { stations, loading, error, refetch } = useStationsData();
+  const { stations, stats, loading, error, refetch } = useStationsData();
 
   // Booking handling
   const { bookStation, booking } = useStationBooking(refetch);
@@ -46,8 +46,8 @@ const StationsMap = () => {
     }
   };
 
-  // Calculate statistics
-  const stats = getStationsStats(stations);
+  // SỬ DỤNG STATS TỪ API THAY VÌ TÍNH TOÁN
+  // const stats = getStationsStats(stations); // Đã loại bỏ
 
   // Handle booking
   const handleBook = async (stationId) => {
@@ -134,10 +134,8 @@ const StationsMap = () => {
         {/* Header */}
         <StationsMapHeader />
 
-        {/* Statistics */}
-        {stations.length > 0 && (
-          <StationsStats stats={stats} />
-        )}
+        {/* Statistics - SỬ DỤNG DỮ LIỆU THẬT TỪ API */}
+        <StationsStats stats={stats} />
 
         {/* Stations List */}
         <StationsList

@@ -22,6 +22,28 @@ const stationService = {
     },
 
     /**
+     * API MỚI: Lấy thống kê tổng hợp về tất cả các trạm
+     * GET /api/stations/stats
+     */
+    getStationsStats: async () => {
+        try {
+            console.log("StationService: Lấy thống kê trạm từ API mới...");
+            const response = await apiUtils.get('/api/stations/stats');
+            
+            if (response.success) {
+                console.log('✅ API stats trả về dữ liệu:', response.data);
+                return { success: true, data: response.data, message: 'Lấy thống kê trạm thành công' };
+            } else {
+                throw new Error(response.message || 'Không thể lấy thống kê trạm');
+            }
+        } catch (error) {
+            console.error('❌ Lỗi khi lấy thống kê trạm:', error);
+            const errorInfo = apiUtils.handleError(error);
+            return { success: false, message: errorInfo.message || 'Lỗi API', error: errorInfo };
+        }
+    },
+
+    /**
      * API 2 (Driver - Bước 2): Lấy các trụ của 1 trạm
      * (Hàm này đã có)
      */

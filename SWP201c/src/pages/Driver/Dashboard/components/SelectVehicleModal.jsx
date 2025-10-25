@@ -1,7 +1,7 @@
 // Driver/Dashboard/components/SelectVehicleModal.jsx
 import React from 'react';
 
-const SelectVehicleModal = ({ vehicles = [], onSelect }) => {
+const SelectVehicleModal = ({ vehicles = [], onSelect, vehicleBatteryInfo = {} }) => {
   return (
     <div
       className="modal-overlay"
@@ -49,7 +49,7 @@ const SelectVehicleModal = ({ vehicles = [], onSelect }) => {
                   {v.plateNumber || v.license_plate || v.licensePlate || 'N/A'}
                 </div>
                 <div style={{ fontSize: 14, color: '#CBD5E1' }}>
-                  Loại: {v.model || v.vehicleModel || 'N/A'} — Pin: {v.health ?? v.batteryLevel ?? v.battery_level ?? 'N/A'}%
+                  Loại: {v.model || v.vehicleModel || 'N/A'} — ID pin: {v.batteryId || v.battery_id || v.currentBatteryId || v.current_battery_id || vehicleBatteryInfo[v.id || v.vehicle_id || v.vehicleId] || 'N/A'}
                 </div>
               </div>
               <span style={{ color: '#93C5FD', fontWeight: 700, fontSize: 16 }}>Chọn →</span>

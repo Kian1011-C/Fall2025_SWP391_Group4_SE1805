@@ -1,6 +1,7 @@
 // src/pages/Driver/SwapBattery/components/PlaceOldBattery.jsx
 import React, { useContext, useState, useEffect } from 'react'; // Add useEffect
-import { SwapContext } from '../index'; 
+import { SwapContext } from '../index';
+import batteryService from '/src/assets/js/services/batteryService.js'; 
 
 const PlaceOldBattery = () => {
     // 1. GET DATA FROM CONTEXT
@@ -88,23 +89,125 @@ const PlaceOldBattery = () => {
         }
     }, []);
 
-    // 4. GENERATE RANDOM PERCENTAGE ON MOUNT
+    // 4. LẤY DUNG LƯỢNG PIN CŨ THẬT TỪ API
     useEffect(() => {
-        if (!isPercentGenerated) {
-            // Generate a random integer between 5 and 60 (simulating a used battery)
-            const randomPercent = Math.floor(Math.random() * 56) + 5; // Generates 5 to 60
-            setPercent(randomPercent);
-            setIsPercentGenerated(true); // Mark as generated
-            console.log(`Simulated old battery percentage: ${randomPercent}%`);
-        }
-    }, [isPercentGenerated]); // Run only when isPercentGenerated changes
+        const fetchOldBatteryLevel = async () => {
+            if (!isPercentGenerated && code && code !== 'N/A') {
+                try {
+                    console.log('🔋 Lấy thông tin pin cũ từ API cho batteryId:', code);
+                    console.log('🔍 API endpoint sẽ gọi: GET /api/batteries/' + code);
+                    
+                    // Lấy thông tin pin cũ từ API
+                    const batteryResponse = await batteryService.getBatteryById(code);
+                    
+                    console.log('🔍 API response cho pin cũ:', batteryResponse);
+                    console.log('🔍 batteryResponse.success:', batteryResponse.success);
+                    console.log('🔍 batteryResponse.data:', batteryResponse.data);
+                    
+                    if (batteryResponse.success && batteryResponse.data) {
+                        const batteryData = batteryResponse.data;
+                        console.log('🔍 batteryData chi tiết:', batteryData);
+                        
+                        const batteryLevel = batteryData.stateOfHealth || batteryData.state_of_health || 
+                                          batteryData.batteryLevel || batteryData.battery_level || 0;
+                        
+                        console.log('✅ Dung lượng pin cũ từ API:', batteryLevel);
+                        console.log('🔍 Các trường có sẵn:', {
+                            stateOfHealth: batteryData.stateOfHealth,
+                            state_of_health: batteryData.state_of_health,
+                            batteryLevel: batteryData.batteryLevel,
+                            battery_level: batteryData.battery_level
+                        });
+                        
+                        // Kiểm tra pin cũ phải thấp hơn 30%
+                        if (batteryLevel >= 30) {
+                            console.warn('⚠️ Pin cũ có dung lượng cao hơn 30%:', batteryLevel);
+                            alert(`Pin cũ có dung lượng ${batteryLevel}% cao hơn 30%. Vui lòng kiểm tra lại.`);
+                            setPercent(batteryLevel);
+                        } else {
+                            console.log('✅ Pin cũ hợp lệ (dung lượng < 30%):', batteryLevel);
+                            setPercent(batteryLevel);
+                        }
+                    } else {
+                        console.warn('⚠️ Không lấy được thông tin pin cũ từ API');
+                        console.log('🔍 Kiểm tra dữ liệu từ xe đã chọn...');
+                        console.log('🔍 selectedVehicle:', selectedVehicle);
+                        
+                        // Sử dụng dữ liệu từ xe đã chọn
+                        const vehicleBatteryLevel = selectedVehicle?.batteryLevel || selectedVehicle?.battery_level || 0;
+                        console.log('🔍 vehicleBatteryLevel từ xe:', vehicleBatteryLevel);
+                        
+                        if (vehicleBatteryLevel > 0) {
+                            console.log('⚠️ CẢNH BÁO: Sử dụng dữ liệu từ xe có thể không chính xác!');
+                            console.log('⚠️ Dữ liệu từ xe có thể là pin mới, không phải pin cũ!');
+                            console.log('⚠️ vehicleBatteryLevel từ xe:', vehicleBatteryLevel);
+                            
+                            // Kiểm tra nếu dữ liệu từ xe có vẻ không hợp lý cho pin cũ
+                            if (vehicleBatteryLevel > 80) {
+                                console.log('❌ Dữ liệu từ xe quá cao cho pin cũ, sử dụng random thấp hơn');
+                                const randomPercent = Math.floor(Math.random() * 25) + 5; // 5-29%
+                                setPercent(randomPercent);
+                                console.log('✅ Sử dụng random percentage cho pin cũ:', randomPercent);
+                            } else {
+                                setPercent(vehicleBatteryLevel);
+                                console.log('✅ Sử dụng dung lượng pin từ xe:', vehicleBatteryLevel);
+                            }
+                        } else {
+                            console.log('⚠️ Không có dữ liệu từ xe, sử dụng random');
+                            // Fallback: Random percentage thấp hơn 30%
+                            const randomPercent = Math.floor(Math.random() * 25) + 5; // 5-29%
+                            setPercent(randomPercent);
+                        }
+                    }
+                } catch (error) {
+                    console.error('❌ Lỗi khi lấy thông tin pin cũ:', error);
+                    // Fallback: Random percentage thấp hơn 30%
+                    const randomPercent = Math.floor(Math.random() * 25) + 5; // 5-29%
+                    setPercent(randomPercent);
+                    console.log(`Fallback random percentage: ${randomPercent}%`);
+                }
+                
+                setIsPercentGenerated(true);
+            }
+        };
+        
+        fetchOldBatteryLevel();
+    }, [code, isPercentGenerated, selectedVehicle]);
 
     // 4. HANDLE SUBMIT
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Chỉ chuyển bước, không gọi confirmSwap ở đây
-        goToStep(STEPS.TAKE_NEW_BATTERY);
-        console.log('Đã đặt pin cũ, chuyển sang bước lấy pin mới.');
+        
+        try {
+            // Lưu thông tin pin cũ vào sessionStorage
+            sessionStorage.setItem('oldBatteryLevel', String(percent));
+            console.log('✅ Đã lưu dung lượng pin cũ:', percent);
+            
+            // Cập nhật thông tin pin cũ vào database
+            if (code && code !== 'N/A') {
+                console.log('🔄 Cập nhật thông tin pin cũ vào database...');
+                const updateResult = await batteryService.updateBattery(code, {
+                    stateOfHealth: percent,
+                    batteryLevel: percent,
+                    status: 'RETURNED', // Đánh dấu pin đã được trả
+                    lastUsed: new Date().toISOString()
+                });
+                
+                if (updateResult.success) {
+                    console.log('✅ Đã cập nhật pin cũ vào database:', updateResult.data);
+                } else {
+                    console.warn('⚠️ Không thể cập nhật pin cũ vào database:', updateResult.message);
+                }
+            }
+            
+            // Chuyển bước
+            goToStep(STEPS.TAKE_NEW_BATTERY);
+            console.log('Đã đặt pin cũ, chuyển sang bước lấy pin mới.');
+            
+        } catch (error) {
+            console.error('❌ Lỗi khi xử lý pin cũ:', error);
+            alert('Có lỗi xảy ra khi xử lý pin cũ. Vui lòng thử lại.');
+        }
     };
 
     // Get the empty slot number

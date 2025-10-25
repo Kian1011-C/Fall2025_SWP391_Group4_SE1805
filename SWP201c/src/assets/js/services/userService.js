@@ -80,35 +80,64 @@ class UserService {
   }
 
   /**
-   * Lấy thông tin dashboard của người dùng (Driver).
+   * Lấy thông tin dashboard của người dùng (Driver) - SỬ DỤNG API MỚI.
    * @param {string} userId - ID của người dùng
    */
   async getUserDashboard(userId) {
     try {
-      console.log(`UserService: Lấy dashboard cho user ${userId}`);
+      console.log(`UserService: Lấy dashboard cho user ${userId} từ API mới GET /api/users/{id}`);
       
-      // Thử endpoint có sẵn trước
-      const response = await apiUtils.get(`/api/users/${userId}/statistics`);
+      // SỬ DỤNG API MỚI: GET /api/users/{id}
+      const response = await apiUtils.get(`/api/users/${userId}`);
       
       if (response.success) {
-        // Tạo cấu trúc dashboard từ dữ liệu statistics
+        console.log('✅ API mới trả về dữ liệu:', response);
+        
+        // Xử lý dữ liệu từ API mới - DỮ LIỆU Ở ROOT LEVEL
+        const user = response.user || {};
+        const dashboard = response.dashboard || {};
+        const vehicles = response.vehicles || [];
+        
+        console.log('🔍 Dữ liệu từ backend:');
+        console.log('- user:', user);
+        console.log('- dashboard:', dashboard);
+        console.log('- vehicles:', vehicles);
+        
+        // Tạo cấu trúc dashboard từ dữ liệu API mới
         const dashboardData = {
-          user: response.data.user || { id: userId },
-          vehicles: response.data.vehicles || [],
+          user: {
+            id: user.userId || user.id || userId,
+            name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.name,
+            email: user.email,
+            phone: user.phone,
+            role: user.role
+          },
+          vehicles: vehicles,
           dashboard: {
-            totalSwaps: response.data.totalSwaps || 0,
-            activeVehicles: response.data.activeVehicles || 0,
-            monthlySpent: response.data.monthlySpent || 0,
-            totalDistance: response.data.totalDistance || 0
+            totalSwaps: dashboard.totalSwaps || 0,
+            activeVehicles: vehicles.length,
+            monthlySpent: dashboard.monthlySpent || 0,
+            totalDistance: dashboard.totalDistance || 0,
+            currentPlans: dashboard.currentPlans || [],
+            contracts: dashboard.contracts || [],
+            // Thêm các field khác từ dashboard
+            vehiclePlate: dashboard.vehiclePlate,
+            vehicleModel: dashboard.vehicleModel,
+            contractNumber: dashboard.contractNumber,
+            contractStatus: dashboard.contractStatus,
+            batteryModel: dashboard.batteryModel,
+            batteryHealth: dashboard.batteryHealth,
+            batteryStatus: dashboard.batteryStatus
           }
         };
         
-        return { success: true, data: dashboardData, message: 'Lấy dashboard thành công' };
+        console.log('✅ Dashboard data được tạo:', dashboardData);
+        return { success: true, data: dashboardData, message: 'Lấy dashboard thành công từ API mới' };
       } else {
-        throw new Error(response.message || 'Không thể lấy dashboard');
+        throw new Error(response.message || 'Không thể lấy dashboard từ API mới');
       }
     } catch (error) {
-      console.error('Lỗi khi lấy dashboard:', error);
+      console.error('❌ Lỗi khi lấy dashboard từ API mới:', error);
       const errorInfo = apiUtils.handleError(error);
       return { success: false, message: errorInfo.message || 'Lỗi khi lấy dashboard', error: errorInfo };
     }

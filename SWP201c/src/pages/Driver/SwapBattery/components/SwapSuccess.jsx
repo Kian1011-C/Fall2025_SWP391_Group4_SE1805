@@ -1,11 +1,68 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { SwapContext } from '../index';
 import { formatPercentage } from '../utils/swapHelpers'; 
+import batteryService from '/src/assets/js/services/batteryService.js';
 import '../../../../assets/css/swap-success.css'; 
 
 const SwapSuccess = ({ onFinish }) => {
     const context = useContext(SwapContext);
     const { summary } = context || {}; // Add fallback for undefined context
+    const [oldBatteryLevel, setOldBatteryLevel] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    // LẤY DUNG LƯỢNG PIN CŨ THẬT TỪ API
+    useEffect(() => {
+        const fetchOldBatteryLevel = async () => {
+            try {
+                setLoading(true);
+                
+                // Lấy ID pin cũ từ sessionStorage
+                const oldBatteryId = sessionStorage.getItem('batteryId') || 
+                                   sessionStorage.getItem('old_battery_id') || 
+                                   sessionStorage.getItem('oldBatteryId');
+                
+                if (oldBatteryId && oldBatteryId !== 'undefined' && oldBatteryId !== 'null') {
+                    console.log('🔋 Lấy dung lượng pin cũ thật từ API cho batteryId:', oldBatteryId);
+                    
+                    const batteryResponse = await batteryService.getBatteryById(oldBatteryId);
+                    
+                    if (batteryResponse.success && batteryResponse.data) {
+                        const batteryData = batteryResponse.data;
+                        const batteryLevel = batteryData.stateOfHealth || batteryData.state_of_health || 
+                                           batteryData.batteryLevel || batteryData.battery_level || 0;
+                        
+                        console.log('✅ Dung lượng pin cũ thật từ API:', batteryLevel);
+                        setOldBatteryLevel(batteryLevel);
+                    } else {
+                        console.warn('⚠️ Không lấy được dung lượng pin cũ từ API');
+                        // Fallback từ sessionStorage
+                        const savedLevel = sessionStorage.getItem('oldBatteryLevel');
+                        if (savedLevel) {
+                            setOldBatteryLevel(parseFloat(savedLevel));
+                        }
+                    }
+                } else {
+                    console.warn('⚠️ Không tìm thấy oldBatteryId');
+                    // Fallback từ sessionStorage
+                    const savedLevel = sessionStorage.getItem('oldBatteryLevel');
+                    if (savedLevel) {
+                        setOldBatteryLevel(parseFloat(savedLevel));
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Lỗi khi lấy dung lượng pin cũ:', error);
+                // Fallback từ sessionStorage
+                const savedLevel = sessionStorage.getItem('oldBatteryLevel');
+                if (savedLevel) {
+                    setOldBatteryLevel(parseFloat(savedLevel));
+                }
+            } finally {
+                setLoading(false);
+            }
+        };
+        
+        fetchOldBatteryLevel();
+    }, []);
 
     // Debug log để kiểm tra dữ liệu
     console.log('SwapSuccess - context:', context);
@@ -15,6 +72,7 @@ const SwapSuccess = ({ onFinish }) => {
     console.log('SwapSuccess - batteryId:', sessionStorage.getItem('batteryId'));
     console.log('SwapSuccess - oldBatteryId:', sessionStorage.getItem('old_battery_id'));
     console.log('SwapSuccess - newBatteryId:', sessionStorage.getItem('new_battery_id'));
+    console.log('SwapSuccess - oldBatteryLevel:', oldBatteryLevel);
     
     // Tạo fallback data từ sessionStorage nếu summary không có dữ liệu
     const getOldBatteryCode = () => {
@@ -36,16 +94,21 @@ const SwapSuccess = ({ onFinish }) => {
     
     // Lấy newBatteryCode từ API response thật
     const getNewBatteryCode = () => {
-        // Ưu tiên lấy từ API response (summary.newBatteryId)
+        console.log('🔍 Debug newBatteryId:');
+        console.log('🔍 summary?.newBatteryId:', summary?.newBatteryId);
+        console.log('🔍 sessionStorage new_battery_id:', sessionStorage.getItem('new_battery_id'));
+        console.log('🔍 sessionStorage newBatteryId:', sessionStorage.getItem('newBatteryId'));
+        
+        // Ưu tiên lấy từ API response (summary.newBatteryId) - DỮ LIỆU THẬT TỪ API
         if (summary?.newBatteryId) {
-            console.log('✅ Lấy newBatteryId từ API response:', summary.newBatteryId);
+            console.log('✅ SỬ DỤNG DỮ LIỆU THẬT TỪ API - newBatteryId:', summary.newBatteryId);
             return summary.newBatteryId;
         }
         
-        // Fallback từ sessionStorage
+        // Fallback từ sessionStorage (có thể là dữ liệu cũ)
         const newBatteryId = sessionStorage.getItem('new_battery_id');
         if (newBatteryId && newBatteryId !== 'undefined' && newBatteryId !== 'null') {
-            console.log('⚠️ Sử dụng newBatteryId từ sessionStorage:', newBatteryId);
+            console.log('⚠️ Sử dụng newBatteryId từ sessionStorage (có thể không cập nhật):', newBatteryId);
             return newBatteryId;
         }
         
@@ -56,7 +119,7 @@ const SwapSuccess = ({ onFinish }) => {
     const fallbackSummary = {
         oldBatteryCode: getOldBatteryCode(),
         oldSlotNumber: summary?.oldSlotNumber || sessionStorage.getItem('emptySlotNumber') || 'N/A',
-        oldBatteryPercent: summary?.oldBatteryPercent || 85, // Giá trị mặc định
+        oldBatteryPercent: oldBatteryLevel || summary?.oldBatteryPercent || 85, // Sử dụng dữ liệu thật từ API
         newBatteryCode: getNewBatteryCode(),
         newSlotNumber: summary?.newSlotNumber || sessionStorage.getItem('newBatterySlot') || 'N/A',
         newBatteryPercent: summary?.newBatteryPercent || 100, // Giá trị mặc định
@@ -72,6 +135,19 @@ const SwapSuccess = ({ onFinish }) => {
             onFinish();
         }
     };
+
+    if (loading) {
+        return (
+            <div className="swap-success-container">
+                <div className="success-card">
+                    <div className="success-header">
+                        <div className="loading-spinner"></div>
+                        <h1 className="success-title">Đang tải thông tin pin cũ...</h1>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     if (!summary && !fallbackSummary) {
         return (

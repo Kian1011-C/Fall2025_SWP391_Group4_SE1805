@@ -48,40 +48,47 @@ export const useDashboardData = () => {
       const userId = validation.userId;
       console.log('🆔 Using userId for API:', userId);
       
-      // Prefer aggregated dashboard API for stats; vehicles luôn lấy từ API chuyên biệt
+      // SỬ DỤNG API MỚI: GET /api/users/{id} - TẤT CẢ DỮ LIỆU TRONG MỘT API
       const dashboardResp = await userService.getUserDashboard(userId);
-      console.log('📊 Dashboard API Response:', dashboardResp);
+      console.log('📊 Dashboard API Response (API mới):', dashboardResp);
       
       if (dashboardResp.success && dashboardResp.data) {
         const root = dashboardResp.data;
-        // Vehicles: gọi endpoint chuyên biệt
-        const vehiclesResp = await vehicleService.getUserVehicles(userId);
-        const userVehicles = vehiclesResp.success ? (vehiclesResp.data || []) : [];
         const userDashboard = root.dashboard || {};
         
-        // Process vehicles
+        console.log('🔍 Dữ liệu từ API mới:');
+        console.log('- totalSwaps:', userDashboard.totalSwaps);
+        console.log('- totalDistance:', userDashboard.totalDistance);
+        console.log('- activeVehicles:', userDashboard.activeVehicles);
+        console.log('- monthlySpent:', userDashboard.monthlySpent);
+        console.log('- currentPlans:', userDashboard.currentPlans);
+        console.log('- vehicles:', root.vehicles);
+        
+        // SỬ DỤNG DỮ LIỆU TỪ API MỚI - KHÔNG CẦN GỌI API KHÁC
+        const userVehicles = root.vehicles || [];
         const processedVehicles = processVehicles(userVehicles);
         const finalVehicles = updateVehiclesFromSession(processedVehicles);
         setVehicles(finalVehicles);
         
-        // Fetch contracts
-        const userContracts = await fetchContracts(userId, userDashboard);
+        // Sử dụng contracts từ API mới
+        const userContracts = userDashboard.contracts || [];
         setContracts(userContracts);
         
-        // Fetch payments
+        // Fetch payments (vẫn cần API riêng)
         const payments = await fetchPayments(userId);
         setRecentPayments(payments);
         
-        // Calculate stats
-        const calculatedStats = normalizeDashboardStats(
-          userDashboard, 
-          processedVehicles, 
-          userContracts, 
-          []
-        );
-        setStats(calculatedStats);
+        // SỬ DỤNG DỮ LIỆU THẬT TỪ API MỚI
+        const calculatedStats = {
+          totalSwaps: userDashboard.totalSwaps || 0,
+          currentPlans: userDashboard.currentPlans || [],
+          activeVehicles: userDashboard.activeVehicles || (userVehicles ? userVehicles.length : 0),
+          monthlySpent: userDashboard.monthlySpent || 0,
+          totalDistance: userDashboard.totalDistance || 0
+        };
         
-        console.log('✅ Successfully loaded dashboard data');
+        setStats(calculatedStats);
+        console.log('✅ Successfully loaded dashboard data từ API mới:', calculatedStats);
       } else {
         // Fallback: try driver profile API
         const userResponse = await userService.getDriverProfile(userId);
@@ -167,17 +174,8 @@ export const useDashboardData = () => {
     }
   };
 
-  // After initial loads, optionally fetch swaps count for "Tổng lượt đổi pin"
-  useEffect(() => {
-    (async () => {
-      try {
-        const resp = await swapService.getAllSwaps();
-        if (resp.success) {
-          setStats((s) => ({ ...s, totalSwaps: Array.isArray(resp.data) ? resp.data.length : 0 }));
-        }
-      } catch {}
-    })();
-  }, []);
+  // KHÔNG CẦN GỌI API RIÊNG CHO totalSwaps - DỮ LIỆU ĐÃ CÓ TRONG API MỚI
+  // useEffect đã được loại bỏ vì dữ liệu totalSwaps đã có trong API GET /api/users/{id}
 
   // Fetch on mount
   useEffect(() => {

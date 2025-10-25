@@ -13,6 +13,7 @@ const SelectVehiclePage = () => {
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [vehicleBatteryInfo, setVehicleBatteryInfo] = useState({}); // Lưu thông tin pin của từng xe
 
   useEffect(() => {
     let isMounted = true;
@@ -24,6 +25,25 @@ const SelectVehiclePage = () => {
         if (isMounted) {
           const list = Array.isArray(res.data) ? res.data : (res.data?.vehicles || []);
           setVehicles(list);
+          
+          // Lấy thông tin pin cho từng xe nếu không có sẵn
+          const batteryInfoMap = {};
+          for (const vehicle of list) {
+            const vehicleId = vehicle.id || vehicle.vehicle_id || vehicle.vehicleId;
+            if (vehicleId && !vehicle.batteryId && !vehicle.battery_id && !vehicle.currentBatteryId && !vehicle.current_battery_id) {
+              try {
+                console.log('🔋 Lấy thông tin pin cho xe:', vehicleId);
+                const batteryResponse = await vehicleService.getVehicleBatteryInfo(vehicleId);
+                if (batteryResponse.success && batteryResponse.data) {
+                  batteryInfoMap[vehicleId] = batteryResponse.data.batteryId || batteryResponse.data.id;
+                  console.log('✅ Lấy được batteryId cho xe', vehicleId, ':', batteryInfoMap[vehicleId]);
+                }
+              } catch (err) {
+                console.warn('⚠️ Không thể lấy thông tin pin cho xe', vehicleId, ':', err);
+              }
+            }
+          }
+          setVehicleBatteryInfo(batteryInfoMap);
         }
       } catch (error) {
         console.error('Lỗi khi tải danh sách xe:', error);
@@ -74,7 +94,7 @@ const SelectVehiclePage = () => {
       // GỌI API LẤY PIN CŨ THẬT TỪ BACKEND
       try {
         console.log('🔋 Gọi API lấy pin cũ cho xe:', vehicleId);
-        const batteryResponse = await batteryService.getBatteryByVehicle(vehicleId);
+        const batteryResponse = await vehicleService.getVehicleBatteryInfo(vehicleId);
         console.log('🔋 API response pin cũ:', batteryResponse);
         
         if (batteryResponse.success && batteryResponse.data) {
@@ -172,7 +192,7 @@ const SelectVehiclePage = () => {
                 {v.plateNumber || v.license_plate || v.licensePlate || 'N/A'}
               </div>
               <div style={{ fontSize: '13px', color: '#B0B0B0' }}>
-                Loại: {v.model || v.vehicleModel || 'N/A'} — Pin: {v.health ?? v.batteryLevel ?? v.battery_level ?? 'N/A'}%
+                Loại: {v.model || v.vehicleModel || 'N/A'} — ID pin: {v.batteryId || v.battery_id || v.currentBatteryId || v.current_battery_id || vehicleBatteryInfo[v.id || v.vehicle_id || v.vehicleId] || 'N/A'}
               </div>
             </button>
           ))}

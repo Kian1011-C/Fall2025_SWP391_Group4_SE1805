@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { SwapContext } from '../index';
 import { apiUtils } from '/src/assets/js/config/api';
-import './TakeNewBattery.css';
+import '../../../../assets/css/TakeNewBattery.css';
 
 const TakeNewBattery = () => {
     const { newBattery, completeSwap, isLoading } = useContext(SwapContext);
@@ -58,7 +58,9 @@ const TakeNewBattery = () => {
                             batteryId: slot.batteryId || slot.battery_id,
                             status: slot.status,
                             slotId: slot.slotId || slot.slot_id || slot.slotNumber,
-                            stateOfHealth: slot.stateOfHealth || slot.state_of_health
+                            stateOfHealth: slot.stateOfHealth || slot.state_of_health,
+                            batteryLevel: slot.batteryLevel || slot.battery_level,
+                            fullSlotData: slot // Log toàn bộ dữ liệu slot để debug
                         });
                     });
                 } else if (Array.isArray(response)) {
@@ -94,14 +96,15 @@ const TakeNewBattery = () => {
                     
                     const batteryId = selectedSlot.batteryId || selectedSlot.battery_id;
                     const slotNumber = selectedSlot.slotNumber || selectedSlot.slot_number || selectedSlot.slot_id;
-                    const batteryLevel = 100; // Pin FULL luôn có 100%
+                    // Lấy dung lượng pin thật từ API
+                    const batteryLevel = selectedSlot.stateOfHealth || selectedSlot.state_of_health || selectedSlot.batteryLevel || selectedSlot.battery_level || 100;
                     
                     console.log('Hệ thống đã chọn pin sẵn sàng:', selectedSlot);
                     console.log('Chọn slot đầu tiên từ', availableSlots.length, 'slot có sẵn');
                     console.log('Trạng thái pin được chọn:', selectedSlot.status);
                     console.log('newBatteryId:', batteryId);
                     console.log('slotNumber:', slotNumber);
-                    console.log('batteryLevel:', batteryLevel, '(Pin từ trụ = 100%)');
+                    console.log('batteryLevel:', batteryLevel, '(Pin từ API thật)');
                     
                     // Lưu thông tin pin mới vào sessionStorage (THỐNG NHẤT KEY với useSwapData.js)
                     sessionStorage.setItem('new_battery_id', String(batteryId)); // SỬA: Đổi key thành new_battery_id
@@ -164,7 +167,7 @@ const TakeNewBattery = () => {
                 <div className="notice-icon">🤖</div>
                 <div className="notice-text">
                     <h3>Hệ thống đã chọn pin sẵn sàng cho bạn</h3>
-                    <p>Pin đã được quét và xác nhận trạng thái sẵn sàng (100%)</p>
+                    <p>Pin đã được quét và xác nhận trạng thái sẵn sàng</p>
                 </div>
             </div>
 
