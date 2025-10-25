@@ -34,6 +34,33 @@ const DriverDashboard = () => {
   const { selectedVehicle, setSelectedVehicle } = useSelectedVehicle(vehicles);
   const [showSelectModal, setShowSelectModal] = React.useState(false);
 
+  // Reload vehicle data sau khi swap xong
+  React.useEffect(() => {
+    const needsReload = sessionStorage.getItem('vehicleNeedsReload');
+    if (needsReload === 'true') {
+      console.log('🔄 Phát hiện flag vehicleNeedsReload, đang reload xe từ API...');
+      
+      // Clear flag ngay để tránh reload lặp lại
+      sessionStorage.removeItem('vehicleNeedsReload');
+      
+      // Refetch toàn bộ data (bao gồm vehicles)
+      refetch();
+      
+      // Cập nhật selectedVehicle từ sessionStorage (đã được cập nhật trong useSwapData)
+      try {
+        const updatedVehicleStr = sessionStorage.getItem('selectedVehicle');
+        if (updatedVehicleStr) {
+          const updatedVehicle = JSON.parse(updatedVehicleStr);
+          setSelectedVehicle(updatedVehicle);
+          localStorage.setItem('selectedVehicle', updatedVehicleStr);
+          console.log('✅ Đã cập nhật selectedVehicle sau swap:', updatedVehicle);
+        }
+      } catch (err) {
+        console.error('❌ Lỗi khi parse updatedVehicle:', err);
+      }
+    }
+  }, [refetch, setSelectedVehicle]);
+
   // Open modal automatically when no vehicle selected
   React.useEffect(() => {
     if (!selectedVehicle) {

@@ -4,9 +4,11 @@ import { formatPercentage } from '../utils/swapHelpers';
 import '../../../../assets/css/swap-success.css'; 
 
 const SwapSuccess = ({ onFinish }) => {
-    const { summary } = useContext(SwapContext);
+    const context = useContext(SwapContext);
+    const { summary } = context || {}; // Add fallback for undefined context
 
     // Debug log để kiểm tra dữ liệu
+    console.log('SwapSuccess - context:', context);
     console.log('SwapSuccess - summary:', summary);
     console.log('SwapSuccess - summary.newBatteryId:', summary?.newBatteryId);
     console.log('SwapSuccess - sessionStorage keys:', Object.keys(sessionStorage));

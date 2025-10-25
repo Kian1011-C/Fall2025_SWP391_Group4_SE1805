@@ -17,11 +17,12 @@ const swapService = {
             console.log("Input data:", realSwapData);
 
             // Gửi đúng dữ liệu thật từ FE
+            // Backend đọc field "batteryId" (không phải "oldBatteryId")
             const swapDataForBE = {
                 userId: realSwapData.userId,
                 contractId: realSwapData.contractId,
                 vehicleId: realSwapData.vehicleId,
-                batteryId: realSwapData.oldBatteryId,  // ← SỬA: Backend đọc key "batteryId"
+                batteryId: realSwapData.oldBatteryId,  // SỬA: Backend đọc field "batteryId"
                 newBatteryId: realSwapData.newBatteryId,
                 stationId: realSwapData.stationId,
                 towerId: realSwapData.towerId,

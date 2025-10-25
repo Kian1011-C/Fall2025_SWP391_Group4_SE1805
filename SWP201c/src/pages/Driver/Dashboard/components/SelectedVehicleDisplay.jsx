@@ -82,6 +82,15 @@ const SelectedVehicleDisplay = ({ selectedVehicle, contracts }) => {
         <button
           onClick={() => {
             console.log('🔋 Navigating to SwapBattery with vehicle:', selectedVehicle);
+            
+            // LƯU selectedVehicle vào sessionStorage
+            try {
+              sessionStorage.setItem('selectedVehicle', JSON.stringify(selectedVehicle));
+              console.log('✅ Đã lưu selectedVehicle vào sessionStorage:', selectedVehicle);
+            } catch (err) {
+              console.error('❌ Lỗi khi lưu selectedVehicle:', err);
+            }
+            
             navigate('/driver/swap-battery', { state: { selectedVehicle } });
           }}
           style={{
