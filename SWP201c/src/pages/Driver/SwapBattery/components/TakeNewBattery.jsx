@@ -39,22 +39,8 @@ const TakeNewBattery = () => {
                         )
                     ]);
                 } catch (apiError) {
-                    console.warn('API call failed hoặc timeout, sử dụng fallback:', apiError);
-                    // Fallback ngay lập tức
-                    const fallbackBatteryId = `NEW-BAT-${Date.now()}`;
-                    const fallbackSlotNumber = Math.floor(Math.random() * 4) + 1;
-                    const fallbackBatteryLevel = 100;
-                    
-                    console.log('Tạo pin fallback do API lỗi:', { 
-                        batteryId: fallbackBatteryId, 
-                        slotNumber: fallbackSlotNumber, 
-                        batteryLevel: fallbackBatteryLevel 
-                    });
-                    
-                    sessionStorage.setItem('newBatteryId', fallbackBatteryId);
-                    sessionStorage.setItem('newBatterySlot', fallbackSlotNumber);
-                    sessionStorage.setItem('newBatteryLevel', fallbackBatteryLevel);
-                    setNewBatteryId(fallbackBatteryId);
+                    console.error('API call failed:', apiError);
+                    setError('Không thể lấy danh sách pin từ trụ');
                     setLoadingBattery(false);
                     return;
                 }
@@ -117,11 +103,15 @@ const TakeNewBattery = () => {
                     console.log('slotNumber:', slotNumber);
                     console.log('batteryLevel:', batteryLevel, '(Pin từ trụ = 100%)');
                     
-                    // Lưu thông tin pin mới vào sessionStorage
-                    sessionStorage.setItem('newBatteryId', batteryId);
-                    sessionStorage.setItem('newBatterySlot', slotNumber);
-                    sessionStorage.setItem('newBatteryLevel', batteryLevel);
-                    console.log('Đã lưu thông tin slot mới vào sessionStorage:', { batteryId, slotNumber, batteryLevel });
+                    // Lưu thông tin pin mới vào sessionStorage (THỐNG NHẤT KEY với useSwapData.js)
+                    sessionStorage.setItem('new_battery_id', String(batteryId)); // SỬA: Đổi key thành new_battery_id
+                    sessionStorage.setItem('newBatterySlot', String(slotNumber));
+                    sessionStorage.setItem('newBatteryLevel', String(batteryLevel));
+                    console.log('✅ Đã lưu thông tin pin mới vào sessionStorage:', { 
+                        new_battery_id: batteryId, 
+                        newBatterySlot: slotNumber, 
+                        newBatteryLevel: batteryLevel 
+                    });
                     
                     setNewBatteryId(batteryId);
                 } else {
@@ -130,49 +120,13 @@ const TakeNewBattery = () => {
                     console.log('Các trạng thái tìm thấy:', [...new Set(slotsData.map(s => s.status))]);
                     
                     // Fallback: Tạo pin giả lập khi không có pin sẵn sàng
-                    console.log('Sử dụng fallback logic vì không có pin sẵn sàng...');
-                    
-                    const fallbackBatteryId = `NEW-BAT-${Date.now()}`;
-                    const fallbackSlotNumber = Math.floor(Math.random() * 4) + 1; // Random slot 1-4
-                    const fallbackBatteryLevel = 100;
-                    
-                    console.log('Tạo pin fallback:', { 
-                        batteryId: fallbackBatteryId, 
-                        slotNumber: fallbackSlotNumber, 
-                        batteryLevel: fallbackBatteryLevel 
-                    });
-                    
-                    sessionStorage.setItem('newBatteryId', fallbackBatteryId);
-                    sessionStorage.setItem('newBatterySlot', fallbackSlotNumber);
-                    sessionStorage.setItem('newBatteryLevel', fallbackBatteryLevel);
-                    setNewBatteryId(fallbackBatteryId);
-                    
-                    // Không set error, cho phép tiếp tục với pin fallback
-                    console.log('Sử dụng pin fallback thay vì báo lỗi');
+                    console.log('Không có pin sẵn sàng tại trụ này');
+                    setError('Trụ này không có pin sẵn sàng. Vui lòng chọn trụ khác.');
                 }
                 
             } catch (err) {
                 console.error('Lỗi khi lấy danh sách pin từ trụ:', err);
-                console.log('Sử dụng fallback logic...');
-                
-                // Fallback: Tạo pin giả lập khi API lỗi
-                const fallbackBatteryId = `NEW-BAT-${Date.now()}`;
-                const fallbackSlotNumber = Math.floor(Math.random() * 4) + 1; // Random slot 1-4
-                const fallbackBatteryLevel = 100;
-                
-                console.log('Tạo pin fallback:', { 
-                    batteryId: fallbackBatteryId, 
-                    slotNumber: fallbackSlotNumber, 
-                    batteryLevel: fallbackBatteryLevel 
-                });
-                
-                sessionStorage.setItem('newBatteryId', fallbackBatteryId);
-                sessionStorage.setItem('newBatterySlot', fallbackSlotNumber);
-                sessionStorage.setItem('newBatteryLevel', fallbackBatteryLevel);
-                setNewBatteryId(fallbackBatteryId);
-                
-                // Không set error, cho phép tiếp tục với pin fallback
-                console.log('Sử dụng newBatteryId giả lập:', fallbackBatteryId);
+                setError('Không thể lấy danh sách pin từ trụ. Vui lòng thử lại.');
             } finally {
                 setLoadingBattery(false);
             }

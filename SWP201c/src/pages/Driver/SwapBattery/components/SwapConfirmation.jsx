@@ -8,13 +8,12 @@ const SwapConfirmation = ({
   selectedVehicle,
   selectedNewBatterySlot,
   selectedEmptySlot,
-  currentBatteryLevel,
+  oldBatteryId,
   error,
-  onShowQR,
   onRequestStaffAssistance
 }) => {
   const vehiclePlate = getVehiclePlate(selectedVehicle);
-  const batteryLevel = getBatteryLevel(selectedVehicle, currentBatteryLevel);
+  const batteryLevel = getBatteryLevel(selectedVehicle, oldBatteryId);
   
   // Get new battery level from selected slot
   const newBatteryLevel = selectedNewBatterySlot?.batteryLevel || 100;
@@ -23,7 +22,7 @@ const SwapConfirmation = ({
   console.log('  - selectedVehicle:', selectedVehicle);
   console.log('  - vehicle.health:', selectedVehicle?.health);
   console.log('  - vehicle.batteryLevel:', selectedVehicle?.batteryLevel);
-  console.log('  - currentBatteryLevel (fallback):', currentBatteryLevel);
+  console.log('  - currentBatteryLevel (fallback):', oldBatteryId);
   console.log('  - Final batteryLevel:', batteryLevel);
   console.log('  - New battery level:', newBatteryLevel, 'from slot:', selectedNewBatterySlot);
   console.log('  - Empty slot:', selectedEmptySlot);
@@ -128,43 +127,6 @@ const SwapConfirmation = ({
       >
         <p style={{ margin: 0, fontSize: '14px', color: '#f57c00', textAlign: 'center' }}>
           ⚡ Thời gian ước tính: 2-3 phút
-        </p>
-      </div>
-
-      {/* Nút hiển thị QR Code */}
-      <div style={{ marginTop: '32px', textAlign: 'center' }}>
-        <button
-          onClick={onShowQR}
-          style={{
-            padding: '14px 32px',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '12px',
-            fontSize: '15px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
-            transition: 'all 0.3s ease',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            margin: '0 auto'
-          }}
-          onMouseOver={(e) => {
-            e.target.style.transform = 'translateY(-2px)';
-            e.target.style.boxShadow = '0 6px 16px rgba(102, 126, 234, 0.4)';
-          }}
-          onMouseOut={(e) => {
-            e.target.style.transform = 'translateY(0)';
-            e.target.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)';
-          }}
-        >
-          <span style={{ fontSize: '20px' }}>📱</span>
-          <span>Hiển thị mã QR</span>
-        </button>
-        <p style={{ marginTop: '12px', fontSize: '13px', color: '#666' }}>
-          Nhân viên sẽ quét mã để xác nhận xe của bạn
         </p>
       </div>
 

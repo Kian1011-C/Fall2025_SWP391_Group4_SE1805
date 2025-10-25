@@ -32,7 +32,7 @@ const PlaceOldBattery = () => {
                 // Bổ sung thông tin pin nếu chưa có
                 const enhancedVehicle = {
                     ...vehicle,
-                    current_battery_id: vehicle.current_battery_id || vehicle.batteryId || vehicle.id || 20,
+                    current_battery_id: vehicle.current_battery_id || vehicle.batteryId || vehicle.id || null,
                     batteryCode: vehicle.batteryCode || `BAT-${vehicle.batteryId || vehicle.id || '001'}`,
                     battery_code: vehicle.battery_code || `BAT-${vehicle.batteryId || vehicle.id || '001'}`,
                     batteryLevel: vehicle.batteryLevel || 85, // Mặc định 85%
@@ -63,10 +63,9 @@ const PlaceOldBattery = () => {
                     batteryCode = String(enhancedVehicle.battery_code);
                     console.log('Sử dụng battery_code:', batteryCode);
                 } else {
-                    console.log('Không tìm thấy mã pin, tạo mã pin giả lập');
-                    // Tạo mã pin giả lập dựa trên ID xe
-                    batteryCode = `BAT-${enhancedVehicle.id || '001'}`;
-                    console.log('Tạo mã pin giả lập:', batteryCode);
+                    console.error('❌ Không tìm thấy mã pin trong dữ liệu xe');
+                    console.error('Dữ liệu xe:', enhancedVehicle);
+                    throw new Error('Không tìm thấy mã pin của xe. Vui lòng kiểm tra dữ liệu API.');
                 }
                 
                 setCode(batteryCode);

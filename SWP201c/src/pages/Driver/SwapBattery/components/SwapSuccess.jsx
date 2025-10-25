@@ -1,23 +1,63 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 import { SwapContext } from '../index';
 import { formatPercentage } from '../utils/swapHelpers'; 
 import '../../../../assets/css/swap-success.css'; 
 
 const SwapSuccess = ({ onFinish }) => {
-    const { summary } = useContext(SwapContext);
+    const context = useContext(SwapContext);
+    const { summary } = context || {}; // Add fallback for undefined context
 
     // Debug log để kiểm tra dữ liệu
+    console.log('SwapSuccess - context:', context);
     console.log('SwapSuccess - summary:', summary);
+    console.log('SwapSuccess - summary.newBatteryId:', summary?.newBatteryId);
     console.log('SwapSuccess - sessionStorage keys:', Object.keys(sessionStorage));
+    console.log('SwapSuccess - batteryId:', sessionStorage.getItem('batteryId'));
     console.log('SwapSuccess - oldBatteryId:', sessionStorage.getItem('old_battery_id'));
     console.log('SwapSuccess - newBatteryId:', sessionStorage.getItem('new_battery_id'));
     
     // Tạo fallback data từ sessionStorage nếu summary không có dữ liệu
+    const getOldBatteryCode = () => {
+        if (summary?.oldBatteryCode) return summary.oldBatteryCode;
+        
+        const batteryId = sessionStorage.getItem('batteryId');
+        const oldBatteryId = sessionStorage.getItem('old_battery_id');
+        
+        // Kiểm tra nếu giá trị là "undefined" hoặc null
+        if (batteryId && batteryId !== 'undefined' && batteryId !== 'null') {
+            return batteryId;
+        }
+        if (oldBatteryId && oldBatteryId !== 'undefined' && oldBatteryId !== 'null') {
+            return oldBatteryId;
+        }
+        
+        return 'N/A';
+    };
+    
+    // Lấy newBatteryCode từ API response thật
+    const getNewBatteryCode = () => {
+        // Ưu tiên lấy từ API response (summary.newBatteryId)
+        if (summary?.newBatteryId) {
+            console.log('✅ Lấy newBatteryId từ API response:', summary.newBatteryId);
+            return summary.newBatteryId;
+        }
+        
+        // Fallback từ sessionStorage
+        const newBatteryId = sessionStorage.getItem('new_battery_id');
+        if (newBatteryId && newBatteryId !== 'undefined' && newBatteryId !== 'null') {
+            console.log('⚠️ Sử dụng newBatteryId từ sessionStorage:', newBatteryId);
+            return newBatteryId;
+        }
+        
+        console.warn('❌ Không tìm thấy newBatteryId từ API response hoặc sessionStorage');
+        return 'N/A';
+    };
+    
     const fallbackSummary = {
-        oldBatteryCode: summary?.oldBatteryCode || sessionStorage.getItem('old_battery_id') || 'N/A',
+        oldBatteryCode: getOldBatteryCode(),
         oldSlotNumber: summary?.oldSlotNumber || sessionStorage.getItem('emptySlotNumber') || 'N/A',
         oldBatteryPercent: summary?.oldBatteryPercent || 85, // Giá trị mặc định
-        newBatteryCode: summary?.newBatteryCode || sessionStorage.getItem('new_battery_id') || 'N/A',
+        newBatteryCode: getNewBatteryCode(),
         newSlotNumber: summary?.newSlotNumber || sessionStorage.getItem('newBatterySlot') || 'N/A',
         newBatteryPercent: summary?.newBatteryPercent || 100, // Giá trị mặc định
         transactionId: summary?.transactionId || 'SWP-' + Date.now()

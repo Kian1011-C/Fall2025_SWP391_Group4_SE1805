@@ -10,11 +10,15 @@ export const useStationsData = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
   // Hàm gọi API
-  const fetchStations = useCallback(async () => {
+  const fetchStations = useCallback(async (filters = {}) => {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await stationService.getAllStations();
+      
+      // Gửi bộ lọc lên service
+      const finalFilters = { ...filters, status: filterStatus, q: searchQuery };
+      const response = await stationService.getAllStations(finalFilters);
+
       if (response.success && Array.isArray(response.data)) {
         setStations(response.data);
       } else {
@@ -25,23 +29,12 @@ export const useStationsData = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [filterStatus, searchQuery]); // Phụ thuộc vào state của bộ lọc
 
+  // Tải dữ liệu lần đầu
   useEffect(() => {
     fetchStations();
   }, [fetchStations]);
-
-  // Logic lọc
-  const filteredStations = useMemo(() => {
-    return stations.filter(station => {
-      const statusMatch = filterStatus ? station.status === filterStatus : true;
-      const searchMatch = searchQuery ? 
-        (station.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-         station.address?.toLowerCase().includes(searchQuery.toLowerCase()))
-        : true;
-      return statusMatch && searchMatch;
-    });
-  }, [stations, filterStatus, searchQuery]);
 
   // Các hàm CRUD
   const handleCreate = async (stationData) => {
@@ -61,7 +54,7 @@ export const useStationsData = () => {
   };
 
   return {
-    stations: filteredStations,
+    stations, // Trả về danh sách đã được lọc bởi backend
     isLoading, error, refetch: fetchStations,
     filterStatus, setFilterStatus,
     searchQuery, setSearchQuery,

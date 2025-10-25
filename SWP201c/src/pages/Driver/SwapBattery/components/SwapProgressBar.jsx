@@ -18,7 +18,25 @@ const STEP_ORDER = [
 ];
 
 const SwapProgressBar = () => {
-    const { currentStep, STEPS } = useContext(SwapContext);
+    const context = useContext(SwapContext);
+    
+    // Fallback nếu context chưa sẵn sàng
+    if (!context) {
+        console.warn('SwapProgressBar: SwapContext is not available');
+        return (
+            <div className="swap-progress-bar">
+                <h2 className="progress-bar-title">Tiến trình đổi pin</h2>
+                <div className="progress-steps-container">
+                    <div className="progress-step">
+                        <div className="step-circle">1</div>
+                        <span className="step-label">Đang tải...</span>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+    
+    const { currentStep, STEPS } = context;
 
     const effectiveStep = currentStep === STEPS.PROCESSING 
       ? STEP_ORDER[STEP_ORDER.indexOf(currentStep) - 1] 

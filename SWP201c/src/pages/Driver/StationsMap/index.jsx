@@ -36,11 +36,7 @@ const StationsMap = () => {
         console.log('✅ Towers set:', resp.data);
       } else {
         console.log('❌ API failed:', resp.message);
-        // Fallback mock data for testing
-        setTowers([
-          { id: 1, name: 'Trụ sạc A', status: 'active', available: true },
-          { id: 2, name: 'Trụ sạc B', status: 'active', available: false }
-        ]);
+        setTowers([]);
       }
       setShowTowers(true);
     } catch (error) {

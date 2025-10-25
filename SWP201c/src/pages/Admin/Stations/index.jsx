@@ -1,106 +1,79 @@
 import React, { useState } from 'react';
-import { useStationsData } from './hooks/useStationsData';
-import StationRow from './components/StationRow';
-import StationFormModal from './components/StationFormModal';
+import { useStationsDrilldown } from './hooks/useStationsDrilldown';
+import StationListView from './components/StationListView';
+import TowerListView from './components/TowerListView';
+import SlotGridView from './components/SlotGridView';
+import LoadingFallback from '../../../components/common/LoadingFallback';
+
+// Component tiêu đề và nút "Quay lại"
+const Header = ({ title, onBack }) => (
+  <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '30px' }}>
+    {onBack && (
+      <button 
+        onClick={onBack} 
+        style={{ background: '#374151', color: 'white', border: 'none', padding: '10px 15px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px' }}
+      >
+        ← Quay lại
+      </button>
+    )}
+    <h1 style={{ margin: 0, fontSize: '28px', color: 'white' }}>{title}</h1>
+  </div>
+);
 
 const AdminStations = () => {
-  const { stations, isLoading, error, refetch, filterStatus, setFilterStatus, searchQuery, setSearchQuery, handleCreate, handleUpdate } = useStationsData();
-  
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingStation, setEditingStation] = useState(null);
+  const [view, setView] = useState('stations'); // 'stations', 'towers', 'slots'
+  const [selectedStation, setSelectedStation] = useState(null);
+  const [selectedTower, setSelectedTower] = useState(null);
 
-  const handleOpenCreateModal = () => {
-    setEditingStation(null);
-    setIsModalOpen(true);
+  const {
+    stations, towers, slots,
+    isLoading, error,
+    fetchStations, fetchTowers, fetchSlots,
+  } = useStationsDrilldown();
+
+  const handleSelectStation = (station) => {
+    setSelectedStation(station);
+    fetchTowers(station.id);
+    setView('towers');
   };
 
-  const handleOpenEditModal = (station) => {
-    setEditingStation(station);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setEditingStation(null);
-  };
-
-  const handleSave = async (formData, stationId) => {
-    let response;
-    if (stationId) {
-      response = await handleUpdate(stationId, formData);
-    } else {
-      response = await handleCreate(formData);
-    }
-    if (response.success) {
-      handleCloseModal();
-    } else {
-      alert(response.message); // Hiển thị lỗi
-    }
+  const handleSelectTower = (tower) => {
+    setSelectedTower(tower);
+    fetchSlots(tower.id || tower.towerId); // Lấy đúng ID của trụ
+    setView('slots');
   };
 
   const renderContent = () => {
-    if (isLoading) return <p style={{ color: '#9ca3af', textAlign: 'center' }}>Đang tải danh sách trạm...</p>;
-    if (error) return ( <div style={{ color: '#ef4444', textAlign: 'center' }}><p>Lỗi: {error}</p><button onClick={refetch}>Thử lại</button></div> );
-    if (stations.length === 0) return <p style={{ color: '#9ca3af', textAlign: 'center' }}>Không tìm thấy trạm nào.</p>;
+    if (isLoading) return <LoadingFallback text="Đang tải dữ liệu..." />;
+    if (error) return <p style={{ color: '#ef4444' }}>Lỗi: {error}</p>;
 
-    return (
-      <div style={{ background: '#1f2937', borderRadius: '12px', overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-          <thead>
-            <tr style={{ background: '#374151' }}>
-              <th style={{ padding: '15px 20px' }}>ID</th>
-              <th style={{ padding: '15px 20px' }}>Tên Trạm</th>
-              <th style={{ padding: '15px 20px' }}>Địa chỉ</th>
-              <th style={{ padding: '15px 20px' }}>Trạng thái</th>
-              <th style={{ padding: '15px 20px' }}>Tổng hộc</th>
-              <th style={{ padding: '15px 20px' }}>Pin sẵn sàng</th>
-              <th style={{ padding: '15px 20px' }}>Hành động</th>
-            </tr>
-          </thead>
-          <tbody>
-            {stations.map(station => <StationRow key={station.id} station={station} onEdit={handleOpenEditModal} />)}
-          </tbody>
-        </table>
-      </div>
-    );
+    if (view === 'slots') {
+      return <SlotGridView slots={slots} />;
+    }
+    if (view === 'towers') {
+      return <TowerListView towers={towers} onSelectTower={handleSelectTower} />;
+    }
+    // Mặc định là 'stations'
+    return <StationListView stations={stations} onSelectStation={handleSelectStation} />;
+  };
+
+  const getTitle = () => {
+    if (view === 'slots') return `Trạm ${selectedStation?.name} - Trụ ${selectedTower?.towerNumber}`;
+    if (view === 'towers') return `Chi tiết Trạm: ${selectedStation?.name}`;
+    return 'Quản lý Trạm';
+  };
+
+  const getBackButtonHandler = () => {
+    if (view === 'slots') return () => setView('towers');
+    if (view === 'towers') return () => setView('stations');
+    return null;
   };
 
   return (
-    <>
-      <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-          <div>
-            <h1 style={{ margin: 0, fontSize: '28px' }}>Quản lý Trạm</h1>
-            <p style={{ margin: '5px 0 0 0', color: '#9ca3af' }}>Thêm, sửa và theo dõi tất cả các trạm trong hệ thống.</p>
-          </div>
-          <button onClick={handleOpenCreateModal} style={{ background: '#f59e0b', color: '#111827', border: 'none', padding: '10px 15px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
-            + Thêm Trạm Mới
-          </button>
-        </div>
-        <div style={{ display: 'flex', gap: '15px', marginBottom: '20px' }}>
-          <input 
-            type="text" 
-            placeholder="Tìm theo tên hoặc địa chỉ..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ flex: 1, background: '#374151', color: 'white', border: '1px solid #4b5563', padding: '10px', borderRadius: '8px' }}
-          />
-          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} style={{ background: '#374151', color: 'white', border: '1px solid #4b5563', padding: '10px', borderRadius: '8px' }}>
-            <option value="">Tất cả trạng thái</option>
-            <option value="active">Hoạt động</option>
-            <option value="maintenance">Bảo trì</option>
-            <option value="offline">Ngoại tuyến</option>
-          </select>
-        </div>
-        {renderContent()}
-      </div>
-      <StationFormModal 
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        onSave={handleSave}
-        station={editingStation}
-      />
-    </>
+    <div>
+      <Header title={getTitle()} onBack={getBackButtonHandler()} />
+      {renderContent()}
+    </div>
   );
 };
 

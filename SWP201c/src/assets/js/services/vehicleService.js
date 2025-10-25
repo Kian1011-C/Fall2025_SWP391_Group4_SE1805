@@ -3,58 +3,6 @@
 
 import { apiUtils, API_CONFIG } from '../config/api.js';
 
-// Demo fallback data khi backend không khả dụng
-const DEMO_VEHICLES = {
-  'driver001': [
-    {
-      id: 'vehicle001',
-      userId: 'driver001',
-      licensePlate: '30B-67890',
-      brand: 'VinFast',
-      model: 'VF-8',
-      year: 2024,
-      color: 'Đỏ',
-      vin: '__90IBCDEF',
-      batteryType: 'LiFePO4-60kWh',
-      status: 'active',
-      currentBatteryId: 'battery001',
-      batteryHealth: 91.2,
-      mileage: 8785.6
-    },
-    {
-      id: 'vehicle002',
-      userId: 'driver001',
-      licensePlate: '30A-12345',
-      brand: 'VinFast',
-      model: 'VF-e34',
-      year: 2024,
-      color: 'Xanh',
-      vin: '__89OABCDE',
-      batteryType: 'LiFePO4-60kWh',
-      status: 'active',
-      currentBatteryId: 'battery002',
-      batteryHealth: 88.7,
-      mileage: 15490.7
-    }
-  ],
-  'driver002': [
-    {
-      id: 'vehicle003',
-      userId: 'driver002',
-      licensePlate: '29C-54321',
-      brand: 'VinFast',
-      model: 'VF-9',
-      year: 2024,
-      color: 'Trắng',
-      vin: '__88XYZABC',
-      batteryType: 'LiFePO4-90kWh',
-      status: 'active',
-      currentBatteryId: 'battery003',
-      batteryHealth: 95.5,
-      mileage: 12300
-    }
-  ]
-};
 
 class VehicleService {
   // Get all vehicles for a user
@@ -327,7 +275,8 @@ class VehicleService {
     try {
       console.log('VehicleService: Update vehicle battery', vehicleId, newBatteryLevel);
       
-      const response = await apiUtils.put(`/api/vehicles/${vehicleId}/battery`, {
+      // Thử endpoint khác vì /api/vehicles/{id}/battery có thể không tồn tại
+      const response = await apiUtils.put(`/api/vehicles/${vehicleId}`, {
         batteryLevel: newBatteryLevel,
         health: newBatteryLevel
       });
