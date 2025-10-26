@@ -34,7 +34,7 @@ export const ProfileDisplay = ({ user }) => {
       <div style={infoItemStyle}>
         <div style={labelStyle}>Họ và tên</div>
         <div style={valueStyle}>
-          {user?.fullName || user?.username || 'Chưa cập nhật'}
+          {user?.fullName || user?.name || user?.username || 'Chưa cập nhật'}
         </div>
       </div>
 
@@ -50,7 +50,33 @@ export const ProfileDisplay = ({ user }) => {
       <div style={infoItemStyle}>
         <div style={labelStyle}>Số điện thoại</div>
         <div style={valueStyle}>
-          {user?.phone ? formatPhoneNumber(user.phone) : 'Chưa cập nhật'}
+          {user?.phone || user?.phoneNumber ? formatPhoneNumber(user.phone || user.phoneNumber) : 'Chưa cập nhật'}
+        </div>
+      </div>
+
+      {/* Role */}
+      <div style={infoItemStyle}>
+        <div style={labelStyle}>Vai trò</div>
+        <div style={valueStyle}>
+          {user?.role || 'Chưa cập nhật'}
+        </div>
+      </div>
+
+      {/* CCCD */}
+      <div style={infoItemStyle}>
+        <div style={labelStyle}>CCCD</div>
+        <div style={valueStyle}>
+          {user?.cccd || user?.citizenId || 'Chưa cập nhật'}
+        </div>
+      </div>
+
+      {/* Join Date */}
+      <div style={infoItemStyle}>
+        <div style={labelStyle}>Ngày tham gia</div>
+        <div style={valueStyle}>
+          {user?.joinDate || user?.createdAt ? 
+            new Date(user.joinDate || user.createdAt).toLocaleDateString('vi-VN') : 
+            'Chưa cập nhật'}
         </div>
       </div>
 

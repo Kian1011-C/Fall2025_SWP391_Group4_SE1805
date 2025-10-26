@@ -13,12 +13,16 @@ export const useSwapData = (goToStep, STEPS) => {
     // --- LẤY DỮ LIỆU THẬT TỪ SESSIONSTORAGE ---
     const getRealData = () => {
         try {
+            // Clear old battery data to avoid conflicts
+            sessionStorage.removeItem('batteryId');
+            sessionStorage.removeItem('oldBatteryId');
+            
             const userId = sessionStorage.getItem('userId') || sessionStorage.getItem('UserID') || 'driver001';
             
             // Lấy vehicleId, contractId, batteryId từ selectedVehicle (nguồn chính xác nhất)
             let vehicleId = sessionStorage.getItem('vehicleId') || sessionStorage.getItem('vehicleID');
             let contractId = sessionStorage.getItem('contractId') || sessionStorage.getItem('contractID');
-            let batteryId = sessionStorage.getItem('batteryId') || sessionStorage.getItem('oldBatteryId') || sessionStorage.getItem('old_battery_id');
+            let batteryId = sessionStorage.getItem('old_battery_id'); // Chỉ lấy từ key chính
             
             // Nếu chưa có, thử parse từ selectedVehicle JSON
             const selectedVehicleStr = sessionStorage.getItem('selectedVehicle');
@@ -48,18 +52,19 @@ export const useSwapData = (goToStep, STEPS) => {
                         }
                     }
                     
-                    // Lấy batteryId từ selectedVehicle nếu chưa có
-                    if (!batteryId || batteryId === 'null' || batteryId === 'undefined') {
-                        batteryId = selectedVehicle?.batteryId || 
-                                   selectedVehicle?.currentBatteryId || 
-                                   selectedVehicle?.current_battery_id ||
-                                   selectedVehicle?.battery?.id ||
-                                   selectedVehicle?.battery?.batteryId;
-                        
-                        if (batteryId) {
-                            console.log('✅ Lấy batteryId từ selectedVehicle:', batteryId);
-                            sessionStorage.setItem('old_battery_id', String(batteryId));
-                        }
+                    // Lấy batteryId từ selectedVehicle (ưu tiên cao nhất)
+                    const selectedVehicleBatteryId = selectedVehicle?.batteryId || 
+                                                   selectedVehicle?.currentBatteryId || 
+                                                   selectedVehicle?.current_battery_id ||
+                                                   selectedVehicle?.battery?.id ||
+                                                   selectedVehicle?.battery?.batteryId;
+                    
+                    if (selectedVehicleBatteryId) {
+                        console.log('✅ Lấy batteryId từ selectedVehicle:', selectedVehicleBatteryId);
+                        batteryId = selectedVehicleBatteryId; // Override với giá trị từ selectedVehicle
+                        sessionStorage.setItem('old_battery_id', String(batteryId));
+                    } else if (!batteryId || batteryId === 'null' || batteryId === 'undefined') {
+                        console.warn('⚠️ Không tìm thấy batteryId trong selectedVehicle');
                     }
                 } catch (parseErr) {
                     console.warn('⚠️ Không parse được selectedVehicle:', parseErr);
@@ -75,6 +80,13 @@ export const useSwapData = (goToStep, STEPS) => {
             console.log('  - vehicleId:', vehicleId);
             console.log('  - contractId:', contractId);
             console.log('  - batteryId (final):', batteryId);
+            
+            // Debug: Log all battery-related keys
+            console.log('🔍 Debug - All battery keys in sessionStorage:');
+            console.log('  - batteryId:', sessionStorage.getItem('batteryId'));
+            console.log('  - oldBatteryId:', sessionStorage.getItem('oldBatteryId'));
+            console.log('  - old_battery_id:', sessionStorage.getItem('old_battery_id'));
+            console.log('  - selectedVehicle:', sessionStorage.getItem('selectedVehicle'));
             
             return {
                 user: { userId: userId },

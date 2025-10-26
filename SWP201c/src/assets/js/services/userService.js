@@ -80,6 +80,29 @@ class UserService {
   }
 
   /**
+   * Lấy thông tin profile chi tiết của người dùng.
+   * @param {string} userId - ID của người dùng
+   */
+  async getUserProfile(userId) {
+    try {
+      console.log(`UserService: Lấy thông tin profile cho user ${userId} từ API GET /api/users/${userId}/profile`);
+      
+      const response = await apiUtils.get(`/api/users/${userId}/profile`);
+      
+      if (response.success) {
+        console.log('✅ API profile trả về dữ liệu:', response);
+        return { success: true, data: response.data, message: 'Lấy thông tin profile thành công' };
+      } else {
+        throw new Error(response.message || 'Không thể lấy thông tin profile');
+      }
+    } catch (error) {
+      console.error(`Lỗi khi lấy thông tin profile user ${userId}:`, error);
+      const errorInfo = apiUtils.handleError(error);
+      return { success: false, message: errorInfo.message || 'Lỗi API' };
+    }
+  }
+
+  /**
    * Lấy thông tin dashboard của người dùng (Driver) - SỬ DỤNG API MỚI.
    * @param {string} userId - ID của người dùng
    */

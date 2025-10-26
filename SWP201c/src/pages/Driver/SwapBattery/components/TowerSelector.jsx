@@ -101,6 +101,15 @@ const TowerSelector = () => {
 
     const handleStartSwap = () => {
         if (selectedCabinet) {
+            // VALIDATION: Kiểm tra trụ có pin sẵn có không
+            const cabinetId = selectedCabinet.id || selectedCabinet.cabinetId;
+            const slotInfo = towerSlotInfo[cabinetId];
+            
+            if (slotInfo && slotInfo.availableBatteries === 0) {
+                alert('Trụ này không có pin sẵn có để đổi. Vui lòng chọn trụ khác.');
+                return;
+            }
+            
             // LƯU TRỤ VÀO SESSION STORAGE
             try {
                 sessionStorage.setItem('selectedCabinet', JSON.stringify(selectedCabinet));
@@ -129,15 +138,28 @@ const TowerSelector = () => {
             
             <div className="station-grid"> 
                 {cabinets.length > 0 ? (
-                    cabinets.map(cab => (
-                        <CabinetCard 
-                            key={cab.id || cab.cabinetId}
-                            cabinet={cab}
-                            isSelected={selectedCabinet?.id === cab.id}
-                            onSelect={() => setSelectedCabinet(cab)}
-                            slotInfo={towerSlotInfo[cab.id || cab.cabinetId]}
-                        />
-                    ))
+                    cabinets.map(cab => {
+                        const cabinetId = cab.id || cab.cabinetId;
+                        const slotInfo = towerSlotInfo[cabinetId];
+                        const hasAvailableBatteries = slotInfo && slotInfo.availableBatteries > 0;
+                        
+                        return (
+                            <CabinetCard 
+                                key={cabinetId}
+                                cabinet={cab}
+                                isSelected={selectedCabinet?.id === cab.id}
+                                onSelect={() => {
+                                    if (hasAvailableBatteries) {
+                                        setSelectedCabinet(cab);
+                                    } else {
+                                        alert('Trụ này không có pin sẵn có để đổi. Vui lòng chọn trụ khác.');
+                                    }
+                                }}
+                                slotInfo={slotInfo}
+                                isDisabled={!hasAvailableBatteries}
+                            />
+                        );
+                    })
                 ) : (
                     <p style={{ color: 'gray' }}>Trạm này hiện không có trụ nào sẵn sàng.</p>
                 )}
@@ -159,7 +181,7 @@ const TowerSelector = () => {
 };
 
 // Component con (CabinetCard)
-const CabinetCard = ({ cabinet, isSelected, onSelect, slotInfo }) => {
+const CabinetCard = ({ cabinet, isSelected, onSelect, slotInfo, isDisabled = false }) => {
     
     // ==========================================================
     // SỬA LỖI "BẢO TRÌ":
@@ -170,13 +192,16 @@ const CabinetCard = ({ cabinet, isSelected, onSelect, slotInfo }) => {
     const isMaintenance = (cabinet.status !== 'active'); 
     
     let cardClass = `station-card ${isMaintenance ? 'maintenance' : ''}`;
-    if (isSelected && !isMaintenance) { // Chỉ 'selected' khi không bảo trì
+    if (isDisabled) {
+        cardClass += ' disabled';
+    }
+    if (isSelected && !isMaintenance && !isDisabled) { // Chỉ 'selected' khi không bảo trì và không disabled
         cardClass += ' selected'; 
     }
     
     return (
-        // Chỉ cho phép click (onSelect) khi không bảo trì
-        <div className={cardClass} onClick={isMaintenance ? null : onSelect}>
+        // Chỉ cho phép click (onSelect) khi không bảo trì và không disabled
+        <div className={cardClass} onClick={isMaintenance || isDisabled ? null : onSelect}>
             <div className="station-card-header">
                 <h3 className="station-name">{cabinet.name}</h3>
                 <span className={`station-status ${isMaintenance ? 'maintenance' : 'active'}`}>
@@ -186,7 +211,10 @@ const CabinetCard = ({ cabinet, isSelected, onSelect, slotInfo }) => {
             <div className="station-address">
                 {slotInfo ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <span>Số Pin đang sẵn có: {slotInfo.availableBatteries}</span>
+                        <span style={{ color: slotInfo.availableBatteries === 0 ? '#ef4444' : 'inherit' }}>
+                            Số Pin đang sẵn có: {slotInfo.availableBatteries}
+                            {slotInfo.availableBatteries === 0 && ' (Không có pin để đổi)'}
+                        </span>
                         <span>Số slot trống: {slotInfo.emptySlots}</span>
                     </div>
                 ) : (

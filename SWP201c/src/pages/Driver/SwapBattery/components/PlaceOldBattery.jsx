@@ -210,8 +210,16 @@ const PlaceOldBattery = () => {
         }
     };
 
-    // Get the empty slot number
-    const emptySlotNumber = transaction?.emptySlot || '...';
+    // Get the empty slot number with fallback
+    const emptySlotFromSession = sessionStorage.getItem('emptySlotNumber');
+    const emptySlotNumber = transaction?.emptySlot || emptySlotFromSession || '1';
+    
+    // Debug logging
+    console.log('🔍 PlaceOldBattery - transaction:', transaction);
+    console.log('🔍 PlaceOldBattery - emptySlot:', transaction?.emptySlot);
+    console.log('🔍 PlaceOldBattery - emptySlotFromSession:', emptySlotFromSession);
+    console.log('🔍 PlaceOldBattery - emptySlotNumber:', emptySlotNumber);
+    console.log('🔍 PlaceOldBattery - isLoading:', isLoading);
 
     return (
         <div className="station-selector-container">
