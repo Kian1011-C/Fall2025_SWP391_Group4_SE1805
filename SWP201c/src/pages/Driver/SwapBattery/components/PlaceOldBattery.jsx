@@ -119,15 +119,9 @@ const PlaceOldBattery = () => {
                             battery_level: batteryData.battery_level
                         });
                         
-                        // Kiểm tra pin cũ phải thấp hơn 30%
-                        if (batteryLevel >= 30) {
-                            console.warn('⚠️ Pin cũ có dung lượng cao hơn 30%:', batteryLevel);
-                            alert(`Pin cũ có dung lượng ${batteryLevel}% cao hơn 30%. Vui lòng kiểm tra lại.`);
-                            setPercent(batteryLevel);
-                        } else {
-                            console.log('✅ Pin cũ hợp lệ (dung lượng < 30%):', batteryLevel);
-                            setPercent(batteryLevel);
-                        }
+                        // Không kiểm tra - chỉ set giá trị
+                        console.log('✅ Dung lượng pin cũ:', batteryLevel);
+                        setPercent(batteryLevel);
                     } else {
                         console.warn('⚠️ Không lấy được thông tin pin cũ từ API');
                         console.log('🔍 Kiểm tra dữ liệu từ xe đã chọn...');
@@ -183,22 +177,13 @@ const PlaceOldBattery = () => {
             sessionStorage.setItem('oldBatteryLevel', String(percent));
             console.log('✅ Đã lưu dung lượng pin cũ:', percent);
             
-            // Cập nhật thông tin pin cũ vào database
-            if (code && code !== 'N/A') {
-                console.log('🔄 Cập nhật thông tin pin cũ vào database...');
-                const updateResult = await batteryService.updateBattery(code, {
-                    stateOfHealth: percent,
-                    batteryLevel: percent,
-                    status: 'RETURNED', // Đánh dấu pin đã được trả
-                    lastUsed: new Date().toISOString()
-                });
-                
-                if (updateResult.success) {
-                    console.log('✅ Đã cập nhật pin cũ vào database:', updateResult.data);
-                } else {
-                    console.warn('⚠️ Không thể cập nhật pin cũ vào database:', updateResult.message);
-                }
-            }
+            // CHỈ GHI NHẬN - KHÔNG GỌI API
+            // Tất cả cập nhật database sẽ được xử lý ở bước cuối cùng (confirmSwap)
+            console.log('✅ Đã ghi nhận thông tin pin cũ:', {
+                batteryId: code,
+                level: percent,
+                emptySlot: emptySlotNumber
+            });
             
             // Chuyển bước
             goToStep(STEPS.TAKE_NEW_BATTERY);

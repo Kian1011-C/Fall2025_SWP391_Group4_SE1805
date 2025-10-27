@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import { vehicleService } from '../../../assets/js/services';
-import batteryService from '../../../assets/js/services/batteryService';
 
 const SelectVehiclePage = () => {
   const navigate = useNavigate();
@@ -80,68 +79,35 @@ const SelectVehiclePage = () => {
         sessionStorage.setItem('vehicleId', String(vehicleId));
       }
       
-      // Lưu batteryId (pin hiện tại trên xe) - SỬ DỤNG DỮ LIỆU THẬT
-      if (batteryId) {
-        sessionStorage.setItem('batteryId', String(batteryId)); // Cho swap process
-        console.log('✅ Lưu batteryId thật từ dữ liệu xe:', batteryId);
-      } else {
-        console.warn('⚠️ Xe không có thông tin pin từ dữ liệu xe');
-        console.warn('⚠️ batteryId value:', batteryId);
-        console.warn('⚠️ batteryId type:', typeof batteryId);
-        // Sẽ thử lấy từ API getBatteryByVehicle
-      }
-      
-      // GỌI API LẤY PIN CŨ THẬT TỪ BACKEND
+      // Lưu old_battery_id (pin hiện tại trên xe) - SỬ DỤNG DỮ LIỆU THẬT TỪ API
       try {
         console.log('🔋 Gọi API lấy pin cũ cho xe:', vehicleId);
         const batteryResponse = await vehicleService.getVehicleBatteryInfo(vehicleId);
         console.log('🔋 API response pin cũ:', batteryResponse);
         
         if (batteryResponse.success && batteryResponse.data) {
-          const realOldBatteryId = batteryResponse.data.batteryId || batteryResponse.data.id;
+          const realOldBatteryId = batteryResponse.data.batteryId || batteryResponse.data.id || batteryId;
           console.log('🔍 realOldBatteryId:', realOldBatteryId);
           console.log('🔍 batteryResponse.data:', batteryResponse.data);
           
-           if (realOldBatteryId) {
-             sessionStorage.setItem('batteryId', String(realOldBatteryId));
-             console.log('✅ Đã lưu pin cũ thật từ API backend:', realOldBatteryId);
-           } else {
-             console.warn('⚠️ API không trả về batteryId, sử dụng dữ liệu từ xe đã chọn');
-             console.warn('⚠️ batteryResponse.data.batteryId:', batteryResponse.data.batteryId);
-             console.warn('⚠️ batteryResponse.data.id:', batteryResponse.data.id);
-             // Sử dụng batteryId từ dữ liệu xe đã chọn
-             if (batteryId) {
-               sessionStorage.setItem('batteryId', String(batteryId));
-               console.log('✅ Sử dụng batteryId từ xe đã chọn:', batteryId);
-             }
-           }
-         } else {
-           console.warn('⚠️ API response không thành công, sử dụng dữ liệu từ xe đã chọn');
-           // Sử dụng batteryId từ dữ liệu xe đã chọn
-           if (batteryId) {
-             sessionStorage.setItem('batteryId', String(batteryId));
-             console.log('✅ Sử dụng batteryId từ xe đã chọn:', batteryId);
-           }
-         }
-       } catch (error) {
-         console.error('❌ Lỗi khi lấy pin cũ từ API:', error);
-         console.warn('⚠️ Sử dụng dữ liệu từ xe đã chọn');
-         // Sử dụng batteryId từ dữ liệu xe đã chọn
-         if (batteryId) {
-           sessionStorage.setItem('batteryId', String(batteryId));
-           console.log('✅ Sử dụng batteryId từ xe đã chọn:', batteryId);
-         }
-       }
-       
-       // FALLBACK CUỐI CÙNG: Đảm bảo luôn có batteryId
-       const finalBatteryId = sessionStorage.getItem('batteryId');
-       if (!finalBatteryId || finalBatteryId === 'null' || finalBatteryId === 'undefined') {
-         console.warn('⚠️ Không có batteryId từ cả 2 nguồn, sử dụng fallback');
-         sessionStorage.setItem('batteryId', '1'); // Fallback value
-         console.log('✅ Đã lưu batteryId fallback: 1');
-       } else {
-         console.log('✅ Final batteryId:', finalBatteryId);
-       }
+          if (realOldBatteryId) {
+            sessionStorage.setItem('old_battery_id', String(realOldBatteryId));
+            console.log('✅ Đã lưu old_battery_id từ API backend:', realOldBatteryId);
+          } else if (batteryId) {
+            sessionStorage.setItem('old_battery_id', String(batteryId));
+            console.log('✅ Sử dụng batteryId từ xe đã chọn:', batteryId);
+          }
+        } else if (batteryId) {
+          sessionStorage.setItem('old_battery_id', String(batteryId));
+          console.log('⚠️ API response không thành công, sử dụng dữ liệu từ xe đã chọn');
+        }
+      } catch (error) {
+        console.error('❌ Lỗi khi lấy pin cũ từ API:', error);
+        if (batteryId) {
+          sessionStorage.setItem('old_battery_id', String(batteryId));
+          console.log('⚠️ Sử dụng batteryId từ xe đã chọn');
+        }
+      }
       
       // Lưu contractId - SỬ DỤNG DỮ LIỆU THẬT
       if (contractId) {

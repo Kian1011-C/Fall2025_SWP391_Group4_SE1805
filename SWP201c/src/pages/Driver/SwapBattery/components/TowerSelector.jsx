@@ -101,6 +101,16 @@ const TowerSelector = () => {
 
     const handleStartSwap = () => {
         if (selectedCabinet) {
+            // ===== DEBUG LOG =====
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            console.log('🔘 NHẤN NÚT "BẮT ĐẦU ĐỔI PIN"');
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            console.log('selectedCabinet object:', selectedCabinet);
+            console.log('selectedCabinet.id:', selectedCabinet.id);
+            console.log('selectedCabinet.cabinetId:', selectedCabinet.cabinetId);
+            console.log('selectedCabinet.cabinetNumber:', selectedCabinet.cabinetNumber);
+            console.log('selectedCabinet towerId sẽ dùng:', selectedCabinet.id || selectedCabinet.cabinetId);
+            
             // VALIDATION: Kiểm tra trụ có pin sẵn có không
             const cabinetId = selectedCabinet.id || selectedCabinet.cabinetId;
             const slotInfo = towerSlotInfo[cabinetId];
@@ -113,10 +123,14 @@ const TowerSelector = () => {
             // LƯU TRỤ VÀO SESSION STORAGE
             try {
                 sessionStorage.setItem('selectedCabinet', JSON.stringify(selectedCabinet));
-                console.log('Đã lưu trụ vào sessionStorage:', selectedCabinet);
+                console.log('✅ Đã lưu trụ vào sessionStorage:', selectedCabinet);
             } catch (error) {
-                console.error('Lỗi khi lưu trụ vào sessionStorage:', error);
+                console.error('❌ Lỗi khi lưu trụ vào sessionStorage:', error);
             }
+            
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            console.log('🚀 GỌI initiateSwap với cabinet:', selectedCabinet);
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             
             initiateSwap(selectedCabinet);
         }

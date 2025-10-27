@@ -69,10 +69,9 @@ const SwapSuccess = ({ onFinish }) => {
     console.log('SwapSuccess - summary:', summary);
     console.log('SwapSuccess - summary.newBatteryId:', summary?.newBatteryId);
     console.log('SwapSuccess - sessionStorage keys:', Object.keys(sessionStorage));
-    console.log('SwapSuccess - batteryId:', sessionStorage.getItem('batteryId'));
-    console.log('SwapSuccess - oldBatteryId:', sessionStorage.getItem('old_battery_id'));
-    console.log('SwapSuccess - newBatteryId:', sessionStorage.getItem('new_battery_id'));
-    console.log('SwapSuccess - oldBatteryLevel:', oldBatteryLevel);
+    console.log('✅ Pin cũ:', sessionStorage.getItem('old_battery_id'));
+    console.log('✅ Pin mới:', sessionStorage.getItem('new_battery_id'));
+    console.log('✅ Dung lượng pin cũ:', oldBatteryLevel);
     
     // Tạo fallback data từ sessionStorage nếu summary không có dữ liệu
     const getOldBatteryCode = () => {
@@ -92,27 +91,27 @@ const SwapSuccess = ({ onFinish }) => {
         return 'N/A';
     };
     
-    // Lấy newBatteryCode từ API response thật
+    // Lấy newBatteryCode từ sessionStorage (nguồn chính xác nhất)
     const getNewBatteryCode = () => {
         console.log('🔍 Debug newBatteryId:');
         console.log('🔍 summary?.newBatteryId:', summary?.newBatteryId);
         console.log('🔍 sessionStorage new_battery_id:', sessionStorage.getItem('new_battery_id'));
         console.log('🔍 sessionStorage newBatteryId:', sessionStorage.getItem('newBatteryId'));
         
-        // Ưu tiên lấy từ API response (summary.newBatteryId) - DỮ LIỆU THẬT TỪ API
-        if (summary?.newBatteryId) {
-            console.log('✅ SỬ DỤNG DỮ LIỆU THẬT TỪ API - newBatteryId:', summary.newBatteryId);
-            return summary.newBatteryId;
-        }
-        
-        // Fallback từ sessionStorage (có thể là dữ liệu cũ)
+        // Ưu tiên lấy từ sessionStorage - DỮ LIỆU THẬT TỪ BƯỚC INITIATE
         const newBatteryId = sessionStorage.getItem('new_battery_id');
         if (newBatteryId && newBatteryId !== 'undefined' && newBatteryId !== 'null') {
-            console.log('⚠️ Sử dụng newBatteryId từ sessionStorage (có thể không cập nhật):', newBatteryId);
+            console.log('✅ SỬ DỤNG DỮ LIỆU TỪ SESSION STORAGE - newBatteryId:', newBatteryId);
             return newBatteryId;
         }
         
-        console.warn('❌ Không tìm thấy newBatteryId từ API response hoặc sessionStorage');
+        // Fallback từ API response
+        if (summary?.newBatteryId) {
+            console.log('⚠️ Sử dụng newBatteryId từ API response (fallback):', summary.newBatteryId);
+            return summary.newBatteryId;
+        }
+        
+        console.warn('❌ Không tìm thấy newBatteryId từ sessionStorage hoặc API response');
         return 'N/A';
     };
     
