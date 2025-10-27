@@ -74,32 +74,48 @@ public class BatteryController {
         try {
             String userId = swapRequest.get("userId").toString();
             Long stationId = Long.valueOf(swapRequest.get("stationId").toString());
+            // Optional staffId: null when auto swap, or string id when staff performs the swap
+            String staffId = swapRequest.containsKey("staffId") && swapRequest.get("staffId") != null
+                    ? swapRequest.get("staffId").toString() : null;
+        // NOTE: We now require a towerId and will only search for batteries inside that tower
+        Long towerIdReq = swapRequest.containsKey("towerId") && swapRequest.get("towerId") != null
+            ? Long.valueOf(swapRequest.get("towerId").toString()) : null;
+
+        if (towerIdReq == null) {
+        Map<String, Object> bad = new HashMap<>();
+        bad.put("success", false);
+        bad.put("message", "towerId is required. This endpoint searches batteries inside a specific tower only.");
+        return ResponseEntity.status(400).body(bad);
+        }
             Long oldBatteryId = swapRequest.containsKey("batteryId") ? 
                 Long.valueOf(swapRequest.get("batteryId").toString()) : null;
             // Optional: vehicleId selected by user (so we update the correct vehicle)
             Integer vehicleId = swapRequest.containsKey("vehicleId") && swapRequest.get("vehicleId") != null
                     ? Integer.valueOf(swapRequest.get("vehicleId").toString()) : null;
             
-            // Find available battery at the station
-            String findBatterySql = """
+            // Find available battery: prefer searching inside the provided tower (if any),
+            // otherwise fall back to searching the whole station
+            String findBatterySql;
+            // Only search by tower (towerIdReq guaranteed non-null above)
+            findBatterySql = """
                 SELECT TOP 1 b.battery_id, sl.slot_id, sl.slot_number, t.tower_id, t.tower_number
                 FROM Batteries b
                 INNER JOIN Slots sl ON b.slot_id = sl.slot_id
                 INNER JOIN Towers t ON sl.tower_id = t.tower_id
-                WHERE t.station_id = ? AND UPPER(b.status) = 'AVAILABLE'
+                WHERE t.tower_id = ? AND UPPER(b.status) = 'available'
                 ORDER BY b.state_of_health DESC
             """;
-            
+
             try (java.sql.Connection conn = hsf302.fa25.s3.context.ConnectDB.getConnection();
                  java.sql.PreparedStatement ps = conn.prepareStatement(findBatterySql)) {
-                ps.setLong(1, stationId);
+                // bind towerId (required)
+                ps.setLong(1, towerIdReq);
                 
                 java.sql.ResultSet rs = ps.executeQuery();
                 if (rs.next()) {
                     Long newBatteryId = rs.getLong("battery_id");
                     Integer newBatterySlotId = rs.getObject("slot_id") != null ? rs.getInt("slot_id") : null;
                     int slotNumber = rs.getInt("slot_number");
-                    int towerId = rs.getInt("tower_id");
                     int towerNumber = rs.getInt("tower_number");
                     
                     // Find active contract for this user's vehicle(s)
@@ -152,14 +168,14 @@ public class BatteryController {
                         }
                     }
 
-                    // Create swap record (include contract_id and vehicle_id)
+                    // Create swap record (include contract_id, vehicle_id and optional staff_id)
                     String insertSwapSql = """
-                        INSERT INTO Swaps (user_id, contract_id, vehicle_id, station_id, tower_id, old_battery_id, new_battery_id, swap_date, status)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, GETDATE(), 'INITIATED')
+                        INSERT INTO Swaps (user_id, contract_id, vehicle_id, station_id, tower_id, staff_id, old_battery_id, new_battery_id, swap_date, status)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, GETDATE(), 'INITIATED')
                     """;
 
-                    try (java.sql.PreparedStatement insertPs = conn.prepareStatement(insertSwapSql,
-                            java.sql.Statement.RETURN_GENERATED_KEYS)) {
+            try (java.sql.PreparedStatement insertPs = conn.prepareStatement(insertSwapSql,
+                java.sql.Statement.RETURN_GENERATED_KEYS)) {
                         insertPs.setString(1, userId);
                         insertPs.setInt(2, contractId);
                         if (swapVehicleId != null) {
@@ -168,13 +184,20 @@ public class BatteryController {
                             insertPs.setNull(3, java.sql.Types.INTEGER);
                         }
                         insertPs.setLong(4, stationId);
-                        insertPs.setInt(5, towerId);
-                        if (oldBatteryId != null) {
-                            insertPs.setLong(6, oldBatteryId);
+                        // persist tower id (we require towerId in request)
+                        insertPs.setLong(5, towerIdReq);
+                        // staff_id (nullable)
+                        if (staffId != null) {
+                            insertPs.setString(6, staffId);
                         } else {
-                            insertPs.setNull(6, java.sql.Types.BIGINT);
+                            insertPs.setNull(6, java.sql.Types.VARCHAR);
                         }
-                        insertPs.setLong(7, newBatteryId);
+                        if (oldBatteryId != null) {
+                            insertPs.setLong(7, oldBatteryId);
+                        } else {
+                            insertPs.setNull(7, java.sql.Types.BIGINT);
+                        }
+                        insertPs.setLong(8, newBatteryId);
 
                         int rowsAffected = insertPs.executeUpdate();
                         if (rowsAffected > 0) {
@@ -190,10 +213,12 @@ public class BatteryController {
                                     swapTransaction.put("stationId", stationId);
                                     swapTransaction.put("oldBatteryId", oldBatteryId);
                                     swapTransaction.put("newBatteryId", newBatteryId);
+                                    swapTransaction.put("staffId", staffId);
                                     swapTransaction.put("status", "INITIATED");
                                     swapTransaction.put("slotNumber", slotNumber);
                                     swapTransaction.put("slotId", newBatterySlotId);
                                     swapTransaction.put("towerNumber", towerNumber);
+                                    swapTransaction.put("towerId", towerIdReq);
                                     swapTransaction.put("estimatedTime", 300); // 5 minutes
                                     swapTransaction.put("initiatedAt", new java.util.Date());
 
@@ -210,7 +235,7 @@ public class BatteryController {
                 } else {
                     Map<String, Object> response = new HashMap<>();
                     response.put("success", false);
-                    response.put("message", "No available batteries at this station");
+                    response.put("message", "No available batteries at this tower");
                     return ResponseEntity.status(404).body(response);
                 }
             }
@@ -533,25 +558,6 @@ public class BatteryController {
         }
     }
 
-    @GetMapping("/swap/active")
-    public ResponseEntity<?> getActiveSwaps(@RequestParam(required = false) String userId) {
-        try {
-            List<Map<String, Object>> activeSwaps = swapDao.getActiveSwaps(userId);
-            
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("data", activeSwaps);
-            response.put("total", activeSwaps.size());
-            
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", false);
-            response.put("message", "Error fetching active swaps: " + e.getMessage());
-            return ResponseEntity.status(500).body(response);
-        }
-    }
-
     @GetMapping("/vehicle/{vehicleId}")
     public ResponseEntity<?> getBatteryByVehicle(@PathVariable int vehicleId) {
         try {
@@ -769,6 +775,57 @@ public class BatteryController {
             
             Map<String, Object> response = new HashMap<>();
             if (updated) {
+                // If the battery is located in a slot, update that slot's status to reflect the battery status.
+                // Rule: if battery.status == 'IN_USE' => slot becomes 'empty' (battery removed)
+                //       otherwise => slot becomes 'charging' (battery present/available in tower slot)
+                try (java.sql.Connection conn = hsf302.fa25.s3.context.ConnectDB.getConnection()) {
+                    if (battery.getSlotId() != null) {
+                        // Normalize battery status and map to slot status according to project conventions:
+                        // battery: 'available','charging','in_use','faulty'
+                        // slot: 'full','charging','empty'
+                        String slotStatus = "charging";
+                        if (battery.getStatus() != null) {
+                            String bs = battery.getStatus().toLowerCase();
+                            switch (bs) {
+                                case "in_use":
+                                case "in-use":
+                                    slotStatus = "empty"; // battery removed from slot
+                                    break;
+                                case "charging":
+                                    slotStatus = "charging"; // battery present and charging
+                                    break;
+                                case "available":
+                                    slotStatus = "full"; // battery present and ready
+                                    break;
+                                case "faulty":
+                                    slotStatus = "faulty"; // battery faulty 
+                                    break;
+                                default:
+                                    slotStatus = "charging";
+                            }
+                        }
+                        try (java.sql.PreparedStatement slotPs = conn.prepareStatement("UPDATE Slots SET status = ? WHERE slot_id = ?")) {
+                            slotPs.setString(1, slotStatus);
+                            slotPs.setInt(2, battery.getSlotId());
+                            slotPs.executeUpdate();
+                        }
+                        // If battery moved to 'in_use', clear its slot_id in Batteries table and in-memory object
+                        if (battery.getStatus() != null) {
+                            String bsClear = battery.getStatus().toLowerCase();
+                            if ("in_use".equals(bsClear) || "in-use".equals(bsClear)) {
+                                try (java.sql.PreparedStatement clearPs = conn.prepareStatement("UPDATE Batteries SET slot_id = NULL WHERE battery_id = ?")) {
+                                    clearPs.setInt(1, battery.getBatteryId());
+                                    clearPs.executeUpdate();
+                                }
+                                // reflect change in response object
+                                battery.setSlotId(null);
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    // Log but don't fail the entire request — battery update already succeeded
+                    e.printStackTrace();
+                }
                 response.put("success", true);
                 response.put("message", "Battery updated successfully");
                 response.put("data", battery);
