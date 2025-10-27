@@ -11,13 +11,14 @@ import java.sql.Timestamp;
 
 public class VehicleBatteryInfo {
     private int vehicleId;
+    private String userId; // Add userId field for admin management
     private String plateNumber;
     private String vehicleModel;
     private String vinNumber;
     private String batteryType;
     private String compatibleBatteryTypes;
     private Timestamp createdAt;
-    private int batteryId;
+    private Integer batteryId; // Change to Integer to allow null values
     private String batteryModel;
     private Double health;
     private Double currentOdometer; // Thêm field quãng đường hiện tại

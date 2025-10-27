@@ -1,12 +1,13 @@
 package hsf302.fa25.s3.controller;
 
-
 import hsf302.fa25.s3.model.Payment;
 import hsf302.fa25.s3.service.PaymentService;
 import jakarta.servlet.http.HttpServletRequest;
-
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import java.util.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/payment")
@@ -33,7 +34,7 @@ public class PaymentController {
         return res;
     }
 
-    /** Return URL (trình duyệt của user sẽ quay về đây) */
+    /** Return URL (trình duyệt quay về) */
     @GetMapping("/vnpay-return")
     public Map<String, Object> vnpReturn(@RequestParam Map<String, String> params) {
         Payment p = paymentService.handleReturn(params);
@@ -41,29 +42,31 @@ public class PaymentController {
         if (p != null && "success".equalsIgnoreCase(p.getStatus())) {
             res.put("success", true);
             res.put("message", "Thanh toán thành công");
-            res.put("txnRef", p.getTransactionRef());
         } else {
             res.put("success", false);
             res.put("message", "Thanh toán thất bại hoặc không hợp lệ");
         }
+        if (p != null) res.put("txnRef", p.getTransactionRef());
         return res;
     }
 
-    /** IPN (server-to-server) – VNPay gọi ngược lại hệ thống của bạn */
-    @GetMapping("/vnpay-ipn")
+    /** IPN (server-to-server) – VNPAY gọi ngược */
+    @GetMapping(value = "/vnpay-ipn", produces = MediaType.APPLICATION_JSON_VALUE)
     public String vnpIpn(@RequestParam Map<String, String> params) {
         return paymentService.handleIpn(params);
     }
 
     private String getClientIp(HttpServletRequest request) {
         String ip = request.getHeader("X-Forwarded-For");
-        if (ip != null && ip.length() != 0 && !"unknown".equalsIgnoreCase(ip)) {
-            return ip.split(",")[0];
+        if (ip != null && !ip.isBlank() && !"unknown".equalsIgnoreCase(ip)) {
+            return ip.split(",")[0].trim();
         }
         ip = request.getHeader("X-Real-IP");
-        if (ip != null && ip.length() != 0 && !"unknown".equalsIgnoreCase(ip)) {
-            return ip;
+        if (ip != null && !ip.isBlank() && !"unknown".equalsIgnoreCase(ip)) {
+            return ip.trim();
         }
-        return request.getRemoteAddr();
+        ip = request.getRemoteAddr();
+        if ("0:0:0:0:0:0:0:1".equals(ip) || "::1".equals(ip)) return "127.0.0.1";
+        return ip;
     }
 }

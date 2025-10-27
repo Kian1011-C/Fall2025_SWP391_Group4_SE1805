@@ -10,18 +10,20 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Swap {
-    private int swapId;
+    private Integer swapId;
     private String userId;
-    private int contractId;
-    private int stationId;
-    private int towerId;
-    private int staffId;
-    private int oldBatteryId;
-    private int newBatteryId;
-    private double odometerBefore;
-    private double odometerAfter;
-    private double distanceUsed;
-    private Timestamp swapTime;
+    private Integer contractId;
+    private Integer vehicleId;
+    private Integer stationId;
+    private Integer towerId;
+    private String staffId;
+    private Integer oldBatteryId;
+    private Integer newBatteryId;
+    private Double odometerBefore;
+    private Double odometerAfter;
+    private Double distanceUsed;
+    // prefer explicit swapDate matching DB column swap_date
+    private Timestamp swapDate;
     private String swapStatus;
-    private int paymentId;
+    private Integer paymentId;
 }

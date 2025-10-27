@@ -8,7 +8,6 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/stations")
-@CrossOrigin(origins = "*")
 public class StationController {
     
     private final StationDao stationDao = new StationDao();

@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "*")
 public class UserController {
 
     private final UserDao userDao = new UserDao();
@@ -166,7 +165,6 @@ public class UserController {
         }
         return response;
     }
-
     @PostMapping("/register")
     public Map<String,Object> register(@RequestParam String firstName,
                                        @RequestParam String lastName,

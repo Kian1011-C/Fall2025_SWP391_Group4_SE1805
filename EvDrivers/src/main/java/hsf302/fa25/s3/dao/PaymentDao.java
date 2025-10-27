@@ -28,7 +28,7 @@ public class PaymentDao {
             return false;
         }
     }
-//tim giao dich VNpay bang transaction_ref
+    //tim giao dich VNpay bang transaction_ref
     public Payment findByTxnRef(String txnRef) {
         String sql = "SELECT TOP 1 * FROM Payments WHERE transaction_ref = ?";
         try (Connection c = ConnectDB.getConnection();
@@ -83,7 +83,7 @@ public class PaymentDao {
             return false;
         }
     }
-//lay tat ca giao dich VNpay
+    //lay tat ca giao dich VNpay
     public List<Payment> findAll() {
         List<Payment> list = new ArrayList<>();
         String sql = "SELECT * FROM Payments ORDER BY payment_id DESC";

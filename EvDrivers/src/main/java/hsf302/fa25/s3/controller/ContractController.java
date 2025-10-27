@@ -10,7 +10,6 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/contracts")
-@CrossOrigin(origins = "*")
 public class ContractController {
     
     private final ContractDao contractDao = new ContractDao();

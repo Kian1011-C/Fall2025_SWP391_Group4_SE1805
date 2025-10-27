@@ -9,7 +9,6 @@ import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "*")
 public class AuthController {
     
     private final UserDao userDao = new UserDao();

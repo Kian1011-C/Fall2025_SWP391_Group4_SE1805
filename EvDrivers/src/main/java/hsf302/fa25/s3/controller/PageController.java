@@ -37,32 +37,6 @@ public class PageController {
         return "login";
     }
 
-    // Trang register
-    @GetMapping("/register")
-    public String registerPage() {
-        return "register";  // register.html
-    }
-
-    // Trang verify OTP
-    @GetMapping("/verify-otp")
-    public String verifyOtpPage(@RequestParam("userId") String userId, Model model) {
-        model.addAttribute("userId", userId);
-        return "verify-otp";  // verify-otp.html
-    }
-
-    // Trang reset password
-    @GetMapping("/forgot")
-    public String forgotPage() {
-        return "forgot";        // templates/forgot.html
-    }
-
-    // Trang nhập mật khẩu mới từ link trong email
-    @GetMapping("/reset")
-    public String resetPage(@RequestParam("token") String token, Model model) {
-        model.addAttribute("token", token);
-        return "reset";         // templates/reset.html
-    }
-
     @GetMapping("/home")
     public String home(@RequestParam("id") String userId, Model model) throws Exception {
         var user = userDao.getUserById(userId);

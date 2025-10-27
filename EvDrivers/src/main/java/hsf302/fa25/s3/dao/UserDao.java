@@ -5,6 +5,12 @@ import hsf302.fa25.s3.context.ConnectDB;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import hsf302.fa25.s3.model.User;
+import hsf302.fa25.s3.context.ConnectDB;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class UserDao {
@@ -369,4 +375,3 @@ public class UserDao {
     }
 
 }
-
