@@ -91,9 +91,9 @@ const AdminBatteries = () => {
           />
           <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} style={{ background: '#374151', color: 'white', border: '1px solid #4b5563', padding: '10px', borderRadius: '8px' }}>
             <option value="">Tất cả trạng thái</option>
-            <option value="AVAILABLE">Sẵn sàng</option>
-            <option value="CHARGING">Đang sạc</option>
-            <option value="MAINTENANCE">Bảo trì</option>
+            <option value="available">Sẵn sàng</option>
+            <option value="charging">Đang sạc</option>
+            <option value="maintenance">Bảo trì</option>
           </select>
         </div>
         {renderContent()}

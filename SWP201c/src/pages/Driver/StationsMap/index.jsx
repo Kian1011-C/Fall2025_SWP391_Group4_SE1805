@@ -1,23 +1,18 @@
 // Driver/StationsMap/index.jsx
-// Container component for StationsMap page - orchestrates stations display and booking
+// Container component for StationsMap page - orchestrates stations display
 
 import React from 'react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
-import { useStationsData, useStationBooking, useStationSelection } from './hooks';
+import { useStationsData, useStationSelection } from './hooks';
 import stationService from '../../../assets/js/services/stationService';
-import { getStationsStats } from './utils';
 import {
   StationsMapHeader,
-  StationsList,
-  StationsStats
+  StationsList
 } from './components';
 
 const StationsMap = () => {
   // Data fetching
-  const { stations, stats, loading, error, refetch } = useStationsData();
-
-  // Booking handling
-  const { bookStation, booking } = useStationBooking(refetch);
+  const { stations, loading, error, refetch } = useStationsData();
 
   // Station selection (for future map integration)
   const { selectedStation, selectStation } = useStationSelection();
@@ -28,19 +23,34 @@ const StationsMap = () => {
     console.log('🔍 Selecting station:', station);
     selectStation(station);
     try {
-      console.log('📡 Calling API for station:', station.id);
-      const resp = await stationService.getTowersByStation(station.id);
-      console.log('📡 API Response:', resp);
-      if (resp.success) {
-        setTowers(resp.data || []);
-        console.log('✅ Towers set:', resp.data);
+      console.log('📡 Calling GET /api/stations/' + station.id + ' for station details...');
+      
+      // Sử dụng API mới GET /api/stations/{id} để lấy chi tiết trạm
+      const stationDetail = await stationService.getStationById(station.id);
+      console.log('📡 Station detail API Response:', stationDetail);
+      
+      if (stationDetail.success && stationDetail.data) {
+        const towers = stationDetail.data.towers || stationDetail.data.cabinets || [];
+        setTowers(towers);
+        console.log('✅ Towers set from station detail:', towers);
+        
+        // Log thông tin chi tiết trạm
+        console.log('🏢 Station details:', {
+          id: stationDetail.data.id,
+          name: stationDetail.data.name,
+          address: stationDetail.data.address,
+          status: stationDetail.data.status,
+          availableSlots: stationDetail.data.availableSlots,
+          totalSlots: stationDetail.data.totalSlots,
+          towers: towers.length
+        });
       } else {
-        console.log('❌ API failed:', resp.message);
+        console.log('❌ Station detail API failed:', stationDetail.message);
         setTowers([]);
       }
       setShowTowers(true);
     } catch (error) {
-      console.error('💥 API Error:', error);
+      console.error('💥 Station detail API Error:', error);
       setTowers([]);
       setShowTowers(true);
     }
@@ -48,11 +58,6 @@ const StationsMap = () => {
 
   // SỬ DỤNG STATS TỪ API THAY VÌ TÍNH TOÁN
   // const stats = getStationsStats(stations); // Đã loại bỏ
-
-  // Handle booking
-  const handleBook = async (stationId) => {
-    await bookStation(stationId);
-  };
 
   // Loading state
   if (loading) {
@@ -134,14 +139,9 @@ const StationsMap = () => {
         {/* Header */}
         <StationsMapHeader />
 
-        {/* Statistics - SỬ DỤNG DỮ LIỆU THẬT TỪ API */}
-        <StationsStats stats={stats} />
-
         {/* Stations List */}
         <StationsList
           stations={stations}
-          onBook={handleBook}
-          booking={booking}
           onSelect={handleSelect}
         />
 

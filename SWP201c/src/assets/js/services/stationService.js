@@ -6,18 +6,70 @@ const { ENDPOINTS } = API_CONFIG;
 
 const stationService = {
     /**
-     * API 1 (Driver - Bước 1): Lấy tất cả các trạm
-     * (Hàm này đã có)
+     * API 1: GET /api/stations - Lấy danh sách tất cả các trạm
+     * Sử dụng cho: Bản đồ trạm, danh sách trạm, quản lý trạm
      */
-    getAllStations: async (filters = {}) => { // <-- 1. Chấp nhận 'filters'
+    getAllStations: async (filters = {}) => {
         try {
-            console.log("StationService: Đang lấy tất cả trạm...", filters);
-            // 2. Truyền 'filters' vào làm query params
-            const response = await apiUtils.get(ENDPOINTS.STATIONS.BASE, filters); 
-            return response;
+            console.log("🔍 StationService: Lấy danh sách trạm từ GET /api/stations", filters);
+            
+            // Gọi API GET /api/stations
+            const response = await apiUtils.get('/api/stations', filters);
+            
+            console.log("📊 GET /api/stations response:", response);
+            
+            if (response.success) {
+                console.log('✅ Danh sách trạm loaded:', response.data?.length || 0);
+                return {
+                    success: true,
+                    data: response.data || [],
+                    message: 'Lấy danh sách trạm thành công'
+                };
+            } else {
+                throw new Error(response.message || 'Không thể lấy danh sách trạm');
+            }
         } catch (error) {
-            console.error('Lỗi khi lấy danh sách trạm:', error);
-            throw error; 
+            console.error('❌ Lỗi khi lấy danh sách trạm:', error);
+            const errorInfo = apiUtils.handleError ? apiUtils.handleError(error) : { message: error.message };
+            return {
+                success: false,
+                message: errorInfo.message || 'Lỗi khi lấy danh sách trạm',
+                error: errorInfo
+            };
+        }
+    },
+
+    /**
+     * API 2: GET /api/stations/{id} - Lấy thông tin chi tiết của một trạm
+     * Sử dụng cho: Chi tiết trạm, danh sách towers, thống kê trạm
+     */
+    getStationById: async (stationId) => {
+        try {
+            console.log("🔍 StationService: Lấy chi tiết trạm từ GET /api/stations/" + stationId);
+            
+            // Gọi API GET /api/stations/{id}
+            const response = await apiUtils.get(`/api/stations/${stationId}`);
+            
+            console.log("📊 GET /api/stations/" + stationId + " response:", response);
+            
+            if (response.success) {
+                console.log('✅ Chi tiết trạm loaded:', response.data);
+                return {
+                    success: true,
+                    data: response.data,
+                    message: 'Lấy chi tiết trạm thành công'
+                };
+            } else {
+                throw new Error(response.message || 'Không thể lấy chi tiết trạm');
+            }
+        } catch (error) {
+            console.error('❌ Lỗi khi lấy chi tiết trạm:', error);
+            const errorInfo = apiUtils.handleError ? apiUtils.handleError(error) : { message: error.message };
+            return {
+                success: false,
+                message: errorInfo.message || 'Lỗi khi lấy chi tiết trạm',
+                error: errorInfo
+            };
         }
     },
 
@@ -44,23 +96,51 @@ const stationService = {
     },
 
     /**
-     * API 2 (Driver - Bước 2): Lấy các trụ của 1 trạm
-     * (Hàm này đã có)
+     * API 3: Lấy các trụ (towers) của một trạm
+     * Sử dụng API getStationById để lấy thông tin chi tiết bao gồm towers
+     */
+    getTowersByStation: async (stationId) => {
+        try {
+            console.log("🔍 StationService: Lấy towers của trạm", stationId);
+            
+            // Sử dụng API getStationById để lấy thông tin chi tiết
+            const stationDetail = await stationService.getStationById(stationId);
+            
+            if (stationDetail.success && stationDetail.data) {
+                const towers = stationDetail.data.towers || stationDetail.data.cabinets || [];
+                console.log('✅ Towers loaded:', towers.length);
+                return {
+                    success: true,
+                    data: towers,
+                    message: 'Lấy danh sách towers thành công'
+                };
+            } else {
+                throw new Error(stationDetail.message || 'Không thể lấy thông tin towers');
+            }
+        } catch (error) {
+            console.error('❌ Lỗi khi lấy danh sách towers:', error);
+            return {
+                success: false,
+                message: error.message || 'Lỗi khi lấy danh sách towers',
+                error: error
+            };
+        }
+    },
+
+    /**
+     * API 4: Lấy các trụ của 1 trạm (backward compatibility)
+     * @deprecated Sử dụng getTowersByStation thay thế
      */
     getCabinetsByStation: async (stationId) => {
+        console.warn('⚠️ getCabinetsByStation is deprecated, use getTowersByStation instead');
+        
         try {
-            console.log(`StationService: Lấy trụ của trạm ${stationId}...`);
+            // Sử dụng API mới getTowersByStation
+            const towersResult = await stationService.getTowersByStation(stationId);
             
-            const endpoint = ENDPOINTS.DRIVER.GET_TOWERS_BY_STATION;
-            const params = { stationId: stationId };
-            
-            console.log("Đang gọi URL:", endpoint, "với params:", params);
-            
-            const response = await apiUtils.get(endpoint, params);
-            
-            if (response && response.success && Array.isArray(response.data)) {
+            if (towersResult.success && Array.isArray(towersResult.data)) {
                 // Đổi tên để Component (FE) hiểu được
-                const adaptedData = response.data.map(tower => ({
+                const adaptedData = towersResult.data.map(tower => ({
                     ...tower,
                     id: tower.id, 
                     cabinetId: tower.id, 
@@ -70,7 +150,7 @@ const stationService = {
             }
             return []; 
         } catch (error) {
-            console.error(`Lỗi khi lấy trụ của trạm ${stationId}:`, error);
+            console.error('❌ Lỗi khi lấy danh sách trụ:', error);
             throw error;
         }
     },

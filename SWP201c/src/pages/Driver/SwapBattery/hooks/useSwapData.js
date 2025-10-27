@@ -179,9 +179,9 @@ export const useSwapData = (goToStep, STEPS) => {
                 throw new Error(errorMsg);
             }
 
-            // == BƯỚC 2: QUÉT TẤT CẢ SLOT CỦA TRỤ (để: 1) lấy pin mới; 2) tìm slot trống)
+            // == BƯỚC 2: CHỈ TÌM SLOT TRỐNG (PIN MỚI SẼ ĐƯỢC LẤY SAU KHI ĐẶT PIN CŨ) ==
             console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-            console.log("🔄 QUÉT SLOTS CỦA TRỤ");
+            console.log("🔄 QUÉT SLOTS CỦA TRỤ - CHỈ TÌM SLOT TRỐNG");
             console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
             console.log("Trụ được chọn (towerId):", realData.towerId);
             console.log("Cabinet object:", cabinet);
@@ -192,19 +192,13 @@ export const useSwapData = (goToStep, STEPS) => {
             const slotsResponse = await stationService.getSlotsByTower(realData.towerId);
             console.log("Response từ API getSlotsByTower:", slotsResponse);
 
-            let newBatteryId = null;
-            let newBatterySlot = null;
             let emptySlotNumber = null;
 
             const slotsArray = (slotsResponse && slotsResponse.success && Array.isArray(slotsResponse.data))
                 ? slotsResponse.data
                 : Array.isArray(slotsResponse) ? slotsResponse : [];
 
-            // 2.1) Tìm pin mới: ưu tiên pin 'full', sau đó 'available'
-            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.log('📋 DANH SÁCH SLOTS NHẬN ĐƯỢC TỪ API');
-            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.log('Tổng số slots:', slotsArray.length);
+            console.log('📋 DANH SÁCH SLOTS NHẬN ĐƯỢC TỪ API:', slotsArray.length);
             
             // Log chi tiết từng slot
             slotsArray.forEach((slot, index) => {
@@ -216,31 +210,12 @@ export const useSwapData = (goToStep, STEPS) => {
                     cabinetId: slot.cabinetId
                 });
             });
-            
-            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.log('🔍 ĐANG TÌM PIN MỚI (full hoặc available)');
-            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            
-            for (const slot of slotsArray) {
-                const status = (slot.status || '').toString().toLowerCase();
-                if (status === 'full' || status === 'available') {
-                    const derivedBatteryId = slot.batteryId || slot.battery_id || slot?.battery?.id;
-                    const derivedSlotNumber = slot.slotNumber || slot.slot_number || slot.slot_id;
-                    newBatteryId = derivedBatteryId ?? `BAT-SLOT-${derivedSlotNumber}`; // fallback nếu API không cung cấp batteryId
-                    newBatterySlot = derivedSlotNumber;
-                    
-                    console.log('✅ ĐÃ CHỌN PIN MỚI:', {
-                        batteryId: newBatteryId,
-                        slotNumber: newBatterySlot,
-                        status: status,
-                        towerId: slot.towerId || slot.cabinetId,
-                        cabinetId: slot.cabinetId
-                    });
-                    break;
-                }
-            }
 
-            // 2.2) Tìm slot trống theo SQL: status = 'empty', ORDER BY slot_number ASC, TOP 1
+            // Tìm slot trống theo SQL: status = 'empty', ORDER BY slot_number ASC, TOP 1
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            console.log('🔍 ĐANG TÌM SLOT TRỐNG');
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            
             const emptySlotsSorted = slotsArray
                 .filter(s => (s.status || '').toString().toLowerCase() === 'empty')
                 .sort((a, b) => {
@@ -251,16 +226,13 @@ export const useSwapData = (goToStep, STEPS) => {
             if (emptySlotsSorted.length > 0) {
                 const bestEmpty = emptySlotsSorted[0];
                 emptySlotNumber = bestEmpty.slotNumber || bestEmpty.slot_number || bestEmpty.slot_id;
+                console.log(`✅ Empty slot được chọn (nhỏ nhất theo số thứ tự): ${emptySlotNumber}`);
+            } else {
+                console.log('⚠️ Không tìm thấy slot trống nào');
+                emptySlotNumber = 1; // Fallback
             }
 
-            // Nếu không tìm thấy pin mới nào
-            if (newBatteryId === null) {
-                throw new Error("Trụ này đã hết pin đầy. Vui lòng chọn trụ khác.");
-            }
-            console.log(`Pin mới (ID: ${newBatteryId}) tại slot ${newBatterySlot}`);
-            console.log(`Empty slot được chọn (nhỏ nhất theo số thứ tự): ${emptySlotNumber}`);
-
-            // == BƯỚC 2.3: LƯU CÁC TRƯỜNG BẮT BUỘC VÀO sessionStorage THEO YÊU CẦU ==
+            // == BƯỚC 2.1: LƯU CÁC TRƯỜNG BẮT BUỘC VÀO sessionStorage THEO YÊU CẦU ==
             try {
                 sessionStorage.setItem('UserID', String(user.userId));
                 sessionStorage.setItem('contractID', String(activeContract.contractId));
@@ -268,25 +240,6 @@ export const useSwapData = (goToStep, STEPS) => {
                 sessionStorage.setItem('stationID', String(realData.stationId));
                 sessionStorage.setItem('towerID', String(realData.towerId));
                 sessionStorage.setItem('old_battery_id', String(realData.oldBatteryId));
-                sessionStorage.setItem('new_battery_id', String(newBatteryId));
-                
-                // LƯU THÔNG TIN PIN MỚI
-                if (newBatterySlot) {
-                    sessionStorage.setItem('newBatterySlot', String(newBatterySlot));
-                }
-                
-                // Lấy dung lượng pin mới từ slot đã chọn
-                const selectedSlot = slotsArray.find(s => 
-                    (s.batteryId || s.battery_id) === newBatteryId
-                );
-                if (selectedSlot) {
-                    const batteryLevel = selectedSlot.stateOfHealth || selectedSlot.state_of_health || 
-                                        selectedSlot.batteryLevel || selectedSlot.battery_level || 100;
-                    sessionStorage.setItem('newBatteryLevel', String(batteryLevel));
-                } else {
-                    // Fallback nếu không tìm thấy slot
-                    sessionStorage.setItem('newBatteryLevel', '100');
-                }
                 
                 // distance_used sẽ được cập nhật khi hoàn tất (odometerAfter - odometerBefore)
                 if (!sessionStorage.getItem('distance_used')) {
@@ -302,10 +255,10 @@ export const useSwapData = (goToStep, STEPS) => {
                 console.log('Swap đã được tạo trước đó, swapId=', transaction.swapId);
             } else {
                 // Gọi hàm trong swapService.js (hàm này gọi POST /api/swaps)
+                // Không gửi newBatteryId vì sẽ được lấy sau khi đặt pin cũ
                 const response = await swapService.initiateSwap({
                     ...realData,
-                    // đảm bảo gửi numeric nếu là numeric
-                    newBatteryId: Number.isFinite(Number(newBatteryId)) ? parseInt(newBatteryId, 10) : newBatteryId,
+                    // newBatteryId sẽ được cập nhật sau khi lấy pin mới từ trụ
                 });
 
                 // Lưu dữ liệu trả về kèm emptySlotNumber đã tính theo SQL
@@ -346,6 +299,94 @@ export const useSwapData = (goToStep, STEPS) => {
             goToStep(STEPS.SELECT_TOWER);
         }
         setIsLoading(false);
+    };
+
+    /**
+     * API 1.5: Lấy pin mới từ trụ (gọi sau khi đặt pin cũ)
+     */
+    const selectNewBatteryFromTower = async () => {
+        setIsLoading(true);
+        setError(null);
+        
+        try {
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            console.log('🔋 LẤY PIN MỚI TỪ TRỤ');
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            
+            if (!selectedCabinet) {
+                throw new Error('Không tìm thấy thông tin trụ');
+            }
+            
+            const towerId = selectedCabinet.id || selectedCabinet.cabinetId;
+            console.log('TowerId để lấy pin mới:', towerId);
+            
+            // Gọi API GET /api/driver/slots?towerId=...
+            const slotsResponse = await stationService.getSlotsByTower(towerId);
+            console.log("Response từ API getSlotsByTower:", slotsResponse);
+
+            let newBatteryId = null;
+            let newBatterySlot = null;
+            let newBatteryLevel = null;
+
+            const slotsArray = (slotsResponse && slotsResponse.success && Array.isArray(slotsResponse.data))
+                ? slotsResponse.data
+                : Array.isArray(slotsResponse) ? slotsResponse : [];
+
+            console.log('📋 DANH SÁCH SLOTS NHẬN ĐƯỢC TỪ API:', slotsArray.length);
+            
+            // Tìm pin mới: ưu tiên pin 'full', sau đó 'available'
+            for (const slot of slotsArray) {
+                const status = (slot.status || '').toString().toLowerCase();
+                if (status === 'full' || status === 'available') {
+                    const derivedBatteryId = slot.batteryId || slot.battery_id || slot?.battery?.id;
+                    const derivedSlotNumber = slot.slotNumber || slot.slot_number || slot.slot_id;
+                    newBatteryId = derivedBatteryId ?? `BAT-SLOT-${derivedSlotNumber}`;
+                    newBatterySlot = derivedSlotNumber;
+                    newBatteryLevel = slot.stateOfHealth || slot.state_of_health || 
+                                     slot.batteryLevel || slot.battery_level || 100;
+                    
+                    console.log('✅ ĐÃ CHỌN PIN MỚI:', {
+                        batteryId: newBatteryId,
+                        slotNumber: newBatterySlot,
+                        level: newBatteryLevel,
+                        status: status
+                    });
+                    break;
+                }
+            }
+
+            if (newBatteryId === null) {
+                throw new Error("Trụ này đã hết pin đầy. Vui lòng chọn trụ khác.");
+            }
+
+            // Lưu thông tin pin mới vào sessionStorage
+            try {
+                sessionStorage.setItem('new_battery_id', String(newBatteryId));
+                sessionStorage.setItem('newBatterySlot', String(newBatterySlot));
+                sessionStorage.setItem('newBatteryLevel', String(newBatteryLevel));
+                
+                console.log('✅ Đã lưu thông tin pin mới vào sessionStorage:');
+                console.log('  - new_battery_id:', newBatteryId);
+                console.log('  - newBatterySlot:', newBatterySlot);
+                console.log('  - newBatteryLevel:', newBatteryLevel);
+            } catch (sessionError) {
+                console.error('❌ Lỗi khi lưu vào sessionStorage:', sessionError);
+            }
+
+            return {
+                newBatteryId,
+                newBatterySlot,
+                newBatteryLevel
+            };
+
+        } catch (err) {
+            console.error('❌ Lỗi khi lấy pin mới từ trụ:', err);
+            const apiError = err.response?.data?.message || err.message;
+            setError(apiError || "Lỗi khi lấy pin mới từ trụ");
+            throw err;
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     /**
@@ -403,6 +444,38 @@ export const useSwapData = (goToStep, STEPS) => {
 
             // Gọi API confirm - backend tự xử lý tất cả
             await confirmSwap(swapId);
+
+            // ===== CẬP NHẬT SESSIONSTORAGE VỚI DỮ LIỆU TỪ SUMMARY =====
+            // Đảm bảo tính nhất quán giữa sessionStorage và API response
+            // Sử dụng setTimeout để đảm bảo summary đã được cập nhật
+            setTimeout(() => {
+                if (summary) {
+                    console.log('🔄 Cập nhật sessionStorage với dữ liệu từ summary:', summary);
+                    
+                    // Cập nhật newBatteryId từ summary nếu có
+                    if (summary.newBatteryId || summary.newBatteryCode) {
+                        const apiNewBatteryId = summary.newBatteryId || summary.newBatteryCode;
+                        sessionStorage.setItem('new_battery_id', String(apiNewBatteryId));
+                        console.log('✅ Đã cập nhật new_battery_id từ summary:', apiNewBatteryId);
+                    }
+                    
+                    // Cập nhật newBatteryLevel từ summary nếu có
+                    if (summary.newBatteryPercent || summary.newBatteryLevel) {
+                        const apiNewBatteryLevel = summary.newBatteryPercent || summary.newBatteryLevel;
+                        sessionStorage.setItem('newBatteryLevel', String(apiNewBatteryLevel));
+                        console.log('✅ Đã cập nhật newBatteryLevel từ summary:', apiNewBatteryLevel);
+                    }
+                    
+                    // Cập nhật newBatterySlot từ summary nếu có
+                    if (summary.newSlotNumber || summary.newSlot) {
+                        const apiNewBatterySlot = summary.newSlotNumber || summary.newSlot;
+                        sessionStorage.setItem('newBatterySlot', String(apiNewBatterySlot));
+                        console.log('✅ Đã cập nhật newBatterySlot từ summary:', apiNewBatterySlot);
+                    }
+                } else {
+                    console.log('⚠️ Summary chưa được cập nhật, bỏ qua cập nhật sessionStorage');
+                }
+            }, 100);
 
             // ===== CẬP NHẬT THÔNG TIN XE SAU KHI ĐỔI PIN THÀNH CÔNG =====
             // Backend đã tự động cập nhật vehicle.current_battery_id
@@ -471,6 +544,7 @@ export const useSwapData = (goToStep, STEPS) => {
         error,
         setSelectedStation,
         initiateSwap,
+        selectNewBatteryFromTower,
         confirmSwap,
         completeSwap,
         resetSwapData,

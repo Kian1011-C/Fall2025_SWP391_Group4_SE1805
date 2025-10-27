@@ -91,27 +91,29 @@ const SwapSuccess = ({ onFinish }) => {
         return 'N/A';
     };
     
-    // Lấy newBatteryCode từ sessionStorage (nguồn chính xác nhất)
+    // Lấy newBatteryCode từ API response (nguồn chính xác nhất sau khi confirm)
     const getNewBatteryCode = () => {
         console.log('🔍 Debug newBatteryId:');
         console.log('🔍 summary?.newBatteryId:', summary?.newBatteryId);
+        console.log('🔍 summary?.newBatteryCode:', summary?.newBatteryCode);
         console.log('🔍 sessionStorage new_battery_id:', sessionStorage.getItem('new_battery_id'));
         console.log('🔍 sessionStorage newBatteryId:', sessionStorage.getItem('newBatteryId'));
         
-        // Ưu tiên lấy từ sessionStorage - DỮ LIỆU THẬT TỪ BƯỚC INITIATE
+        // Ưu tiên lấy từ API response - DỮ LIỆU CHÍNH XÁC NHẤT SAU KHI CONFIRM
+        if (summary?.newBatteryId || summary?.newBatteryCode) {
+            const apiNewBatteryId = summary.newBatteryId || summary.newBatteryCode;
+            console.log('✅ SỬ DỤNG DỮ LIỆU TỪ API RESPONSE - newBatteryId:', apiNewBatteryId);
+            return apiNewBatteryId;
+        }
+        
+        // Fallback từ sessionStorage (đã được cập nhật trong completeSwap)
         const newBatteryId = sessionStorage.getItem('new_battery_id');
         if (newBatteryId && newBatteryId !== 'undefined' && newBatteryId !== 'null') {
-            console.log('✅ SỬ DỤNG DỮ LIỆU TỪ SESSION STORAGE - newBatteryId:', newBatteryId);
+            console.log('⚠️ Sử dụng newBatteryId từ sessionStorage (fallback):', newBatteryId);
             return newBatteryId;
         }
         
-        // Fallback từ API response
-        if (summary?.newBatteryId) {
-            console.log('⚠️ Sử dụng newBatteryId từ API response (fallback):', summary.newBatteryId);
-            return summary.newBatteryId;
-        }
-        
-        console.warn('❌ Không tìm thấy newBatteryId từ sessionStorage hoặc API response');
+        console.warn('❌ Không tìm thấy newBatteryId từ API response hoặc sessionStorage');
         return 'N/A';
     };
     
@@ -120,9 +122,9 @@ const SwapSuccess = ({ onFinish }) => {
         oldSlotNumber: summary?.oldSlotNumber || sessionStorage.getItem('emptySlotNumber') || 'N/A',
         oldBatteryPercent: oldBatteryLevel || summary?.oldBatteryPercent || 85, // Sử dụng dữ liệu thật từ API
         newBatteryCode: getNewBatteryCode(),
-        newSlotNumber: summary?.newSlotNumber || sessionStorage.getItem('newBatterySlot') || 'N/A',
-        newBatteryPercent: summary?.newBatteryPercent || 100, // Giá trị mặc định
-        transactionId: summary?.transactionId || 'SWP-' + Date.now()
+        newSlotNumber: summary?.newSlotNumber || summary?.newSlot || sessionStorage.getItem('newBatterySlot') || 'N/A',
+        newBatteryPercent: summary?.newBatteryPercent || summary?.newBatteryLevel || sessionStorage.getItem('newBatteryLevel') || 100,
+        transactionId: summary?.transactionId || summary?.swapId || 'SWP-' + Date.now()
     };
     
     console.log('SwapSuccess - fallbackSummary:', fallbackSummary);

@@ -20,19 +20,31 @@ export const useStationsData = () => {
       setLoading(true);
       setError(null);
       
-      console.log('🔍 Fetching stations data...');
+      console.log('🔍 Fetching stations data using new API...');
       
-      // Lấy danh sách trạm
+      // Sử dụng API mới GET /api/stations
       const stationsResult = await stationService.getAllStations();
-      console.log('📊 Stations API response:', stationsResult);
+      console.log('📊 GET /api/stations response:', stationsResult);
       
       // Lấy thống kê trạm
       const statsResult = await stationService.getStationsStats();
-      console.log('📈 Stats API response:', statsResult);
+      console.log('📈 GET /api/stations/stats response:', statsResult);
       
       if (stationsResult.success) {
-        setStations(stationsResult.data || []);
-        console.log('✅ Stations loaded:', stationsResult.data?.length || 0);
+        const stationsData = stationsResult.data || [];
+        console.log('✅ Stations loaded:', stationsData.length);
+        console.log('🔍 First station data structure:', stationsData[0]);
+        console.log('🔍 All stations status values:', stationsData.map(s => ({ 
+          id: s.id, 
+          name: s.name, 
+          status: s.status, 
+          availableSlots: s.availableSlots,
+          totalSlots: s.totalSlots,
+          address: s.address,
+          latitude: s.latitude,
+          longitude: s.longitude
+        })));
+        setStations(stationsData);
       } else {
         setError(stationsResult.message || 'Không thể tải dữ liệu trạm');
       }

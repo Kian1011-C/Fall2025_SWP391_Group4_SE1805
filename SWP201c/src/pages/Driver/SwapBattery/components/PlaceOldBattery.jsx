@@ -5,7 +5,7 @@ import batteryService from '/src/assets/js/services/batteryService.js';
 
 const PlaceOldBattery = () => {
     // 1. GET DATA FROM CONTEXT
-    const { transaction, isLoading, goToStep, STEPS } = useContext(SwapContext);
+    const { transaction, isLoading, goToStep, STEPS, selectNewBatteryFromTower } = useContext(SwapContext);
 
     // 2. STATE FOR THE FORM
     const [code, setCode] = useState(''); // Real ID
@@ -185,9 +185,20 @@ const PlaceOldBattery = () => {
                 emptySlot: emptySlotNumber
             });
             
+            // LẤY PIN MỚI TỪ TRỤ VÀ LƯU VÀO SESSION
+            console.log('🔋 Đang lấy pin mới từ trụ...');
+            try {
+                const newBatteryInfo = await selectNewBatteryFromTower();
+                console.log('✅ Đã lấy pin mới thành công:', newBatteryInfo);
+            } catch (batteryError) {
+                console.error('❌ Lỗi khi lấy pin mới:', batteryError);
+                alert('Có lỗi khi lấy pin mới từ trụ. Vui lòng thử lại.');
+                return; // Không chuyển bước nếu lỗi
+            }
+            
             // Chuyển bước
             goToStep(STEPS.TAKE_NEW_BATTERY);
-            console.log('Đã đặt pin cũ, chuyển sang bước lấy pin mới.');
+            console.log('Đã đặt pin cũ và lấy pin mới, chuyển sang bước lấy pin mới.');
             
         } catch (error) {
             console.error('❌ Lỗi khi xử lý pin cũ:', error);
@@ -233,7 +244,7 @@ const PlaceOldBattery = () => {
                          )}
                      </div>
                     <div className="form-group">
-                        <label htmlFor="batPercent">% pin cũ (Đã quét - Random):</label>
+                        <label htmlFor="batPercent">% pin cũ (Đã quét):</label>
                         <input
                             type="number"
                             id="batPercent"
