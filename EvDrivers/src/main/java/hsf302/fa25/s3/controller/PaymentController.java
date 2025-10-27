@@ -3,6 +3,7 @@ package hsf302.fa25.s3.controller;
 import hsf302.fa25.s3.model.Payment;
 import hsf302.fa25.s3.service.PaymentService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,22 +11,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/payment")
 public class PaymentController {
 
     private final PaymentService paymentService;
-    public PaymentController(PaymentService paymentService) {
-        this.paymentService = paymentService;
-    }
 
-    /** Tạo URL thanh toán */
+    /** Tạo URL thanh toán (Return + QueryDR, không IPN) */
     @PostMapping("/create")
     public Map<String, Object> create(
             @RequestParam String userId,
             @RequestParam(required = false) Integer contractId,
             @RequestParam double amount,
             HttpServletRequest req
-    ) throws Exception {
+    ) {
         String ip = getClientIp(req);
         String url = paymentService.createPaymentUrl(userId, contractId, amount, ip);
         Map<String, Object> res = new HashMap<>();
@@ -34,7 +33,7 @@ public class PaymentController {
         return res;
     }
 
-    /** Return URL (trình duyệt quay về) */
+    /** Return URL: VNPAY redirect về */
     @GetMapping("/vnpay-return")
     public Map<String, Object> vnpReturn(@RequestParam Map<String, String> params) {
         Payment p = paymentService.handleReturn(params);
@@ -44,27 +43,32 @@ public class PaymentController {
             res.put("message", "Thanh toán thành công");
         } else {
             res.put("success", false);
-            res.put("message", "Thanh toán thất bại hoặc không hợp lệ");
+            res.put("message", "Thanh toán thất bại hoặc chưa xác nhận");
         }
-        if (p != null) res.put("txnRef", p.getTransactionRef());
+        if (p != null) {
+            res.put("txnRef", p.getTransactionRef());
+            res.put("status", p.getStatus());
+            res.put("responseCode", p.getVnpResponseCode());
+        }
         return res;
     }
 
-    /** IPN (server-to-server) – VNPAY gọi ngược */
-    @GetMapping(value = "/vnpay-ipn", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String vnpIpn(@RequestParam Map<String, String> params) {
-        return paymentService.handleIpn(params);
+    /** (Tuỳ chọn) Endpoint test QueryDR thủ công */
+    @GetMapping(value = "/querydr", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Map<String, Object> querydr(
+            @RequestParam String txnRef,
+            @RequestParam String transactionDate // yyyyMMddHHmmss lúc PAY
+    ) throws Exception {
+        return paymentService.queryDrPipeFormat(
+                txnRef, "Manual query", transactionDate, "127.0.0.1"
+        );
     }
 
     private String getClientIp(HttpServletRequest request) {
         String ip = request.getHeader("X-Forwarded-For");
-        if (ip != null && !ip.isBlank() && !"unknown".equalsIgnoreCase(ip)) {
-            return ip.split(",")[0].trim();
-        }
+        if (ip != null && !ip.isBlank() && !"unknown".equalsIgnoreCase(ip)) return ip.split(",")[0].trim();
         ip = request.getHeader("X-Real-IP");
-        if (ip != null && !ip.isBlank() && !"unknown".equalsIgnoreCase(ip)) {
-            return ip.trim();
-        }
+        if (ip != null && !ip.isBlank() && !"unknown".equalsIgnoreCase(ip)) return ip.trim();
         ip = request.getRemoteAddr();
         if ("0:0:0:0:0:0:0:1".equals(ip) || "::1".equals(ip)) return "127.0.0.1";
         return ip;

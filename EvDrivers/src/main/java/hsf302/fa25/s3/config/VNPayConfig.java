@@ -24,102 +24,105 @@ public class VNPayConfig {
     @Value("${vnpay.hash-secret}")
     private String vnp_HashSecret;
 
+    // URL giao diện thanh toán
     @Value("${vnpay.pay-url}")
     private String vnp_PayUrl;
 
+    // URL hệ thống của bạn nhận redirect
     @Value("${vnpay.return-url}")
     private String vnp_ReturnUrl;
 
-    @Value("${vnpay.ipn-url:}") // ✅ đúng key (không phải in-url)
-    private String vnp_IpnUrl;
+    // WebAPI dùng QueryDR/Refund
+    @Value("${vnpay.api-url}")
+    private String vnp_ApiUrl;
 
+    /* ========== Utilities ========== */
+
+    /** yyyyMMddHHmmss (GMT+7) */
+    public String nowYmdHms() {
+        SimpleDateFormat f = new SimpleDateFormat("yyyyMMddHHmmss");
+        f.setTimeZone(TimeZone.getTimeZone("GMT+7"));
+        return f.format(new Date());
+    }
+
+    /** Sinh mã tham chiếu duy nhất */
     public String generateTxnRef() {
-        return "EV" + System.currentTimeMillis();
+        int code = new Random().nextInt(900_000) + 100_000;
+        return "PAY" + System.currentTimeMillis() + code;
     }
 
-    public String getPayDateNow() {
-        return new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+    /** HMAC SHA512 → hex lowercase */
+    public String hmacSHA512(String key, String data) {
+        try {
+            Mac mac = Mac.getInstance("HmacSHA512");
+            mac.init(new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "HmacSHA512"));
+            byte[] raw = mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder(raw.length * 2);
+            for (byte b : raw) sb.append(String.format("%02x", b));
+            return sb.toString();
+        } catch (Exception e) {
+            throw new IllegalStateException("HMAC SHA512 error", e);
+        }
     }
 
-    // ---------------- Helpers ----------------
+    /* ========== Build strings (ENCODED) ========== */
 
-    private static String enc(String s) {
-        if (s == null) return "";
-        return URLEncoder.encode(s, StandardCharsets.UTF_8);
-    }
-
-    // ✅ HMAC SHA512 (hex lowercase để đồng bộ sample VNPAY)
-    private static String hmacSHA512(String key, String data) throws Exception {
-        String k = (key == null) ? "" : key.trim();
-        Mac mac = Mac.getInstance("HmacSHA512");
-        mac.init(new SecretKeySpec(k.getBytes(StandardCharsets.UTF_8), "HmacSHA512"));
-        byte[] bytes = mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
-        StringBuilder sb = new StringBuilder(bytes.length * 2);
-        for (byte b : bytes) sb.append(String.format("%02x", b));
-        return sb.toString();
-    }
-
-    private static String buildHashDataSortedRAW(Map<String, String> params) {
+    /** Tạo chuỗi dùng để KÝ: sort key ↑, ENCODE value trước khi ghép */
+    private static String buildHashDataEncodedSorted(Map<String, String> params) {
         List<String> names = new ArrayList<>(params.keySet());
         Collections.sort(names);
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < names.size(); i++) {
-            String k = names.get(i);
+        for (String k : names) {
             String v = params.get(k);
-            if (v == null) v = "";
-            if (i > 0) sb.append('&');
-            sb.append(k).append('=').append(v);
+            if (v == null || v.isEmpty()) continue;
+            if (sb.length() > 0) sb.append('&');
+            sb.append(k).append('=')
+                    .append(URLEncoder.encode(v, StandardCharsets.US_ASCII));
         }
         return sb.toString();
     }
 
+    /** Tạo query string gửi đi: sort key ↑, ENCODE cả key & value */
     private static String buildQuerySortedENCODED(Map<String, String> params) {
         List<String> names = new ArrayList<>(params.keySet());
         Collections.sort(names);
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < names.size(); i++) {
-            String k = names.get(i);
-            String v = params.get(k);
-            if (v == null) v = "";
-            if (i > 0) sb.append('&');
-            sb.append(k).append('=').append(enc(v));
+        StringBuilder query = new StringBuilder();
+        for (String key : names) {
+            String value = params.get(key);
+            if (value == null || value.isEmpty()) continue;
+            if (query.length() > 0) query.append('&');
+            query.append(URLEncoder.encode(key, StandardCharsets.US_ASCII))
+                    .append('=')
+                    .append(URLEncoder.encode(value, StandardCharsets.US_ASCII));
         }
-        return sb.toString();
+        return query.toString();
     }
 
-    // ---------------- Build pay URL ----------------
+    /* ========== Build Pay URL (Return + QueryDR flow) ========== */
 
-    public String buildPayUrl(Map<String, String> vnParams) throws Exception {
+    public String buildPayUrl(Map<String, String> vnpParams) {
         // Lọc null/empty
         Map<String, String> filtered = new HashMap<>();
-        for (var e : vnParams.entrySet()) {
-            if (e.getValue() != null && !e.getValue().isEmpty()) {
-                filtered.put(e.getKey(), e.getValue());
-            }
+        for (var e : vnpParams.entrySet()) {
+            if (e.getValue() != null && !e.getValue().isEmpty()) filtered.put(e.getKey(), e.getValue());
         }
 
-        // ✅ Không override IP thật nếu controller đã truyền
-        filtered.putIfAbsent("vnp_IpAddr", "127.0.0.1");
-
-        // RAW để ký (KHÔNG gồm vnp_SecureHash / vnp_SecureHashType)
-        String hashData = buildHashDataSortedRAW(filtered);
-
-        // Query encode
-        String query = buildQuerySortedENCODED(filtered);
-        // Có thể gửi vnp_SecureHashType nhưng không ký nó
-        query += "&vnp_SecureHashType=HmacSHA512";
-
-        // Chữ ký
+        // Chuỗi KÝ (ENCODED)
+        String hashData = buildHashDataEncodedSorted(filtered);
         String secureHash = hmacSHA512(vnp_HashSecret, hashData);
-        query += "&vnp_SecureHash=" + secureHash;
 
-        log.info("VNPAY buildPayUrl - hashData (RAW): {}", hashData);
-        log.info("VNPAY buildPayUrl - secureHash: {}", secureHash);
+        // Chuỗi QUERY (ENCODED) + append chữ ký
+        String query = buildQuerySortedENCODED(filtered)
+                + "&vnp_SecureHashType=HmacSHA512"
+                + "&vnp_SecureHash=" + secureHash;
+
+        log.info("VNPAY buildPayUrl - hashData(ENCODED): {}", hashData);
+        log.info("VNPAY buildPayUrl - secureHash       : {}", secureHash);
 
         return vnp_PayUrl + "?" + query;
     }
 
-    // ---------------- Validate Signature ----------------
+    /* ========== Validate signature for Return/IPN (ENCODED) ========== */
 
     public boolean validateSignature(Map<String, String> params) {
         try {
@@ -136,12 +139,13 @@ public class VNPayConfig {
                 }
             }
 
-            String hashData = buildHashDataSortedRAW(copy);
+            String hashData = buildHashDataEncodedSorted(copy); // phải cùng cách build như lúc tạo URL
             String calc = hmacSHA512(vnp_HashSecret, hashData);
 
             boolean ok = calc.equalsIgnoreCase(received);
-            log.info("VNPAY validate - hashData (RAW): {}", hashData);
-            log.info("VNPAY validate - match: {}", ok);
+            if (!ok) {
+                log.warn("Validate FAIL. hashData(ENCODED)={}, calc={}, recv={}", hashData, calc, received);
+            }
             return ok;
         } catch (Exception e) {
             log.error("validateSignature error", e);
@@ -149,12 +153,34 @@ public class VNPayConfig {
         }
     }
 
+    /* ========== Support for QueryDR (PIPE format) ========== */
+
+    /** Chuỗi PIPE để ký cho QueryDR: requestId|version|command|tmnCode|txnRef|transactionDate|createDate|ipAddr|orderInfo */
+    public String buildQueryDrPipeData(String requestId, String version, String command,
+                                       String tmnCode, String txnRef, String transactionDate,
+                                       String createDate, String ipAddr, String orderInfo) {
+        return String.join("|",
+                nullToEmpty(requestId),
+                nullToEmpty(version),
+                nullToEmpty(command),
+                nullToEmpty(tmnCode),
+                nullToEmpty(txnRef),
+                nullToEmpty(transactionDate),
+                nullToEmpty(createDate),
+                nullToEmpty(ipAddr),
+                nullToEmpty(orderInfo)
+        );
+    }
+
+    private static String nullToEmpty(String s) { return (s == null) ? "" : s; }
+
     @PostConstruct
     public void checkKeyLoaded() {
         if (vnp_HashSecret != null) {
-            log.info("✅ VNP key length: {}", vnp_HashSecret.trim().length());
+            log.info("VNPay Secret length: {}", vnp_HashSecret.trim().length());
         }
-        log.info("✅ Return URL: {}", vnp_ReturnUrl);
-        log.info("✅ IPN URL   : {}", vnp_IpnUrl);
+        log.info("VNPay PayUrl: {}", vnp_PayUrl);
+        log.info("VNPay ReturnUrl: {}", vnp_ReturnUrl);
+        log.info("VNPay ApiUrl: {}", vnp_ApiUrl);
     }
 }

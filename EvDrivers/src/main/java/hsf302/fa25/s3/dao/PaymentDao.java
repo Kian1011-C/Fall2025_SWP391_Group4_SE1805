@@ -2,11 +2,12 @@ package hsf302.fa25.s3.dao;
 
 import hsf302.fa25.s3.context.ConnectDB;
 import hsf302.fa25.s3.model.Payment;
+import org.springframework.stereotype.Repository;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-
+@Repository
 public class PaymentDao {
 
     //luu giao dich dang cho doi xu ly
