@@ -19,7 +19,12 @@ public class User {
     private String password;
     private String role;
     private String cccd;
-    private String status;
+    private String status;              //  | active | locked | inactive
+    private String otpCode;             // nullable
+    private Timestamp otpExpire;        // nullable
+    private boolean isEmailVerified;    // false default
+    private String reset_token;
+    private Timestamp reset_expire;
     private Timestamp createdAt;
     private Timestamp updatedAt;
 }

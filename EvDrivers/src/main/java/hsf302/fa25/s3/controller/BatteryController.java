@@ -770,6 +770,10 @@ public class BatteryController {
             if (battery.getStatus() == null || battery.getStatus().isEmpty()) {
                 battery.setStatus(existingBattery.getStatus());
             }
+            // Preserve existing slotId when the incoming request does not include it
+            if (battery.getSlotId() == null) {
+                battery.setSlotId(existingBattery.getSlotId());
+            }
             
             boolean updated = batteryDao.updateBattery(battery);
             
@@ -809,18 +813,7 @@ public class BatteryController {
                             slotPs.setInt(2, battery.getSlotId());
                             slotPs.executeUpdate();
                         }
-                        // If battery moved to 'in_use', clear its slot_id in Batteries table and in-memory object
-                        if (battery.getStatus() != null) {
-                            String bsClear = battery.getStatus().toLowerCase();
-                            if ("in_use".equals(bsClear) || "in-use".equals(bsClear)) {
-                                try (java.sql.PreparedStatement clearPs = conn.prepareStatement("UPDATE Batteries SET slot_id = NULL WHERE battery_id = ?")) {
-                                    clearPs.setInt(1, battery.getBatteryId());
-                                    clearPs.executeUpdate();
-                                }
-                                // reflect change in response object
-                                battery.setSlotId(null);
-                            }
-                        }
+                        // Note: do NOT clear Batteries.slot_id here — keep slotId if battery still references it.
                     }
                 } catch (Exception e) {
                     // Log but don't fail the entire request — battery update already succeeded
