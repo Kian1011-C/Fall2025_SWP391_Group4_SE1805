@@ -168,6 +168,26 @@ const swapService = {
         console.log('updateSwapStatus not implemented yet', { swapId, status });
         return { success: false, message: 'Not implemented' };
     },
+    getSwapDetails: async (swapId) => {
+        try {
+            const endpoint = `/api/swaps/${swapId}`;
+            const response = await apiUtils.get(endpoint);
+            if (response.success) {
+                return response.data;
+            } else {
+                throw new Error(response.message || 'Error fetching swap details');
+            }
+        } catch (error) {
+            console.error('❌ LỖI KHI GỌI API GET SWAP DETAILS:', error);
+            throw error;
+        }
+    },
+
+    getBatteriesByStation: (stationId) => {
+    // Dùng ENDPOINTS và apiUtils.get
+    const url = API_CONFIG.ENDPOINTS.BATTERIES.BY_STATION(stationId);
+    return apiUtils.get(url);
+    }
 };
 
 export default swapService;

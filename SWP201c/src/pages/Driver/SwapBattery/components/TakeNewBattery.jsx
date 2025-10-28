@@ -1,138 +1,34 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { SwapContext } from '../index';
-import { apiUtils } from '/src/assets/js/config/api';
-import './TakeNewBattery.css';
+// import { apiUtils } from '/src/assets/js/config/api'; // Không cần - chỉ đọc từ sessionStorage
+import '../../../../assets/css/TakeNewBattery.css';
 
 const TakeNewBattery = () => {
-    const { newBattery, completeSwap, isLoading } = useContext(SwapContext);
+    const { newBattery, completeSwap, isLoading, goToStep, STEPS } = useContext(SwapContext);
     const [newBatteryId, setNewBatteryId] = useState(null);
     const [loadingBattery, setLoadingBattery] = useState(true);
     const [error, setError] = useState(null);
 
-    // GỌI API LẤY DANH SÁCH PIN MỚI CÓ SẴN
+    // ĐỌC THÔNG TIN TỪ SESSION STORAGE - KHÔNG GỌI API
     useEffect(() => {
-        const fetchAvailableBatteries = async () => {
-            try {
-                setLoadingBattery(true);
-                setError(null);
-                
-                // Lấy thông tin trụ đã chọn từ sessionStorage
-                const savedCabinet = sessionStorage.getItem('selectedCabinet');
-                if (!savedCabinet) {
-                    console.error('Không tìm thấy thông tin trụ');
-                    setError('Không tìm thấy thông tin trụ');
-                    return;
-                }
-                
-                const cabinet = JSON.parse(savedCabinet);
-                const towerId = cabinet.id || cabinet.cabinetId;
-                
-                console.log('Đang gọi API GET /api/driver/slots để tìm pin sẵn sàng cho towerId:', towerId);
-                
-                // Gọi API với timeout và fallback
-                let response;
-                try {
-                    response = await Promise.race([
-                        apiUtils.get(`/api/driver/slots?towerId=${towerId}`),
-                        new Promise((_, reject) => 
-                            setTimeout(() => reject(new Error('API timeout')), 5000)
-                        )
-                    ]);
-                } catch (apiError) {
-                    console.error('API call failed:', apiError);
-                    setError('Không thể lấy danh sách pin từ trụ');
-                    setLoadingBattery(false);
-                    return;
-                }
-                
-                console.log('Response từ API /api/driver/slots:', response);
-                
-                // Xử lý response từ API /api/driver/slots
-                let slotsData = [];
-                if (response && response.success && Array.isArray(response.data)) {
-                    slotsData = response.data;
-                    console.log('Dữ liệu slots từ response.data:', slotsData);
-                    console.log('Chi tiết từng slot:');
-                    slotsData.forEach((slot, index) => {
-                        console.log(`Slot ${index}:`, {
-                            batteryId: slot.batteryId || slot.battery_id,
-                            status: slot.status,
-                            slotId: slot.slotId || slot.slot_id || slot.slotNumber,
-                            stateOfHealth: slot.stateOfHealth || slot.state_of_health
-                        });
-                    });
-                } else if (Array.isArray(response)) {
-                    slotsData = response;
-                    console.log('Dữ liệu slots trực tiếp:', slotsData);
-                } else {
-                    console.warn('Cấu trúc response không đúng:', response);
-                    throw new Error('Cấu trúc dữ liệu không hợp lệ');
-                }
-                
-                // Debug: Xem tất cả các trạng thái có trong dữ liệu
-                const allStatuses = slotsData.map(slot => slot.status);
-                console.log('Tất cả trạng thái trong dữ liệu:', allStatuses);
-                console.log('Các trạng thái unique:', [...new Set(allStatuses)]);
-                
-                // Lọc ra những slot có pin sẵn sàng (FULL, AVAILABLE, READY, hoặc bất kỳ trạng thái nào không phải charging/maintenance)
-                const availableSlots = slotsData.filter(slot => {
-                    const status = slot.status?.toLowerCase();
-                    return status && 
-                           status !== 'charging' && 
-                           status !== 'maintenance' && 
-                           status !== 'empty' &&
-                           status !== 'unavailable';
-                });
-                
-                console.log('Danh sách slot có pin sẵn sàng:', availableSlots);
-                console.log('Tìm thấy', availableSlots.length, 'pin có sẵn trong trụ');
-                console.log('Chi tiết trạng thái:', availableSlots.map(s => ({ id: s.batteryId || s.battery_id, status: s.status })));
-                
-                if (availableSlots.length > 0) {
-                    // Chọn slot đầu tiên có pin sẵn sàng (không random)
-                    const selectedSlot = availableSlots[0];
-                    
-                    const batteryId = selectedSlot.batteryId || selectedSlot.battery_id;
-                    const slotNumber = selectedSlot.slotNumber || selectedSlot.slot_number || selectedSlot.slot_id;
-                    const batteryLevel = 100; // Pin FULL luôn có 100%
-                    
-                    console.log('Hệ thống đã chọn pin sẵn sàng:', selectedSlot);
-                    console.log('Chọn slot đầu tiên từ', availableSlots.length, 'slot có sẵn');
-                    console.log('Trạng thái pin được chọn:', selectedSlot.status);
-                    console.log('newBatteryId:', batteryId);
-                    console.log('slotNumber:', slotNumber);
-                    console.log('batteryLevel:', batteryLevel, '(Pin từ trụ = 100%)');
-                    
-                    // Lưu thông tin pin mới vào sessionStorage (THỐNG NHẤT KEY với useSwapData.js)
-                    sessionStorage.setItem('new_battery_id', String(batteryId)); // SỬA: Đổi key thành new_battery_id
-                    sessionStorage.setItem('newBatterySlot', String(slotNumber));
-                    sessionStorage.setItem('newBatteryLevel', String(batteryLevel));
-                    console.log('✅ Đã lưu thông tin pin mới vào sessionStorage:', { 
-                        new_battery_id: batteryId, 
-                        newBatterySlot: slotNumber, 
-                        newBatteryLevel: batteryLevel 
-                    });
-                    
-                    setNewBatteryId(batteryId);
-                } else {
-                    console.warn('Không có slot nào có pin sẵn sàng');
-                    console.log('Tất cả slot trong trụ:', slotsData);
-                    console.log('Các trạng thái tìm thấy:', [...new Set(slotsData.map(s => s.status))]);
-                    
-                    // Fallback: Tạo pin giả lập khi không có pin sẵn sàng
-                    console.log('Không có pin sẵn sàng tại trụ này');
-                    setError('Trụ này không có pin sẵn sàng. Vui lòng chọn trụ khác.');
-                }
-                
-            } catch (err) {
-                console.error('Lỗi khi lấy danh sách pin từ trụ:', err);
-                setError('Không thể lấy danh sách pin từ trụ. Vui lòng thử lại.');
-            } finally {
-                setLoadingBattery(false);
-            }
-        };
-
-        fetchAvailableBatteries();
+        console.log('✅ TakeNewBattery: Đọc thông tin từ sessionStorage (không gọi API)');
+        
+        const newBatteryIdFromStorage = sessionStorage.getItem('new_battery_id');
+        const newBatterySlotFromStorage = sessionStorage.getItem('newBatterySlot');
+        const newBatteryLevelFromStorage = sessionStorage.getItem('newBatteryLevel');
+        
+        console.log('  - new_battery_id:', newBatteryIdFromStorage);
+        console.log('  - newBatterySlot:', newBatterySlotFromStorage);
+        console.log('  - newBatteryLevel:', newBatteryLevelFromStorage);
+        
+        if (newBatteryIdFromStorage) {
+            setNewBatteryId(newBatteryIdFromStorage);
+            setLoadingBattery(false);
+        } else {
+            console.error('❌ Không tìm thấy new_battery_id trong sessionStorage');
+            setError('Không tìm thấy thông tin pin mới');
+            setLoadingBattery(false);
+        }
     }, []);
 
     if (loadingBattery) {
@@ -164,7 +60,7 @@ const TakeNewBattery = () => {
                 <div className="notice-icon">🤖</div>
                 <div className="notice-text">
                     <h3>Hệ thống đã chọn pin sẵn sàng cho bạn</h3>
-                    <p>Pin đã được quét và xác nhận trạng thái sẵn sàng (100%)</p>
+                    <p>Pin đã được quét và xác nhận trạng thái sẵn sàng</p>
                 </div>
             </div>
 
@@ -221,11 +117,16 @@ const TakeNewBattery = () => {
                     </div>
             </div>
 
-            {/* Nút hoàn thành */}
+            {/* Nút hoàn thành - GỌI completeSwap */}
             <div className="battery-action">
                 <button 
                     className="complete-battery-button"
-                    onClick={completeSwap} 
+                    onClick={async () => {
+                        // GỌI API XÁC NHẬN - MỘT LẦN DUY NHẤT
+                        console.log('🔄 Gọi completeSwap với tất cả dữ liệu...');
+                        await completeSwap();
+                        goToStep(STEPS.SUCCESS);
+                    }} 
                     disabled={isLoading}
                 >
                     {isLoading ? (

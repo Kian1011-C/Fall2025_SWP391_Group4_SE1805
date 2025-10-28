@@ -44,6 +44,27 @@ const batteryService = {
   },
 
   /**
+   * Lấy thông tin một viên pin theo ID.
+   * @param {number} batteryId - ID của pin cần lấy thông tin
+   */
+  getBatteryById: async (batteryId) => {
+    try {
+      console.log(`BatteryService: Lấy thông tin pin ${batteryId}`);
+      const response = await apiUtils.get(`${API_CONFIG.ENDPOINTS.BATTERIES.BASE}/${batteryId}`);
+      
+      if (response.success) {
+        return { success: true, data: response.data, message: 'Lấy thông tin pin thành công' };
+      } else {
+        throw new Error(response.message || 'Không thể lấy thông tin pin');
+      }
+    } catch (error) {
+      console.error(`Lỗi khi lấy thông tin pin ${batteryId}:`, error);
+      const errorInfo = apiUtils.handleError(error);
+      return { success: false, message: errorInfo.message || 'Lỗi API' };
+    }
+  },
+
+  /**
    * Cập nhật thông tin một viên pin (cho Admin).
    * @param {number} batteryId - ID của pin cần cập nhật
    * @param {object} batteryData - Dữ liệu cập nhật

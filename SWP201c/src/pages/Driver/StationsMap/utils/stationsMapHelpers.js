@@ -59,12 +59,28 @@ export const getAvailabilityStatus = (availableSlots, totalSlots) => {
  * Get operating status
  */
 export const getOperatingStatus = (station) => {
-  if (station.status === 'active' || station.status === 'Active') {
+  console.log('🔍 getOperatingStatus - station:', station);
+  console.log('🔍 getOperatingStatus - station.status:', station.status);
+  console.log('🔍 getOperatingStatus - typeof station.status:', typeof station.status);
+  
+  // Kiểm tra nhiều trường hợp có thể có của status
+  const status = station.status || station.Status || station.state || station.State || 'unknown';
+  console.log('🔍 getOperatingStatus - normalized status:', status);
+  
+  if (status === 'active' || status === 'Active' || status === 'ACTIVE') {
     return { status: 'active', color: '#19c37d', label: 'Đang hoạt động' };
-  } else if (station.status === 'maintenance') {
+  } else if (status === 'maintenance' || status === 'Maintenance' || status === 'MAINTENANCE') {
     return { status: 'maintenance', color: '#ffa500', label: 'Bảo trì' };
-  } else {
+  } else if (status === 'inactive' || status === 'Inactive' || status === 'INACTIVE') {
     return { status: 'inactive', color: '#ff6b6b', label: 'Ngưng hoạt động' };
+  } else {
+    // Nếu không có status hoặc status không rõ, mặc định là active nếu có availableSlots
+    console.log('⚠️ Unknown status, defaulting to active if has slots');
+    if (station.availableSlots > 0) {
+      return { status: 'active', color: '#19c37d', label: 'Đang hoạt động' };
+    } else {
+      return { status: 'inactive', color: '#ff6b6b', label: 'Ngưng hoạt động' };
+    }
   }
 };
 

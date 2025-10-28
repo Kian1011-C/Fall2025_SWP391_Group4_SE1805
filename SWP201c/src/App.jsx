@@ -40,7 +40,8 @@ import StaffStationManagement from './pages/Staff/StationManagement';
 import StaffIssues from './pages/Staff/Issues';
 import StaffReports from './pages/Staff/Reports';
 import StaffTransactionManagement from './pages/Staff/TransactionManagement';
-import Staffmanagement from './pages/Staff/StationManagement';
+import StaffSwapBattery from './pages/Staff/SwapBattery';
+
 
 // --- Admin Pages ---
 import AdminDashboard from './pages/Admin/Dashboard';
@@ -101,7 +102,8 @@ function AppContent() {
             <Route path="transaction-management" element={<StaffTransactionManagement />} />
             <Route path="issues" element={<StaffIssues />} />
             <Route path="reports" element={<StaffReports />} />
-            <Route path="station-management" element={<Staffmanagement />} />
+            <Route path="swap-battery" element={<StaffSwapBattery />} />
+            
           </Route>
           
           {/* === ADMIN ROUTES === */}

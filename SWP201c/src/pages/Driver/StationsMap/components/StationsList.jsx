@@ -4,7 +4,7 @@
 import PropTypes from 'prop-types';
 import StationCard from './StationCard';
 
-const StationsList = ({ stations, onBook, booking, onSelect }) => {
+const StationsList = ({ stations, onSelect }) => {
   if (stations.length === 0) {
     return (
       <div style={{
@@ -35,8 +35,6 @@ const StationsList = ({ stations, onBook, booking, onSelect }) => {
         <StationCard
           key={station.id}
           station={station}
-          onBook={onBook}
-          booking={booking}
           onSelect={onSelect}
         />
       ))}
@@ -46,8 +44,6 @@ const StationsList = ({ stations, onBook, booking, onSelect }) => {
 
 StationsList.propTypes = {
   stations: PropTypes.arrayOf(PropTypes.object).isRequired,
-  onBook: PropTypes.func.isRequired,
-  booking: PropTypes.bool.isRequired,
   onSelect: PropTypes.func
 };
 

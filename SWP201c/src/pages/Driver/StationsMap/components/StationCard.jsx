@@ -1,10 +1,10 @@
 // Driver/StationsMap/components/StationCard.jsx
-// Individual station card with booking button
+// Individual station card with status information
 
 import PropTypes from 'prop-types';
 import { getAvailabilityStatus, getOperatingStatus } from '../utils';
 
-const StationCard = ({ station, onBook, booking, onSelect }) => {
+const StationCard = ({ station, onSelect }) => {
   const availability = getAvailabilityStatus(
     station.availableSlots || 0,
     station.totalSlots || 10
@@ -15,11 +15,6 @@ const StationCard = ({ station, onBook, booking, onSelect }) => {
     if (onSelect) {
       onSelect(station);
     }
-  };
-
-  const handleBookClick = (e) => {
-    e.stopPropagation();
-    onBook(station.id);
   };
 
   return (
@@ -109,40 +104,7 @@ const StationCard = ({ station, onBook, booking, onSelect }) => {
         </span>
       </div>
 
-      {/* Book Button */}
-      {operatingStatus.status === 'active' && (station.availableSlots || 0) > 0 && (
-        <button
-          onClick={handleBookClick}
-          disabled={booking}
-          style={{
-            padding: '10px 20px',
-            background: booking ? '#666' : '#19c37d',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: booking ? 'not-allowed' : 'pointer',
-            fontSize: '0.95rem',
-            fontWeight: '600',
-            width: '100%',
-            transition: 'all 0.3s ease'
-          }}
-          onMouseEnter={(e) => {
-            if (!booking) {
-              e.currentTarget.style.background = '#17b370';
-              e.currentTarget.style.transform = 'translateY(-1px)';
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (!booking) {
-              e.currentTarget.style.background = '#19c37d';
-              e.currentTarget.style.transform = 'translateY(0)';
-            }
-          }}
-        >
-          {booking ? 'Đang đặt...' : '📅 Đặt chỗ'}
-        </button>
-      )}
-
+      {/* Status Messages */}
       {operatingStatus.status !== 'active' && (
         <div style={{
           padding: '10px',
@@ -170,6 +132,21 @@ const StationCard = ({ station, onBook, booking, onSelect }) => {
           Hết chỗ
         </div>
       )}
+
+      {operatingStatus.status === 'active' && (station.availableSlots || 0) > 0 && (
+        <div style={{
+          padding: '10px',
+          background: 'rgba(25, 195, 125, 0.1)',
+          border: '1px solid rgba(25, 195, 125, 0.3)',
+          borderRadius: '8px',
+          textAlign: 'center',
+          color: '#19c37d',
+          fontSize: '0.875rem',
+          fontWeight: '600'
+        }}>
+          ✅ Sẵn sàng đổi pin
+        </div>
+      )}
     </div>
   );
 };
@@ -183,8 +160,6 @@ StationCard.propTypes = {
     totalSlots: PropTypes.number,
     status: PropTypes.string
   }).isRequired,
-  onBook: PropTypes.func.isRequired,
-  booking: PropTypes.bool.isRequired,
   onSelect: PropTypes.func
 };
 

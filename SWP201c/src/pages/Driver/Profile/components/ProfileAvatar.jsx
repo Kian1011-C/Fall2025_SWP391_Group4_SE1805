@@ -22,16 +22,19 @@ export const ProfileAvatar = ({ user, onEdit, isEditing }) => {
         width: '120px',
         height: '120px',
         borderRadius: '50%',
-        background: 'linear-gradient(135deg, #19c37d, #6ab7ff)',
+        background: user?.avatar ? `url(${user.avatar})` : 'linear-gradient(135deg, #19c37d, #6ab7ff)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         fontSize: '3rem',
         fontWeight: '700',
         color: '#FFFFFF',
-        boxShadow: '0 10px 30px rgba(25, 195, 125, 0.3)'
+        boxShadow: '0 10px 30px rgba(25, 195, 125, 0.3)',
+        border: '3px solid rgba(255, 255, 255, 0.2)'
       }}>
-        {initials}
+        {!user?.avatar && initials}
       </div>
 
       {/* User Info */}
@@ -42,7 +45,7 @@ export const ProfileAvatar = ({ user, onEdit, isEditing }) => {
           fontSize: '1.8rem',
           fontWeight: '600'
         }}>
-          {user?.fullName || user?.username || 'Driver'}
+          {user?.fullName || user?.name || user?.username || 'Driver'}
         </h2>
         <p style={{ color: '#B0B0B0', margin: '0 0 15px 0', fontSize: '1rem' }}>
           {user?.email || 'email@example.com'}

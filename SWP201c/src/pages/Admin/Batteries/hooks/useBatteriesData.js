@@ -34,7 +34,9 @@ export const useBatteriesData = () => {
   // Logic lọc
   const filteredBatteries = useMemo(() => {
     return batteries.filter(bat => {
-      const statusMatch = filterStatus ? bat.status === filterStatus : true;
+      // So sánh status không phân biệt chữ hoa/thường
+      const statusMatch = filterStatus ? 
+        (bat.status?.toLowerCase() === filterStatus.toLowerCase()) : true;
       const searchMatch = searchQuery ? 
         (bat.batteryId.toString().includes(searchQuery) || 
          bat.model?.toLowerCase().includes(searchQuery.toLowerCase()))

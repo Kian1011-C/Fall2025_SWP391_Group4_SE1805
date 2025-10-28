@@ -5,7 +5,7 @@ const inputStyle = { width: '100%', padding: '10px', background: '#374151', colo
 const labelStyle = { display: 'block', marginBottom: '8px', color: '#9ca3af' };
 
 const BatteryFormModal = ({ isOpen, onClose, onSave, battery }) => {
-  const [formData, setFormData] = useState({ model: '', capacity: 100, stateOfHealth: 100, status: 'AVAILABLE' });
+  const [formData, setFormData] = useState({ model: '', capacity: 100, stateOfHealth: 100, status: 'available' });
   const isEditing = !!battery;
 
   useEffect(() => {
@@ -14,11 +14,11 @@ const BatteryFormModal = ({ isOpen, onClose, onSave, battery }) => {
         model: battery.model || '',
         capacity: battery.capacity || 100,
         stateOfHealth: battery.stateOfHealth || 100,
-        status: battery.status || 'AVAILABLE',
+        status: (battery.status || 'available').toLowerCase(),
       });
     } else {
       // Reset form khi mở modal để "Tạo mới"
-      setFormData({ model: '', capacity: 100, stateOfHealth: 100, status: 'AVAILABLE' });
+      setFormData({ model: '', capacity: 100, stateOfHealth: 100, status: 'available' });
     }
   }, [battery, isEditing, isOpen]);
 
@@ -56,10 +56,10 @@ const BatteryFormModal = ({ isOpen, onClose, onSave, battery }) => {
             </div>
             <div>
               <label style={labelStyle}>Trạng thái</label>
-              <select name="status" value={formData.status} onChange={handleChange} style={inputStyle}>
-                <option value="AVAILABLE">Sẵn sàng</option>
-                <option value="CHARGING">Đang sạc</option>
-                <option value="MAINTENANCE">Bảo trì</option>
+              <select name="status" value={formData.status?.toLowerCase() || ''} onChange={handleChange} style={inputStyle}>
+                <option value="available">Sẵn sàng</option>
+                <option value="charging">Đang sạc</option>
+                <option value="maintenance">Bảo trì</option>
               </select>
             </div>
           </div>

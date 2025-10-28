@@ -10,6 +10,7 @@ const TowerSelector = () => {
     const [selectedCabinet, setSelectedCabinet] = useState(null);
     const [loading, setLoading] = useState(true); 
     const [error, setError] = useState(null);
+    const [towerSlotInfo, setTowerSlotInfo] = useState({}); // Lưu thông tin slot và pin của từng trụ
 
     // LOAD LẠI TRỤ ĐÃ CHỌN TỪ SESSION STORAGE
     useEffect(() => {
@@ -42,6 +43,47 @@ const TowerSelector = () => {
                 // data trả về là một mảng đã được service xử lý
                 if (Array.isArray(data)) {
                     setCabinets(data); 
+                    
+                    // Lấy thông tin slot và pin cho từng trụ
+                    const slotInfoMap = {};
+                    for (const cabinet of data) {
+                        const towerId = cabinet.id || cabinet.cabinetId;
+                        if (towerId) {
+                            try {
+                                console.log('🔋 Lấy thông tin slot và pin cho trụ:', towerId);
+                                const slotsResponse = await stationService.getSlotsByTower(towerId);
+                                if (slotsResponse.success && Array.isArray(slotsResponse.data)) {
+                                    const slots = slotsResponse.data;
+                                    const availableBatteries = slots.filter(slot => 
+                                        slot.batteryId && 
+                                        slot.status && 
+                                        slot.status.toLowerCase() !== 'charging' && 
+                                        slot.status.toLowerCase() !== 'maintenance' &&
+                                        slot.status.toLowerCase() !== 'empty'
+                                    ).length;
+                                    const emptySlots = slots.filter(slot => 
+                                        !slot.batteryId || 
+                                        slot.status?.toLowerCase() === 'empty'
+                                    ).length;
+                                    
+                                    slotInfoMap[towerId] = {
+                                        availableBatteries,
+                                        emptySlots,
+                                        totalSlots: slots.length
+                                    };
+                                    console.log('✅ Thông tin trụ', towerId, ':', slotInfoMap[towerId]);
+                                }
+                            } catch (err) {
+                                console.warn('⚠️ Không thể lấy thông tin slot cho trụ', towerId, ':', err);
+                                slotInfoMap[towerId] = {
+                                    availableBatteries: 0,
+                                    emptySlots: 0,
+                                    totalSlots: 0
+                                };
+                            }
+                        }
+                    }
+                    setTowerSlotInfo(slotInfoMap);
                 } else {
                     console.warn("Dữ liệu trụ không phải là mảng:", data);
                     setCabinets([]);
@@ -59,13 +101,36 @@ const TowerSelector = () => {
 
     const handleStartSwap = () => {
         if (selectedCabinet) {
+            // ===== DEBUG LOG =====
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            console.log('🔘 NHẤN NÚT "BẮT ĐẦU ĐỔI PIN"');
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            console.log('selectedCabinet object:', selectedCabinet);
+            console.log('selectedCabinet.id:', selectedCabinet.id);
+            console.log('selectedCabinet.cabinetId:', selectedCabinet.cabinetId);
+            console.log('selectedCabinet.cabinetNumber:', selectedCabinet.cabinetNumber);
+            console.log('selectedCabinet towerId sẽ dùng:', selectedCabinet.id || selectedCabinet.cabinetId);
+            
+            // VALIDATION: Kiểm tra trụ có pin sẵn có không
+            const cabinetId = selectedCabinet.id || selectedCabinet.cabinetId;
+            const slotInfo = towerSlotInfo[cabinetId];
+            
+            if (slotInfo && slotInfo.availableBatteries === 0) {
+                alert('Trụ này không có pin sẵn có để đổi. Vui lòng chọn trụ khác.');
+                return;
+            }
+            
             // LƯU TRỤ VÀO SESSION STORAGE
             try {
                 sessionStorage.setItem('selectedCabinet', JSON.stringify(selectedCabinet));
-                console.log('Đã lưu trụ vào sessionStorage:', selectedCabinet);
+                console.log('✅ Đã lưu trụ vào sessionStorage:', selectedCabinet);
             } catch (error) {
-                console.error('Lỗi khi lưu trụ vào sessionStorage:', error);
+                console.error('❌ Lỗi khi lưu trụ vào sessionStorage:', error);
             }
+            
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            console.log('🚀 GỌI initiateSwap với cabinet:', selectedCabinet);
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             
             initiateSwap(selectedCabinet);
         }
@@ -87,14 +152,28 @@ const TowerSelector = () => {
             
             <div className="station-grid"> 
                 {cabinets.length > 0 ? (
-                    cabinets.map(cab => (
-                        <CabinetCard 
-                            key={cab.id || cab.cabinetId}
-                            cabinet={cab}
-                            isSelected={selectedCabinet?.id === cab.id}
-                            onSelect={() => setSelectedCabinet(cab)}
-                        />
-                    ))
+                    cabinets.map(cab => {
+                        const cabinetId = cab.id || cab.cabinetId;
+                        const slotInfo = towerSlotInfo[cabinetId];
+                        const hasAvailableBatteries = slotInfo && slotInfo.availableBatteries > 0;
+                        
+                        return (
+                            <CabinetCard 
+                                key={cabinetId}
+                                cabinet={cab}
+                                isSelected={selectedCabinet?.id === cab.id}
+                                onSelect={() => {
+                                    if (hasAvailableBatteries) {
+                                        setSelectedCabinet(cab);
+                                    } else {
+                                        alert('Trụ này không có pin sẵn có để đổi. Vui lòng chọn trụ khác.');
+                                    }
+                                }}
+                                slotInfo={slotInfo}
+                                isDisabled={!hasAvailableBatteries}
+                            />
+                        );
+                    })
                 ) : (
                     <p style={{ color: 'gray' }}>Trạm này hiện không có trụ nào sẵn sàng.</p>
                 )}
@@ -116,7 +195,7 @@ const TowerSelector = () => {
 };
 
 // Component con (CabinetCard)
-const CabinetCard = ({ cabinet, isSelected, onSelect }) => {
+const CabinetCard = ({ cabinet, isSelected, onSelect, slotInfo, isDisabled = false }) => {
     
     // ==========================================================
     // SỬA LỖI "BẢO TRÌ":
@@ -127,13 +206,16 @@ const CabinetCard = ({ cabinet, isSelected, onSelect }) => {
     const isMaintenance = (cabinet.status !== 'active'); 
     
     let cardClass = `station-card ${isMaintenance ? 'maintenance' : ''}`;
-    if (isSelected && !isMaintenance) { // Chỉ 'selected' khi không bảo trì
+    if (isDisabled) {
+        cardClass += ' disabled';
+    }
+    if (isSelected && !isMaintenance && !isDisabled) { // Chỉ 'selected' khi không bảo trì và không disabled
         cardClass += ' selected'; 
     }
     
     return (
-        // Chỉ cho phép click (onSelect) khi không bảo trì
-        <div className={cardClass} onClick={isMaintenance ? null : onSelect}>
+        // Chỉ cho phép click (onSelect) khi không bảo trì và không disabled
+        <div className={cardClass} onClick={isMaintenance || isDisabled ? null : onSelect}>
             <div className="station-card-header">
                 <h3 className="station-name">{cabinet.name}</h3>
                 <span className={`station-status ${isMaintenance ? 'maintenance' : 'active'}`}>
@@ -141,7 +223,17 @@ const CabinetCard = ({ cabinet, isSelected, onSelect }) => {
                 </span>
             </div>
             <div className="station-address">
-                <span>Số hộc trống: {cabinet.availableSlots} / {cabinet.totalSlots}</span>
+                {slotInfo ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <span style={{ color: slotInfo.availableBatteries === 0 ? '#ef4444' : 'inherit' }}>
+                            Số Pin đang sẵn có: {slotInfo.availableBatteries}
+                            {slotInfo.availableBatteries === 0 && ' (Không có pin để đổi)'}
+                        </span>
+                        <span>Số slot trống: {slotInfo.emptySlots}</span>
+                    </div>
+                ) : (
+                    <span>Số hộc trống: {cabinet.availableSlots || 0} / {cabinet.totalSlots || 0}</span>
+                )}
             </div>
         </div>
     );

@@ -26,6 +26,7 @@ const StaffRoutes = () => {
       <Route path="/issues" element={<StaffIssues />} />
       <Route path="/reports" element={<StaffReports />} />
       <Route path="/" element={<StaffDashboard />} />
+      <Route path="/swap-battery" element={<StaffSwapBattery />} />
     </Routes>
   );
 };
