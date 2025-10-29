@@ -13,6 +13,8 @@ CREATE DATABASE ev_battery_swap;
 GO
 
 USE ev_battery_swap;
+
+
 GO
 
 -- 1. Users
@@ -81,9 +83,9 @@ GO
 CREATE TABLE Batteries (
                            battery_id INT PRIMARY KEY IDENTITY(1,1),
                            model NVARCHAR(50) NOT NULL,
-                           capacity INT NOT NULL,
+                           capacity DECIMAL(5,2) NOT NULL,
                            state_of_health DECIMAL(5,2) NOT NULL,
-                           status VARCHAR(20) NOT NULL CHECK (status IN ('available','charging','in_use','faulty')),
+                           status VARCHAR(20) NOT NULL CHECK (status IN ('available','charging','in_use','faulty','in_stock')),
                            slot_id INT NULL,
                            last_maintenance_date DATETIME NULL,
                            cycle_count INT DEFAULT 0,
@@ -99,7 +101,7 @@ CREATE TABLE Vehicles (
                           plate_number VARCHAR(15) UNIQUE NOT NULL,
                           model NVARCHAR(50) NOT NULL,
                           vin_number VARCHAR(50) UNIQUE NOT NULL,
-                          battery_type NVARCHAR(50) NOT NULL,
+                          battery_type NVARCHAR(50) NULL,
                           compatible_battery_types NVARCHAR(MAX) NULL,
                           current_battery_id INT NULL,
                           current_odometer DECIMAL(12,2) DEFAULT 0,
@@ -182,7 +184,6 @@ CREATE TABLE Swaps (
                        distance_used AS (ISNULL(odometer_after, 0) - ISNULL(odometer_before, 0)),
                        swap_date DATETIME DEFAULT GETDATE(),
                        status NVARCHAR(20) DEFAULT 'INITIATED' CHECK (status IN ('INITIATED','IN_PROGRESS','COMPLETED','FAILED','CANCELLED','AUTO')),
-                       payment_id INT NULL,
                        CONSTRAINT FK_Swaps_Contracts FOREIGN KEY (contract_id) REFERENCES Contracts(contract_id),
                        CONSTRAINT FK_Swaps_Vehicles FOREIGN KEY (vehicle_id) REFERENCES Vehicles(vehicle_id),
                        CONSTRAINT FK_Swaps_Stations FOREIGN KEY (station_id) REFERENCES Stations(station_id),
@@ -190,7 +191,6 @@ CREATE TABLE Swaps (
                        CONSTRAINT FK_Swaps_UsersStaff FOREIGN KEY (staff_id) REFERENCES Users(user_id),
                        CONSTRAINT FK_Swaps_OldBattery FOREIGN KEY (old_battery_id) REFERENCES Batteries(battery_id),
                        CONSTRAINT FK_Swaps_NewBattery FOREIGN KEY (new_battery_id) REFERENCES Batteries(battery_id),
-                       CONSTRAINT FK_Swaps_Payments FOREIGN KEY (payment_id) REFERENCES Payments(payment_id)
 );
 GO
 
@@ -256,39 +256,83 @@ INSERT INTO Towers (station_id, tower_number, status) VALUES
                                                           (4, 1, 'maintenance');
 GO
 
+-- Slots: statuses aligned with battery assignment below
+-- For occupied slots where battery.status = 'available' -> slot = 'full'
+-- where battery.status = 'charging' -> slot = 'charging'
+-- unoccupied slots remain 'empty'
 INSERT INTO Slots (tower_id, slot_number, status) VALUES
-                                                      (1, 1, 'full'), (1, 2, 'charging'), (1, 3, 'empty'), (1, 4, 'full'),
-                                                      (2, 1, 'full'), (2, 2, 'full'), (2, 3, 'charging'), (2, 4, 'empty'),
-                                                      (3, 1, 'full'), (3, 2, 'empty'), (3, 3, 'full'), (3, 4, 'charging'),
-                                                      (4, 1, 'full'), (4, 2, 'full'), (4, 3, 'full'), (4, 4, 'empty'),
-                                                      (5, 1, 'charging'), (5, 2, 'full'), (5, 3, 'empty'), (5, 4, 'full'),
-                                                      (6, 1, 'full'), (6, 2, 'full'), (6, 3, 'charging'), (6, 4, 'empty'),
-                                                      (7, 1, 'empty'), (7, 2, 'full'), (7, 3, 'full'), (7, 4, 'charging');
+-- Tower 1 slots 1..8 (we occupy 1..5)
+(1, 1, 'full'), (1, 2, 'full'), (1, 3, 'charging'), (1, 4, 'full'), (1, 5, 'charging'), (1, 6, 'empty'), (1, 7, 'empty'), (1, 8, 'empty'),
+-- Tower 2 slots 9..16 (occupy 9..13)
+(2, 1, 'full'), (2, 2, 'charging'), (2, 3, 'full'), (2, 4, 'full'), (2, 5, 'charging'), (2, 6, 'empty'), (2, 7, 'empty'), (2, 8, 'empty'),
+-- Tower 3 slots 17..24 (occupy 17..21)
+(3, 1, 'full'), (3, 2, 'charging'), (3, 3, 'full'), (3, 4, 'full'), (3, 5, 'charging'), (3, 6, 'empty'), (3, 7, 'empty'), (3, 8, 'empty'),
+-- Tower 4 slots 25..32 (occupy 25..29)
+(4, 1, 'full'), (4, 2, 'charging'), (4, 3, 'full'), (4, 4, 'full'), (4, 5, 'charging'), (4, 6, 'empty'), (4, 7, 'empty'), (4, 8, 'empty'),
+-- Tower 5 slots 33..40 (occupy 33..37)
+(5, 1, 'full'), (5, 2, 'charging'), (5, 3, 'full'), (5, 4, 'full'), (5, 5, 'charging'), (5, 6, 'empty'), (5, 7, 'empty'), (5, 8, 'empty'),
+-- Tower 6 slots 41..48 (occupy 41..45)
+(6, 1, 'full'), (6, 2, 'charging'), (6, 3, 'full'), (6, 4, 'full'), (6, 5, 'charging'), (6, 6, 'empty'), (6, 7, 'empty'), (6, 8, 'empty'),
+-- Tower 7 slots 49..56 (occupy 49..53)
+(7, 1, 'full'), (7, 2, 'charging'), (7, 3, 'full'), (7, 4, 'full'), (7, 5, 'charging'), (7, 6, 'empty'), (7, 7, 'empty'), (7, 8, 'empty');
 GO
 
+-- Populate batteries and assign to slots such that each tower keeps ~3 empty slots
+-- There are 7 towers with 8 slots each (slot_id 1..56). We'll occupy slots 1-5 of each tower
+-- (leave slots 6-8 per tower empty), providing ~3 empty slots per tower for swaps.
 INSERT INTO Batteries (model, capacity, state_of_health, status, slot_id, cycle_count, total_distance) VALUES
-                                                                                                           ('LiFePO4-60kWh', 60, 100, 'available', 1, 45, 2250.0),
-                                                                                                           ('LiFePO4-60kWh', 60, 96.2, 'available', 4, 78, 3900.0),
-                                                                                                           ('LiFePO4-60kWh', 60, 99.1, 'available', 5, 32, 1600.0),
-                                                                                                           ('LiFePO4-60kWh', 60, 94.8, 'available', 6, 156, 7800.0),
-                                                                                                           ('LiFePO4-60kWh', 60, 97.3, 'available', 9, 67, 3350.0),
-                                                                                                           ('LiFePO4-60kWh', 60, 95.6, 'available', 11, 89, 4450.0),
-                                                                                                           ('LiFePO4-60kWh', 60, 98.9, 'available', 13, 23, 1150.0),
-                                                                                                           ('LiFePO4-60kWh', 60, 96.7, 'available', 14, 112, 5600.0),
-                                                                                                           ('LiFePO4-60kWh', 60, 97.8, 'available', 15, 56, 2800.0),
-                                                                                                           ('LiFePO4-60kWh', 60, 94.2, 'available', 18, 134, 6700.0),
-                                                                                                           ('LiFePO4-60kWh', 60, 99.3, 'available', 19, 18, 900.0),
-                                                                                                           ('LiFePO4-60kWh', 60, 96.1, 'available', 22, 91, 4550.0),
-                                                                                                           ('LiFePO4-60kWh', 60, 98.0, 'available', 23, 67, 3350.0),
-                                                                                                           ('LiFePO4-60kWh', 60, 92.1, 'charging', 2, 189, 9450.0),
-                                                                                                           ('LiFePO4-60kWh', 60, 95.4, 'charging', 7, 78, 3900.0),
-                                                                                                           ('LiFePO4-60kWh', 60, 97.2, 'charging', 12, 45, 2250.0),
-                                                                                                           ('LiFePO4-60kWh', 60, 93.8, 'charging', 17, 167, 8350.0),
-                                                                                                           ('LiFePO4-60kWh', 60, 96.9, 'charging', 21, 89, 4450.0),
-                                                                                                           ('LiFePO4-60kWh', 60, 94.5, 'charging', 24, 123, 6150.0),
-                                                                                                           ('LiFePO4-60kWh', 60, 88.7, 'in_use', NULL, 234, 15490.7),
-                                                                                                           ('LiFePO4-60kWh', 60, 91.2, 'in_use', NULL, 198, 8785.6),
-                                                                                                           ('LiFePO4-60kWh', 60, 89.8, 'in_use', NULL, 212, 12375.4);
+-- Tower 1 (slot_id 1..8) -> occupy 1..5
+('LiFePO4-60kWh', 100, 100.0, 'available', 1, 10, 500.0),
+('LiFePO4-60kWh', 100, 100.0, 'available', 2, 50, 2500.0),
+('LiFePO4-60kWh', 100, 40, 'charging', 3, 80, 3900.0),
+('LiFePO4-60kWh', 100, 100.0, 'available', 4, 30, 1500.0),
+('LiFePO4-60kWh', 100, 20, 'charging', 5, 120, 6000.0),
+-- Tower 2 (slot_id 9..16) -> occupy 9..13
+('LiFePO4-60kWh', 100, 100.0, 'available', 9, 20, 900.0),
+('LiFePO4-60kWh', 100, 34, 'charging', 10, 60, 3000.0),
+('LiFePO4-60kWh', 100, 100.0, 'available', 11, 40, 2000.0),
+('LiFePO4-60kWh', 100, 100.0, 'available', 12, 150, 7500.0),
+('LiFePO4-60kWh', 100, 30, 'charging', 13, 25, 1250.0),
+-- Tower 3 (slot_id 17..24) -> occupy 17..21
+('LiFePO4-60kWh', 100, 100.0, 'available', 17, 35, 1750.0),
+('LiFePO4-60kWh', 100, 25, 'charging', 18, 110, 5500.0),
+('LiFePO4-60kWh', 100, 100.0, 'available', 19, 15, 750.0),
+('LiFePO4-60kWh', 100, 100.0, 'available', 20, 70, 3500.0),
+('LiFePO4-60kWh', 100, 25, 'charging', 21, 200, 10000.0),
+-- Tower 4 (slot_id 25..32) -> occupy 25..29
+('LiFePO4-60kWh', 100, 100.0, 'available', 25, 18, 900.0),
+('LiFePO4-60kWh', 100, 32, 'charging', 26, 40, 2000.0),
+('LiFePO4-60kWh', 100, 100.0, 'available', 27, 55, 2750.0),
+('LiFePO4-60kWh', 100, 100.0, 'available', 28, 88, 4400.0),
+('LiFePO4-60kWh', 100, 10, 'charging', 29, 12, 600.0),
+-- Tower 5 (slot_id 33..40) -> occupy 33..37
+('LiFePO4-60kWh', 100, 100.0, 'available', 33, 45, 2250.0),
+('LiFePO4-60kWh', 100, 24, 'charging', 34, 60, 3000.0),
+('LiFePO4-60kWh', 100, 100.0, 'available', 35, 28, 1400.0),
+('LiFePO4-60kWh', 100, 100.0, 'available', 36, 132, 6600.0),
+('LiFePO4-60kWh', 100, 53, 'charging', 37, 77, 3850.0),
+-- Tower 6 (slot_id 41..48) -> occupy 41..45
+('LiFePO4-60kWh', 100, 100.0, 'available', 41, 8, 400.0),
+('LiFePO4-60kWh', 100, 53, 'charging', 42, 66, 3300.0),
+('LiFePO4-60kWh', 100, 100.0, 'available', 43, 58, 2900.0),
+('LiFePO4-60kWh', 100, 100.0, 'available', 44, 140, 7000.0),
+('LiFePO4-60kWh', 100, 12, 'charging', 45, 22, 1100.0),
+-- Tower 7 (slot_id 49..56) -> occupy 49..53
+('LiFePO4-60kWh', 100, 100.0, 'available', 49, 31, 1550.0),
+('LiFePO4-60kWh', 100, 12, 'charging', 50, 47, 2350.0),
+('LiFePO4-60kWh', 100, 100.0, 'available', 51, 90, 4500.0),
+('LiFePO4-60kWh', 100, 100.0, 'available', 52, 160, 8000.0),
+('LiFePO4-60kWh', 100, 13, 'charging', 53, 14, 700.0),
+-- Add some in_use batteries (no slot_id) representing those currently on vehicles
+('LiFePO4-60kWh', 100, 91.0, 'in_use', NULL, 234, 15490.7),
+('LiFePO4-60kWh', 100, 94.0, 'in_use', NULL, 198, 8785.6),
+('LiFePO4-60kWh', 100, 93.0, 'in_use', NULL, 212, 12375.4),
+-- Add several 'in_stock' warehouse batteries (status = 'in_stock', slot_id NULL)
+('LiFePO4-60kWh', 100, 100.0, 'in_stock', NULL, 0, 0.0),
+('LiFePO4-60kWh', 100, 100.0, 'in_stock', NULL, 0, 0.0),
+('LiFePO4-60kWh', 100, 100.0, 'in_stock', NULL, 0, 0.0),
+('LiFePO4-60kWh', 100, 100.0, 'in_stock', NULL, 0, 0.0),
+('LiFePO4-60kWh', 100, 100.0, 'in_stock', NULL, 0, 0.0);
 GO
 
 INSERT INTO Vehicles (user_id, plate_number, model, vin_number, battery_type, compatible_battery_types, current_odometer) VALUES
@@ -316,11 +360,11 @@ INSERT INTO Payments (user_id, contract_id, amount, method, status, currency, tr
 GO
 
 INSERT INTO Swaps (user_id, contract_id, vehicle_id, station_id, tower_id, staff_id, old_battery_id, new_battery_id,
-                   odometer_before, odometer_after, status, payment_id) VALUES
-                                                                            ('driver001', 1, 1, 1, 1, 'staff001', 20, 1, 15420.5, 15450.8, 'COMPLETED', 4),
-                                                                            ('driver001', 2, 2, 2, 3, 'staff002', 21, 9, 8750.2, 8785.6, 'COMPLETED', NULL),
-                                                                            ('driver002', 3, 3, 1, 2, 'staff001', 22, 5, 12340.1, 12375.4, 'COMPLETED', 5),
-                                                                            ('driver001', 1, 1, 2, 4, 'staff002', 1, 11, 15460.3, 15490.7, 'COMPLETED', NULL);
+                   odometer_before, odometer_after, status) VALUES
+                                                                ('driver001', 1, 1, 1, 1, 'staff001', 20, 1, 15000, 15450.8, 'COMPLETED'),
+                                                                ('driver001', 2, 2, 2, 3, 'staff002', 21, 9, 8750.2, 8785.6, 'COMPLETED'),
+                                                                ('driver002', 3, 3, 1, 2, 'staff001', 22, 5, 11900.1, 12375.4, 'COMPLETED'),
+                                                                ('driver001', 1, 1, 2, 4, 'staff002', 1, 11, 15460.3, 15490.7, 'COMPLETED');
 GO
 
 INSERT INTO Reports (station_id, date, total_swaps, revenue, issues) VALUES

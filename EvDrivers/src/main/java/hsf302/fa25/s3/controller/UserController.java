@@ -245,8 +245,7 @@ public class UserController {
         if (ok) {
             res.put("success", true);
             res.put("message", "Xác thực thành công. Tài khoản đã được kích hoạt.");
-            // ĐỔI TỪ /home?id=... THÀNH /driver/home?id=...
-            res.put("redirect", "/driver/home?id=" + userId);
+            res.put("redirect", "/api/users" + userId);
         } else {
             res.put("success", false);
             res.put("message", "OTP không đúng hoặc đã hết hạn.");
@@ -275,8 +274,6 @@ public class UserController {
 
             // Link reset
             String link = "http://localhost:8080/reset?token=" + token;
-
-            // Gửi mail hoặc in log (DEV)
             emailService.sendResetEmail(u.get().getEmail(), link);
 
             res.put("success", true);

@@ -251,6 +251,98 @@ public class AdminController {
             }
         }
 
+    @PutMapping("/users/{userId}")
+    public ResponseEntity<?> updateUser(@PathVariable String userId, @RequestBody User user) {
+        try {
+            User existing = userDao.getUserById(userId);
+            if (existing == null) {
+                Map<String, Object> resp = new HashMap<>();
+                resp.put("success", false);
+                resp.put("message", "User not found");
+                return ResponseEntity.status(404).body(resp);
+            }
+
+            // Validate email uniqueness if changed
+            if (user.getEmail() != null && !user.getEmail().equalsIgnoreCase(existing.getEmail())) {
+                if (userDao.emailExists(user.getEmail())) {
+                    Map<String, Object> resp = new HashMap<>();
+                    resp.put("success", false);
+                    resp.put("message", "Email already in use");
+                    return ResponseEntity.status(400).body(resp);
+                }
+            }
+
+            // Validate phone uniqueness if provided and changed
+            if (user.getPhone() != null && !user.getPhone().isBlank() && !user.getPhone().equals(existing.getPhone())) {
+                if (userDao.phoneExists(user.getPhone())) {
+                    Map<String, Object> resp = new HashMap<>();
+                    resp.put("success", false);
+                    resp.put("message", "Phone already in use");
+                    return ResponseEntity.status(400).body(resp);
+                }
+            }
+
+            // Merge incoming fields (preserve existing values when omitted)
+            user.setUserId(userId);
+            if (user.getFirstName() == null) user.setFirstName(existing.getFirstName());
+            if (user.getLastName() == null) user.setLastName(existing.getLastName());
+            if (user.getEmail() == null) user.setEmail(existing.getEmail());
+            if (user.getPhone() == null) user.setPhone(existing.getPhone());
+            if (user.getPassword() == null) user.setPassword(existing.getPassword());
+            if (user.getRole() == null) user.setRole(existing.getRole());
+            if (user.getCccd() == null) user.setCccd(existing.getCccd());
+            if (user.getStatus() == null) user.setStatus(existing.getStatus());
+
+            boolean ok = userDao.updateUser(user);
+            Map<String, Object> resp = new HashMap<>();
+            if (ok) {
+                resp.put("success", true);
+                resp.put("message", "User updated successfully");
+                resp.put("data", userDao.getUserById(userId));
+                return ResponseEntity.ok(resp);
+            } else {
+                resp.put("success", false);
+                resp.put("message", "Failed to update user");
+                return ResponseEntity.status(500).body(resp);
+            }
+        } catch (Exception e) {
+            Map<String, Object> resp = new HashMap<>();
+            resp.put("success", false);
+            resp.put("message", "Error updating user: " + e.getMessage());
+            return ResponseEntity.status(500).body(resp);
+        }
+    }
+
+    @DeleteMapping("/users/{userId}")
+    public ResponseEntity<?> deleteUser(@PathVariable String userId) {
+        try {
+            User existing = userDao.getUserById(userId);
+            if (existing == null) {
+                Map<String, Object> resp = new HashMap<>();
+                resp.put("success", false);
+                resp.put("message", "User not found");
+                return ResponseEntity.status(404).body(resp);
+            }
+
+            boolean deleted = userDao.deleteUser(userId);
+            Map<String, Object> resp = new HashMap<>();
+            if (deleted) {
+                resp.put("success", true);
+                resp.put("message", "User deleted successfully");
+                return ResponseEntity.ok(resp);
+            } else {
+                resp.put("success", false);
+                resp.put("message", "Failed to delete user");
+                return ResponseEntity.status(500).body(resp);
+            }
+        } catch (Exception e) {
+            Map<String, Object> resp = new HashMap<>();
+            resp.put("success", false);
+            resp.put("message", "Error deleting user: " + e.getMessage());
+            return ResponseEntity.status(500).body(resp);
+        }
+    }
+
         // Staff-specific endpoints removed — manage staff via unified /users CRUD
 
         // ==================== VEHICLE MANAGEMENT APIs ====================
