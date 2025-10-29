@@ -72,7 +72,6 @@ const TakeNewBattery = () => {
                         {newBatterySlot || newBattery?.newBatterySlot || '...'}
                     </div>
                 </div>
-                
                 <div className="compartment-indicator">
                     <div className="indicator-light"></div>
                     <span>Pin sẵn sàng</span>
