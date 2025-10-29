@@ -16,6 +16,11 @@ import RegisterModal from './components/modals/RegisterModal';
 import LoadingFallback from './components/common/LoadingFallback';
 import { DriverRoute, StaffRoute, AdminRoute } from './components/ProtectedRoute';
 
+// --- Register & Verify Pages ---
+import RegisterPage from './components/auth/Register';
+import VerifyOTPPage from './components/auth/VerifyOTP';
+import ResetPasswordPage from './components/auth/ResetPassword';
+
 // --- Layouts & Screens ---
 import DriverLayout from './layouts/DriverLayout';
 import StaffLayout from './layouts/StaffLayout';
@@ -120,6 +125,17 @@ function AppContent() {
           </Route>
           
           {/* === PUBLIC & REDIRECT ROUTES === */}
+          <Route path="/register" element={
+            <React.Suspense fallback={<div>Loading Register...</div>}>
+              <RegisterPage />
+            </React.Suspense>
+          } />
+          <Route path="/verify-otp" element={
+            <React.Suspense fallback={<div>Loading Verify OTP...</div>}>
+              <VerifyOTPPage />
+            </React.Suspense>
+          } />
+          <Route path="/reset" element={<ResetPasswordPage />} />
           <Route path="/" element={
             currentUser ? (
               <Navigate to={

@@ -9,7 +9,7 @@ const getStatusStyle = (status) => {
     return { ...style, background: '#4b5563', color: '#e5e7eb' };
 };
 
-const BatteryRow = ({ battery, onEdit, onDelete }) => {
+const BatteryRow = ({ battery, onEdit}) => {
   return (
     <tr style={{ borderTop: '1px solid #374151' }}>
       <td style={{ padding: '15px 20px', fontWeight: 'bold', color: 'white' }}>BAT{battery.batteryId}</td>

@@ -61,12 +61,14 @@ const DriverDashboard = () => {
     }
   }, [refetch, setSelectedVehicle]);
 
-  // Open modal automatically when no vehicle selected
+  // Open modal automatically when no vehicle selected AND user has vehicles
   React.useEffect(() => {
-    if (!selectedVehicle) {
-      // mở modal khi chưa có xe được chọn (ưu tiên từ localStorage)
+    if (!selectedVehicle && vehicles && vehicles.length > 0) {
+      // Chỉ mở modal khi chưa có xe được chọn VÀ user có xe
       let persisted = null;
-      try { persisted = JSON.parse(localStorage.getItem('selectedVehicle')); } catch {}
+      try { persisted = JSON.parse(localStorage.getItem('selectedVehicle')); } catch {
+        console.log('No persisted vehicle found');
+      }
       if (persisted) {
         setSelectedVehicle(persisted);
         setShowSelectModal(false);
@@ -76,7 +78,7 @@ const DriverDashboard = () => {
     } else {
       setShowSelectModal(false);
     }
-  }, [selectedVehicle, setSelectedVehicle]);
+  }, [selectedVehicle, setSelectedVehicle, vehicles]);
 
   // Loading state
   if (loading) {
@@ -108,8 +110,35 @@ const DriverDashboard = () => {
     <div className="driver-dashboard">
       {/* Selected vehicle summary */}
       <SelectedVehicleDisplay selectedVehicle={selectedVehicle} contracts={contracts} />
+      
+      {/* Vehicle selection buttons */}
       <div style={{ marginBottom: 12 }}>
-        <button className="btn" onClick={() => setShowSelectModal(true)}>Chọn xe khác</button>
+        {vehicles && vehicles.length > 0 ? (
+          <button className="btn" onClick={() => setShowSelectModal(true)}>Chọn xe khác</button>
+        ) : (
+          <div style={{
+            background: 'linear-gradient(135deg, #fef3c7, #fde68a)',
+            border: '1px solid #f59e0b',
+            borderRadius: '12px',
+            padding: '16px',
+            marginBottom: '16px',
+            textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '16px', fontWeight: '600', color: '#92400e', marginBottom: '8px' }}>
+              🚗 Chưa có phương tiện
+            </div>
+            <div style={{ fontSize: '14px', color: '#92400e', marginBottom: '12px' }}>
+              Bạn cần đăng ký phương tiện để sử dụng dịch vụ đổi pin
+            </div>
+            <button 
+              className="btn btn-primary" 
+              onClick={() => navigate('/driver/vehicles')}
+              style={{ background: '#f59e0b', color: 'white' }}
+            >
+              Đăng ký phương tiện
+            </button>
+          </div>
+        )}
       </div>
       {/* TEST BUTTON FOR SETTINGS */}
       <button
@@ -136,7 +165,8 @@ const DriverDashboard = () => {
       
       {/* Quick Actions */}
       <QuickActions 
-        selectedVehicle={selectedVehicle} 
+        selectedVehicle={selectedVehicle}
+        vehicles={vehicles}
       />
       
       {/* Vehicle Management */}
@@ -158,7 +188,9 @@ const DriverDashboard = () => {
           try { 
             sessionStorage.setItem('selectedVehicle', JSON.stringify(v));
             localStorage.setItem('selectedVehicle', JSON.stringify(v));
-          } catch {}
+          } catch (e) {
+            console.error('Error saving vehicle to storage:', e);
+          }
           setSelectedVehicle(v);
           setShowSelectModal(false);
         }}

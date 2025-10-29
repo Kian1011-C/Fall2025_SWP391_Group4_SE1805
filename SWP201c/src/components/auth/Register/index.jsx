@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { showToast } from '../../assets/js/helpers/helpers';
-import authService from '../../assets/js/services/authService';
-import '../../assets/css/modal.css';
+import { showToast } from '../../../assets/js/helpers/helpers';
+import authService from '../../../assets/js/services/authService';
+import './register.css';
 
-const RegisterModal = () => {
-  const { showRegisterModal, setShowRegisterModal, setShowLoginModal } = useAuth();
+const RegisterPage = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -19,6 +17,11 @@ const RegisterModal = () => {
     cccd: ''
   });
   const [errors, setErrors] = useState({});
+
+  // Debug: Log when component mounts
+  React.useEffect(() => {
+    console.log('📝 RegisterPage: Component mounted successfully');
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -103,7 +106,7 @@ const RegisterModal = () => {
 
     setIsLoading(true);
     try {
-      console.log('🚀 RegisterModal: Submitting registration form', formData);
+      console.log('🚀 RegisterPage: Submitting registration form', formData);
       
       const response = await authService.register({
         firstName: formData.firstName.trim(),
@@ -114,15 +117,14 @@ const RegisterModal = () => {
         cccd: formData.cccd.trim()
       });
 
-      console.log('📧 RegisterModal: Registration response:', response);
+      console.log('📧 RegisterPage: Registration response:', response);
 
       if (response.success) {
         showToast(response.message || 'Đăng ký thành công! Vui lòng kiểm tra email để nhập OTP.', 'success');
-        setShowRegisterModal(false);
         
         // Use redirect field from API response
-        const redirectPath = response.redirect || `/verify-otp?userId=${response.userId}`;
-        console.log('🎯 RegisterModal: Redirecting to:', redirectPath);
+        const redirectPath = response.redirect || '/verify-otp';
+        console.log('🎯 RegisterPage: Redirecting to:', redirectPath);
         
         // Navigate to OTP verification page
         navigate(redirectPath, { 
@@ -136,57 +138,40 @@ const RegisterModal = () => {
         showToast(response.message || 'Đăng ký thất bại!', 'error');
       }
     } catch (error) {
-      console.error('❌ RegisterModal: Registration error:', error);
+      console.error('❌ RegisterPage: Registration error:', error);
       showToast('Có lỗi xảy ra khi đăng ký!', 'error');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleClose = () => {
-    if (!isLoading) {
-      setShowRegisterModal(false);
-      setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        password: '',
-        confirmPassword: '',
-        cccd: ''
-      });
-      setErrors({});
-    }
+  const handleBackToLogin = () => {
+    navigate('/');
   };
-
-  const handleSwitchToLogin = () => {
-    setShowRegisterModal(false);
-    setShowLoginModal(true);
-  };
-
-  if (!showRegisterModal) return null;
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-container" style={{ maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto' }}>
+    <div className="register-page">
+      <div className="register-card">
         {/* Header */}
-        <div className="modal-header">
-          <h2 className="modal-title">📝 Đăng ký tài khoản</h2>
+        <div className="register-header">
+          <h2 className="register-title">
+            📝 Đăng ký tài khoản
+          </h2>
           <button
-            onClick={handleClose}
+            onClick={handleBackToLogin}
             disabled={isLoading}
-            className="modal-close-btn"
+            className="register-close"
           >
             ×
           </button>
         </div>
 
         {/* Info Box */}
-        <div className="modal-info-box">
-          <h4 className="modal-info-title">
+        <div className="register-info">
+          <h4 className="register-info-title">
             📋 Thông tin cần thiết
           </h4>
-          <div className="modal-info-content">
+          <div className="register-info-content">
             <div>• Tất cả thông tin đều bắt buộc</div>
             <div>• Email sẽ được dùng để xác thực OTP</div>
             <div>• CCCD để xác minh danh tính</div>
@@ -196,8 +181,14 @@ const RegisterModal = () => {
         <form onSubmit={handleSubmit}>
           {/* First Name & Last Name Row */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-            <div className="modal-form-group">
-              <label className="modal-label">
+            <div>
+              <label style={{
+                display: 'block',
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#374151',
+                marginBottom: '8px'
+              }}>
                 Họ *
               </label>
               <input
@@ -207,16 +198,34 @@ const RegisterModal = () => {
                 onChange={handleInputChange}
                 disabled={isLoading}
                 placeholder="Nhập họ của bạn"
-                className={`modal-input ${errors.firstName ? 'error' : ''}`}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: `2px solid ${errors.firstName ? '#ef4444' : '#d1d5db'}`,
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  outline: 'none',
+                  transition: 'border-color 0.2s'
+                }}
               />
               {errors.firstName && (
-                <div className="modal-error-message">
+                <div style={{
+                  color: '#ef4444',
+                  fontSize: '12px',
+                  marginTop: '4px'
+                }}>
                   ⚠️ {errors.firstName}
                 </div>
               )}
             </div>
-            <div className="modal-form-group">
-              <label className="modal-label">
+            <div>
+              <label style={{
+                display: 'block',
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#374151',
+                marginBottom: '8px'
+              }}>
                 Tên *
               </label>
               <input
@@ -226,10 +235,22 @@ const RegisterModal = () => {
                 onChange={handleInputChange}
                 disabled={isLoading}
                 placeholder="Nhập tên của bạn"
-                className={`modal-input ${errors.lastName ? 'error' : ''}`}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: `2px solid ${errors.lastName ? '#ef4444' : '#d1d5db'}`,
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  outline: 'none',
+                  transition: 'border-color 0.2s'
+                }}
               />
               {errors.lastName && (
-                <div className="modal-error-message">
+                <div style={{
+                  color: '#ef4444',
+                  fontSize: '12px',
+                  marginTop: '4px'
+                }}>
                   ⚠️ {errors.lastName}
                 </div>
               )}
@@ -237,8 +258,14 @@ const RegisterModal = () => {
           </div>
 
           {/* Email Field */}
-          <div className="modal-form-group" style={{ marginBottom: '16px' }}>
-            <label className="modal-label">
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{
+              display: 'block',
+              fontSize: '14px',
+              fontWeight: '600',
+              color: '#374151',
+              marginBottom: '8px'
+            }}>
               Email *
             </label>
             <input
@@ -248,18 +275,36 @@ const RegisterModal = () => {
               onChange={handleInputChange}
               disabled={isLoading}
               placeholder="Nhập email của bạn"
-              className={`modal-input ${errors.email ? 'error' : ''}`}
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: `2px solid ${errors.email ? '#ef4444' : '#d1d5db'}`,
+                borderRadius: '8px',
+                fontSize: '16px',
+                outline: 'none',
+                transition: 'border-color 0.2s'
+              }}
             />
             {errors.email && (
-              <div className="modal-error-message">
+              <div style={{
+                color: '#ef4444',
+                fontSize: '12px',
+                marginTop: '4px'
+              }}>
                 ⚠️ {errors.email}
               </div>
             )}
           </div>
 
           {/* Phone Field */}
-          <div className="modal-form-group" style={{ marginBottom: '16px' }}>
-            <label className="modal-label">
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{
+              display: 'block',
+              fontSize: '14px',
+              fontWeight: '600',
+              color: '#374151',
+              marginBottom: '8px'
+            }}>
               Số điện thoại *
             </label>
             <input
@@ -269,10 +314,22 @@ const RegisterModal = () => {
               onChange={handleInputChange}
               disabled={isLoading}
               placeholder="Nhập số điện thoại"
-              className={`modal-input ${errors.phone ? 'error' : ''}`}
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: `2px solid ${errors.phone ? '#ef4444' : '#d1d5db'}`,
+                borderRadius: '8px',
+                fontSize: '16px',
+                outline: 'none',
+                transition: 'border-color 0.2s'
+              }}
             />
             {errors.phone && (
-              <div className="modal-error-message">
+              <div style={{
+                color: '#ef4444',
+                fontSize: '12px',
+                marginTop: '4px'
+              }}>
                 ⚠️ {errors.phone}
               </div>
             )}
@@ -280,8 +337,14 @@ const RegisterModal = () => {
 
           {/* Password Fields Row */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-            <div className="modal-form-group">
-              <label className="modal-label">
+            <div>
+              <label style={{
+                display: 'block',
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#374151',
+                marginBottom: '8px'
+              }}>
                 Mật khẩu *
               </label>
               <input
@@ -291,16 +354,34 @@ const RegisterModal = () => {
                 onChange={handleInputChange}
                 disabled={isLoading}
                 placeholder="Nhập mật khẩu"
-                className={`modal-input ${errors.password ? 'error' : ''}`}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: `2px solid ${errors.password ? '#ef4444' : '#d1d5db'}`,
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  outline: 'none',
+                  transition: 'border-color 0.2s'
+                }}
               />
               {errors.password && (
-                <div className="modal-error-message">
+                <div style={{
+                  color: '#ef4444',
+                  fontSize: '12px',
+                  marginTop: '4px'
+                }}>
                   ⚠️ {errors.password}
                 </div>
               )}
             </div>
-            <div className="modal-form-group">
-              <label className="modal-label">
+            <div>
+              <label style={{
+                display: 'block',
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#374151',
+                marginBottom: '8px'
+              }}>
                 Xác nhận mật khẩu *
               </label>
               <input
@@ -310,10 +391,22 @@ const RegisterModal = () => {
                 onChange={handleInputChange}
                 disabled={isLoading}
                 placeholder="Nhập lại mật khẩu"
-                className={`modal-input ${errors.confirmPassword ? 'error' : ''}`}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: `2px solid ${errors.confirmPassword ? '#ef4444' : '#d1d5db'}`,
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  outline: 'none',
+                  transition: 'border-color 0.2s'
+                }}
               />
               {errors.confirmPassword && (
-                <div className="modal-error-message">
+                <div style={{
+                  color: '#ef4444',
+                  fontSize: '12px',
+                  marginTop: '4px'
+                }}>
                   ⚠️ {errors.confirmPassword}
                 </div>
               )}
@@ -321,8 +414,14 @@ const RegisterModal = () => {
           </div>
 
           {/* CCCD Field */}
-          <div className="modal-form-group" style={{ marginBottom: '24px' }}>
-            <label className="modal-label">
+          <div style={{ marginBottom: '24px' }}>
+            <label style={{
+              display: 'block',
+              fontSize: '14px',
+              fontWeight: '600',
+              color: '#374151',
+              marginBottom: '8px'
+            }}>
               CCCD *
             </label>
             <input
@@ -332,38 +431,51 @@ const RegisterModal = () => {
               onChange={handleInputChange}
               disabled={isLoading}
               placeholder="Nhập số CCCD"
-              className={`modal-input ${errors.cccd ? 'error' : ''}`}
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: `2px solid ${errors.cccd ? '#ef4444' : '#d1d5db'}`,
+                borderRadius: '8px',
+                fontSize: '16px',
+                outline: 'none',
+                transition: 'border-color 0.2s'
+              }}
             />
             {errors.cccd && (
-              <div className="modal-error-message">
+              <div style={{
+                color: '#ef4444',
+                fontSize: '12px',
+                marginTop: '4px'
+              }}>
                 ⚠️ {errors.cccd}
               </div>
             )}
           </div>
 
           {/* Action Buttons */}
-          <div className="modal-actions">
+          <div className="register-actions">
             <button
               type="button"
-              onClick={handleSwitchToLogin}
+              onClick={handleBackToLogin}
               disabled={isLoading}
-              className="modal-btn modal-btn-cancel"
+              className="btn btn-cancel"
             >
-              Đã có tài khoản? Đăng nhập
+              Quay lại đăng nhập
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="modal-btn modal-btn-primary"
+              className={`btn btn-primary ${isLoading ? 'btn-loading' : ''}`}
             >
               {isLoading ? (
                 <>
-                  <div className="modal-spinner"></div>
+                  <span className="spinner" style={{ marginRight: 8 }} />
                   Đang đăng ký...
                 </>
               ) : (
                 <>
-                  🚀 Đăng ký
+                  <span style={{ marginRight: 8 }}>🚀</span>
+                  Đăng ký
                 </>
               )}
             </button>
@@ -374,4 +486,4 @@ const RegisterModal = () => {
   );
 };
 
-export default RegisterModal;
+export default RegisterPage;

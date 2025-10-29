@@ -196,6 +196,28 @@ export const apiUtils = {
     }
   },
 
+  // POST request with FormData (for Spring Boot)
+  postFormData: async (url, formData) => {
+    try {
+      console.log('API POST FormData Request:', { url, formData: Object.fromEntries(formData) });
+      const response = await apiClient.post(url, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      console.log('API POST FormData Response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('API POST FormData Error:', error);
+      // Return a structured error response instead of throwing
+      return {
+        success: false,
+        message: error.response?.data?.message || error.message || 'Network error',
+        error: error.response?.data || error.message
+      };
+    }
+  },
+
   // PUT request
   put: async (url, data = {}) => {
     const response = await apiClient.put(url, data);

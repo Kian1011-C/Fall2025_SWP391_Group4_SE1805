@@ -12,6 +12,5 @@ export { default as TakeNewBattery } from './TakeNewBattery';
 export { default as ConfirmAndSave } from './ConfirmAndSave';
 export { default as SwapSuccess } from './SwapSuccess';
 export { default as SwapProcessing } from './SwapProcessing';
-export { default as QRCodeModal } from './QRCodeModal';
 export { default as StaffAssistanceModal } from './StaffAssistanceModal';
 export { default as StaffAssistanceButton } from './StaffAssistanceButton';

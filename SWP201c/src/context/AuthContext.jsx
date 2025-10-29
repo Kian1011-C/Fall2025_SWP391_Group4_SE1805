@@ -53,23 +53,25 @@ export const AuthProvider = ({ children }) => {
         const updatedUser = { ...userData, role: normalizedRole };
         setCurrentUser(updatedUser);
         
-        // Navigate to appropriate dashboard
-        const dashboardPath = normalizedRole === 'admin' ? '/admin/dashboard' :
-                             normalizedRole === 'staff' ? '/staff/dashboard' :
-                             '/driver/dashboard';
+        // Use redirect field from API response, fallback to role-based navigation
+        const redirectPath = response.redirect || 
+                           (normalizedRole === 'admin' ? '/admin/dashboard' :
+                            normalizedRole === 'staff' ? '/staff/dashboard' :
+                            '/driver/dashboard');
+        
         // Force chọn xe sau mỗi lần đăng nhập mới
         try {
           localStorage.removeItem('selectedVehicle');
           sessionStorage.removeItem('selectedVehicle');
         } catch {}
         
-        console.log('🚀 AuthContext: Navigating to dashboard:', dashboardPath, 'for role:', normalizedRole);
+        console.log('🚀 AuthContext: Navigating to:', redirectPath, 'for role:', normalizedRole, 'redirect from API:', response.redirect);
         showToast(`Chào mừng ${userData.name}! Đang chuyển đến ${normalizedRole.toUpperCase()} Dashboard...`, 'success');
         
         // Small delay to show the toast before navigating
         setTimeout(() => {
-          console.log('🎯 AuthContext: Executing navigation to:', dashboardPath);
-          navigate(dashboardPath);
+          console.log('🎯 AuthContext: Executing navigation to:', redirectPath);
+          navigate(redirectPath);
         }, 500);
       } else {
         showToast(response.message || 'Đăng nhập thất bại!', 'error');

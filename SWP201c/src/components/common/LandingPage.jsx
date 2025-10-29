@@ -5,6 +5,14 @@ import { showToast } from '../../assets/js/helpers/helpers';
 const LandingPage = () => {
   const { setShowLoginModal, setShowRegisterModal } = useAuth();
 
+  const handleRegisterClick = () => {
+    setShowRegisterModal(true);
+  };
+
+  const handleLoginClick = () => {
+    setShowLoginModal(true);
+  };
+
   return (
     <div id="landing" style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #0b1020 0%, #0e1430 100%)' }}>
       <header>
@@ -24,8 +32,8 @@ const LandingPage = () => {
               <a href="#about">Về chúng tôi</a>
             </div>
             <div className="auth-buttons">
-              <button className="btn" onClick={() => setShowLoginModal(true)}>Đăng nhập</button>
-              <button className="btn btn-primary" onClick={() => setShowRegisterModal(true)}>Đăng ký</button>
+              <button className="btn" onClick={handleLoginClick}>Đăng nhập</button>
+              <button className="btn btn-primary" onClick={handleRegisterClick}>Đăng ký</button>
             </div>
           </nav>
         </div>
@@ -46,10 +54,10 @@ const LandingPage = () => {
               Chỉ 3 phút để có pin đầy 100%.
             </p>
             <div className="hero-actions">
-              <button className="btn btn-primary" onClick={() => setShowRegisterModal(true)}>
+              <button className="btn btn-primary" onClick={handleRegisterClick}>
                 Bắt đầu ngay
               </button>
-              <button className="btn" onClick={() => setShowLoginModal(true)}>
+              <button className="btn" onClick={handleLoginClick}>
                 Đăng nhập
               </button>
             </div>
@@ -151,7 +159,7 @@ const LandingPage = () => {
                     transition: 'all 0.3s ease'
                   }}
                   onClick={() => {
-                    setShowLoginModal(true);
+                    handleLoginClick();
                     showToast('Vui lòng đăng nhập để chọn gói!', 'info');
                   }}
                 >
@@ -217,7 +225,7 @@ const LandingPage = () => {
                     transition: 'all 0.3s ease'
                   }}
                   onClick={() => {
-                    setShowLoginModal(true);
+                    handleLoginClick();
                     showToast('Vui lòng đăng nhập để chọn gói!', 'info');
                   }}
                 >
@@ -303,7 +311,7 @@ const LandingPage = () => {
                     boxShadow: '0 8px 25px rgba(168, 85, 247, 0.3)'
                   }}
                   onClick={() => {
-                    setShowLoginModal(true);
+                    handleLoginClick();
                     showToast('Vui lòng đăng nhập để chọn gói!', 'info');
                   }}
                 >
@@ -387,7 +395,7 @@ const LandingPage = () => {
                     transition: 'all 0.3s ease'
                   }}
                   onClick={() => {
-                    setShowLoginModal(true);
+                    handleLoginClick();
                     showToast('Vui lòng đăng nhập để chọn gói!', 'info');
                   }}
                 >
@@ -436,7 +444,7 @@ const LandingPage = () => {
                   <button 
                     className="btn btn-primary"
                     onClick={() => {
-                      setShowLoginModal(true);
+                      handleLoginClick();
                       showToast('Đăng nhập để xem bản đồ chi tiết!', 'info');
                     }}
                     style={{

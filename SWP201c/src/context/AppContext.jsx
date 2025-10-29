@@ -54,11 +54,12 @@ export const AppProvider = ({ children }) => {
         setShowLoginModal(false);
         showToast(`Chào mừng ${userData.name}!`, 'success');
         
-        // Navigate to dashboard based on role
-        const dashboardPath = userData.role === 'admin' ? '/admin/dashboard' :
-                             userData.role === 'staff' ? '/staff/dashboard' :
-                             '/driver/dashboard';
-        navigate(dashboardPath);
+        // Use redirect field from API response, fallback to role-based navigation
+        const redirectPath = response.redirect || 
+                           (userData.role === 'admin' ? '/admin/dashboard' :
+                            userData.role === 'staff' ? '/staff/dashboard' :
+                            '/driver/dashboard');
+        navigate(redirectPath);
       } else {
         showToast(response.message || 'Đăng nhập thất bại!', 'error');
       }

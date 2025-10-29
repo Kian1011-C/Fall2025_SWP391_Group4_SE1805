@@ -133,6 +133,7 @@ class AuthService {
         success: true,
         user: demoAccount.user,
         token: `demo_token_${demoAccount.user.id}`,
+        redirect: null, // Demo accounts don't have redirect field
         message: `Đăng nhập thành công - ${demoAccount.user.role.toUpperCase()}`
       };
     };
@@ -165,6 +166,7 @@ class AuthService {
           success: true,
           user: responseUser,
           token: responseToken || 'backend_token',
+          redirect: backendResponse.redirect || backendResponse.data?.redirect,
           message: backendResponse.message || backendResponse.data?.message || 'Đăng nhập thành công'
         };
       }
@@ -209,7 +211,7 @@ class AuthService {
       // Best-effort server logout; ignore CORS/network issues
       await apiUtils.post(API_CONFIG.ENDPOINTS.AUTH.LOGOUT);
       return { success: true, message: 'Đăng xuất thành công' };
-    } catch (_) {
+    } catch {
       // Swallow errors to avoid noisy console when backend is unreachable
       return { success: true, message: 'Đã đăng xuất (server không phản hồi)' };
     }
@@ -219,20 +221,34 @@ class AuthService {
     try {
       console.log('AuthService: Register user', userData);
       
-      const response = await apiUtils.post('/api/auth/register', {
-        username: userData.username,
+      // Create FormData for Spring Boot backend
+      const formData = new FormData();
+      formData.append('firstName', userData.firstName);
+      formData.append('lastName', userData.lastName);
+      formData.append('email', userData.email);
+      formData.append('phone', userData.phone);
+      formData.append('password', userData.password);
+      formData.append('cccd', userData.cccd);
+      
+      console.log('AuthService: Sending FormData:', {
+        firstName: userData.firstName,
+        lastName: userData.lastName,
         email: userData.email,
-        password: userData.password,
-        fullName: userData.fullName,
         phone: userData.phone,
-        role: userData.role || 'driver'
+        password: '[HIDDEN]',
+        cccd: userData.cccd
       });
+      
+      const response = await apiUtils.postFormData('/api/users/register', formData);
+
+      console.log('AuthService: Registration response:', response);
 
       if (response.success) {
         return {
           success: true,
-          message: 'Đăng ký thành công',
-          data: response.data
+          message: response.message || 'Đăng ký thành công! Vui lòng kiểm tra email để nhập OTP.',
+          userId: response.userId,
+          redirect: response.redirect
         };
       } else {
         throw new Error(response.message || 'Đăng ký thất bại');
@@ -243,6 +259,106 @@ class AuthService {
       return {
         success: false,
         message: errorInfo.message || 'Đăng ký thất bại',
+        error: errorInfo
+      };
+    }
+  }
+
+  async verifyOTP(userId, otp) {
+    try {
+      console.log('AuthService: Verify OTP', { userId, otp });
+      
+      // Create FormData for Spring Boot backend
+      const formData = new FormData();
+      formData.append('userId', userId);
+      formData.append('otp', otp);
+      
+      console.log('AuthService: Sending FormData for OTP:', {
+        userId: userId,
+        otp: otp
+      });
+      
+      const response = await apiUtils.postFormData('/api/users/verify-otp', formData);
+
+      console.log('AuthService: OTP verification response:', response);
+
+      if (response.success) {
+        return {
+          success: true,
+          message: response.message || 'Xác thực thành công!',
+          redirect: response.redirect
+        };
+      } else {
+        throw new Error(response.message || 'Mã OTP không đúng');
+      }
+    } catch (error) {
+      console.error('Verify OTP error:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return {
+        success: false,
+        message: errorInfo.message || 'Xác thực OTP thất bại',
+        error: errorInfo
+      };
+    }
+  }
+
+  async resendOTP(userId) {
+    try {
+      console.log('AuthService: Resend OTP', { userId });
+      
+      // Create FormData for Spring Boot backend
+      const formData = new FormData();
+      formData.append('userId', userId);
+      
+      console.log('AuthService: Sending FormData for resend OTP:', {
+        userId: userId
+      });
+      
+      const response = await apiUtils.postFormData('/api/users/resend-otp', formData);
+
+      console.log('AuthService: Resend OTP response:', response);
+
+      if (response.success) {
+        return {
+          success: true,
+          message: response.message || 'Đã gửi lại mã OTP!'
+        };
+      } else {
+        throw new Error(response.message || 'Không thể gửi lại mã OTP');
+      }
+    } catch (error) {
+      console.error('Resend OTP error:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return {
+        success: false,
+        message: errorInfo.message || 'Gửi lại mã OTP thất bại',
+        error: errorInfo
+      };
+    }
+  }
+
+  // Send forgot password email link
+  async forgotPassword(email) {
+    try {
+      console.log('AuthService: Forgot Password', { email });
+      const formData = new FormData();
+      formData.append('email', email);
+      const response = await apiUtils.postFormData('/api/users/forgot', formData);
+      console.log('AuthService: Forgot Password response:', response);
+      if (response.success) {
+        return {
+          success: true,
+          message: response.message || 'Nếu email tồn tại, hệ thống đã gửi liên kết đặt lại.'
+        };
+      } else {
+        throw new Error(response.message || 'Yêu cầu quên mật khẩu thất bại');
+      }
+    } catch (error) {
+      console.error('Forgot Password error:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return {
+        success: false,
+        message: errorInfo.message || 'Không thể xử lý yêu cầu quên mật khẩu',
         error: errorInfo
       };
     }
