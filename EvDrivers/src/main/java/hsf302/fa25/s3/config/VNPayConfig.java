@@ -28,7 +28,7 @@ public class VNPayConfig {
     @Value("${vnpay.pay-url}")
     private String vnp_PayUrl;
 
-    // URL hệ thống của bạn nhận redirect
+    // URL hệ thống  nhận redirect
     @Value("${vnpay.return-url}")
     private String vnp_ReturnUrl;
 

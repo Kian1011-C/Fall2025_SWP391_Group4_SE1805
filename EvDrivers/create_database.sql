@@ -87,6 +87,7 @@ CREATE TABLE Contracts (
     monthly_total_fee DECIMAL(12,2) DEFAULT 0, -- Tổng phí tháng hiện tại
     last_reset_date DATETIME DEFAULT GETDATE(), -- Lần cuối reset usage (đầu mỗi tháng)
     created_at DATETIME DEFAULT GETDATE(),
+    ALTER TABLE Contracts ADD updated_at DATETIME NULL,
     FOREIGN KEY (vehicle_id) REFERENCES Vehicles(vehicle_id),
     FOREIGN KEY (plan_id) REFERENCES ServicePlans(plan_id)
 );
@@ -350,3 +351,9 @@ UPDATE Vehicles SET current_battery_id = 22 WHERE vehicle_id = 3; -- driver002 x
 -- Add FK constraint cho Vehicles -> Batteries (sau khi đã có data)
 ALTER TABLE Vehicles ADD CONSTRAINT FK_Vehicles_CurrentBattery 
     FOREIGN KEY (current_battery_id) REFERENCES Batteries(battery_id);
+
+USE ev_battery_swap;
+GO
+ALTER TABLE Vehicles
+ALTER COLUMN battery_type NVARCHAR(50) NULL;
+Thế là đủ cho DAO hiện tại (hàm insert đã set battery_type = NULL
