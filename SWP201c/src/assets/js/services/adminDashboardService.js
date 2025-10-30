@@ -8,9 +8,8 @@ const adminDashboardService = {
    */
   getDashboardOverview: async (filters = {}) => {
     try {
-      console.log('AdminDashboardService: Lấy thống kê tổng quan...', filters);
-      // Gọi đến API: GET /api/reports/overview
-      const response = await apiUtils.get(API_CONFIG.ENDPOINTS.REPORTS.OVERVIEW, filters);
+      // Gọi lại endpoint cũ hợp lệ với backend: /api/reports/overview
+      const response = await apiUtils.get('/api/reports/overview', filters);
       
       if (response.success) {
         return { success: true, data: response.data, message: 'Lấy thống kê thành công' };
@@ -18,7 +17,6 @@ const adminDashboardService = {
         throw new Error(response.message || 'Không thể lấy thống kê');
       }
     } catch (error) {
-      console.error('Lỗi khi lấy thống kê dashboard:', error);
       const errorInfo = apiUtils.handleError(error);
       return { success: false, message: errorInfo.message || 'Lỗi API', data: {} };
     }

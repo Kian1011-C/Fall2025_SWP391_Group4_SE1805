@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAdminDashboardData } from './hooks/useAdminDashboardData';
 import StatCard from './components/StatsCards';
+import { formatCurrency } from '../../../assets/js/utils/apiHelpers';
 
 const AdminDashboard = () => {
   const { stats, isLoading, error, refetch } = useAdminDashboardData();
@@ -17,8 +18,8 @@ const AdminDashboard = () => {
     );
     if (!stats) return <p style={{ color: '#9ca3af', textAlign: 'center' }}>Không có dữ liệu thống kê.</p>;
 
-    const totalRevenue = stats.totalRevenue ? stats.totalRevenue.toLocaleString('vi-VN') + ' ₫' : 'N/A';
-    const newUsers = stats.newUsers ?? 'N/A';
+    const totalRevenue = stats.totalRevenue ? formatCurrency(stats.totalRevenue) : 'N/A';
+    const newUsers = stats.newUsersThisMonth ?? 'N/A';
     const totalStations = stats.totalStations ?? 'N/A';
     const swapsToday = stats.swapsToday ?? 'N/A';
 
