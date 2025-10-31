@@ -25,5 +25,4 @@ public class Swap {
     // prefer explicit swapDate matching DB column swap_date
     private Timestamp swapDate;
     private String swapStatus;
-    private Integer paymentId;
 }

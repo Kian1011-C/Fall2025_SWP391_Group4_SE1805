@@ -8,6 +8,65 @@ import java.util.List;
 
 public class VehicleDao {
 
+    // ========================== ĐĂNG KÝ XE TỐI GIẢN ==========================
+
+    /** Kiểm tra biển số đã tồn tại */
+    public boolean existsByPlate(String plateNumber) {
+        String sql = "SELECT 1 FROM Vehicles WHERE plate_number = ?";
+        try (Connection conn = ConnectDB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, plateNumber);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            System.err.println("❌ VehicleDao.existsByPlate error: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /** Kiểm tra VIN đã tồn tại */
+    public boolean existsByVin(String vinNumber) {
+        String sql = "SELECT 1 FROM Vehicles WHERE vin_number = ?";
+        try (Connection conn = ConnectDB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, vinNumber);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            System.err.println("❌ VehicleDao.existsByVin error: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Đăng ký xe (chỉ 3 trường: plate_number, model, vin_number)
+     * Các trường khác để NULL / 0.
+     */
+    public boolean createVehicleMinimal(String userId, String plateNumber, String model, String vinNumber) {
+        final String sql = """
+            INSERT INTO Vehicles (user_id, plate_number, model, vin_number,
+                                  battery_type, compatible_battery_types,
+                                  current_battery_id, current_odometer)
+            VALUES (?, ?, ?, ?, NULL, NULL, NULL, 0)
+        """;
+        try (Connection conn = ConnectDB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, userId);
+            ps.setString(2, plateNumber);
+            ps.setString(3, model);
+            ps.setString(4, vinNumber);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("❌ VehicleDao.createVehicleMinimal error: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // ========================== LẤY DANH SÁCH / CHI TIẾT ==========================
+
+
     // Lấy danh sách xe + thông tin pin theo userId
     public List<VehicleBatteryInfo> getVehiclesWithBatteryByUser(String userId) {
         List<VehicleBatteryInfo> list = new ArrayList<>();
@@ -35,15 +94,12 @@ public class VehicleDao {
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, userId);
-            System.out.println("🔍 VehicleDao: Executing SQL with userId = " + userId);
             
             ResultSet rs = ps.executeQuery();
             int count = 0;
 
             while (rs.next()) {
                 count++;
-                System.out.println("🔍 VehicleDao: Processing vehicle " + count + " - ID: " + rs.getInt("vehicle_id"));
-                
                 VehicleBatteryInfo v = new VehicleBatteryInfo();
                 v.setVehicleId(rs.getInt("vehicle_id"));
                 v.setUserId(userId); // Set userId from parameter
@@ -59,17 +115,14 @@ public class VehicleDao {
                 v.setCurrentOdometer(rs.getDouble("current_odometer"));
 
                 list.add(v);
-                System.out.println("✅ VehicleDao: Added vehicle: " + v.getPlateNumber());
             }
-            
-            System.out.println("🔍 VehicleDao: Total vehicles found: " + count);
+
 
         } catch (SQLException e) {
-            System.err.println("❌ VehicleDao: SQL Exception - " + e.getMessage());
             e.printStackTrace();
+            System.err.println("❌ VehicleDao.getVehiclesWithBatteryByUser error: " + e.getMessage());
         }
 
-        System.out.println("🔍 VehicleDao: Returning " + list.size() + " vehicles");
         return list;
     }
 

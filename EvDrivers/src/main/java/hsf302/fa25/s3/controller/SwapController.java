@@ -28,17 +28,12 @@ public class SwapController {
             @PathVariable String userId,
             @RequestParam(defaultValue = "10") int limit) {
         
-        System.out.println("SwapController: Getting swap history for user: " + userId + " with limit: " + limit);
+        System.out.println("SwapController: Getting swap history for user: " + userId);
         Map<String, Object> response = new HashMap<>();
         
         try {
             List<Swap> swaps = swapDao.getSwapsByUserId(userId);
-            
-            // Apply limit if needed
-            if (swaps != null && swaps.size() > limit) {
-                swaps = swaps.subList(0, limit);
-            }
-            
+
             if (swaps != null && !swaps.isEmpty()) {
                 System.out.println("SwapController: Found " + swaps.size() + " swaps for user: " + userId);
                 response.put("success", true);
@@ -105,18 +100,20 @@ public class SwapController {
         Map<String, Object> response = new HashMap<>();
         
         try {
-            boolean created = swapDao.createSwap(swap);
-            
-            if (created) {
+            Integer swapId = swapDao.createSwapReturningId(swap);
+            if (swapId != null) {
+                // set generated id back to model for client
+                try { swap.setSwapId(swapId); } catch (Exception ignore) {}
                 response.put("success", true);
                 response.put("data", swap);
+                response.put("swapId", swapId);
                 response.put("message", "Tạo bản ghi đổi pin thành công");
             } else {
                 response.put("success", false);
                 response.put("message", "Không thể tạo bản ghi đổi pin");
                 response.put("data", null);
             }
-            
+
         } catch (Exception e) {
             System.err.println("SwapController Error: " + e.getMessage());
             e.printStackTrace();

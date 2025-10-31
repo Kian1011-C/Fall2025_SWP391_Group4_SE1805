@@ -4,6 +4,7 @@ import hsf302.fa25.s3.context.ConnectDB;
 import hsf302.fa25.s3.model.Swap;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -88,12 +89,14 @@ public class SwapDao {
         return list;
     }
 
-    // Tạo swap mới
-    public boolean createSwap(Swap swap) {
+    /**
+     * Create a swap and return the generated swap_id, or null on failure.
+     */
+    public Integer createSwapReturningId(Swap swap) {
         String sql = "INSERT INTO Swaps (user_id, contract_id, vehicle_id, station_id, tower_id, staff_id, old_battery_id, new_battery_id, odometer_before, odometer_after, status, swap_date) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE())";
         try (Connection conn = ConnectDB.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             if (swap.getUserId() != null) ps.setString(1, swap.getUserId()); else ps.setNull(1, java.sql.Types.VARCHAR);
             if (swap.getContractId() != null) ps.setInt(2, swap.getContractId()); else ps.setNull(2, java.sql.Types.INTEGER);
@@ -107,29 +110,18 @@ public class SwapDao {
             if (swap.getOdometerAfter() != null) ps.setDouble(10, swap.getOdometerAfter()); else ps.setNull(10, java.sql.Types.DOUBLE);
             ps.setString(11, swap.getSwapStatus() != null ? swap.getSwapStatus() : "INITIATED");
 
-            return ps.executeUpdate() > 0;
+            int affected = ps.executeUpdate();
+            if (affected > 0) {
+                try (ResultSet keys = ps.getGeneratedKeys()) {
+                    if (keys.next()) return keys.getInt(1);
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return false;
+        return null;
     }
 
-    // Cập nhật trạng thái swap
-    public boolean updateSwapStatus(int swapId, String status) {
-        String sql = "UPDATE Swaps SET status=? WHERE swap_id=?";
-        try (Connection conn = ConnectDB.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, status);
-            ps.setInt(2, swapId);
-            return ps.executeUpdate() > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    // Hoàn thành swap
     public boolean completeSwap(int swapId) {
         Connection conn = null;
         try {
@@ -155,78 +147,18 @@ public class SwapDao {
                 }
             }
 
-            // find where new battery currently sits
-            Integer targetSlotId = null;
-            if (newBatteryId != null) {
-                String selSlot = "SELECT slot_id FROM Batteries WHERE battery_id = ?";
-                try (PreparedStatement psSlot = conn.prepareStatement(selSlot)) {
-                    psSlot.setInt(1, newBatteryId);
-                    try (ResultSet rs = psSlot.executeQuery()) {
-                        if (rs.next()) {
-                            Object sObj = rs.getObject("slot_id"); if (sObj != null) targetSlotId = ((Number) sObj).intValue();
-                        }
-                    }
-                }
-            }
-
-            // find empty slot to place old battery first (prefer tower -> station -> any)
-            Integer placementSlotId = null;
-            if (towerId != null) {
-                String selEmptyInTower = "SELECT TOP 1 slot_id FROM Slots WHERE tower_id = ? AND status = 'empty' ORDER BY slot_number";
-                try (PreparedStatement ps = conn.prepareStatement(selEmptyInTower)) {
-                    ps.setInt(1, towerId);
-                    try (ResultSet rs = ps.executeQuery()) { if (rs.next()) placementSlotId = rs.getInt("slot_id"); }
-                }
-            }
-            if (placementSlotId == null && stationId != null) {
-                String selEmptyInStation = "SELECT TOP 1 s.slot_id FROM Slots s JOIN Towers t ON s.tower_id = t.tower_id WHERE t.station_id = ? AND s.status = 'empty' ORDER BY s.slot_number";
-                try (PreparedStatement ps = conn.prepareStatement(selEmptyInStation)) {
-                    ps.setInt(1, stationId);
-                    try (ResultSet rs = ps.executeQuery()) { if (rs.next()) placementSlotId = rs.getInt("slot_id"); }
-                }
-            }
-            if (placementSlotId == null) {
-                String selAnyEmpty = "SELECT TOP 1 slot_id FROM Slots WHERE status = 'empty' ORDER BY slot_id";
-                try (PreparedStatement ps = conn.prepareStatement(selAnyEmpty)) {
-                    try (ResultSet rs = ps.executeQuery()) { if (rs.next()) placementSlotId = rs.getInt("slot_id"); }
-                }
-            }
-
-            // 1) place old battery into placementSlotId first (if possible)
-            if (oldBatteryId != null && placementSlotId != null) {
-                String updOldBat = "UPDATE Batteries SET slot_id = ?, status = ? WHERE battery_id = ?";
+            // For manual swaps we don't need to manage tower/slot placement.
+            // Simply mark the old battery as in_stock and the new battery as in_use.
+            if (oldBatteryId != null) {
+                String updOldBat = "UPDATE Batteries SET status = ? WHERE battery_id = ?";
                 try (PreparedStatement psOld = conn.prepareStatement(updOldBat)) {
-                    psOld.setInt(1, placementSlotId);
-                    psOld.setString(2, "charging");
-                    psOld.setInt(3, oldBatteryId);
+                    psOld.setString(1, "in_stock");
+                    psOld.setInt(2, oldBatteryId);
                     psOld.executeUpdate();
                 }
-                String updSlot = "UPDATE Slots SET status = ? WHERE slot_id = ?";
-                try (PreparedStatement psSlot = conn.prepareStatement(updSlot)) {
-                    psSlot.setString(1, "charging");
-                    psSlot.setInt(2, placementSlotId);
-                    psSlot.executeUpdate();
-                }
             }
 
-            // 2) remove new battery from its slot (if it had one)
-            if (newBatteryId != null && targetSlotId != null) {
-                String updNewBat = "UPDATE Batteries SET slot_id = NULL, status = ? WHERE battery_id = ?";
-                try (PreparedStatement psNew = conn.prepareStatement(updNewBat)) {
-                    psNew.setString(1, "in_use");
-                    psNew.setInt(2, newBatteryId);
-                    psNew.executeUpdate();
-                }
-                // mark the old slot empty unless we just placed old battery into the same slot
-                if (placementSlotId == null || !placementSlotId.equals(targetSlotId)) {
-                    String updOldSlot = "UPDATE Slots SET status = ? WHERE slot_id = ?";
-                    try (PreparedStatement psOldSlot = conn.prepareStatement(updOldSlot)) {
-                        psOldSlot.setString(1, "empty");
-                        psOldSlot.setInt(2, targetSlotId);
-                        psOldSlot.executeUpdate();
-                    }
-                }
-            } else if (newBatteryId != null) {
+            if (newBatteryId != null) {
                 String updNewBat = "UPDATE Batteries SET status = ? WHERE battery_id = ?";
                 try (PreparedStatement psNew = conn.prepareStatement(updNewBat)) {
                     psNew.setString(1, "in_use");

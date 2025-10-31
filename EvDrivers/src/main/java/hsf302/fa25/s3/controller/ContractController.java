@@ -7,6 +7,13 @@ import hsf302.fa25.s3.model.ServicePlan;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.*;
+import hsf302.fa25.s3.dao.UserDao;
+import hsf302.fa25.s3.model.User;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+
+import static org.hibernate.engine.config.spi.StandardConverters.asInteger;
+import static org.hibernate.engine.config.spi.StandardConverters.asString;
 
 @RestController
 @RequestMapping("/api/contracts")
@@ -14,31 +21,115 @@ public class ContractController {
     
     private final ContractDao contractDao = new ContractDao();
     private final ServicePlanDao servicePlanDao = new ServicePlanDao();
+    private final UserDao userDao = new UserDao();
 
     @PostMapping
-    public ResponseEntity<?> createContract(@RequestBody Map<String, Object> contractData) {
-        // Mock data - Contract creation not implemented yet (missing createContract DAO method)
-        Map<String, Object> newContract = new HashMap<>();
-        newContract.put("contractId", System.currentTimeMillis());
-        newContract.put("userId", contractData.get("userId"));
-        newContract.put("vehicleId", contractData.get("vehicleId"));
-        newContract.put("planId", contractData.get("planId"));
-        newContract.put("planType", contractData.get("planType"));
-        newContract.put("duration", contractData.get("duration"));
-        newContract.put("monthlyFee", contractData.get("monthlyFee"));
-        newContract.put("swapLimit", contractData.get("swapLimit"));
-        newContract.put("status", "ACTIVE");
-        newContract.put("startDate", new Date());
-        newContract.put("endDate", new Date(System.currentTimeMillis() + 30L * 24 * 60 * 60 * 1000)); // 30 days
-        newContract.put("createdAt", new Date());
-        
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("message", "Contract created successfully (mock)");
-        response.put("data", newContract);
-        response.put("note", "Mock data - ContractDao.createContract method not implemented");
-        
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> createContract(@RequestBody Map<String, Object> body) {
+        Map<String, Object> res = new HashMap<>();
+        try {
+            // 1) Lấy & kiểm tra input
+            String userId = asString(body.get("userId"));
+            Integer vehicleId = asInteger(body.get("vehicleId"));
+            Integer planId = asInteger(body.get("planId"));
+            String planName = asString(body.get("planName"));
+            String startDate = asString(body.get("startDate"));
+            String endDate = asString(body.get("endDate"));
+            String signedPlace = asString(body.get("signedPlace"));
+
+            if (isBlank(userId) || vehicleId == null || isBlank(startDate) || isBlank(endDate)) {
+                res.put("success", false);
+                res.put("message", "Thiếu tham số: userId, vehicleId, startDate, endDate là bắt buộc.");
+                return ResponseEntity.badRequest().body(res);
+            }
+
+            // 2) Parse ngày
+            LocalDate s, e;
+            try {
+                s = LocalDate.parse(startDate);
+                e = LocalDate.parse(endDate);
+            } catch (DateTimeParseException ex) {
+                res.put("success", false);
+                res.put("message", "Định dạng ngày không hợp lệ. Dùng yyyy-MM-dd.");
+                return ResponseEntity.badRequest().body(res);
+            }
+            if (e.isBefore(s)) {
+                res.put("success", false);
+                res.put("message", "endDate phải >= startDate.");
+                return ResponseEntity.badRequest().body(res);
+            }
+
+            // 3) Kiểm tra user tồn tại & active
+            User u = userDao.getUserById(userId);
+            if (u == null || !"active".equalsIgnoreCase(u.getStatus())) {
+                res.put("success", false);
+                res.put("message", "Tài khoản không tồn tại hoặc chưa kích hoạt.");
+                return ResponseEntity.badRequest().body(res);
+            }
+
+            // 4) Xe phải thuộc user
+            if (!contractDao.vehicleBelongsToUser(vehicleId, userId)) {
+                res.put("success", false);
+                res.put("message", "Xe không thuộc về người dùng " + userId + ".");
+                return ResponseEntity.badRequest().body(res);
+            }
+
+            // 5) Xác định planId (ưu tiên planId, nếu không có thì tra theo planName)
+            Integer finalPlanId = planId;
+            if (finalPlanId == null) {
+                if (isBlank(planName)) {
+                    res.put("success", false);
+                    res.put("message", "Thiếu planId hoặc planName.");
+                    return ResponseEntity.badRequest().body(res);
+                }
+                finalPlanId = contractDao.getPlanIdByName(planName);
+                if (finalPlanId == null) {
+                    res.put("success", false);
+                    res.put("message", "Không tìm thấy gói dịch vụ đang active: " + planName);
+                    return ResponseEntity.badRequest().body(res);
+                }
+            }
+
+            // 6) Chặn overlap với hợp đồng active hiện có
+            java.sql.Date ds = java.sql.Date.valueOf(s);
+            java.sql.Date de = java.sql.Date.valueOf(e);
+            if (contractDao.hasActiveOverlap(vehicleId, ds, de)) {
+                res.put("success", false);
+                res.put("message", "Xe đã có hợp đồng active trùng/đè khoảng thời gian này.");
+                return ResponseEntity.badRequest().body(res);
+            }
+
+            // 7) Tạo hợp đồng (DAO sẽ set monthly_base_fee = base_price; monthly_total_fee = base_price)
+            int contractId = contractDao.createContract(
+                    vehicleId, finalPlanId, ds, de,
+                    isBlank(signedPlace) ? "Hà Nội" : signedPlace
+            );
+            if (contractId <= 0) {
+                res.put("success", false);
+                res.put("message", "Tạo hợp đồng thất bại.");
+                return ResponseEntity.status(500).body(res);
+            }
+
+            // 8) Trả về kết quả
+            Map<String, Object> data = new HashMap<>();
+            data.put("contractId", contractId);
+            data.put("vehicleId", vehicleId);
+            data.put("planId", finalPlanId);
+            data.put("userId", userId);
+            data.put("startDate", s.toString());
+            data.put("endDate", e.toString());
+            data.put("signedPlace", isBlank(signedPlace) ? "Hà Nội" : signedPlace);
+
+            res.put("success", true);
+            res.put("message", "Tạo hợp đồng thành công.");
+            res.put("data", data);
+            return ResponseEntity.ok(res);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            res.put("success", false);
+            res.put("message", "Lỗi hệ thống: " + e.getMessage());
+            return ResponseEntity.status(500).body(res);
+        }
     }
 
     @GetMapping("/user/{userId}")
@@ -77,7 +168,7 @@ public class ContractController {
                 }
                 
                 // Add monthly usage from database
-                contractMap.put("usedSwaps", 0); // TODO: Calculate from Swaps table
+                contractMap.put("usedSwaps", 0); // TODO từ bảng Swaps nếu cần
                 contractMap.put("usedDistance", contract.getMonthlyDistance());
                 contractMap.put("monthlyBaseFee", contract.getMonthlyBaseFee());
                 contractMap.put("monthlyOverageFee", contract.getMonthlyOverageFee());
@@ -127,7 +218,7 @@ public class ContractController {
         terminationResult.put("status", "TERMINATED");
         terminationResult.put("terminatedAt", new Date());
         terminationResult.put("reason", reason);
-        terminationResult.put("refundAmount", 0); // Calculate based on remaining time
+        terminationResult.put("refundAmount", 0);
         terminationResult.put("finalBillAmount", 0);
         
         Map<String, Object> response = new HashMap<>();
@@ -425,5 +516,19 @@ public class ContractController {
             response.put("message", "Error: " + e.getMessage());
             return ResponseEntity.status(500).body(response);
         }
+    }
+
+    // ===== Helpers =====
+    private static boolean isBlank(String s) {
+        return s == null || s.trim().isEmpty();
+    }
+    private static String asString(Object o) {
+        return (o == null) ? null : String.valueOf(o);
+    }
+    private static Integer asInteger(Object o) {
+        if (o == null) return null;
+        if (o instanceof Integer i) return i;
+        if (o instanceof Number n) return n.intValue();
+        try { return Integer.parseInt(String.valueOf(o)); } catch (Exception e) { return null; }
     }
 }
