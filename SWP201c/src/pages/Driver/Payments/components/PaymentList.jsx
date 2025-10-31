@@ -1,4 +1,4 @@
-// Payment List Component
+// src/pages/Driver/Payments/components/PaymentList.jsx
 import React from 'react';
 import PaymentCard from './PaymentCard';
 
@@ -8,9 +8,10 @@ const PaymentList = ({ payments, onViewDetails, formatDate, formatCurrency, getS
       display: 'grid',
       gap: '15px'
     }}>
+      {/* Lặp qua mảng payments và tạo một PaymentCard cho mỗi item */}
       {payments.map((payment, index) => (
         <PaymentCard
-          key={payment.id || index}
+          key={payment.id || payment.payment_id || index} // Dùng key duy nhất
           payment={payment}
           onViewDetails={onViewDetails}
           formatDate={formatDate}
