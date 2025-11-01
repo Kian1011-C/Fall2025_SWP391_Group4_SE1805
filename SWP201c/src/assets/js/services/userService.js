@@ -36,44 +36,69 @@ class UserService {
   }
 
   /**
-   * Cập nhật thông tin người dùng (cho Admin).
+   * Cập nhật thông tin người dùng (cho Admin) - SỬ DỤNG API THỐNG NHẤT
    * @param {string} userId - ID của người dùng
    * @param {object} userData - Dữ liệu cập nhật
    */
   async updateUser(userId, userData) {
     try {
-      const endpoint = userData.role === 'driver' ? `/api/admin/drivers/${userId}` : `/api/admin/staff/${userId}`;
-      console.log(`UserService: Cập nhật người dùng ${userId} tại ${endpoint}`, userData);
-      const response = await apiUtils.put(endpoint, userData);
+      // Sử dụng API thống nhất /api/admin/users/{userId} thay vì tách drivers/staff
+      console.log(`🔵 UserService: Cập nhật người dùng ${userId} tại /api/admin/users/${userId}`, userData);
+      const response = await apiUtils.put(`/api/admin/users/${userId}`, userData);
       
       if (response.success) {
+        console.log('✅ UserService: Cập nhật người dùng thành công', response.data);
         return { success: true, data: response.data, message: 'Cập nhật người dùng thành công' };
       } else {
         throw new Error(response.message || 'Không thể cập nhật người dùng');
       }
     } catch (error) {
+      console.error('❌ Lỗi khi cập nhật người dùng:', error);
       const errorInfo = apiUtils.handleError(error);
       return { success: false, message: errorInfo.message || 'Lỗi khi cập nhật người dùng', error: errorInfo };
     }
   }
 
   /**
-   * Tạo người dùng mới (cho Admin).
+   * Xóa người dùng (cho Admin) - SỬ DỤNG API THỐNG NHẤT
+   * @param {string} userId - ID của người dùng cần xóa
+   */
+  async deleteUser(userId) {
+    try {
+      console.log(`🔵 UserService: Xóa người dùng ${userId} tại /api/admin/users/${userId}`);
+      const response = await apiUtils.delete(`/api/admin/users/${userId}`);
+      
+      if (response.success) {
+        console.log('✅ UserService: Xóa người dùng thành công');
+        return { success: true, message: 'Xóa người dùng thành công' };
+      } else {
+        throw new Error(response.message || 'Không thể xóa người dùng');
+      }
+    } catch (error) {
+      console.error('❌ Lỗi khi xóa người dùng:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return { success: false, message: errorInfo.message || 'Lỗi khi xóa người dùng', error: errorInfo };
+    }
+  }
+
+  /**
+   * Tạo người dùng mới (cho Admin) - SỬ DỤNG API THỐNG NHẤT
    * @param {object} userData - Dữ liệu người dùng mới
    */
   async createUser(userData) {
     try {
-      const endpoint = userData.role === 'driver' ? '/api/admin/drivers' : '/api/admin/staff';
-      console.log(`UserService: Tạo người dùng tại ${endpoint}`, userData);
-      const response = await apiUtils.post(endpoint, userData);
+      // Sử dụng API thống nhất /api/admin/users thay vì tách drivers/staff
+      console.log('🔵 UserService: Tạo người dùng mới tại /api/admin/users', userData);
+      const response = await apiUtils.post('/api/admin/users', userData);
       
       if (response.success) {
+        console.log('✅ UserService: Tạo người dùng thành công', response.data);
         return { success: true, data: response.data, message: 'Tạo người dùng thành công' };
       } else {
         throw new Error(response.message || 'Không thể tạo người dùng');
       }
     } catch (error) {
-      console.error('Lỗi khi tạo người dùng:', error);
+      console.error('❌ Lỗi khi tạo người dùng:', error);
       const errorInfo = apiUtils.handleError(error);
       return { success: false, message: errorInfo.message || 'Lỗi khi tạo người dùng', error: errorInfo };
     }

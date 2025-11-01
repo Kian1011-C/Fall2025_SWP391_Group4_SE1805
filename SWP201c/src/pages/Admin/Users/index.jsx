@@ -4,34 +4,38 @@ import UserRow from './components/UserRow';
 import UserFormModal from './components/UserFormModal'; // <-- Import Modal
 
 const AdminUsers = () => {
-  // Lấy thêm các hàm handleCreate và handleUpdate từ hook
+  // Lấy thêm các hàm handleCreate, handleUpdate và handleDelete từ hook
   const { 
     users, isLoading, error, refetch, 
     filterRole, setFilterRole, 
     searchQuery, setSearchQuery,
-    handleCreate, handleUpdate 
+    handleCreate, handleUpdate, handleDelete
   } = useAdminUsersData();
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
 
   const handleOpenCreateModal = () => {
+    console.log('🔵 AdminUsers: Mở modal tạo người dùng mới');
     setEditingUser(null); // Đảm bảo là tạo mới
     setIsModalOpen(true);
   };
 
   const handleOpenEditModal = (user) => {
+    console.log('🔵 AdminUsers: Mở modal sửa người dùng', user.userId);
     setEditingUser(user); // Đặt user cần sửa
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
+    console.log('🔵 AdminUsers: Đóng modal');
     setIsModalOpen(false);
     setEditingUser(null);
   };
 
   // Hàm được gọi khi nhấn "Lưu" trên Modal
   const handleSave = async (formData, userId) => {
+    console.log('🔵 AdminUsers: handleSave called', { userId, formData });
     let response;
     if (userId) {
       // Đây là trường hợp Cập nhật (Update)
@@ -42,9 +46,30 @@ const AdminUsers = () => {
     }
     
     if (response.success) {
+      console.log('✅ Lưu thành công, đóng modal');
       handleCloseModal();
     } else {
+      console.error('❌ Lưu thất bại:', response.message);
       alert(response.message); // Hiển thị lỗi nếu có
+    }
+  };
+
+  // Hàm xử lý xóa người dùng
+  const handleDeleteUser = async (userId) => {
+    console.log('🔵 AdminUsers: handleDeleteUser called', userId);
+    const confirmed = window.confirm(`Bạn có chắc chắn muốn xóa người dùng ${userId}?`);
+    if (!confirmed) {
+      console.log('❌ Hủy xóa người dùng');
+      return;
+    }
+
+    const response = await handleDelete(userId);
+    if (response.success) {
+      console.log('✅ Xóa người dùng thành công');
+      alert('Xóa người dùng thành công!');
+    } else {
+      console.error('❌ Xóa người dùng thất bại:', response.message);
+      alert(`Lỗi: ${response.message}`);
     }
   };
 
@@ -67,8 +92,8 @@ const AdminUsers = () => {
             </tr>
           </thead>
           <tbody>
-            {/* Truyền hàm handleOpenEditModal xuống cho nút Sửa */}
-            {users.map(user => <UserRow key={user.userId} user={user} onEdit={handleOpenEditModal} />)}
+            {/* Truyền handleOpenEditModal và handleDeleteUser xuống cho các nút Sửa và Xóa */}
+            {users.map(user => <UserRow key={user.userId} user={user} onEdit={handleOpenEditModal} onDelete={handleDeleteUser} />)}
           </tbody>
         </table>
       </div>

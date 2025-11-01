@@ -57,17 +57,37 @@ export const useAdminUsersData = () => {
 
   // --- HÀM XỬ LÝ CRUD ---
   const handleCreate = async (userData) => {
+    console.log('🔵 useAdminUsersData: handleCreate called', userData);
     const response = await userService.createUser(userData);
     if (response.success) {
+      console.log('✅ Tạo người dùng thành công, tải lại danh sách...');
       fetchUsers(); // Tải lại danh sách
+    } else {
+      console.error('❌ Tạo người dùng thất bại:', response.message);
     }
     return response;
   };
 
   const handleUpdate = async (userId, userData) => {
+    console.log('🔵 useAdminUsersData: handleUpdate called', userId, userData);
     const response = await userService.updateUser(userId, userData);
     if (response.success) {
+      console.log('✅ Cập nhật người dùng thành công, tải lại danh sách...');
       fetchUsers(); // Tải lại danh sách
+    } else {
+      console.error('❌ Cập nhật người dùng thất bại:', response.message);
+    }
+    return response;
+  };
+
+  const handleDelete = async (userId) => {
+    console.log('🔵 useAdminUsersData: handleDelete called', userId);
+    const response = await userService.deleteUser(userId);
+    if (response.success) {
+      console.log('✅ Xóa người dùng thành công, tải lại danh sách...');
+      fetchUsers(); // Tải lại danh sách
+    } else {
+      console.error('❌ Xóa người dùng thất bại:', response.message);
     }
     return response;
   };
@@ -77,6 +97,6 @@ export const useAdminUsersData = () => {
     isLoading, error, refetch: fetchUsers,
     filterRole, setFilterRole,
     searchQuery, setSearchQuery,
-    handleCreate, handleUpdate, // <-- Xuất các hàm này ra
+    handleCreate, handleUpdate, handleDelete, // <-- Xuất cả handleDelete
   };
 };
