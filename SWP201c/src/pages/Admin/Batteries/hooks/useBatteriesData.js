@@ -47,7 +47,9 @@ export const useBatteriesData = () => {
 
   // Các hàm CRUD
   const handleCreate = async (batteryData) => {
+    console.log('🔵 useBatteriesData: handleCreate called with:', batteryData);
     const response = await batteryService.createBattery(batteryData);
+    console.log('🔵 useBatteriesData: createBattery response:', response);
     if (response.success) {
       fetchBatteries(); // Tải lại danh sách
     }
@@ -55,7 +57,19 @@ export const useBatteriesData = () => {
   };
 
   const handleUpdate = async (batteryId, batteryData) => {
+    console.log('🔵 useBatteriesData: handleUpdate called with:', batteryId, batteryData);
     const response = await batteryService.updateBattery(batteryId, batteryData);
+    console.log('🔵 useBatteriesData: updateBattery response:', response);
+    if (response.success) {
+      fetchBatteries(); // Tải lại danh sách
+    }
+    return response;
+  };
+
+  const handleDelete = async (batteryId) => {
+    console.log('🔵 useBatteriesData: handleDelete called with:', batteryId);
+    const response = await batteryService.deleteBattery(batteryId);
+    console.log('🔵 useBatteriesData: deleteBattery response:', response);
     if (response.success) {
       fetchBatteries(); // Tải lại danh sách
     }
@@ -67,6 +81,6 @@ export const useBatteriesData = () => {
     isLoading, error, refetch: fetchBatteries,
     filterStatus, setFilterStatus,
     searchQuery, setSearchQuery,
-    handleCreate, handleUpdate,
+    handleCreate, handleUpdate, handleDelete,
   };
 };

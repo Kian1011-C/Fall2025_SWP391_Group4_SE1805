@@ -4,42 +4,70 @@ import BatteryRow from './components/BatteryRow';
 import BatteryFormModal from './components/BatteryFormModal';
 
 const AdminBatteries = () => {
-  const { batteries, isLoading, error, refetch, filterStatus, setFilterStatus, searchQuery, setSearchQuery, handleCreate, handleUpdate } = useBatteriesData();
+  const { batteries, isLoading, error, refetch, filterStatus, setFilterStatus, searchQuery, setSearchQuery, handleCreate, handleUpdate, handleDelete } = useBatteriesData();
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBattery, setEditingBattery] = useState(null);
 
   const handleOpenCreateModal = () => {
+    console.log('🟢 AdminBatteries: Opening CREATE modal');
     setEditingBattery(null);
     setIsModalOpen(true);
   };
 
   const handleOpenEditModal = (battery) => {
+    console.log('🟢 AdminBatteries: Opening EDIT modal for battery:', battery);
     setEditingBattery(battery);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
+    console.log('🟢 AdminBatteries: Closing modal');
     setIsModalOpen(false);
     setEditingBattery(null);
   };
 
   const handleSave = async (formData, batteryId) => {
+    console.log('🟢 AdminBatteries: handleSave called');
+    console.log('  ├─ batteryId:', batteryId);
+    console.log('  └─ formData:', formData);
+    
     let response;
     if (batteryId) {
       // Đây là trường hợp Cập nhật (Update)
+      console.log('🔄 Calling handleUpdate...');
       response = await handleUpdate(batteryId, formData);
     } else {
       // Đây là trường hợp Tạo mới (Create)
+      console.log('➕ Calling handleCreate...');
       response = await handleCreate(formData);
     }
     
+    console.log('📬 Response:', response);
+    
     if (response.success) {
       handleCloseModal();
-      // showToast('Thành công!', 'success'); // Bạn có thể thêm hàm toast
+      alert('✅ ' + response.message);
     } else {
-      // showErrorToast(response.message); // Hiển thị lỗi
+      alert('❌ Lỗi: ' + response.message);
       console.error("Lỗi khi lưu:", response.message);
+    }
+  };
+
+  const handleDeleteBattery = async (battery) => {
+    // Confirm trước khi xóa
+    const confirmed = window.confirm(
+      `⚠️ Bạn có chắc chắn muốn xóa pin BAT${battery.batteryId} (${battery.model})?\n\nHành động này không thể hoàn tác!`
+    );
+    
+    if (!confirmed) return;
+
+    const response = await handleDelete(battery.batteryId);
+    if (response.success) {
+      alert('✅ ' + response.message);
+    } else {
+      alert('❌ Lỗi: ' + response.message);
+      console.error("Lỗi khi xóa:", response.message);
     }
   };
 
@@ -62,7 +90,7 @@ const AdminBatteries = () => {
             </tr>
           </thead>
           <tbody>
-            {batteries.map(bat => <BatteryRow key={bat.batteryId} battery={bat} onEdit={handleOpenEditModal} />)}
+            {batteries.map(bat => <BatteryRow key={bat.batteryId} battery={bat} onEdit={handleOpenEditModal} onDelete={handleDeleteBattery} />)}
           </tbody>
         </table>
       </div>

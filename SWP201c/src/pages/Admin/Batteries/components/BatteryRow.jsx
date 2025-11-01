@@ -9,7 +9,7 @@ const getStatusStyle = (status) => {
     return { ...style, background: '#4b5563', color: '#e5e7eb' };
 };
 
-const BatteryRow = ({ battery, onEdit}) => {
+const BatteryRow = ({ battery, onEdit, onDelete }) => {
   return (
     <tr style={{ borderTop: '1px solid #374151' }}>
       <td style={{ padding: '15px 20px', fontWeight: 'bold', color: 'white' }}>BAT{battery.batteryId}</td>
@@ -17,13 +17,17 @@ const BatteryRow = ({ battery, onEdit}) => {
       <td style={{ padding: '15px 20px' }}><span style={getStatusStyle(battery.status)}>{battery.status?.toLowerCase() || battery.status}</span></td>
       <td style={{ padding: '15px 20px' }}>{battery.stateOfHealth}%</td>
       <td style={{ padding: '15px 20px' }}>{battery.cycleCount}</td>
-      <td style={{ padding: '15px 20px' }}>
+      <td style={{ padding: '15px 20px', display: 'flex', gap: '10px' }}>
         <button 
           onClick={() => onEdit(battery)} 
-          style={{ background: '#374151', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', marginRight: '10px' }}>
-          Sửa
+          style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', fontWeight: '500' }}>
+          ✏️ Sửa
         </button>
-        {/* Thêm nút Xóa (nếu cần) */}
+        <button 
+          onClick={() => onDelete(battery)} 
+          style={{ background: '#ef4444', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', fontWeight: '500' }}>
+          🗑️ Xóa
+        </button>
       </td>
     </tr>
   );

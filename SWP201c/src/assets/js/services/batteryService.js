@@ -85,6 +85,27 @@ const batteryService = {
       return { success: false, message: errorInfo.message || 'Lỗi API' };
     }
   },
+
+  /**
+   * Xóa một viên pin (cho Admin).
+   * @param {number} batteryId - ID của pin cần xóa
+   */
+  deleteBattery: async (batteryId) => {
+    try {
+      console.log(`BatteryService: Xóa pin ${batteryId}`);
+      const response = await apiUtils.delete(`${API_CONFIG.ENDPOINTS.BATTERIES.BASE}/${batteryId}`);
+      
+      if (response.success) {
+        return { success: true, message: 'Xóa pin thành công' };
+      } else {
+        throw new Error(response.message || 'Không thể xóa pin');
+      }
+    } catch (error) {
+      console.error(`Lỗi khi xóa pin ${batteryId}:`, error);
+      const errorInfo = apiUtils.handleError(error);
+      return { success: false, message: errorInfo.message || 'Lỗi API' };
+    }
+  },
 };
 
 export default batteryService;
