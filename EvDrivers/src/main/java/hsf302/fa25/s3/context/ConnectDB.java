@@ -7,29 +7,18 @@ import java.sql.SQLException;
 public class ConnectDB {
 
     private static final String URL =
-        "jdbc:sqlserver://localhost\\MSSQL2022;"
-            + "databaseName=ev_battery_swap;"
-            + "encrypt=true;"
-            + "trustServerCertificate=true;"
-            + "sslProtocol=TLSv1.2;";
+            "jdbc:sqlserver://localhost\\MSSQL2022;"
+                    + "databaseName=ev_battery_swap;"
+                    + "encrypt=true;"
+                    + "trustServerCertificate=true;"
+                    + "sslProtocol=TLSv1.2;";
     private static final String USER = "sa";
     private static final String PASSWORD = "123";
 
     public static Connection getConnection() {
         Connection conn = null;
         try {
-            // Allow overriding DB connection for tests via system properties
-            String testUrl = System.getProperty("DB_URL");
-            String testUser = System.getProperty("DB_USER");
-            String testPass = System.getProperty("DB_PASS");
-
-            if (testUrl != null && !testUrl.isEmpty()) {
-                String u = testUser != null ? testUser : "";
-                String p = testPass != null ? testPass : "";
-                conn = DriverManager.getConnection(testUrl, u, p);
-            } else {
-                conn = DriverManager.getConnection(URL, USER, PASSWORD);
-            }
+            conn = DriverManager.getConnection(URL, USER, PASSWORD);
             System.out.println("Kết nối database thành công!");
         } catch (SQLException e) {
             System.err.println("Kết nối thất bại: " + e.getMessage());

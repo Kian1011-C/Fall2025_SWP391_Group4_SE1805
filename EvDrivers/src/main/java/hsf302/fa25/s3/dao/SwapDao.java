@@ -92,7 +92,7 @@ public class SwapDao {
     /**
      * Create a swap and return the generated swap_id, or null on failure.
      */
-    public Integer createSwapReturningId(Swap swap) {
+    public Integer createSwap(Swap swap) {
         String sql = "INSERT INTO Swaps (user_id, contract_id, vehicle_id, station_id, tower_id, staff_id, old_battery_id, new_battery_id, odometer_before, odometer_after, status, swap_date) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE())";
         try (Connection conn = ConnectDB.getConnection();
@@ -155,6 +155,25 @@ public class SwapDao {
                     psOld.setString(1, "in_stock");
                     psOld.setInt(2, oldBatteryId);
                     psOld.executeUpdate();
+                }
+            }
+
+            if (oldBatteryId != null) {
+                double degradation = 1 + (Math.random() * 49); // random from 1.0 to 50.0
+                String updateOldBatterySql = """
+                            UPDATE Batteries 
+                            SET state_of_health = CASE 
+                                WHEN state_of_health - ? < 0 THEN 0 
+                                ELSE state_of_health - ? 
+                            END,
+                            cycle_count = cycle_count + 1
+                            WHERE battery_id = ?
+                        """;
+                try (java.sql.PreparedStatement degradePs = conn.prepareStatement(updateOldBatterySql)) {
+                    degradePs.setDouble(1, degradation);
+                    degradePs.setDouble(2, degradation);
+                    degradePs.setLong(3, oldBatteryId);
+                    degradePs.executeUpdate();
                 }
             }
 

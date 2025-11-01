@@ -168,6 +168,26 @@ public class BatteryController {
                         }
                     }
 
+                    // Simulate battery degradation: if oldBatteryId exists, reduce its state_of_health by random 1-30
+                    if (oldBatteryId != null) {
+                        double degradation = 1 + (Math.random() * 49); // random from 1.0 to 30.0
+                        String updateOldBatterySql = """
+                            UPDATE Batteries 
+                            SET state_of_health = CASE 
+                                WHEN state_of_health - ? < 0 THEN 0 
+                                ELSE state_of_health - ? 
+                            END,
+                            cycle_count = cycle_count + 1
+                            WHERE battery_id = ?
+                        """;
+                        try (java.sql.PreparedStatement degradePs = conn.prepareStatement(updateOldBatterySql)) {
+                            degradePs.setDouble(1, degradation);
+                            degradePs.setDouble(2, degradation);
+                            degradePs.setLong(3, oldBatteryId);
+                            degradePs.executeUpdate();
+                        }
+                    }
+
                     // Create swap record (include contract_id, vehicle_id and optional staff_id)
                     String insertSwapSql = """
                         INSERT INTO Swaps (user_id, contract_id, vehicle_id, station_id, tower_id, staff_id, old_battery_id, new_battery_id, swap_date, status)

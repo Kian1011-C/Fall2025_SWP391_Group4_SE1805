@@ -17,7 +17,7 @@ public class BatteryChargingService {
     public void runChargingCycle() {
         System.out.println("[BatteryChargingScheduler] Starting charging cycle...");
 
-        String selectSql = "SELECT battery_id, state_of_health, slot_id, status FROM Batteries WHERE status = 'charging'";
+        String selectSql = "SELECT battery_id, state_of_health, slot_id, status FROM Batteries WHERE status = 'charging' or status = 'in_stock'";
         String updateBatterySql = "UPDATE Batteries SET state_of_health = ?, status = ? WHERE battery_id = ?";
         String updateSlotSql = "UPDATE Slots SET status = ? WHERE slot_id = ?";
 
@@ -35,13 +35,18 @@ public class BatteryChargingService {
                     String newBatteryStatus = currentStatus;
                     String newSlotStatus = null;
 
-                    if (newSoh >= 100.0) {
-                        newBatteryStatus = "available";
-                        newSlotStatus = "full";
-                    } else {
-                        // still charging
-                        newBatteryStatus = "charging";
-                        newSlotStatus = "charging";
+                    if (newBatteryStatus .equals("in_stock")) {
+                        // Battery is in stock, so we charge it but keep it in stock
+                        newBatteryStatus = "in_stock";
+                    }else {
+                        if (newSoh >= 100.0) {
+                            newBatteryStatus = "available";
+                            newSlotStatus = "full";
+                        } else {
+                            // still charging
+                            newBatteryStatus = "charging";
+                            newSlotStatus = "charging";
+                        }
                     }
 
                     // Update battery

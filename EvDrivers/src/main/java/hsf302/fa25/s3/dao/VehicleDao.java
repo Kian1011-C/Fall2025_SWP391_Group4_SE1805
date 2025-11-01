@@ -82,9 +82,11 @@ public class VehicleDao {
                 v.current_battery_id AS battery_id,
                 v.current_odometer,
                 b.model AS battery_model,
-                b.state_of_health AS health
+                b.state_of_health AS health,
+                c.contract_id
             FROM Vehicles v
             LEFT JOIN Batteries b ON v.current_battery_id = b.battery_id
+            LEFT JOIN Contract c ON v.vehicle_id = c.vehicle_id AND c.status = 'active'
             WHERE v.user_id = ?
             ORDER BY v.vehicle_id DESC
         """;

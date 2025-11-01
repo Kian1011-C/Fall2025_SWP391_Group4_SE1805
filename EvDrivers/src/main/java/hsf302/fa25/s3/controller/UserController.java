@@ -286,5 +286,134 @@ public class UserController {
             return res;
         }
     }
+
+    @GetMapping("/reset/verify")
+    public Map<String,Object> verifyResetToken(@RequestParam String token){
+        Map<String,Object> res = new HashMap<>();
+        try{
+            boolean ok = userDao.isResetTokenValid(token);
+            res.put("success", ok);
+            res.put("message", ok ? "Token hợp lệ." : "Link đã hết hạn hoặc không hợp lệ.");
+            return res;
+        }catch(Exception e){
+            res.put("success", false);
+            res.put("message", "Lỗi: " + e.getMessage());
+            return res;
+        }
+    }
+
+    // 2) Đặt lại mật khẩu
+    @PostMapping("/reset")
+    public Map<String,Object> doReset(@RequestParam String token,
+                                      @RequestParam String newPassword){
+        Map<String,Object> res = new HashMap<>();
+        try{
+            if (newPassword == null || newPassword.length() < 8){
+                res.put("success", false);
+                res.put("message", "Mật khẩu tối thiểu 8 ký tự.");
+                return res;
+            }
+            if (!userDao.isResetTokenValid(token)){
+                res.put("success", false);
+                res.put("message", "Link đã hết hạn hoặc không hợp lệ.");
+                return res;
+            }
+            User u = userDao.findByResetToken(token);
+            if (u == null){
+                res.put("success", false);
+                res.put("message", "Token không hợp lệ.");
+                return res;
+            }
+
+            // (Dev hiện tại dùng plain; production nên BCrypt)
+            boolean ok1 = userDao.updatePassword(u.getUserId(), newPassword);
+            boolean ok2 = userDao.clearResetToken(u.getUserId());
+            if (ok1 && ok2){
+                res.put("success", true);
+                res.put("message", "Đặt lại mật khẩu thành công. Hãy đăng nhập bằng mật khẩu mới.");
+            }else{
+                res.put("success", false);
+                res.put("message", "Không thể đặt lại mật khẩu. Vui lòng thử lại.");
+            }
+            return res;
+        }catch(Exception e){
+            e.printStackTrace();
+            res.put("success", false);
+            res.put("message", "Lỗi: " + e.getMessage());
+            return res;
+        }
+    }
+
+    // ==================== API ĐĂNG KÝ XE (CHỈ 3 TRƯỜNG) ====================
+
+    /**
+     * Đăng ký xe cho user (form/x-www-form-urlencoded hoặc form-data).
+     * Endpoint: POST /api/users/{userId}/vehicles
+     * Params: plateNumber, model, vinNumber
+     */
+    @PostMapping("/{userId}/vehicles")
+    public Map<String, Object> registerVehicleForUser(
+            @PathVariable String userId,
+            @RequestParam String plateNumber,
+            @RequestParam String model,
+            @RequestParam String vinNumber
+    ) {
+        Map<String, Object> res = new HashMap<>();
+        try {
+            // 1) Validate input
+            if (isBlank(plateNumber) || isBlank(model) || isBlank(vinNumber)) {
+                res.put("success", false);
+                res.put("message", "Thiếu thông tin: biển số, model hoặc VIN.");
+                return res;
+            }
+
+            // 2) User phải tồn tại & active
+            User u = userDao.getUserById(userId);
+            if (u == null || !"active".equalsIgnoreCase(u.getStatus())) {
+                res.put("success", false);
+                res.put("message", "Tài khoản không tồn tại hoặc chưa kích hoạt.");
+                return res;
+            }
+
+            // 3) Chống trùng
+            if (vehicleDao.existsByPlate(plateNumber)) {
+                res.put("success", false);
+                res.put("message", "Biển số đã tồn tại.");
+                return res;
+            }
+            if (vehicleDao.existsByVin(vinNumber)) {
+                res.put("success", false);
+                res.put("message", "VIN đã tồn tại.");
+                return res;
+            }
+
+            // 4) Tạo vehicle tối giản (battery fields = NULL, odometer=0)
+            boolean ok = vehicleDao.createVehicleMinimal(userId, plateNumber, model, vinNumber);
+            if (!ok) {
+                res.put("success", false);
+                res.put("message", "Đăng ký xe thất bại (DB lỗi hoặc dữ liệu trùng).");
+                return res;
+            }
+
+            // 5) Thành công → trả danh sách xe mới nhất
+            res.put("success", true);
+            res.put("message", "Đăng ký xe thành công!");
+            res.put("data", vehicleDao.getVehiclesWithBatteryByUser(userId));
+            return res;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            res.put("success", false);
+            res.put("message", "Lỗi hệ thống: " + e.getMessage());
+            return res;
+        }
+    }
+
+    // ==================== Helper ====================
+
+    private static boolean isBlank(String s) {
+        return s == null || s.trim().isEmpty();
+    }
 }
+
 

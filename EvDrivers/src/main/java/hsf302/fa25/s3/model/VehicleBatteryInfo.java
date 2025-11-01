@@ -21,5 +21,6 @@ public class VehicleBatteryInfo {
     private Integer batteryId; // Change to Integer to allow null values
     private String batteryModel;
     private Double health;
-    private Double currentOdometer; // Thêm field quãng đường hiện tại
+    private Double currentOdometer;
+    private Integer contractId;// Thêm field quãng đường hiện tại
 }

@@ -12,8 +12,6 @@ import hsf302.fa25.s3.model.User;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 
-import static org.hibernate.engine.config.spi.StandardConverters.asInteger;
-import static org.hibernate.engine.config.spi.StandardConverters.asString;
 
 @RestController
 @RequestMapping("/api/contracts")

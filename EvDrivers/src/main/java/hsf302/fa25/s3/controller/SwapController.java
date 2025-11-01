@@ -100,7 +100,7 @@ public class SwapController {
         Map<String, Object> response = new HashMap<>();
         
         try {
-            Integer swapId = swapDao.createSwapReturningId(swap);
+            Integer swapId = swapDao.createSwap(swap);
             if (swapId != null) {
                 // set generated id back to model for client
                 try { swap.setSwapId(swapId); } catch (Exception ignore) {}
