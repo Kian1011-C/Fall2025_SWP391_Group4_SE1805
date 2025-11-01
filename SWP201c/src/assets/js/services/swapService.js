@@ -9,25 +9,27 @@ const swapService = {
      * (Uses POST /api/swaps from your BE)
      */
     initiateSwap: async (realSwapData) => {
-        // realSwapData: { userId, contractId, vehicleId, oldBatteryId, stationId, towerId, newBatteryId }
+        // realSwapData: { userId, contractId, vehicleId, oldBatteryId, stationId, staffId, newBatteryId }
         try {
             console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
             console.log("📤 GỌI API TẠO SWAP (POST /api/swaps)");
             console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-            console.log("Input data:", realSwapData);
+            console.log("Input data (từ useSwapBattery):", realSwapData);
 
             // Gửi đúng dữ liệu thật từ FE
-            // Backend đọc field "batteryId" (không phải "oldBatteryId")
+            // Backend model Swap có field: oldBatteryId, newBatteryId, staffId, swapStatus
             const swapDataForBE = {
                 userId: realSwapData.userId,
                 contractId: realSwapData.contractId,
                 vehicleId: realSwapData.vehicleId,
-                batteryId: realSwapData.oldBatteryId,  // SỬA: Backend đọc field "batteryId"
+                oldBatteryId: realSwapData.oldBatteryId,  // Backend field: oldBatteryId
                 newBatteryId: realSwapData.newBatteryId,
                 stationId: realSwapData.stationId,
-                towerId: realSwapData.towerId,
-                status: "INITIATED"
+                staffId: realSwapData.staffId,  // Thêm staffId
+                swapStatus: "INITIATED"  // Backend field: swapStatus
             };
+            
+            // KHÔNG GỬI towerId vì lấy pin từ kho (IN_STOCK)
 
             console.log("Payload sẽ gửi đến backend:");
             console.log(JSON.stringify(swapDataForBE, null, 2));
@@ -35,16 +37,16 @@ const swapService = {
             console.log("  ├─ userId:", swapDataForBE.userId, `(type: ${typeof swapDataForBE.userId})`);
             console.log("  ├─ contractId:", swapDataForBE.contractId, `(type: ${typeof swapDataForBE.contractId})`);
             console.log("  ├─ vehicleId:", swapDataForBE.vehicleId, `(type: ${typeof swapDataForBE.vehicleId})`);
-            console.log("  ├─ batteryId (old battery):", swapDataForBE.batteryId, `(type: ${typeof swapDataForBE.batteryId})`);
+            console.log("  ├─ oldBatteryId:", swapDataForBE.oldBatteryId, `(type: ${typeof swapDataForBE.oldBatteryId})`);
             console.log("  ├─ newBatteryId:", swapDataForBE.newBatteryId, `(type: ${typeof swapDataForBE.newBatteryId})`);
             console.log("  ├─ stationId:", swapDataForBE.stationId, `(type: ${typeof swapDataForBE.stationId})`);
-            console.log("  ├─ towerId:", swapDataForBE.towerId, `(type: ${typeof swapDataForBE.towerId})`);
-            console.log("  └─ status:", swapDataForBE.status);
+            console.log("  ├─ staffId:", swapDataForBE.staffId, `(type: ${typeof swapDataForBE.staffId})`);
+            console.log("  └─ swapStatus:", swapDataForBE.swapStatus);
+            console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
             console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
-            // SỬA: Đổi lại endpoint (kiểm tra backend đang dùng endpoint nào)
-            // Thử endpoint: /api/batteries/swap/initiate
-            const responseData = await apiUtils.post('/api/batteries/swap/initiate', swapDataForBE);
+            // Đúng endpoint backend: /api/swaps
+            const responseData = await apiUtils.post('/api/swaps', swapDataForBE);
 
             console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
             console.log("📥 NHẬN RESPONSE TỪ POST /api/swaps");
@@ -52,16 +54,18 @@ const swapService = {
             console.log("Response:", JSON.stringify(responseData, null, 2));
             console.log("Response keys:", Object.keys(responseData || {}));
             console.log("Response.data:", responseData?.data);
-            console.log("Response.data keys:", Object.keys(responseData?.data || {}));
-            console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-
-            // Check if response indicates an error
+            
+            // Xử lý lỗi nếu backend trả về success: false
+            // Lỗi này sẽ được 'catch' ở dòng 131
             if (responseData?.success === false) {
+                 console.error("LỖI TỪ BACKEND:", responseData?.message);
+                 // Ném lỗi với thông báo từ backend
                 throw new Error(responseData?.message || "Backend could not create swap transaction");
             }
-
-            // If no data returned, it might be a network error
+            
+            // Xử lý nếu không có dữ liệu trả về (có thể là lỗi network)
             if (!responseData?.data && !responseData?.success) {
+                 console.error("LỖI NETWORK HOẶC KHÔNG CÓ DATA:", responseData);
                 throw new Error("No response data received from backend");
             }
 
@@ -92,30 +96,20 @@ const swapService = {
                 throw new Error('Backend không trả về swapId. Kiểm tra API response structure.');
             }
 
-            // 3. FIND EMPTY SLOT (optional helper, nếu BE đã trả thì bỏ qua)
-            let emptySlotNumber = returnedSwap.emptySlot || returnedSwap.emptySlotNumber;
-            if (!emptySlotNumber) {
-                try {
-                    const emptySlotResponse = await apiUtils.get(ENDPOINTS.DRIVER.GET_EMPTY_SLOT, {
-                        towerId: realSwapData.towerId
-                    });
-                    if (emptySlotResponse?.success && emptySlotResponse?.data) {
-                        emptySlotNumber = emptySlotResponse.data.slotNumber;
-                    }
-                } catch (e) {
-                    console.warn('Could not fetch empty slot:', e);
-                }
-            }
+            // KHÔNG TÌM EMPTY SLOT vì lấy pin từ kho (IN_STOCK)
+            // Pin IN_STOCK không cần towerId/slotId
 
+            // KHÔNG TÌM EMPTY SLOT vì lấy pin từ kho (IN_STOCK)
+            // Pin IN_STOCK không cần towerId/slotId
 
             return {
                 ...returnedSwap,
                 swapId: normalizedSwapId,
-                emptySlot: emptySlotNumber ?? null,
-                emptySlotNumber: emptySlotNumber ?? null,
+                // Không trả về emptySlot vì không cần
             };
         } catch (error) {
-            console.error('Error initiating swap:', error);
+            console.error('Error initiating swap (trong swapService.js):', error);
+            // Ném lỗi để useSwapBattery.js (dòng 99) có thể bắt được
             throw new Error(error.message || "Unknown error during swap initiation");
         }
     },
@@ -138,7 +132,7 @@ const swapService = {
             const response = await apiUtils.post(endpoint, {});
 
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.log('� NHẬN RESPONSE TỪ API');
+            console.log('📥 NHẬN RESPONSE TỪ API CONFIRM');
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             console.log('Full response:', JSON.stringify(response, null, 2));
             console.log('  ├─ response.success:', response.success);
@@ -159,17 +153,40 @@ const swapService = {
         }
     },
 
-    // Other functions (getAllSwaps, updateSwapStatus) remain the same
-    getAllSwaps: async () => { 
-        console.log('getAllSwaps not implemented yet');
-        return { success: false, message: 'Not implemented' };
+    // Lấy lịch sử swap của user
+    getUserSwapHistory: async (userId, limit = 10) => {
+        try {
+            const endpoint = `/api/users/${userId}/swaps?limit=${limit}`;
+            const response = await apiUtils.get(endpoint);
+            return response;
+        } catch (error) {
+            console.error('❌ LỖI KHI GỌI API GET USER SWAP HISTORY:', error);
+            throw error;
+        }
     },
+
+    // Lấy tất cả swap (admin)
+    getAllSwaps: async () => { 
+        try {
+            const endpoint = `/api/swaps`;
+            const response = await apiUtils.get(endpoint);
+            return response;
+        } catch (error) {
+            console.error('❌ LỖI KHI GỌI API GET ALL SWAPS:', error);
+            throw error;
+        }
+    },
+
+    // (Chưa implement)
     updateSwapStatus: async (swapId, status) => { 
         console.log('updateSwapStatus not implemented yet', { swapId, status });
         return { success: false, message: 'Not implemented' };
     },
+
+    // Lấy chi tiết 1 swap
     getSwapDetails: async (swapId) => {
         try {
+            // Giả sử endpoint là /api/swaps/{swapId}
             const endpoint = `/api/swaps/${swapId}`;
             const response = await apiUtils.get(endpoint);
             if (response.success) {
@@ -183,10 +200,16 @@ const swapService = {
         }
     },
 
+    // Lấy pin theo trạm
     getBatteriesByStation: (stationId) => {
-    // Dùng ENDPOINTS và apiUtils.get
-    const url = API_CONFIG.ENDPOINTS.BATTERIES.BY_STATION(stationId);
-    return apiUtils.get(url);
+        try {
+            // Dùng ENDPOINTS và apiUtils.get
+            const url = ENDPOINTS.BATTERIES.BY_STATION(stationId);
+            return apiUtils.get(url);
+        } catch (error) {
+            console.error('❌ LỖI KHI GỌI API GET BATTERIES BY STATION:', error);
+            throw error;
+        }
     }
 };
 

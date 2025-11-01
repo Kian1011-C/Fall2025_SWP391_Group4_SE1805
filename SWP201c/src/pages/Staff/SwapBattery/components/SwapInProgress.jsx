@@ -5,26 +5,33 @@ const SwapInProgress = ({ swapDetails, isSubmitting, onConfirmSwap, onCancel }) 
 
     return (
         <div style={styles.container}>
-            <div style={styles.badge}>✅ GIAO DỊCH #{swapDetails.swapId}</div>
-            <h2 style={styles.title}>Đã tìm thấy pin!</h2>
-            <p style={styles.text}>Yêu cầu nhân viên đến vị trí sau để lấy pin mới:</p>
-            
+            <div style={styles.badge}>✅ GIAO DỊCH #{swapDetails.swapId || swapDetails.id}</div>
+            <h2 style={styles.title}>Khởi tạo đổi pin thành công!</h2>
+            <p style={styles.text}>Pin mới đã được chọn từ kho (trạng thái IN_STOCK):</p>
             <div style={styles.infoBox}>
                 <div style={styles.infoRow}>
-                    <span style={styles.label}>Tháp số:</span>
-                    <span style={styles.value}>#{swapDetails.towerNumber}</span>
-                </div>
-                <div style={styles.infoRow}>
-                    <span style={styles.label}>Hộc (Slot) số:</span>
-                    <span style={styles.value}>#{swapDetails.slotNumber}</span>
+                    <span style={styles.label}>Mã Giao dịch:</span>
+                    <span style={styles.value}>#{swapDetails.swapId || swapDetails.id}</span>
                 </div>
                 <div style={styles.infoRow}>
                     <span style={styles.label}>Mã Pin Mới:</span>
-                    <span style={styles.value}>BAT-{swapDetails.newBatteryId}</span>
+                    <span style={styles.value}>{swapDetails.newBatteryId || swapDetails.batteryId || swapDetails.newBatteryID || '-'}</span>
+                </div>
+                {swapDetails.oldBatteryId && (
+                    <div style={styles.infoRow}>
+                        <span style={styles.label}>Mã Pin Cũ:</span>
+                        <span style={styles.value}>{swapDetails.oldBatteryId}</span>
+                    </div>
+                )}
+                <div style={styles.infoRow}>
+                    <span style={styles.label}>Trạng thái:</span>
+                    <span style={{...styles.value, color: '#10b981'}}>
+                        {swapDetails.status || 'INITIATED'}
+                    </span>
                 </div>
             </div>
 
-            <p style={styles.text}>Sau khi hoàn tất đổi pin vật lý cho khách hàng, hãy bấm "Xác nhận".</p>
+            <p style={styles.text}>Vui lòng lấy pin mới từ kho và hoàn tất đổi pin vật lý cho khách hàng, sau đó bấm "Xác nhận".</p>
 
             <div style={styles.buttonGroup}>
                 <button onClick={onCancel} style={styles.buttonSecondary}>

@@ -1,13 +1,28 @@
 import React from 'react';
+import { useAuth } from '../../../context/AuthContext';
 import { useSwapBattery } from './hooks/useSwapBattery';
 import InitiateSwapForm from './components/InitiateSwapForm';
 import SwapInProgress from './components/SwapInProgress';
 
-// Đây là thông tin bạn nên lấy từ Context/Redux sau khi nhân viên đăng nhập
-const MOCK_STAFF_ID = "staff_001";
-const MOCK_STATION_ID = 1; 
+// Thông tin mẫu cho trạm
+const MOCK_STATION_ID = 1;
 
 const SwapBatteryPage = () => {
+    // Lấy thông tin staff đang đăng nhập từ AuthContext
+    const { currentUser } = useAuth();
+    
+    // Lấy staffId từ currentUser, nếu không có thì dùng 'staff001' (để test)
+    // Trong production, PHẢI đăng nhập và có userId hợp lệ
+    const currentStaffId = currentUser?.userId || 'staff001';
+    
+    console.log('👤 Staff đang đăng nhập:', {
+        currentUser,
+        currentStaffId,
+        userId: currentUser?.userId,
+        email: currentUser?.email,
+        role: currentUser?.role
+    });
+    
     const {
         step,
         isLoading,
@@ -15,20 +30,37 @@ const SwapBatteryPage = () => {
         error,
         availableBatteries,
         swapDetails,
+        swapHistory,
+        allSwaps,
+        getUserSwapHistory,
+        getAllSwaps,
         fetchAvailableBatteries,
         handleInitiateSwap,
         handleConfirmSwap,
         cancelSwap
-    } = useSwapBattery(MOCK_STAFF_ID, MOCK_STATION_ID);
+    } = useSwapBattery(null, currentStaffId, MOCK_STATION_ID); // userId = null ban đầu
 
     return (
         <div style={{ padding: '20px' }}>
-            <h1 style={{ marginTop: 0, marginBottom: '30px' }}>Thực hiện Đổi Pin</h1>
-
-            {/* * Component này sẽ render 1 trong 2 component con 
-              * tùy thuộc vào trạng thái 'step' từ hook.
-              */}
+            <h1 style={{ marginTop: 0, marginBottom: '30px', color: 'white' }}>Thực hiện Đổi Pin</h1>
             
+            {/* Hiển thị thông tin nhân viên */}
+            <div style={{ marginBottom: '20px', background: '#1e293b', borderRadius: '12px', padding: '16px' }}>
+                <p style={{ margin: 0, color: '#94a3b8' }}>
+                    👤 Nhân viên: <strong style={{ color: 'white' }}>
+                        {currentUser?.name || currentUser?.email || currentUser?.userId || 'Chưa đăng nhập'}
+                    </strong>
+                </p>
+                <p style={{ margin: '5px 0 0 0', color: '#94a3b8' }}>
+                    🏢 Trạm: <strong style={{ color: 'white' }}>#{MOCK_STATION_ID}</strong>
+                </p>
+                {!currentStaffId && (
+                    <p style={{ margin: '5px 0 0 0', color: '#ef4444', fontSize: '14px' }}>
+                        ⚠️ Cảnh báo: Không tìm thấy Staff ID. Staff ID sẽ để NULL trong giao dịch.
+                    </p>
+                )}
+            </div>
+
             {step === 'form' && (
                 <InitiateSwapForm
                     isLoading={isLoading}
@@ -37,6 +69,7 @@ const SwapBatteryPage = () => {
                     availableBatteries={availableBatteries}
                     fetchAvailableBatteries={() => fetchAvailableBatteries(MOCK_STATION_ID)}
                     onInitiateSwap={handleInitiateSwap}
+                    currentStaffId={currentStaffId} // Truyền staffId
                 />
             )}
 
