@@ -24,24 +24,19 @@ public class VNPayConfig {
     @Value("${vnpay.hash-secret}")
     private String vnp_HashSecret;
 
-    // URL giao diện thanh toán
     @Value("${vnpay.pay-url}")
     private String vnp_PayUrl;
 
-    // URL hệ thống  nhận redirect
     @Value("${vnpay.return-url}")
     private String vnp_ReturnUrl;
 
-    // WebAPI dùng QueryDR/Refund
     @Value("${vnpay.api-url}")
     private String vnp_ApiUrl;
 
-    /* ========== Utilities ========== */
-
-    /** yyyyMMddHHmmss (GMT+7) */
+    /** yyyyMMddHHmmss (Asia/Ho_Chi_Minh) */
     public String nowYmdHms() {
         SimpleDateFormat f = new SimpleDateFormat("yyyyMMddHHmmss");
-        f.setTimeZone(TimeZone.getTimeZone("GMT+7"));
+        f.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
         return f.format(new Date());
     }
 
@@ -77,7 +72,7 @@ public class VNPayConfig {
             if (v == null || v.isEmpty()) continue;
             if (sb.length() > 0) sb.append('&');
             sb.append(k).append('=')
-                    .append(URLEncoder.encode(v, StandardCharsets.US_ASCII));
+                    .append(URLEncoder.encode(v, StandardCharsets.UTF_8)); // UTF-8
         }
         return sb.toString();
     }
@@ -91,9 +86,9 @@ public class VNPayConfig {
             String value = params.get(key);
             if (value == null || value.isEmpty()) continue;
             if (query.length() > 0) query.append('&');
-            query.append(URLEncoder.encode(key, StandardCharsets.US_ASCII))
+            query.append(URLEncoder.encode(key, StandardCharsets.UTF_8))   // UTF-8
                     .append('=')
-                    .append(URLEncoder.encode(value, StandardCharsets.US_ASCII));
+                    .append(URLEncoder.encode(value, StandardCharsets.UTF_8)); // UTF-8
         }
         return query.toString();
     }
@@ -139,7 +134,7 @@ public class VNPayConfig {
                 }
             }
 
-            String hashData = buildHashDataEncodedSorted(copy); // phải cùng cách build như lúc tạo URL
+            String hashData = buildHashDataEncodedSorted(copy); // cùng cách build như lúc tạo URL
             String calc = hmacSHA512(vnp_HashSecret, hashData);
 
             boolean ok = calc.equalsIgnoreCase(received);

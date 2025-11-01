@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URI;
-import java.net.URLDecoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -38,16 +37,16 @@ public class PaymentService {
                 .contractId(contractId)
                 .amount(amount)
                 .method("QR")
-                .status("in_progress") // tạm trạng thái chờ
+                .status("in_progress")
                 .currency("VND")
                 .transactionRef(txnRef)
                 .build();
         paymentDao.insertPending(p);
 
-        // vnp_Amount = amount x 100 (integer)
-        String vnpAmount = BigDecimal.valueOf(amount)
+        // vnp_Amount = amount x 100 (integer, làm tròn an toàn)
+        String vnpAmount = new BigDecimal(String.valueOf(amount))
                 .multiply(new BigDecimal("100"))
-                .setScale(0, RoundingMode.UNNECESSARY)
+                .setScale(0, RoundingMode.HALF_UP)
                 .toPlainString();
 
         String now = vnpay.nowYmdHms();
@@ -76,9 +75,8 @@ public class PaymentService {
     /* ===================== RETURN + UPDATE ===================== */
 
     public Payment handleReturn(Map<String, String> queryParams) {
-        // decode
-        Map<String, String> params = new HashMap<>();
-        queryParams.forEach((k, v) -> params.put(k, v == null ? null : URLDecoder.decode(v, StandardCharsets.UTF_8)));
+        // KHÔNG decode lại: Spring đã decode 1 lần, dùng nguyên map
+        Map<String, String> params = new HashMap<>(queryParams);
 
         String txnRef = params.get("vnp_TxnRef");
         if (txnRef == null || txnRef.isBlank()) throw new RuntimeException("Missing vnp_TxnRef");
@@ -93,9 +91,9 @@ public class PaymentService {
         // đối soát số tiền
         try {
             long got = Long.parseLong(params.getOrDefault("vnp_Amount", "0"));
-            long expected = BigDecimal.valueOf(exist.getAmount())
+            long expected = new BigDecimal(String.valueOf(exist.getAmount()))
                     .multiply(new BigDecimal("100"))
-                    .setScale(0, RoundingMode.UNNECESSARY)
+                    .setScale(0, RoundingMode.HALF_UP)
                     .longValueExact();
             if (got != expected) {
                 updateFromReturn(txnRef, params, "failed");
@@ -106,8 +104,8 @@ public class PaymentService {
             return paymentDao.findByTxnRef(txnRef);
         }
 
-        // QueryDR để chốt trạng thái cuối
-        String transactionDate = formatAsYmdHms(exist.getCreatedAt()); // hoặc lưu riêng vnp_CreateDate lúc tạo
+        // QueryDR để chốt trạng thái cuối (dùng createdAt như code hiện tại của bạn)
+        String transactionDate = formatAsYmdHms(exist.getCreatedAt());
         boolean paid;
         try {
             Map<String, Object> q = queryDrPipeFormat(txnRef, "Query after return", transactionDate, "127.0.0.1");
@@ -123,7 +121,8 @@ public class PaymentService {
         return paymentDao.findByTxnRef(txnRef);
     }
 
-    private void updateFromReturn(String txnRef, Map<String, String> params, String finalStatus) {
+    /** Cập nhật DB từ dữ liệu VNPAY trả về */
+    public void updateFromReturn(String txnRef, Map<String, String> params, String finalStatus) {
         Payment update = new Payment();
         update.setTransactionRef(txnRef);
         update.setStatus(finalStatus);
@@ -144,6 +143,84 @@ public class PaymentService {
         update.setReturnRaw(toRaw(params));
 
         paymentDao.updateReturn(update);
+    }
+
+    /* ===================== IPN (server-to-server) ===================== */
+
+    /**
+     * Xử lý IPN từ VNPay. Trả về JSON đúng format VNPay yêu cầu.
+     */
+    public Map<String, String> handleIpn(Map<String, String> queryParams, String rawQuery) {
+        Map<String, String> res = new HashMap<>();
+        try {
+            // 1) Validate chữ ký
+            boolean okSign = vnpay.validateSignature(queryParams);
+            if (!okSign) {
+                res.put("RspCode", "97"); // Invalid Signature
+                res.put("Message", "Invalid Signature");
+                return res;
+            }
+
+            // 2) Lấy TxnRef & tìm đơn
+            String txnRef = queryParams.get("vnp_TxnRef");
+            if (txnRef == null || txnRef.isBlank()) {
+                res.put("RspCode", "91"); // Invalid request
+                res.put("Message", "Missing vnp_TxnRef");
+                return res;
+            }
+
+            Payment order = paymentDao.findByTxnRef(txnRef);
+            if (order == null) {
+                res.put("RspCode", "01"); // Order not found
+                res.put("Message", "Order not found");
+                return res;
+            }
+
+            // 3) Idempotent
+            if ("success".equalsIgnoreCase(order.getStatus())) {
+                res.put("RspCode", "02");
+                res.put("Message", "Order already confirmed");
+                return res;
+            }
+
+            // 4) Đối soát số tiền
+            long incomingAmountMinor = 0L;
+            try {
+                incomingAmountMinor = Long.parseLong(queryParams.getOrDefault("vnp_Amount", "0"));
+            } catch (Exception ignored) {}
+
+            long expectedMinor = new BigDecimal(String.valueOf(order.getAmount()))
+                    .multiply(new BigDecimal("100"))
+                    .setScale(0, RoundingMode.HALF_UP)
+                    .longValueExact();
+
+            if (incomingAmountMinor != expectedMinor) {
+                updateFromReturn(txnRef, queryParams, "failed");
+                res.put("RspCode", "04"); // Invalid amount
+                res.put("Message", "Invalid amount");
+                return res;
+            }
+
+            // 5) Kết quả từ VNPay
+            String rsp = queryParams.get("vnp_ResponseCode");
+            String ts  = queryParams.get("vnp_TransactionStatus");
+            boolean paid = "00".equals(rsp) && "00".equals(ts);
+
+            // 6) Cập nhật DB + (tùy chọn) lưu rawQuery nếu có cột
+            updateFromReturn(txnRef, queryParams, paid ? "success" : "failed");
+            // paymentDao.updateIpnRaw(txnRef, rawQuery); // nếu bạn có cột riêng
+
+            // 7) Phản hồi VNPay
+            res.put("RspCode", "00"); // luôn 00 nếu đã xử lý hợp lệ
+            res.put("Message", paid ? "Confirm Success" : "Confirm Fail");
+            return res;
+
+        } catch (Exception e) {
+            log.error("handleIpn error", e);
+            res.put("RspCode", "99");
+            res.put("Message", "Unknown error");
+            return res;
+        }
     }
 
     /* ===================== QUERYDR (PIPE) ===================== */
@@ -190,7 +267,7 @@ public class PaymentService {
         HttpRequest req = HttpRequest.newBuilder()
                 .uri(URI.create(vnpay.getVnp_ApiUrl()))
                 .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .POST(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8))
                 .build();
         HttpResponse<String> resp = client.send(req, HttpResponse.BodyHandlers.ofString());
 
@@ -214,9 +291,9 @@ public class PaymentService {
     private String addMinutes(String ymdHms, int minutes) {
         try {
             SimpleDateFormat f = new SimpleDateFormat("yyyyMMddHHmmss");
-            f.setTimeZone(TimeZone.getTimeZone("GMT+7"));
+            f.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
             Date d = f.parse(ymdHms);
-            Calendar c = Calendar.getInstance(TimeZone.getTimeZone("GMT+7"));
+            Calendar c = Calendar.getInstance(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
             c.setTime(d);
             c.add(Calendar.MINUTE, minutes);
             return f.format(c.getTime());
@@ -230,7 +307,7 @@ public class PaymentService {
         if (ymdHms == null || ymdHms.isBlank()) return null;
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-            sdf.setTimeZone(TimeZone.getTimeZone("GMT+7"));
+            sdf.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
             return new Timestamp(sdf.parse(ymdHms).getTime());
         } catch (Exception e) {
             return null;
@@ -266,7 +343,7 @@ public class PaymentService {
     private String formatAsYmdHms(Timestamp ts) {
         if (ts == null) return vnpay.nowYmdHms();
         SimpleDateFormat f = new SimpleDateFormat("yyyyMMddHHmmss");
-        f.setTimeZone(TimeZone.getTimeZone("GMT+7"));
+        f.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
         return f.format(new Date(ts.getTime()));
     }
 }

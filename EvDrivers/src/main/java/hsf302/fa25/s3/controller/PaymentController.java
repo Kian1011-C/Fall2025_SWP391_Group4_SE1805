@@ -33,8 +33,8 @@ public class PaymentController {
         return res;
     }
 
-    /** Return URL: VNPAY redirect về */
-    @GetMapping("/vnpay-return")
+    /** Return URL: VNPAY redirect về (trả JSON như cũ) */
+    @GetMapping("/vnpay-return-json")
     public Map<String, Object> vnpReturn(@RequestParam Map<String, String> params) {
         Payment p = paymentService.handleReturn(params);
         Map<String, Object> res = new HashMap<>();
@@ -51,13 +51,24 @@ public class PaymentController {
             res.put("responseCode", p.getVnpResponseCode());
         }
         return res;
+
+    }
+
+    /** IPN: VNPay gọi server-to-server để xác nhận thanh toán */
+    @GetMapping("/vnpay-ipn")
+    public Map<String, String> vnpIpn(
+            @RequestParam Map<String, String> params,
+            HttpServletRequest request
+    ) {
+        String rawQuery = request.getQueryString(); // để audit nếu cần
+        return paymentService.handleIpn(params, rawQuery);
     }
 
     /** (Tuỳ chọn) Endpoint test QueryDR thủ công */
     @GetMapping(value = "/querydr", produces = MediaType.APPLICATION_JSON_VALUE)
     public Map<String, Object> querydr(
             @RequestParam String txnRef,
-            @RequestParam String transactionDate // yyyyMMddHHmmss lúc PAY
+            @RequestParam String transactionDate // yyyyMMddHHmmss lúc PAY (ở đây dùng createdAt format)
     ) throws Exception {
         return paymentService.queryDrPipeFormat(
                 txnRef, "Manual query", transactionDate, "127.0.0.1"

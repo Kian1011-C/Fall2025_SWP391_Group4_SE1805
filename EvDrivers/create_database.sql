@@ -267,7 +267,7 @@ INSERT INTO Slots (tower_id, slot_number, status) VALUES
 (5, 1, 'charging'), (5, 2, 'full'), (5, 3, 'empty'), (5, 4, 'full'),
 -- Station 3 - Tower 1
 (6, 1, 'full'), (6, 2, 'full'), (6, 3, 'charging'), (6, 4, 'empty'),
--- Station 3 - Tower 2  
+-- Station 3 - Tower 2
 (7, 1, 'empty'), (7, 2, 'full'), (7, 3, 'full'), (7, 4, 'charging');
 
 -- Insert Batteries
@@ -305,9 +305,9 @@ INSERT INTO Vehicles (user_id, plate_number, model, vin_number, battery_type, co
 ('driver002', '29A-11111', 'Tesla Model 3', 'TS1234567890GHIJK', 'LiFePO4-60kWh', 'LiFePO4-60kWh,LiFePO4-75kWh', 12375.4);
 
 -- Insert Contracts với usage data tháng 10/2024
-INSERT INTO Contracts (vehicle_id, plan_id, start_date, end_date, status, contract_number, signed_place, 
+INSERT INTO Contracts (vehicle_id, plan_id, start_date, end_date, status, contract_number, signed_place,
                       current_month, monthly_distance, monthly_base_fee, monthly_overage_distance, monthly_overage_fee, monthly_total_fee) VALUES
-(1, 2, '2024-01-01', '2024-12-31', 'active', 'CT-2024-001', 'Hà Nội', 
+(1, 2, '2024-01-01', '2024-12-31', 'active', 'CT-2024-001', 'Hà Nội',
  '2024-10', 150.0, 270000, 0, 0, 270000), -- Gói Cơ bản: 150km < 400km
 (2, 3, '2024-02-15', '2025-02-14', 'active', 'CT-2024-002', 'Hà Nội',
  '2024-10', 780.0, 405000, 180.0, 64260, 469260), -- Gói Plus: 780km > 600km, vượt 180km * 357 = 64.260
@@ -317,13 +317,13 @@ INSERT INTO Contracts (vehicle_id, plan_id, start_date, end_date, status, contra
 -- Insert Payments
 INSERT INTO Payments (user_id, contract_id, amount, method, status, currency, transaction_ref) VALUES
 ('driver001', 1, 500000, 'QR', 'success', 'VND', 'QR-20241001-001'),
-('driver001', 2, 600000, 'Stripe', 'success', 'VND', 'ST-20241001-002'), 
+('driver001', 2, 600000, 'Stripe', 'success', 'VND', 'ST-20241001-002'),
 ('driver002', 3, 550000, 'Subscription', 'success', 'VND', 'SUB-20241001-003'),
 ('driver001', 1, 50000, 'QR', 'success', 'VND', 'QR-20241005-004'),
 ('driver002', 3, 50000, 'QR', 'success', 'VND', 'QR-20241005-005');
 
 -- Insert Swaps
-INSERT INTO Swaps (user_id, contract_id, vehicle_id, station_id, tower_id, staff_id, old_battery_id, new_battery_id, 
+INSERT INTO Swaps (user_id, contract_id, vehicle_id, station_id, tower_id, staff_id, old_battery_id, new_battery_id,
                   odometer_before, odometer_after, status, payment_id) VALUES
 ('driver001', 1, 1, 1, 1, 'staff001', 20, 1, 15420.5, 15450.8, 'COMPLETED', 4),
 ('driver001', 2, 2, 2, 3, 'staff002', 21, 9, 8750.2, 8785.6, 'COMPLETED', NULL),
@@ -345,11 +345,11 @@ INSERT INTO Issues (user_id, station_id, description, status) VALUES
 
 -- Update vehicles với pin hiện tại (batteries in_use)
 UPDATE Vehicles SET current_battery_id = 20 WHERE vehicle_id = 1; -- driver001 xe 1
-UPDATE Vehicles SET current_battery_id = 21 WHERE vehicle_id = 2; -- driver001 xe 2  
+UPDATE Vehicles SET current_battery_id = 21 WHERE vehicle_id = 2; -- driver001 xe 2
 UPDATE Vehicles SET current_battery_id = 22 WHERE vehicle_id = 3; -- driver002 xe 1
 
 -- Add FK constraint cho Vehicles -> Batteries (sau khi đã có data)
-ALTER TABLE Vehicles ADD CONSTRAINT FK_Vehicles_CurrentBattery 
+ALTER TABLE Vehicles ADD CONSTRAINT FK_Vehicles_CurrentBattery
     FOREIGN KEY (current_battery_id) REFERENCES Batteries(battery_id);
 
 USE ev_battery_swap;
