@@ -312,6 +312,7 @@ public class BatteryController {
                         int newBatteryId = rs.getInt("new_battery_id");
                         int stationId = rs.getInt("station_id");
                         Integer contractId = rs.getObject("contract_id") != null ? rs.getInt("contract_id") : null;
+                        Integer towerId = rs.getObject("tower_id") != null ? rs.getInt("tower_id") : null;
 
                         // 1) Update swap status
                         try (java.sql.PreparedStatement updateSwapPs = conn.prepareStatement("UPDATE Swaps SET status = 'COMPLETED', swap_date = GETDATE() WHERE swap_id = ?")) {
@@ -319,17 +320,16 @@ public class BatteryController {
                             updateSwapPs.executeUpdate();
                         }
 
-                        // 2) Handle old battery: move into an empty slot and set to 'charging'
+                        // 2) Handle old battery: move into an empty slot in the SAME TOWER and set to 'charging'
                         if (oldBatteryId != null) {
                             String findEmptySlotSql = """
                                 SELECT TOP 1 sl.slot_id FROM Slots sl
-                                INNER JOIN Towers t ON sl.tower_id = t.tower_id
-                                WHERE t.station_id = ? AND sl.status = 'empty'
+                                WHERE sl.tower_id = ? AND sl.status = 'empty'
                                 ORDER BY sl.slot_number
                             """;
                             Integer targetSlotId = null;
                             try (java.sql.PreparedStatement slotPs = conn.prepareStatement(findEmptySlotSql)) {
-                                slotPs.setInt(1, stationId);
+                                slotPs.setInt(1, towerId);
                                 try (java.sql.ResultSet slotRs = slotPs.executeQuery()) {
                                     if (slotRs.next()) {
                                         targetSlotId = slotRs.getInt("slot_id");
