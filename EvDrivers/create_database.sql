@@ -357,3 +357,62 @@ GO
 ALTER TABLE Vehicles
 ALTER COLUMN battery_type NVARCHAR(50) NULL;
 Thế là đủ cho DAO hiện tại (hàm insert đã set battery_type = NULL
+
+
+-- Hàm chọn bậc theo TỔNG KM THÁNG (không lũy tiến)
+CREATE OR ALTER FUNCTION dbo.ufn_rate_for_total_km (@total_km INT)
+RETURNS DECIMAL(10,2)
+AS
+BEGIN
+    DECLARE @rate DECIMAL(10,2);
+    SELECT TOP (1) @rate = rate_per_km
+    FROM DistanceRateTiers
+    WHERE @total_km BETWEEN from_km AND ISNULL(to_km, 2147483647)
+    ORDER BY from_km ASC;
+    RETURN ISNULL(@rate, 0);
+END
+GO
+
+-- Proc tính tiền theo bậc
+CREATE OR ALTER PROCEDURE dbo.usp_CalcMonthlyBill_ByTier
+    @contract_id INT, @year INT, @month INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    DECLARE @first DATE = DATEFROMPARTS(@year,@month,1);
+    DECLARE @next  DATE = DATEADD(MONTH,1,@first);
+    DECLARE @yyyymm VARCHAR(7) = CONVERT(CHAR(7),@first,126);
+
+    DECLARE @base_price DECIMAL(12,2), @base_distance INT;
+    SELECT @base_price=sp.base_price,@base_distance=sp.base_distance
+    FROM Contracts c JOIN ServicePlans sp ON c.plan_id=sp.plan_id
+    WHERE c.contract_id=@contract_id;
+
+    DECLARE @total_km DECIMAL(12,2) = (
+        SELECT ISNULL(SUM(distance_used),0)
+        FROM Swaps
+        WHERE contract_id=@contract_id
+          AND status='COMPLETED'
+          AND swap_date>=@first AND swap_date<@next
+    );
+
+    DECLARE @over_km DECIMAL(12,2)=CASE WHEN @base_distance=-1 THEN 0
+                                        WHEN @total_km>@base_distance THEN @total_km-@base_distance ELSE 0 END;
+    DECLARE @rate DECIMAL(10,2)=dbo.ufn_rate_for_total_km(CAST(@total_km AS INT));
+    DECLARE @over_fee DECIMAL(12,2)=@over_km*@rate;
+    DECLARE @total_fee DECIMAL(12,2)=@base_price+@over_fee;
+
+    UPDATE Contracts SET
+        current_month=@yyyymm,
+        monthly_distance=@total_km,
+        monthly_overage_distance=@over_km,
+        monthly_overage_fee=@over_fee,
+        monthly_total_fee=@total_fee,
+        updated_at=GETDATE()
+    WHERE contract_id=@contract_id;
+
+    SELECT @contract_id contract_id,@yyyymm month,@total_km total_km,
+           @base_distance base_distance,@base_price base_price,@rate rate_per_km_applied,
+           @over_km overage_km,@over_fee overage_fee,@total_fee total_fee;
+END
+GO

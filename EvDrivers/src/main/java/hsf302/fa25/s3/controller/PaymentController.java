@@ -17,7 +17,7 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
-    /** Tạo URL thanh toán (Return + QueryDR, không IPN) */
+    /** Tạo URL thanh toán (Return + QueryDR) */
     @PostMapping("/create")
     public Map<String, Object> create(
             @RequestParam String userId,
@@ -33,12 +33,13 @@ public class PaymentController {
         return res;
     }
 
-    /** Return URL: VNPAY redirect về (trả JSON như cũ) */
+    /** Return URL: VNPay redirect về (trả JSON) */
     @GetMapping("/vnpay-return-json")
     public Map<String, Object> vnpReturn(@RequestParam Map<String, String> params) {
         Payment p = paymentService.handleReturn(params);
         Map<String, Object> res = new HashMap<>();
         if (p != null && "success".equalsIgnoreCase(p.getStatus())) {
+
             res.put("success", true);
             res.put("message", "Thanh toán thành công");
         } else {
@@ -51,16 +52,12 @@ public class PaymentController {
             res.put("responseCode", p.getVnpResponseCode());
         }
         return res;
-
     }
 
-    /** IPN: VNPay gọi server-to-server để xác nhận thanh toán */
+    /** ✅ IPN: VNPay gọi server-to-server để xác nhận thanh toán */
     @GetMapping("/vnpay-ipn")
-    public Map<String, String> vnpIpn(
-            @RequestParam Map<String, String> params,
-            HttpServletRequest request
-    ) {
-        String rawQuery = request.getQueryString(); // để audit nếu cần
+    public Map<String, String> vnpIpn(@RequestParam Map<String, String> params, HttpServletRequest req) {
+        String rawQuery = req.getQueryString(); // để audit nếu cần
         return paymentService.handleIpn(params, rawQuery);
     }
 
@@ -68,11 +65,24 @@ public class PaymentController {
     @GetMapping(value = "/querydr", produces = MediaType.APPLICATION_JSON_VALUE)
     public Map<String, Object> querydr(
             @RequestParam String txnRef,
-            @RequestParam String transactionDate // yyyyMMddHHmmss lúc PAY (ở đây dùng createdAt format)
+            @RequestParam String transactionDate // yyyyMMddHHmmss lúc PAY (createdAt format)
     ) throws Exception {
         return paymentService.queryDrPipeFormat(
                 txnRef, "Manual query", transactionDate, "127.0.0.1"
         );
+    }
+
+    /** (Tuỳ chọn) Tính tiền tháng + trả URL VNPay ngay cho FE */
+    @GetMapping("/pay-monthly")
+    public Map<String, Object> payMonthly(@RequestParam String userId,
+                                          @RequestParam int contractId,
+                                          @RequestParam int year,
+                                          @RequestParam int month,
+                                          HttpServletRequest req) {
+        String ip = getClientIp(req);
+        Map<String, Object> bill = paymentService.createMonthlyBillUrl(userId, contractId, year, month, ip);
+        bill.put("success", true);
+        return bill;
     }
 
     private String getClientIp(HttpServletRequest request) {

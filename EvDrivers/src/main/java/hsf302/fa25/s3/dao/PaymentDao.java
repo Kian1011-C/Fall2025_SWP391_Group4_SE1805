@@ -3,25 +3,25 @@ package hsf302.fa25.s3.dao;
 import hsf302.fa25.s3.context.ConnectDB;
 import hsf302.fa25.s3.model.Payment;
 import org.springframework.stereotype.Repository;
-
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+
 @Repository
 public class PaymentDao {
 
-    //luu giao dich dang cho doi xu ly
+    // ===== Lưu giao dịch pending =====
     public boolean insertPending(Payment p) {
         String sql = "INSERT INTO Payments (user_id, contract_id, amount, method, status, currency, transaction_ref, created_at) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, GETDATE())";
         try (Connection c = ConnectDB.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, p.getUserId());
-            if (p.getContractId() == null) ps.setNull(2, Types.INTEGER); else ps.setInt(2, p.getContractId());
+            if (p.getContractId() == null) ps.setNull(2, Types.INTEGER);
+            else ps.setInt(2, p.getContractId());
             ps.setBigDecimal(3, new java.math.BigDecimal(p.getAmount()).setScale(2, java.math.RoundingMode.HALF_UP));
-            ps.setString(4, p.getMethod());   // 'QR' để pass CHECK
-            ps.setString(5, p.getStatus());   // 'pending' nếu bạn đã thêm vào CHECK; nếu chưa, dùng 'failed' rồi update lại khi có return (không khuyến nghị)
-            ps.setString(6, p.getCurrency()); // 'VND'
+            ps.setString(4, p.getMethod());
+            ps.setString(5, p.getStatus());
+            ps.setString(6, p.getCurrency());
             ps.setString(7, p.getTransactionRef());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -29,7 +29,8 @@ public class PaymentDao {
             return false;
         }
     }
-    //tim giao dich VNpay bang transaction_ref
+
+    // ===== Tìm giao dịch theo mã ref =====
     public Payment findByTxnRef(String txnRef) {
         String sql = "SELECT TOP 1 * FROM Payments WHERE transaction_ref = ?";
         try (Connection c = ConnectDB.getConnection();
@@ -44,7 +45,7 @@ public class PaymentDao {
         return null;
     }
 
-    //cap nhap giao dich VNpay sau khi co ket qua tra ve
+    // ===== Cập nhật sau khi VNPay trả kết quả =====
     public boolean updateReturn(Payment p) {
         String sql = "UPDATE Payments SET status=?, vnp_amount=?, vnp_response_code=?, vnp_transaction_no=?, vnp_bank_code=?, " +
                 "vnp_bank_tran_no=?, vnp_card_type=?, vnp_pay_date=?, vnp_order_info=?, vnp_transaction_status=?, return_raw=? " +
@@ -70,7 +71,7 @@ public class PaymentDao {
         }
     }
 
-    //cap nhap trang thai IPN (da xac thuc hay chua)
+    // ===== Xác thực IPN =====
     public boolean updateIpn(String txnRef, boolean verified, String ipnRaw) {
         String sql = "UPDATE Payments SET ipn_verified=?, ipn_raw=? WHERE transaction_ref=?";
         try (Connection c = ConnectDB.getConnection();
@@ -84,21 +85,49 @@ public class PaymentDao {
             return false;
         }
     }
-    //lay tat ca giao dich VNpay
-    public List<Payment> findAll() {
-        List<Payment> list = new ArrayList<>();
-        String sql = "SELECT * FROM Payments ORDER BY payment_id DESC";
+
+    // ===== Tính tiền tháng bằng proc =====
+    public Map<String, Object> calculateMonthlyBill(int contractId, int year, int month) {
+        String sql = "EXEC dbo.usp_CalcMonthlyBill_ByTier ?, ?, ?";
         try (Connection c = ConnectDB.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) list.add(map(rs));
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, contractId);
+            ps.setInt(2, year);
+            ps.setInt(3, month);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("contractId", rs.getInt("contract_id"));
+                    map.put("month", rs.getString("month"));
+                    map.put("totalKm", rs.getBigDecimal("total_km"));
+                    map.put("baseDistance", rs.getInt("base_distance"));
+                    map.put("basePrice", rs.getBigDecimal("base_price"));
+                    map.put("ratePerKmApplied", rs.getBigDecimal("rate_per_km_applied"));
+                    map.put("overageKm", rs.getBigDecimal("overage_km"));
+                    map.put("overageFee", rs.getBigDecimal("overage_fee"));
+                    map.put("totalFee", rs.getBigDecimal("total_fee"));
+                    return map;
+                }
+            }
         } catch (SQLException e) {
-            System.err.println("findAll err: " + e.getMessage());
+            System.err.println("calculateMonthlyBill err: " + e.getMessage());
         }
-        return list;
+        return null;
+    }
+    public boolean updateContractStatusToInactive(int contractId) {
+        String sql = "UPDATE Contracts SET status = 'expired', updated_at = GETDATE() WHERE contract_id = ?";
+        try (Connection c = ConnectDB.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, contractId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("updateContractStatusToInactive err: " + e.getMessage());
+            return false;
+        }
     }
 
-    //map ResultSet to Payment object
+
+    // ===== Map từ ResultSet sang object =====
     private Payment map(ResultSet rs) throws SQLException {
         Timestamp payDate = rs.getTimestamp("vnp_pay_date");
         return Payment.builder()
@@ -125,4 +154,5 @@ public class PaymentDao {
                 .createdAt(rs.getTimestamp("created_at"))
                 .build();
     }
+
 }
