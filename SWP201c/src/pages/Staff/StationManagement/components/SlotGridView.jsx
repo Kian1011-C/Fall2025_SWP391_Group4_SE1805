@@ -1,45 +1,94 @@
 import React from 'react';
 
-// Cập nhật hàm getBatteryColor để đọc 'batteryStatus'
-const getBatteryColor = (status) => {
-  const s = status ? status.toLowerCase() : 'empty';
-  if (s === 'empty') return '#4b5563'; // Trống
-  if (s === 'maintenance') return '#991b1b'; // Hỏng/Bảo trì
-  if (s === 'available' || s === 'full') return '#166534'; // Đầy
-  if (s === 'charging') return '#1e40af'; // Đang sạc
-  return '#4b5563';
+const getSlotStatus = (slot) => {
+  const hasBattery = !!slot.batteryId;
+  if (!hasBattery) return 'empty';
+  
+  const status = slot.batteryStatus ? slot.batteryStatus.toLowerCase() : 'empty';
+  return status;
+};
+
+const getStatusIcon = (status) => {
+  switch(status) {
+    case 'empty': return '⚪';
+    case 'available':
+    case 'full': return '🟢';
+    case 'charging': return '⚡';
+    case 'maintenance': return '🔴';
+    default: return '⚫';
+  }
+};
+
+const getBatteryLevelClass = (level) => {
+  if (level >= 80) return '';
+  if (level >= 40) return 'medium';
+  return 'low';
 };
 
 const SlotCard = ({ slot }) => {
-  // Đọc dữ liệu từ API /api/driver/slots
   const hasBattery = !!slot.batteryId;
+  const status = getSlotStatus(slot);
   
   return (
-    <div style={{ 
-      background: '#374151', 
-      borderLeft: `5px solid ${getBatteryColor(hasBattery ? slot.batteryStatus : 'empty')}`,
-      padding: '15px', 
-      borderRadius: '8px' 
-    }}>
-      <div style={{ color: 'white', fontWeight: 'bold', fontSize: '18px' }}>Hộc {slot.slotNumber}</div>
+    <div className={`slot-card ${status}`}>
+      <div className="slot-card-header">
+        <div className="slot-number">Hộc {slot.slotNumber}</div>
+        <div className="slot-status-icon">{getStatusIcon(status)}</div>
+      </div>
+      
       {hasBattery ? (
-        <>
-          <div style={{ fontSize: '14px', color: '#e5e7eb' }}>Pin: BAT{slot.batteryId}</div>
-          <div style={{ fontSize: '14px', color: '#e5e7eb' }}>Mẫu: {slot.batteryModel || 'N/A'}</div>
-          <div style={{ fontSize: '14px', color: '#e5e7eb' }}>Mức pin: {slot.batteryLevel}%</div>
-          <div style={{ fontSize: '14px', color: '#e5e7eb' }}>Trạng thái pin: {slot.batteryStatus}</div>
-        </>
+        <div className="slot-info">
+          <div className="slot-info-row">
+            <span className="slot-info-label">Pin ID:</span>
+            <span className="slot-info-value">BAT{slot.batteryId}</span>
+          </div>
+          <div className="slot-info-row">
+            <span className="slot-info-label">Mẫu pin:</span>
+            <span className="slot-info-value">{slot.batteryModel || 'N/A'}</span>
+          </div>
+          <div className="slot-info-row">
+            <span className="slot-info-label">Mức pin:</span>
+            <span className="slot-info-value">{slot.batteryLevel}%</span>
+          </div>
+          <div className="slot-info-row">
+            <span className="slot-info-label">Trạng thái:</span>
+            <span className="slot-info-value">{slot.batteryStatus}</span>
+          </div>
+          
+          {slot.batteryLevel !== undefined && (
+            <div className="battery-level-bar">
+              <div 
+                className={`battery-level-fill ${getBatteryLevelClass(slot.batteryLevel)}`}
+                style={{ width: `${slot.batteryLevel}%` }}
+              ></div>
+            </div>
+          )}
+        </div>
       ) : (
-        <div style={{ fontSize: '14px', color: '#9ca3af' }}>Trống</div>
+        <div className="slot-empty-text">Không có pin</div>
       )}
     </div>
   );
 };
 
-const SlotGridView = ({ slots }) => (
-  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px' }}>
-    {slots.map(slot => <SlotCard key={slot.id || slot.slotId} slot={slot} />)}
-  </div>
-);
+const SlotGridView = ({ slots }) => {
+  if (!slots || slots.length === 0) {
+    return (
+      <div className="station-empty">
+        <div className="station-empty-icon">🔋</div>
+        <div className="station-empty-text">Không có hộc sạc nào</div>
+        <div className="station-empty-subtext">Trụ này chưa có hộc sạc nào</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="slot-grid">
+      {slots.map(slot => (
+        <SlotCard key={slot.id || slot.slotId} slot={slot} />
+      ))}
+    </div>
+  );
+};
 
 export default SlotGridView;

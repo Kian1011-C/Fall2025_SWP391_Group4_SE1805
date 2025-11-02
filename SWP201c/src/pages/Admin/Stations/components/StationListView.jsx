@@ -1,41 +1,69 @@
 import React from 'react';
 
-const getStatusStyle = (status = '') => {
-    const s = status.toLowerCase();
-    const style = { padding: '5px 12px', borderRadius: '15px', fontSize: '12px', fontWeight: 'bold', display: 'inline-block' };
-    if (s === 'active' || s === 'hoạt động') return { ...style, background: '#166534', color: '#86efac' };
-    if (s === 'maintenance' || s === 'bảo trì') return { ...style, background: '#9a3412', color: '#fdba74' };
-    if (s === 'offline' || s === 'ngoại tuyến') return { ...style, background: '#991b1b', color: '#fca5a5' };
-    return { ...style, background: '#4b5563', color: '#e5e7eb' };
+const getStatusClass = (status = '') => {
+  const s = status.toLowerCase().replace(/\s+/g, '-');
+  return s || 'unknown';
 };
 
 const StationRow = ({ station, onSelect }) => (
-  <tr onClick={() => onSelect(station)} style={{ cursor: 'pointer', borderTop: '1px solid #374151' }}>
-    <td style={{ padding: '15px 20px', fontWeight: 'bold', color: 'white' }}>{station.id}</td>
-    <td style={{ padding: '15px 20px' }}>{station.name}</td>
-    <td style={{ padding: '15px 20px', maxWidth: '300px' }}>{station.address}</td>
-    <td style={{ padding: '15px 20px' }}><span style={getStatusStyle(station.status)}>{station.status}</span></td>
-    <td style={{ padding: '15px 20px' }}>{station.availableBatteries ?? 0} / {station.totalSlots ?? 0}</td>
+  <tr onClick={() => onSelect(station)}>
+    <td>{station.id}</td>
+    <td>{station.name}</td>
+    <td style={{ maxWidth: '350px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+      {station.address}
+    </td>
+    <td>
+      <span className={`station-status-badge ${getStatusClass(station.status)}`}>
+        {station.status}
+      </span>
+    </td>
+    <td>
+      <span style={{ fontWeight: 'bold', color: '#10b981' }}>
+        {station.availableBatteries ?? 0}
+      </span>
+      {' / '}
+      <span style={{ color: '#94a3b8' }}>
+        {station.totalSlots ?? 0}
+      </span>
+    </td>
   </tr>
 );
 
-const StationListView = ({ stations, onSelectStation }) => (
-  <div style={{ background: '#1f2937', borderRadius: '12px', overflowX: 'auto' }}>
-    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-      <thead>
-        <tr style={{ background: '#374151' }}>
-          <th style={{ padding: '15px 20px' }}>ID</th>
-          <th style={{ padding: '15px 20px' }}>Tên Trạm</th>
-          <th style={{ padding: '15px 20px' }}>Địa chỉ</th>
-          <th style={{ padding: '15px 20px' }}>Trạng thái</th>
-          <th style={{ padding: '15px 20px' }}>Pin (Sẵn/Tổng)</th>
-        </tr>
-      </thead>
-      <tbody>
-        {stations.map(station => <StationRow key={station.id} station={station} onSelect={onSelectStation} />)}
-      </tbody>
-    </table>
-  </div>
-);
+const StationListView = ({ stations, onSelectStation }) => {
+  if (!stations || stations.length === 0) {
+    return (
+      <div className="station-empty">
+        <div className="station-empty-icon">🏢</div>
+        <div className="station-empty-text">Không có trạm nào</div>
+        <div className="station-empty-subtext">Hiện tại chưa có trạm sạc nào trong hệ thống</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="station-table-container">
+      <table className="station-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Tên Trạm</th>
+            <th>Địa chỉ</th>
+            <th>Trạng thái</th>
+            <th>Pin (Sẵn/Tổng)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {stations.map(station => (
+            <StationRow 
+              key={station.id} 
+              station={station} 
+              onSelect={onSelectStation} 
+            />
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
 
 export default StationListView;

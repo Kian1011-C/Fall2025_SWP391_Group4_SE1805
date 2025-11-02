@@ -4,24 +4,35 @@ import StationListView from './components/StationListView';
 import TowerListView from './components/TowerListView';
 import SlotGridView from './components/SlotGridView';
 import LoadingFallback from '../../../components/common/LoadingFallback';
+import '../../../assets/css/StationManagement.css';
 
-// Component tiêu đề và nút "Quay lại"
-const Header = ({ title, onBack }) => (
-  <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '30px' }}>
-    {onBack && (
-      <button 
-        onClick={onBack} 
-        style={{ background: '#374151', color: 'white', border: 'none', padding: '10px 15px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px' }}
-      >
-        ← Quay lại
-      </button>
+const Header = ({ title, onBack, onRefresh, icon }) => (
+  <div className="station-header">
+    <div className="station-header-left">
+      {onBack && (
+        <button onClick={onBack} className="station-back-btn">
+          <span>←</span>
+          <span>Quay lại</span>
+        </button>
+      )}
+      <h1 className="station-title">
+        {icon && <span className="station-title-icon">{icon}</span>}
+        <span>{title}</span>
+      </h1>
+    </div>
+    {onRefresh && (
+      <div className="station-actions">
+        <button onClick={onRefresh} className="station-refresh-btn" title="Làm mới">
+          <span>🔄</span>
+          <span>Làm mới</span>
+        </button>
+      </div>
     )}
-    <h1 style={{ margin: 0, fontSize: '28px', color: 'white' }}>{title}</h1>
   </div>
 );
 
 const AdminStations = () => {
-  const [view, setView] = useState('stations'); // 'stations', 'towers', 'slots'
+  const [view, setView] = useState('stations');
   const [selectedStation, setSelectedStation] = useState(null);
   const [selectedTower, setSelectedTower] = useState(null);
 
@@ -39,13 +50,48 @@ const AdminStations = () => {
 
   const handleSelectTower = (tower) => {
     setSelectedTower(tower);
-    fetchSlots(tower.id || tower.towerId); // Lấy đúng ID của trụ
+    fetchSlots(tower.id || tower.towerId);
     setView('slots');
   };
 
+  const handleBack = () => {
+    if (view === 'slots') {
+      setView('towers');
+      setSelectedTower(null);
+    } else if (view === 'towers') {
+      setView('stations');
+      setSelectedStation(null);
+    }
+  };
+
+  const handleRefresh = () => {
+    if (view === 'slots') {
+      fetchSlots(selectedTower.id || selectedTower.towerId);
+    } else if (view === 'towers') {
+      fetchTowers(selectedStation.id);
+    } else {
+      fetchStations();
+    }
+  };
+
   const renderContent = () => {
-    if (isLoading) return <LoadingFallback text="Đang tải dữ liệu..." />;
-    if (error) return <p style={{ color: '#ef4444' }}>Lỗi: {error}</p>;
+    if (isLoading) {
+      return (
+        <div className="station-loading">
+          <div className="station-loading-spinner"></div>
+          <div className="station-loading-text">Đang tải dữ liệu...</div>
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="station-error">
+          <span className="station-error-icon">⚠️</span>
+          <span>Lỗi: {error}</span>
+        </div>
+      );
+    }
 
     if (view === 'slots') {
       return <SlotGridView slots={slots} />;
@@ -53,25 +99,34 @@ const AdminStations = () => {
     if (view === 'towers') {
       return <TowerListView towers={towers} onSelectTower={handleSelectTower} />;
     }
-    // Mặc định là 'stations'
     return <StationListView stations={stations} onSelectStation={handleSelectStation} />;
   };
 
   const getTitle = () => {
-    if (view === 'slots') return `Trạm ${selectedStation?.name} - Trụ ${selectedTower?.towerNumber}`;
+    if (view === 'slots') return `${selectedStation?.name} - Trụ ${selectedTower?.towerNumber}`;
     if (view === 'towers') return `Chi tiết Trạm: ${selectedStation?.name}`;
     return 'Quản lý Trạm';
   };
 
+  const getIcon = () => {
+    if (view === 'slots') return '🔋';
+    if (view === 'towers') return '🏗️';
+    return '🏢';
+  };
+
   const getBackButtonHandler = () => {
-    if (view === 'slots') return () => setView('towers');
-    if (view === 'towers') return () => setView('stations');
+    if (view === 'slots' || view === 'towers') return handleBack;
     return null;
   };
 
   return (
-    <div>
-      <Header title={getTitle()} onBack={getBackButtonHandler()} />
+    <div className="station-management-container fade-in">
+      <Header 
+        title={getTitle()} 
+        onBack={getBackButtonHandler()}
+        onRefresh={handleRefresh}
+        icon={getIcon()}
+      />
       {renderContent()}
     </div>
   );

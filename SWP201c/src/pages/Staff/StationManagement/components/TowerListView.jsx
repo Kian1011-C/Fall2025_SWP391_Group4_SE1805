@@ -1,30 +1,69 @@
 import React from 'react';
 
+const getStatusClass = (status = '') => {
+  const s = status.toLowerCase().replace(/\s+/g, '-');
+  return s || 'unknown';
+};
+
 const TowerRow = ({ tower, onSelect }) => (
-  <tr onClick={() => onSelect(tower)} style={{ cursor: 'pointer', borderTop: '1px solid #374151' }}>
-    <td style={{ padding: '15px 20px', fontWeight: 'bold', color: 'white' }}>{tower.id || tower.towerId}</td>
-    <td style={{ padding: '15px 20px' }}>{tower.towerNumber || 'N/A'}</td>
-    <td style={{ padding: '15px 20px' }}>{tower.status}</td>
-    <td style={{ padding: '15px 20px' }}>{tower.availableSlots ?? 0} / {tower.totalSlots ?? 0}</td>
+  <tr onClick={() => onSelect(tower)}>
+    <td>{tower.id || tower.towerId}</td>
+    <td>
+      <span style={{ fontWeight: 'bold', fontSize: '16px' }}>
+        Trụ {tower.towerNumber || 'N/A'}
+      </span>
+    </td>
+    <td>
+      <span className={`station-status-badge ${getStatusClass(tower.status)}`}>
+        {tower.status}
+      </span>
+    </td>
+    <td>
+      <span style={{ fontWeight: 'bold', color: '#10b981' }}>
+        {tower.availableSlots ?? 0}
+      </span>
+      {' / '}
+      <span style={{ color: '#94a3b8' }}>
+        {tower.totalSlots ?? 0}
+      </span>
+    </td>
   </tr>
 );
 
-const TowerListView = ({ towers, onSelectTower }) => (
-  <div style={{ background: '#1f2937', borderRadius: '12px', overflowX: 'auto' }}>
-    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-      <thead>
-        <tr style={{ background: '#374151' }}>
-          <th style={{ padding: '15px 20px' }}>ID Trụ</th>
-          <th style={{ padding: '15px 20px' }}>Số hiệu Trụ</th>
-          <th style={{ padding: '15px 20px' }}>Trạng thái</th>
-          <th style={{ padding: '15px 20px' }}>Hộc (Trống/Tổng)</th>
-        </tr>
-      </thead>
-      <tbody>
-        {towers.map(tower => <TowerRow key={tower.id || tower.towerId} tower={tower} onSelect={onSelectTower} />)}
-      </tbody>
-    </table>
-  </div>
-);
+const TowerListView = ({ towers, onSelectTower }) => {
+  if (!towers || towers.length === 0) {
+    return (
+      <div className="station-empty">
+        <div className="station-empty-icon">🏗️</div>
+        <div className="station-empty-text">Không có trụ sạc nào</div>
+        <div className="station-empty-subtext">Trạm này chưa có trụ sạc nào</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="station-table-container">
+      <table className="station-table">
+        <thead>
+          <tr>
+            <th>ID Trụ</th>
+            <th>Số hiệu Trụ</th>
+            <th>Trạng thái</th>
+            <th>Hộc (Trống/Tổng)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {towers.map(tower => (
+            <TowerRow 
+              key={tower.id || tower.towerId} 
+              tower={tower} 
+              onSelect={onSelectTower} 
+            />
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
 
 export default TowerListView;
