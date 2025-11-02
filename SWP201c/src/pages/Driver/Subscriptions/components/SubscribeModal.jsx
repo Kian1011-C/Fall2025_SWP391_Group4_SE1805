@@ -24,15 +24,25 @@ const SubscribeModal = ({
     if (show && currentUser) {
       fetchVehicles();
       
-      // Set default dates: startDate = today, endDate = today + 1 year
+      // Set default dates: startDate = today, endDate = today + 1 month
       const today = new Date();
-      const nextYear = new Date(today);
-      nextYear.setFullYear(today.getFullYear() + 1);
+      const nextMonth = new Date(today);
+      nextMonth.setMonth(today.getMonth() + 1);
       
       setStartDate(today.toISOString().split('T')[0]);
-      setEndDate(nextYear.toISOString().split('T')[0]);
+      setEndDate(nextMonth.toISOString().split('T')[0]);
     }
   }, [show, currentUser]);
+
+  // Auto-update endDate when startDate changes (always 1 month later)
+  useEffect(() => {
+    if (startDate) {
+      const start = new Date(startDate);
+      const end = new Date(start);
+      end.setMonth(start.getMonth() + 1);
+      setEndDate(end.toISOString().split('T')[0]);
+    }
+  }, [startDate]);
 
   const fetchVehicles = async () => {
     setLoadingVehicles(true);
@@ -264,16 +274,16 @@ const SubscribeModal = ({
             <input
               type="date"
               value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              min={startDate}
+              readOnly
               style={{
                 width: '100%',
                 padding: '12px',
-                background: 'rgba(255, 255, 255, 0.1)',
-                border: errors.endDate ? '1px solid #ef4444' : '1px solid rgba(255, 255, 255, 0.2)',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
                 borderRadius: '8px',
-                color: '#FFFFFF',
-                fontSize: '1rem'
+                color: '#9CA3AF',
+                fontSize: '1rem',
+                cursor: 'not-allowed'
               }}
             />
             {errors.endDate && (

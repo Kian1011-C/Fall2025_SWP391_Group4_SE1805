@@ -51,17 +51,6 @@ const VehicleCard = ({ vehicle, onClick }) => {
           </span>
         </div>
         
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <span style={{ color: '#B0B0B0' }}>Sức khỏe pin:</span>
-          <span style={{ 
-            color: vehicle.health > 70 ? '#19c37d' : 
-                   vehicle.health > 30 ? '#ffa500' : '#ff6b6b',
-            fontWeight: '600' 
-          }}>
-            🔋 {(vehicle.health || 0).toFixed(1)}%
-          </span>
-        </div>
-        
         {vehicle.batteryModel && (
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span style={{ color: '#B0B0B0' }}>Loại pin:</span>

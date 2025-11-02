@@ -9,13 +9,6 @@ const VehicleCard = ({ vehicle, isSelected, onClick, contracts }) => {
                (contracts.length === 1) // Single vehicle case
   );
 
-  const getBatteryColor = (level) => {
-    if (level > 70) return { bg: 'rgba(25, 195, 125, 0.2)', color: '#19c37d' };
-    if (level > 30) return { bg: 'rgba(255, 165, 0, 0.2)', color: '#ffa500' };
-    return { bg: 'rgba(255, 107, 107, 0.2)', color: '#ff6b6b' };
-  };
-
-  const batteryColor = getBatteryColor(vehicle.batteryLevel);
 
   return (
     <div
@@ -43,9 +36,6 @@ const VehicleCard = ({ vehicle, isSelected, onClick, contracts }) => {
     >
       {/* Vehicle Info */}
       <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
         marginBottom: '10px'
       }}>
         <div>
@@ -64,16 +54,6 @@ const VehicleCard = ({ vehicle, isSelected, onClick, contracts }) => {
           }}>
             {vehicle.plateNumber}
           </div>
-        </div>
-        <div style={{
-          background: batteryColor.bg,
-          color: batteryColor.color,
-          padding: '4px 10px',
-          borderRadius: '12px',
-          fontSize: '0.8rem',
-          fontWeight: '600'
-        }}>
-          🔋 {vehicle.batteryLevel}%
         </div>
       </div>
 

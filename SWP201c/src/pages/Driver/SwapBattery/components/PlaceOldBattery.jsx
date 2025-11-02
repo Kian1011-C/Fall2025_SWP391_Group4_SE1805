@@ -261,13 +261,28 @@ const PlaceOldBattery = () => {
                         />
                     </div>
 
-                    <button
-                        type="submit"
-                        className="place-battery-button"
-                        disabled={isLoading}
-                    >
-                        {isLoading ? "Đang xác nhận..." : "Tôi đã đặt pin"}
-                    </button>
+                    <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                        <button
+                            type="button"
+                            onClick={() => goToStep(STEPS.SELECT_TOWER)}
+                            className="place-battery-button"
+                            style={{
+                                background: '#475569',
+                                color: '#FFFFFF',
+                                flex: 1
+                            }}
+                        >
+                            Hủy
+                        </button>
+                        <button
+                            type="submit"
+                            className="place-battery-button"
+                            disabled={isLoading}
+                            style={{ flex: 1, whiteSpace: 'nowrap' }}
+                        >
+                            {isLoading ? "Đang xác nhận..." : "Tôi đã đặt pin"}
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
