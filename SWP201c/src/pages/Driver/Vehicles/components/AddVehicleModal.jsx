@@ -5,9 +5,10 @@ const AddVehicleModal = ({
   show, 
   onClose, 
   formData, 
-  setFormData, 
+  formErrors,
+  onUpdateField,
   onSubmit, 
-  loading 
+  submitting 
 }) => {
   if (!show) return null;
 
@@ -39,27 +40,50 @@ const AddVehicleModal = ({
           🚗 Thêm phương tiện mới
         </h2>
         
-        <form onSubmit={onSubmit}>
+        {/* Hiển thị lỗi submit nếu có */}
+        {formErrors?.submit && (
+          <div style={{
+            background: 'rgba(239, 68, 68, 0.2)',
+            border: '1px solid rgba(239, 68, 68, 0.5)',
+            color: '#fecaca',
+            padding: '12px',
+            borderRadius: '8px',
+            marginBottom: '20px',
+            fontSize: '0.9rem'
+          }}>
+            ⚠️ {formErrors.submit}
+          </div>
+        )}
+        
+        <form onSubmit={(e) => {
+          e.preventDefault();
+          onSubmit(e);
+        }}>
           <div style={{ marginBottom: '20px' }}>
             <label style={{ color: '#E0E0E0', display: 'block', marginBottom: '8px' }}>
               Biển số xe *
             </label>
             <input
               type="text"
-              value={formData.plateNumber}
-              onChange={(e) => setFormData({ ...formData, plateNumber: e.target.value })}
+              value={formData.plateNumber || ''}
+              onChange={(e) => onUpdateField('plateNumber', e.target.value)}
               required
               placeholder="VD: 30A-12345"
               style={{
                 width: '100%',
                 padding: '12px',
                 background: 'rgba(255, 255, 255, 0.1)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
+                border: formErrors?.plateNumber ? '1px solid #ef4444' : '1px solid rgba(255, 255, 255, 0.2)',
                 borderRadius: '8px',
                 color: '#FFFFFF',
                 fontSize: '1rem'
               }}
             />
+            {formErrors?.plateNumber && (
+              <div style={{ color: '#fecaca', fontSize: '0.85rem', marginTop: '4px' }}>
+                {formErrors.plateNumber}
+              </div>
+            )}
           </div>
 
           <div style={{ marginBottom: '20px' }}>
@@ -68,20 +92,25 @@ const AddVehicleModal = ({
             </label>
             <input
               type="text"
-              value={formData.vehicleModel}
-              onChange={(e) => setFormData({ ...formData, vehicleModel: e.target.value })}
+              value={formData.vehicleModel || ''}
+              onChange={(e) => onUpdateField('vehicleModel', e.target.value)}
               required
               placeholder="VD: VinFast VF-8"
               style={{
                 width: '100%',
                 padding: '12px',
                 background: 'rgba(255, 255, 255, 0.1)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
+                border: formErrors?.vehicleModel ? '1px solid #ef4444' : '1px solid rgba(255, 255, 255, 0.2)',
                 borderRadius: '8px',
                 color: '#FFFFFF',
                 fontSize: '1rem'
               }}
             />
+            {formErrors?.vehicleModel && (
+              <div style={{ color: '#fecaca', fontSize: '0.85rem', marginTop: '4px' }}>
+                {formErrors.vehicleModel}
+              </div>
+            )}
           </div>
 
           <div style={{ marginBottom: '20px' }}>
@@ -90,29 +119,34 @@ const AddVehicleModal = ({
             </label>
             <input
               type="text"
-              value={formData.vinNumber}
-              onChange={(e) => setFormData({ ...formData, vinNumber: e.target.value })}
+              value={formData.vinNumber || ''}
+              onChange={(e) => onUpdateField('vinNumber', e.target.value)}
               required
               placeholder="VD: VF1234567890ABCDE"
               style={{
                 width: '100%',
                 padding: '12px',
                 background: 'rgba(255, 255, 255, 0.1)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
+                border: formErrors?.vinNumber ? '1px solid #ef4444' : '1px solid rgba(255, 255, 255, 0.2)',
                 borderRadius: '8px',
                 color: '#FFFFFF',
                 fontSize: '1rem'
               }}
             />
+            {formErrors?.vinNumber && (
+              <div style={{ color: '#fecaca', fontSize: '0.85rem', marginTop: '4px' }}>
+                {formErrors.vinNumber}
+              </div>
+            )}
           </div>
 
           <div style={{ marginBottom: '25px' }}>
             <label style={{ color: '#E0E0E0', display: 'block', marginBottom: '8px' }}>
-              Loại pin
+              Loại pin (Tùy chọn)
             </label>
             <select
-              value={formData.batteryType}
-              onChange={(e) => setFormData({ ...formData, batteryType: e.target.value })}
+              value={formData.batteryType || 'LiFePO4-60kWh'}
+              onChange={(e) => onUpdateField('batteryType', e.target.value)}
               style={{
                 width: '100%',
                 padding: '12px',
@@ -128,17 +162,20 @@ const AddVehicleModal = ({
               <option value="LiFePO4-50kWh">LiFePO4-50kWh</option>
               <option value="Li-ion-80kWh">Li-ion-80kWh</option>
             </select>
+            <div style={{ color: '#9ca3af', fontSize: '0.85rem', marginTop: '4px' }}>
+              ⓘ Loại pin sẽ được cấu hình sau khi đăng ký xe thành công
+            </div>
           </div>
 
           <div style={{
-            background: 'rgba(255, 165, 0, 0.1)',
-            border: '1px solid rgba(255, 165, 0, 0.3)',
+            background: 'rgba(34, 197, 94, 0.1)',
+            border: '1px solid rgba(34, 197, 94, 0.3)',
             borderRadius: '8px',
             padding: '12px',
             marginBottom: '20px'
           }}>
-            <div style={{ color: '#ffa500', fontSize: '0.9rem' }}>
-              ℹ️ <strong>Lưu ý:</strong> Yêu cầu thêm xe sẽ được gửi đến admin để xem xét và phê duyệt.
+            <div style={{ color: '#22c55e', fontSize: '0.9rem' }}>
+              ✅ <strong>Thông tin:</strong> Xe sẽ được đăng ký ngay sau khi bạn nhấn "Đăng ký xe".
             </div>
           </div>
 
@@ -161,20 +198,20 @@ const AddVehicleModal = ({
             </button>
             <button
               type="submit"
-              disabled={loading}
+              disabled={submitting}
               style={{
                 flex: 1,
                 padding: '12px',
-                background: loading ? '#666' : 'linear-gradient(135deg, #19c37d, #15a36a)',
+                background: submitting ? '#666' : 'linear-gradient(135deg, #19c37d, #15a36a)',
                 color: 'white',
                 border: 'none',
                 borderRadius: '8px',
-                cursor: loading ? 'not-allowed' : 'pointer',
+                cursor: submitting ? 'not-allowed' : 'pointer',
                 fontSize: '1rem',
                 fontWeight: '600'
               }}
             >
-              {loading ? 'Đang gửi...' : '➕ Gửi yêu cầu'}
+              {submitting ? 'Đang đăng ký...' : '➕ Đăng ký xe'}
             </button>
           </div>
         </form>

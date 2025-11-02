@@ -8,9 +8,9 @@ import {
   SubscriptionsHeader,
   PlansGrid,
   EmptyPlans,
-  FAQSection,
-  DebugInfo
+  FAQSection
 } from './components';
+import SubscribeModal from './components/SubscribeModal';
 
 const Subscriptions = () => {
   const { currentUser } = useAuth();
@@ -26,7 +26,14 @@ const Subscriptions = () => {
   } = useSubscriptionsData(currentUser);
 
   // Subscription actions
-  const { subscribe, subscribing } = useSubscribe(currentUser, refetch);
+  const { 
+    subscribe, 
+    subscribing, 
+    showModal, 
+    selectedPlan, 
+    handleConfirm, 
+    handleCloseModal 
+  } = useSubscribe(currentUser, refetch);
 
   // Loading state
   if (loading) {
@@ -74,15 +81,6 @@ const Subscriptions = () => {
   return (
     <DashboardLayout role="driver">
       <div style={{ padding: '20px', maxWidth: '1400px', margin: '0 auto' }}>
-        {/* Debug Info */}
-        <DebugInfo
-          currentUser={currentUser}
-          plans={plans}
-          userContracts={userContracts}
-          currentSubscription={currentSubscription}
-          error={error}
-        />
-
         {/* Header */}
         <SubscriptionsHeader />
 
@@ -100,6 +98,15 @@ const Subscriptions = () => {
         {/* FAQ Section */}
         <FAQSection />
       </div>
+
+      {/* Subscribe Modal */}
+      <SubscribeModal
+        show={showModal}
+        plan={selectedPlan}
+        currentUser={currentUser}
+        onClose={handleCloseModal}
+        onConfirm={handleConfirm}
+      />
     </DashboardLayout>
   );
 };

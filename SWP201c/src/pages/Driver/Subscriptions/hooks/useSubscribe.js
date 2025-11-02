@@ -6,30 +6,39 @@ import contractService from '../../../../assets/js/services/contractService';
 import {
   getUserId,
   createSubscriptionRequest,
-  getSubscriptionConfirmMessage,
   getSubscriptionSuccessMessage
 } from '../utils';
 
 export const useSubscribe = (currentUser, onSuccess) => {
   const [subscribing, setSubscribing] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState(null);
 
-  const subscribe = async (plan) => {
-    const confirmMessage = getSubscriptionConfirmMessage(plan);
-    
-    if (!window.confirm(confirmMessage)) {
-      return;
-    }
+  const subscribe = (plan) => {
+    // Mở modal để thu thập thông tin hợp đồng
+    setSelectedPlan(plan);
+    setShowModal(true);
+  };
 
+  const handleConfirm = async (contractInfo) => {
     try {
       setSubscribing(true);
+      setShowModal(false);
       
       const userId = getUserId(currentUser);
       
-      console.log('📝 Creating contract for plan:', plan);
+      if (!userId) {
+        throw new Error('Không tìm thấy User ID. Vui lòng đăng nhập lại.');
+      }
+
+      console.log('📝 Creating contract for plan:', selectedPlan);
       console.log('👤 User ID:', userId);
+      console.log('🚗 Contract info:', contractInfo);
       
-      // Create subscription request
-      const requestData = createSubscriptionRequest(plan, userId);
+      // Create subscription request với đầy đủ thông tin (theo logic của BE)
+      const requestData = createSubscriptionRequest(selectedPlan, userId, contractInfo);
+      
+      console.log('📝 Request data:', requestData);
       
       // Create contract via API
       const result = await contractService.createContract(requestData);
@@ -37,7 +46,7 @@ export const useSubscribe = (currentUser, onSuccess) => {
       console.log('📝 Contract creation result:', result);
 
       if (result.success) {
-        const successMessage = getSubscriptionSuccessMessage(plan);
+        const successMessage = getSubscriptionSuccessMessage(selectedPlan);
         alert(successMessage);
         
         // Call success callback to refresh data
@@ -45,18 +54,28 @@ export const useSubscribe = (currentUser, onSuccess) => {
           onSuccess();
         }
       } else {
-        alert(result.message || 'Đăng ký thất bại');
+        alert(result.message || 'Đăng ký thất bại. Vui lòng thử lại.');
       }
     } catch (err) {
       console.error('❌ Error subscribing:', err);
-      alert('Có lỗi xảy ra khi đăng ký: ' + err.message);
+      alert('Có lỗi xảy ra khi đăng ký: ' + (err.message || 'Lỗi không xác định'));
     } finally {
       setSubscribing(false);
+      setSelectedPlan(null);
     }
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedPlan(null);
   };
 
   return {
     subscribe,
-    subscribing
+    subscribing,
+    showModal,
+    selectedPlan,
+    handleConfirm,
+    handleCloseModal
   };
 };

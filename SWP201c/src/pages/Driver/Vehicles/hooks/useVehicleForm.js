@@ -56,26 +56,45 @@ export const useVehicleForm = (onSuccess) => {
         throw new Error('User not found. Please login again.');
       }
 
-      // Create vehicle data
-      const vehicleData = createVehicleData(formData, userId);
-      console.log('🚗 Adding vehicle:', vehicleData);
+      // Validate các trường bắt buộc (theo logic của BE)
+      const plateNumber = formData.plateNumber?.trim() || '';
+      const model = formData.vehicleModel?.trim() || '';
+      const vinNumber = formData.vinNumber?.trim() || '';
 
-      // Call API
-      const response = await vehicleService.addVehicle(vehicleData);
-      console.log('✅ Vehicle added:', response);
+      if (!plateNumber || !model || !vinNumber) {
+        setFormErrors({ submit: 'Vui lòng nhập đầy đủ thông tin: biển số, model và VIN.' });
+        return false;
+      }
+
+      console.log('🚗 Registering vehicle:', { userId, plateNumber, model, vinNumber });
+
+      // Gọi API đăng ký xe (theo logic của BE)
+      // API: POST /api/users/{userId}/vehicles với params: plateNumber, model, vinNumber
+      const response = await vehicleService.registerVehicleForUser(userId, plateNumber, model, vinNumber);
+      console.log('✅ Vehicle registered:', response);
 
       if (response.success) {
         resetForm();
+        
+        // BE trả về danh sách xe mới nhất trong response.data
+        if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+          console.log('✅ Danh sách xe sau khi đăng ký:', response.data);
+        }
+        
         if (onSuccess) {
           onSuccess();
         }
         return true;
       } else {
-        throw new Error(response.message || 'Failed to add vehicle');
+        // Hiển thị error message từ BE
+        const errorMessage = response.message || 'Đăng ký xe thất bại. Vui lòng thử lại.';
+        setFormErrors({ submit: errorMessage });
+        return false;
       }
     } catch (err) {
-      console.error('❌ Error adding vehicle:', err);
-      setFormErrors({ submit: err.message });
+      console.error('❌ Error registering vehicle:', err);
+      const errorMessage = err.message || 'Lỗi hệ thống. Vui lòng thử lại sau.';
+      setFormErrors({ submit: errorMessage });
       return false;
     } finally {
       setSubmitting(false);
