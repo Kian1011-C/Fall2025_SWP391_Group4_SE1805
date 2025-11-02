@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import contractService from '../../../../assets/js/services/contractService';
 
 const InitiateSwapForm = ({ 
     isLoading, 
@@ -14,6 +15,7 @@ const InitiateSwapForm = ({
     const [step, setStep] = useState(1); // 1 = nhập userId, 2 = nhập thông tin đổi pin
     const [userId, setUserId] = useState('');
     const [userVehicles, setUserVehicles] = useState([]);
+    const [userContracts, setUserContracts] = useState([]); // Thêm state để lưu contracts
     const [loadingVehicles, setLoadingVehicles] = useState(false);
     
     // Step 2: Chọn xe và pin
@@ -38,19 +40,32 @@ const InitiateSwapForm = ({
 
         setLoadingVehicles(true);
         try {
-            const response = await axios.get(`http://localhost:8080/api/users/${userId}/vehicles`);
-            console.log('📦 Dữ liệu xe nhận được:', response.data);
+            // Load vehicles và contracts song song
+            const [vehiclesResponse, contractsResponse] = await Promise.all([
+                axios.get(`http://localhost:8080/api/users/${userId}/vehicles`),
+                contractService.getUserContracts(userId)
+            ]);
             
-            if (response.data.success && response.data.data && response.data.data.length > 0) {
-                setUserVehicles(response.data.data);
+            console.log('📦 Dữ liệu xe nhận được:', vehiclesResponse.data);
+            console.log('📄 Dữ liệu hợp đồng nhận được:', contractsResponse);
+            
+            if (vehiclesResponse.data.success && vehiclesResponse.data.data && vehiclesResponse.data.data.length > 0) {
+                setUserVehicles(vehiclesResponse.data.data);
+                // Lưu contracts nếu có
+                if (contractsResponse.success && contractsResponse.data) {
+                    setUserContracts(Array.isArray(contractsResponse.data) ? contractsResponse.data : []);
+                } else {
+                    setUserContracts([]);
+                }
                 setStep(2); // Chuyển sang bước 2
             } else {
                 alert('Không tìm thấy xe nào của user này');
                 setUserVehicles([]);
+                setUserContracts([]);
             }
         } catch (error) {
-            console.error('Lỗi khi tải thông tin xe:', error);
-            alert('Không thể tải thông tin xe. Vui lòng kiểm tra User ID.');
+            console.error('Lỗi khi tải thông tin:', error);
+            alert('Không thể tải thông tin. Vui lòng kiểm tra User ID.');
         } finally {
             setLoadingVehicles(false);
         }
@@ -82,13 +97,35 @@ const InitiateSwapForm = ({
             setSelectedVehicleId(vehicleIdStr); // Lưu string để hiển thị trong dropdown
             setSelectedVehicle(vehicle);
             setOldBatteryId(vehicle.batteryId ? String(vehicle.batteryId) : '');
-            setContractId(vehicle.contractId ? String(vehicle.contractId) : '');
+            
+            // Tìm contract tương ứng với vehicle này
+            let foundContractId = '';
+            if (vehicle.contractId) {
+                // Nếu vehicle đã có contractId
+                foundContractId = String(vehicle.contractId);
+            } else {
+                // Tìm contract từ userContracts bằng vehicleId hoặc plateNumber
+                const contract = userContracts.find(c => 
+                    c.vehicleId === vehicleIdNum || 
+                    c.vehicle_id === vehicleIdNum ||
+                    (c.vehiclePlate === vehicle.plateNumber) ||
+                    (c.plateNumber === vehicle.plateNumber)
+                );
+                if (contract) {
+                    foundContractId = String(contract.id || contract.contractId || contract.contract_id || '');
+                    console.log('📄 Tìm thấy contract cho xe:', contract);
+                } else {
+                    console.log('⚠️ Không tìm thấy contract cho xe này');
+                }
+            }
+            
+            setContractId(foundContractId);
             
             console.log('✅ Đã set vehicle:', {
                 vehicleId: vehicle.vehicleId,
                 plateNumber: vehicle.plateNumber,
                 batteryId: vehicle.batteryId,
-                contractId: vehicle.contractId
+                contractId: foundContractId
             });
         } else {
             console.error('❌ Không tìm thấy xe với vehicleId:', vehicleIdNum);
@@ -139,6 +176,7 @@ const InitiateSwapForm = ({
         setStep(1);
         setUserId('');
         setUserVehicles([]);
+        setUserContracts([]); // Reset contracts
         setSelectedVehicle(null);
         setSelectedVehicleId(''); // Reset vehicleId
         setOldBatteryId('');

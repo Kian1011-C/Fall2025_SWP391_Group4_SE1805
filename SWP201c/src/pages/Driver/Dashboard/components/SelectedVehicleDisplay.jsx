@@ -14,25 +14,12 @@ const SelectedVehicleDisplay = ({ selectedVehicle, contracts }) => {
                (contracts.length === 1) // Single vehicle case
   );
 
-  const getBatteryStyle = (level) => {
-    if (level > 70) return { bg: 'rgba(25, 195, 125, 0.3)', color: '#19c37d' };
-    if (level > 30) return { bg: 'rgba(255, 165, 0, 0.3)', color: '#ffa500' };
-    return { bg: 'rgba(255, 107, 107, 0.3)', color: '#ff6b6b' };
-  };
-
-  // Lấy batteryLevel - sử dụng dữ liệu từ API, không dùng mock data
-  const batteryLevel = selectedVehicle.batteryLevel !== null && selectedVehicle.batteryLevel !== undefined
-    ? selectedVehicle.batteryLevel
-    : null;
-  
   // Lấy odometer - sử dụng dữ liệu từ API, không dùng mock data
   const odometer = selectedVehicle.currentOdometer !== null && selectedVehicle.currentOdometer !== undefined
     ? selectedVehicle.currentOdometer
     : (selectedVehicle.current_odometer !== null && selectedVehicle.current_odometer !== undefined
       ? selectedVehicle.current_odometer
       : null);
-  
-  const batteryStyle = getBatteryStyle(batteryLevel || 0); // Dùng 0 chỉ để tính style, không hiển thị
 
   return (
     <div style={{
@@ -65,17 +52,6 @@ const SelectedVehicleDisplay = ({ selectedVehicle, contracts }) => {
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div style={{
-            background: batteryStyle.bg,
-            color: batteryStyle.color,
-            padding: '8px 15px',
-            borderRadius: '20px',
-            fontSize: '1.1rem',
-            fontWeight: '700',
-            marginBottom: '10px'
-          }}>
-            🔋 {batteryLevel !== null ? `${batteryLevel}%` : 'N/A'}
-          </div>
           <div style={{ color: '#B0B0B0', fontSize: '0.9rem', marginBottom: '5px' }}>
             📏 {odometer !== null ? `${odometer.toLocaleString()} km` : 'N/A'}
           </div>
