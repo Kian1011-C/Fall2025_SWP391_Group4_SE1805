@@ -130,6 +130,112 @@ public class ContractController {
         }
     }
 
+    // ==================== GET ALL CONTRACTS (Admin/Staff) ====================
+    @GetMapping
+    public ResponseEntity<?> getAllContracts(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String userId,
+            @RequestParam(required = false) Integer planId,
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "50") int size) {
+        try {
+            StringBuilder sql = new StringBuilder("""
+                SELECT c.contract_id, c.vehicle_id, c.plan_id, c.start_date, c.end_date, 
+                       c.status, c.contract_number, c.signed_place, c.monthly_distance, c.monthly_base_fee,
+                       sp.plan_name,
+                       v.plate_number, v.model as vehicle_model,
+                       u.first_name, u.last_name, u.email, u.phone
+                FROM Contracts c
+                INNER JOIN ServicePlans sp ON c.plan_id = sp.plan_id
+                INNER JOIN Vehicles v ON c.vehicle_id = v.vehicle_id
+                INNER JOIN Users u ON v.user_id = u.user_id
+                WHERE 1=1
+            """);
+
+            List<Object> params = new ArrayList<>();
+
+            // Apply filters
+            if (status != null && !status.isEmpty()) {
+                sql.append(" AND c.status = ?");
+                params.add(status);
+            }
+            if (userId != null && !userId.isEmpty()) {
+                sql.append(" AND v.user_id = ?");
+                params.add(userId);
+            }
+            if (planId != null) {
+                sql.append(" AND c.plan_id = ?");
+                params.add(planId);
+            }
+
+            sql.append(" ORDER BY c.contract_id DESC");
+
+            List<Map<String, Object>> allContracts = new ArrayList<>();
+
+            try (java.sql.Connection conn = hsf302.fa25.s3.context.ConnectDB.getConnection();
+                 java.sql.PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+                
+                // Set parameters
+                for (int i = 0; i < params.size(); i++) {
+                    ps.setObject(i + 1, params.get(i));
+                }
+
+                java.sql.ResultSet rs = ps.executeQuery();
+                while (rs.next()) {
+                    Map<String, Object> contractMap = new LinkedHashMap<>();
+                    
+                    // Contract info
+                    contractMap.put("contractId", rs.getInt("contract_id"));
+                    contractMap.put("contractNumber", rs.getString("contract_number"));
+                    contractMap.put("status", rs.getString("status"));
+                    contractMap.put("startDate", rs.getDate("start_date"));
+                    contractMap.put("endDate", rs.getDate("end_date"));
+                    contractMap.put("signedPlace", rs.getString("signed_place"));
+                    contractMap.put("monthlyDistance", rs.getBigDecimal("monthly_distance"));
+                    contractMap.put("monthlyBaseFee", rs.getBigDecimal("monthly_base_fee"));
+                    
+                    // Plan info
+                    contractMap.put("planId", rs.getInt("plan_id"));
+                    contractMap.put("planName", rs.getString("plan_name"));
+                    
+                    // Vehicle info
+                    contractMap.put("vehicleId", rs.getInt("vehicle_id"));
+                    contractMap.put("plateNumber", rs.getString("plate_number"));
+                    contractMap.put("vehicleModel", rs.getString("vehicle_model"));
+                    
+                    // User info
+                    contractMap.put("firstName", rs.getString("first_name"));
+                    contractMap.put("lastName", rs.getString("last_name"));
+                    contractMap.put("email", rs.getString("email"));
+                    contractMap.put("phone", rs.getString("phone"));
+                    
+                    allContracts.add(contractMap);
+                }
+            }
+
+            // Apply pagination
+            int start = page * size;
+            int end = Math.min(start + size, allContracts.size());
+            List<Map<String, Object>> paginatedContracts = allContracts.subList(start, end);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("data", paginatedContracts);
+            response.put("total", allContracts.size());
+            response.put("page", page);
+            response.put("size", size);
+            response.put("totalPages", (allContracts.size() + size - 1) / size);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Error fetching contracts: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getContracts(@PathVariable String userId) {
         try {

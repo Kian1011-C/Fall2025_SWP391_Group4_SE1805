@@ -1,6 +1,8 @@
 package hsf302.fa25.s3.controller;
 
 import hsf302.fa25.s3.context.ConnectDB;
+import hsf302.fa25.s3.service.ReportService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.sql.Connection;
@@ -10,8 +12,9 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/reports")
+@RequiredArgsConstructor
 public class ReportController {
-
+    private final ReportService service;
     @GetMapping("/overview")
     public ResponseEntity<?> getOverviewReport(@RequestParam(required = false) String dateRange) {
         try {
@@ -209,5 +212,32 @@ public class ReportController {
             e.printStackTrace();
         }
         return 0.0;
+    }
+
+    //tong doanh thu
+    @GetMapping("/revenue/total")
+    public Map<String, Object> totalRevenue() {
+        double total = service.getTotalRevenue();
+        return Map.of(
+                "success", true,
+                "totalRevenue", total,
+                "currency", "VND"
+        );
+    }
+
+    /** (Tuỳ chọn) Tổng doanh thu theo khoảng ngày [from, to], format yyyy-MM-dd. */
+    @GetMapping("/revenue/range")
+    public Map<String, Object> revenueInRange(
+            @RequestParam String from,
+            @RequestParam String to
+    ) {
+        double total = service.getRevenueInRange(from, to);
+        return Map.of(
+                "success", true,
+                "from", from,
+                "to", to,
+                "totalRevenue", total,
+                "currency", "VND"
+        );
     }
 }

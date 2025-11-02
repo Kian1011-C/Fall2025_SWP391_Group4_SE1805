@@ -1,0 +1,172 @@
+<!-- src/main/resources/templates/payment_result.html -->
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Kết quả thanh toán | VNPay</title>
+    <style>
+        :root{
+            --blue:#0b74e5; --blue-600:#0a66cc; --green:#16a34a; --red:#dc2626;
+            --text:#0f172a; --muted:#475569; --bg:#f6f9fc; --card:#ffffff; --border:#e2e8f0;
+        }
+        *{box-sizing:border-box}
+        body{margin:0;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;color:var(--text)}
+        .wrap{min-height:100dvh;display:grid;place-items:center;padding:24px}
+        .card{
+            width:min(680px,100%); background:var(--card); border:1px solid var(--border);
+            border-radius:16px; box-shadow:0 10px 30px rgba(2,6,23,.06); overflow:hidden;
+        }
+        .head{
+            display:flex;align-items:center;gap:12px;padding:20px 24px;border-bottom:1px solid var(--border);
+            background:linear-gradient(180deg, #eaf3ff, #ffffff 60%);
+        }
+        .brand{display:flex;align-items:center;gap:10px}
+        .brand .logo{
+            width:36px;height:36px;border-radius:10px;background:var(--blue);display:grid;place-items:center;color:#fff;font-weight:700
+        }
+        .status{
+            margin-left:auto;display:inline-flex;align-items:center;gap:8px;
+            padding:6px 10px;border-radius:999px;font-size:14px;font-weight:600
+        }
+        .status.success{background:#ecfdf5;color:var(--green);border:1px solid #86efac}
+        .status.failed{background:#fef2f2;color:var(--red);border:1px solid #fecaca}
+        .body{padding:24px}
+        .summary{
+            display:grid;grid-template-columns:1.2fr .8fr;gap:20px
+        }
+        @media (max-width:720px){ .summary{grid-template-columns:1fr} }
+        .panel{
+            border:1px solid var(--border);border-radius:12px;padding:16px;background:#fff
+        }
+        .title{font-size:18px;font-weight:700;margin:0 0 12px}
+        .amount{
+            font-size:28px;font-weight:800;color:var(--blue);margin:4px 0 2px
+        }
+        .muted{color:var(--muted);font-size:14px}
+        .kv{display:grid;grid-template-columns:180px 1fr;gap:8px 14px;margin-top:10px;font-size:15px}
+        .kv div{padding:6px 0;border-bottom:1px dashed var(--border)}
+        .kv div:nth-child(2n){text-align:right}
+        .foot{
+            display:flex;flex-wrap:wrap;gap:12px;justify-content:flex-end;
+            padding:16px 24px;border-top:1px solid var(--border);background:#fafbff
+        }
+        a.btn, button.btn{
+            appearance:none;border:1px solid var(--border);background:#fff;color:var(--text);
+            padding:10px 14px;border-radius:10px;font-weight:600;text-decoration:none;cursor:pointer
+        }
+        a.btn.primary{background:var(--blue);color:#fff;border-color:var(--blue-600)}
+        .note{margin-top:12px;font-size:14px;color:var(--muted)}
+        .badge{font-size:12px;background:#eef2ff;color:#3730a3;border:1px solid #c7d2fe;border-radius:999px;padding:3px 8px}
+        .icon{width:18px;height:18px;display:inline-block;vertical-align:-3px}
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="card">
+        <!-- Header -->
+        <div class="head">
+            <div class="brand">
+                <div class="logo">VN</div>
+                <div>
+                    <div style="font-weight:800;line-height:1">Thanh toán VNPay</div>
+                    <div class="muted"
+                         th:text="${payment != null && payment.transactionRef != null} ?
+                                  'Mã giao dịch: ' + ${payment.transactionRef} :
+                                  'Mã giao dịch: -'">Mã giao dịch: -</div>
+                </div>
+            </div>
+
+            <!-- Nhãn trạng thái -->
+            <div th:class="'status ' + ( (${payment} != null and ${payment.status} != null and ${payment.status.toLowerCase()} == 'success') ? 'success' : 'failed')">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     th:if="${payment} != null and ${payment.status} != null and ${payment.status.toLowerCase()} == 'success'">
+                    <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          d="M9 12l2 2 4-4m5 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     th:if="${payment} == null or ${payment.status} == null or ${payment.status.toLowerCase()} != 'success'">
+                    <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          d="M12 9v4m0 4h.01M21 12A9 9 0 113 12a9 9 0 0118 0z"/>
+                </svg>
+                <span th:text="${payment} != null and ${payment.status} != null and ${payment.status.toLowerCase()} == 'success'
+                               ? 'Thành công' : 'Thất bại / Chưa xác nhận'">Thất bại / Chưa xác nhận</span>
+            </div>
+        </div>
+
+        <!-- Body -->
+        <div class="body">
+            <div class="summary">
+                <!-- Tổng quan -->
+                <div class="panel">
+                    <h2 class="title">Tổng quan</h2>
+
+                    <div class="amount"
+                         th:text="${payment} != null
+                                  ? ${#numbers.formatDecimal(payment.amount, 0, 'COMMA', 0, 'POINT')} + ' VND'
+                                  : '0 VND'">0 VND</div>
+
+                    <div class="muted">
+                        <span class="badge"
+                              th:text="${payment} != null and ${payment.currency} != null ? ${payment.currency} : 'VND'">VND</span>
+                        <span th:if="${payment} != null and ${payment.vnpPayDate} != null"
+                              th:text="' • Lúc ' + ${#dates.format(payment.vnpPayDate, 'dd/MM/yyyy HH:mm:ss')}"> • Lúc --/--/---- --:--:--</span>
+                    </div>
+
+                    <p class="note"
+                       th:if="${payment} != null and ${payment.status} != null and ${payment.status.toLowerCase()} != 'success'">
+                        Nếu số tiền đã trừ nhưng trạng thái chưa thành công, vui lòng chờ hệ thống đối soát (QueryDR/IPN) hoặc liên hệ CSKH.
+                    </p>
+                </div>
+
+                <!-- Chi tiết từ VNPay -->
+                <div class="panel">
+                    <h2 class="title">Chi tiết giao dịch</h2>
+                    <div class="kv">
+
+
+
+
+                        <div>Mã ngân hàng</div>
+                        <div th:text="${payment} != null and ${payment.vnpBankCode} != null ? ${payment.vnpBankCode} : '-'">-</div>
+
+                        <div>Số giao dịch ngân hàng</div>
+                        <div th:text="${payment} != null and ${payment.vnpBankTranNo} != null ? ${payment.vnpBankTranNo} : '-'">-</div>
+
+                        <div>Loại thẻ</div>
+                        <div th:text="${payment} != null and ${payment.vnpCardType} != null ? ${payment.vnpCardType} : '-'">-</div>
+
+                        <div>Mã giao dịch VNPAY</div>
+                        <div th:text="${payment} != null and ${payment.vnpTransactionNo} != null ? ${payment.vnpTransactionNo} : '-'">-</div>
+
+
+
+                        <div>Nội dung đơn hàng</div>
+                        <div th:text="${payment} != null and ${payment.vnpOrderInfo} != null ? ${payment.vnpOrderInfo} : '-'">-</div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="note" style="margin-top:16px">
+                * Mọi thông tin hiển thị dựa trên dữ liệu trả về từ VNPay và bản ghi trên hệ thống của bạn.
+            </div>
+        </div>
+
+        <!-- Footer / Actions -->
+        <div class="foot">
+            <a class="btn" th:href="@{${driverHomeUrl}}">Quay về trang chủ</a>
+            <a class="btn" th:href="@{/orders}" href="/orders">Đơn hàng của tôi</a>
+            <a class="btn primary"
+               th:href="@{/payment/querydr(
+              txnRef=${payment != null and payment.transactionRef != null ? payment.transactionRef : ''},
+              transactionDate=${queryDateStr}
+            )}">
+                Đối soát (QueryDR)
+            </a>
+
+        </div>
+    </div>
+</div>
+</body>
+</html>

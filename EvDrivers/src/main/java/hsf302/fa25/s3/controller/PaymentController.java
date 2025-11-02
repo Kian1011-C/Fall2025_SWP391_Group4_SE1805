@@ -34,7 +34,7 @@ public class PaymentController {
     }
 
     /** Return URL: VNPAY redirect về */
-    @GetMapping("/vnpay-return")
+    @GetMapping("/vnpay-return-json")
     public Map<String, Object> vnpReturn(@RequestParam Map<String, String> params) {
         Payment p = paymentService.handleReturn(params);
         Map<String, Object> res = new HashMap<>();
@@ -72,5 +72,18 @@ public class PaymentController {
         ip = request.getRemoteAddr();
         if ("0:0:0:0:0:0:0:1".equals(ip) || "::1".equals(ip)) return "127.0.0.1";
         return ip;
+    }
+
+    /** (Tuỳ chọn) Tính tiền tháng + trả URL VNPay ngay cho FE */
+    @GetMapping("/pay-monthly")
+    public Map<String, Object> payMonthly(@RequestParam String userId,
+                                          @RequestParam int contractId,
+                                          @RequestParam int year,
+                                          @RequestParam int month,
+                                          HttpServletRequest req) {
+        String ip = getClientIp(req);
+        Map<String, Object> bill = paymentService.createMonthlyBillUrl(userId, contractId, year, month, ip);
+        bill.put("success", true);
+        return bill;
     }
 }

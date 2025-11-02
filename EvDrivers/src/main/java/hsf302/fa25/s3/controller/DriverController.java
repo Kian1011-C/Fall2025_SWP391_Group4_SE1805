@@ -75,17 +75,7 @@ public class DriverController {
                 Map<String, Object> batteryInfo = slotDao.getBatteryInfoBySlotId(slot.getSlotId());
                 if (batteryInfo != null) {
                     slotMap.put("batteryId", batteryInfo.get("battery_id"));
-                    // Simulate random usage: subtract 0-15% from SOH
-                    try {
-                        double soh = ((Number) batteryInfo.get("state_of_health")).doubleValue();
-                        int percentDrop = new Random().nextInt(16); // 0..15
-                        double displayed = soh - (soh * percentDrop / 100.0);
-                        // round to 2 decimals
-                        double rounded = BigDecimal.valueOf(displayed).setScale(2, RoundingMode.HALF_UP).doubleValue();
-                        slotMap.put("batteryLevel", rounded);
-                    } catch (Exception ex) {
-                        slotMap.put("batteryLevel", batteryInfo.get("state_of_health"));
-                    }
+                    slotMap.put("batteryLevel", batteryInfo.get("state_of_health"));
                     slotMap.put("batteryModel", batteryInfo.get("model"));
                     slotMap.put("batteryStatus", batteryInfo.get("battery_status"));
                 } else {

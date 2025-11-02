@@ -86,7 +86,7 @@ public class VehicleDao {
                 c.contract_id
             FROM Vehicles v
             LEFT JOIN Batteries b ON v.current_battery_id = b.battery_id
-            LEFT JOIN Contract c ON v.vehicle_id = c.vehicle_id AND c.status = 'active'
+            LEFT JOIN Contracts c ON v.vehicle_id = c.vehicle_id AND c.status = 'active'
             WHERE v.user_id = ?
             ORDER BY v.vehicle_id DESC
         """;
