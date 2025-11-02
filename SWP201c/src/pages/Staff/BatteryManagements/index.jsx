@@ -1,22 +1,16 @@
-import React from 'react';
-// import SwapConfirmView from './components/SwapConfirmView'; // <-- Đã xóa
+import React, { useState } from 'react';
 import BatteryStockView from './components/BatteryStockView';
+import '../../../assets/css/StaffBatteryManagement.css';
 
 const BatteryManagement = () => {
-  // Xóa state quản lý tab
-  // Xóa hàm getTabStyle
-
   return (
-    <div>
-      <h1 style={{ marginTop: 0, marginBottom: '30px' }}>Quản lý Pin</h1>
-      
-      {/* Toàn bộ div chứa 2 nút bấm "Xác nhận đổi pin" và "Kho pin" đã bị xóa 
-      */}
-
-      {/* Hiển thị trực tiếp nội dung kho pin */}
-      <div style={{ marginTop: '30px' }}>
-        <BatteryStockView />
+    <div className="staff-battery-container">
+      <div className="staff-battery-header">
+        <h1>🔋 Quản lý Pin</h1>
+        <p>Theo dõi tình trạng và kho pin trong hệ thống</p>
       </div>
+      
+      <BatteryStockView />
     </div>
   );
 };

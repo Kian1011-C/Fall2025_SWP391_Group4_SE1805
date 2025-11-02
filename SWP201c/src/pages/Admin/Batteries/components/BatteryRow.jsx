@@ -1,33 +1,97 @@
 import React from 'react';
 
-const getStatusStyle = (status) => {
-    const s = status ? status.toLowerCase() : '';
-    const style = { padding: '5px 12px', borderRadius: '15px', fontSize: '12px', fontWeight: 'bold', display: 'inline-block' };
-    if (s === 'available' || s === 'đầy') return { ...style, background: '#166534', color: '#86efac' };
-    if (s === 'charging' || s === 'đang sạc') return { ...style, background: '#1e40af', color: '#93c5fd' };
-    if (s === 'maintenance' || s === 'bảo trì') return { ...style, background: '#9a3412', color: '#fdba74' };
-    return { ...style, background: '#4b5563', color: '#e5e7eb' };
-};
-
 const BatteryRow = ({ battery, onEdit, onDelete }) => {
+  // Get health class
+  const getHealthClass = (health) => {
+    if (health >= 80) return 'high';
+    if (health >= 50) return 'medium';
+    return 'low';
+  };
+
+  // Format status for display
+  const formatStatus = (status) => {
+    const statusMap = {
+      'available': 'available',
+      'in_stock': 'in_stock',
+      'charging': 'charging',
+      'maintenance': 'maintenance',
+      'in_use': 'in_use',
+      'low': 'low'
+    };
+    return statusMap[status?.toLowerCase()] || status?.toLowerCase() || 'unknown';
+  };
+
+  const displayStatus = (status) => {
+    const statusDisplay = {
+      'available': 'Sẵn sàng',
+      'in_stock': 'Trong kho',
+      'charging': 'Đang sạc',
+      'maintenance': 'Bảo trì',
+      'in_use': 'Đang dùng',
+      'low': 'Yếu'
+    };
+    return statusDisplay[formatStatus(status)] || status;
+  };
+
   return (
-    <tr style={{ borderTop: '1px solid #374151' }}>
-      <td style={{ padding: '15px 20px', fontWeight: 'bold', color: 'white' }}>BAT{battery.batteryId}</td>
-      <td style={{ padding: '15px 20px' }}>{battery.model}</td>
-      <td style={{ padding: '15px 20px' }}><span style={getStatusStyle(battery.status)}>{battery.status?.toLowerCase() || battery.status}</span></td>
-      <td style={{ padding: '15px 20px' }}>{battery.stateOfHealth}%</td>
-      <td style={{ padding: '15px 20px' }}>{battery.cycleCount}</td>
-      <td style={{ padding: '15px 20px', display: 'flex', gap: '10px' }}>
-        <button 
-          onClick={() => onEdit(battery)} 
-          style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', fontWeight: '500' }}>
-          ✏️ Sửa
-        </button>
-        <button 
-          onClick={() => onDelete(battery)} 
-          style={{ background: '#ef4444', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', fontWeight: '500' }}>
-          🗑️ Xóa
-        </button>
+    <tr>
+      {/* Battery ID */}
+      <td>
+        <div className="admin-battery-id">
+          <span className="admin-battery-id-icon">🔋</span>
+          <span className="admin-battery-id-text">BAT{battery.batteryId}</span>
+        </div>
+      </td>
+
+      {/* Model */}
+      <td>
+        <span className="admin-battery-model">{battery.model}</span>
+      </td>
+
+      {/* Status */}
+      <td>
+        <span className={`admin-battery-status ${formatStatus(battery.status)}`}>
+          {displayStatus(battery.status)}
+        </span>
+      </td>
+
+      {/* Health */}
+      <td>
+        <div className="admin-battery-health">
+          <div className="admin-battery-health-bar">
+            <div 
+              className={`admin-battery-health-fill ${getHealthClass(battery.stateOfHealth)}`}
+              style={{ width: `${battery.stateOfHealth}%` }}
+            ></div>
+          </div>
+          <span className="admin-battery-health-text">{battery.stateOfHealth}%</span>
+        </div>
+      </td>
+
+      {/* Cycles */}
+      <td>
+        <div className="admin-battery-cycles">
+          <span className="admin-battery-cycles-icon">🔄</span>
+          <span className="admin-battery-cycles-text">{battery.cycleCount}</span>
+        </div>
+      </td>
+
+      {/* Actions */}
+      <td>
+        <div className="admin-battery-actions">
+          <button 
+            onClick={() => onEdit(battery)} 
+            className="admin-battery-action-btn edit"
+          >
+            ✏️ Sửa
+          </button>
+          <button 
+            onClick={() => onDelete(battery)} 
+            className="admin-battery-action-btn delete"
+          >
+            🗑️ Xóa
+          </button>
+        </div>
       </td>
     </tr>
   );

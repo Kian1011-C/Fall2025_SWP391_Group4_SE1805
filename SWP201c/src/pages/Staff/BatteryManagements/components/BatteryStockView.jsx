@@ -1,94 +1,266 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useBatteryStockData } from '../hooks/useBatteryStockData';
-import BatteryDetailModal from './BatteryDetailModal'; // <-- 1. Import Modal component
-
-// Hàm để lấy style cho trạng thái, giúp giao diện trực quan hơn
-const getStatusStyle = (status = '') => {
-    const s = status.toLowerCase();
-    const style = { padding: '5px 12px', borderRadius: '15px', fontSize: '12px', fontWeight: 'bold', display: 'inline-block' };
-    if (s === 'available' || s === 'đầy') return { ...style, background: '#166534', color: '#86efac' };
-    if (s === 'charging' || s === 'đang sạc') return { ...style, background: '#1e40af', color: '#93c5fd' };
-    if (s === 'maintenance' || s === 'bảo trì') return { ...style, background: '#9a3412', color: '#fdba74' };
-    if (s === 'low' || s === 'yếu') return { ...style, background: '#991b1b', color: '#fca5a5' };
-    return { ...style, background: '#475569', color: '#cbd5e1' };
-};
+import BatteryDetailModal from './BatteryDetailModal';
 
 const BatteryStockView = () => {
-    // Lấy dữ liệu và các hàm cần thiết từ hook
     const { batteries, isLoading, error, refetch } = useBatteryStockData();
-
-    // --- 2. THÊM STATE ĐỂ QUẢN LÝ MODAL ---
     const [selectedBattery, setSelectedBattery] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [statusFilter, setStatusFilter] = useState('');
 
-    // Hàm để mở modal, nhận vào thông tin của viên pin được chọn
+    // Calculate statistics
+    const stats = useMemo(() => {
+        const total = batteries.length;
+        const available = batteries.filter(b => 
+            b.status?.toLowerCase() === 'available' || b.status?.toLowerCase() === 'in_stock'
+        ).length;
+        const charging = batteries.filter(b => b.status?.toLowerCase() === 'charging').length;
+        const maintenance = batteries.filter(b => b.status?.toLowerCase() === 'maintenance').length;
+        
+        return { total, available, charging, maintenance };
+    }, [batteries]);
+
+    // Filter batteries
+    const filteredBatteries = useMemo(() => {
+        return batteries.filter(bat => {
+            const id = bat.id || bat.batteryId;
+            const status = (bat.status || '').toLowerCase();
+            const matchesSearch = searchQuery === '' || 
+                id.toString().includes(searchQuery) ||
+                `BAT${id}`.toLowerCase().includes(searchQuery.toLowerCase());
+            const matchesStatus = statusFilter === '' || status === statusFilter.toLowerCase();
+            
+            return matchesSearch && matchesStatus;
+        });
+    }, [batteries, searchQuery, statusFilter]);
+
     const handleViewDetails = (battery) => {
         setSelectedBattery(battery);
     };
 
-    // Hàm để đóng modal
     const handleCloseModal = () => {
         setSelectedBattery(null);
     };
 
-    // Xử lý trạng thái đang tải
+    // Get health class
+    const getHealthClass = (health) => {
+        if (health >= 80) return 'high';
+        if (health >= 50) return 'medium';
+        return 'low';
+    };
+
+    // Format status
+    const formatStatus = (status) => {
+        const statusMap = {
+            'available': 'available',
+            'in_stock': 'in_stock',
+            'charging': 'charging',
+            'maintenance': 'maintenance',
+            'in_use': 'in_use',
+            'low': 'low'
+        };
+        return statusMap[status?.toLowerCase()] || status?.toLowerCase() || 'unknown';
+    };
+
+    const displayStatus = (status) => {
+        const statusDisplay = {
+            'available': 'Sẵn sàng',
+            'in_stock': 'Trong kho',
+            'charging': 'Đang sạc',
+            'maintenance': 'Bảo trì',
+            'in_use': 'Đang dùng',
+            'low': 'Yếu'
+        };
+        return statusDisplay[formatStatus(status)] || status;
+    };
     if (isLoading) {
-      return <p style={{ color: '#94a3b8', textAlign: 'center' }}>Đang tải dữ liệu kho pin...</p>;
+        return (
+            <div className="staff-battery-loading">
+                <div className="staff-battery-spinner"></div>
+                <div className="staff-battery-loading-text">Đang tải dữ liệu kho pin...</div>
+            </div>
+        );
     }
 
-    // Xử lý trạng thái lỗi
+    // Error State
     if (error) {
-      return (
-        <div style={{ color: '#ef4444', textAlign: 'center' }}>
-          <p>Lỗi: {error}</p>
-          <button onClick={refetch}>Thử lại</button>
-        </div>
-      );
+        return (
+            <div className="staff-battery-error">
+                <div className="staff-battery-error-icon">⚠️</div>
+                <h3 className="staff-battery-error-title">Lỗi tải dữ liệu</h3>
+                <p className="staff-battery-error-message">{error}</p>
+                <button onClick={refetch} className="staff-battery-error-btn">
+                    🔄 Thử lại
+                </button>
+            </div>
+        );
     }
 
-    // Giao diện chính khi đã có dữ liệu
+    // Empty State
+    if (batteries.length === 0) {
+        return (
+            <div className="staff-battery-empty">
+                <div className="staff-battery-empty-icon">🔋</div>
+                <h3 className="staff-battery-empty-title">Không có pin nào</h3>
+                <p className="staff-battery-empty-message">Kho pin hiện đang trống</p>
+            </div>
+        );
+    }
+
     return (
-        <> {/* <-- Dùng Fragment để bọc cả bảng và modal */}
-            <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                    <h2 style={{margin: 0}}>Chi tiết Kho Pin</h2>
-                    <button onClick={refetch} style={{ background: '#334155', color: 'white', border: 'none', padding: '8px 15px', borderRadius: '6px', cursor: 'pointer' }}>
-                        🔄 Tải lại
+        <>
+            {/* Stats Dashboard */}
+            <div className="staff-battery-stats">
+                <div className="staff-battery-stat-card">
+                    <div className="staff-battery-stat-icon">🔋</div>
+                    <div className="staff-battery-stat-content">
+                        <span className="staff-battery-stat-label">Tổng số pin</span>
+                        <h2 className="staff-battery-stat-value">{stats.total}</h2>
+                    </div>
+                </div>
+
+                <div className="staff-battery-stat-card">
+                    <div className="staff-battery-stat-icon">✅</div>
+                    <div className="staff-battery-stat-content">
+                        <span className="staff-battery-stat-label">Sẵn sàng</span>
+                        <h2 className="staff-battery-stat-value">{stats.available}</h2>
+                    </div>
+                </div>
+
+                <div className="staff-battery-stat-card">
+                    <div className="staff-battery-stat-icon">⚡</div>
+                    <div className="staff-battery-stat-content">
+                        <span className="staff-battery-stat-label">Đang sạc</span>
+                        <h2 className="staff-battery-stat-value">{stats.charging}</h2>
+                    </div>
+                </div>
+
+                <div className="staff-battery-stat-card">
+                    <div className="staff-battery-stat-icon">🔧</div>
+                    <div className="staff-battery-stat-content">
+                        <span className="staff-battery-stat-label">Bảo trì</span>
+                        <h2 className="staff-battery-stat-value">{stats.maintenance}</h2>
+                    </div>
+                </div>
+            </div>
+
+            {/* Filters */}
+            <div className="staff-battery-filters">
+                <div className="staff-battery-filter-row">
+                    <input 
+                        type="text" 
+                        placeholder="🔍 Tìm theo Mã pin..." 
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="staff-battery-search"
+                    />
+                    
+                    <select 
+                        value={statusFilter} 
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        className="staff-battery-filter-select"
+                    >
+                        <option value="">📊 Tất cả trạng thái</option>
+                        <option value="available">✅ Sẵn sàng</option>
+                        <option value="in_stock">✅ Trong kho</option>
+                        <option value="charging">⚡ Đang sạc</option>
+                        <option value="maintenance">🔧 Bảo trì</option>
+                        <option value="in_use">🚗 Đang sử dụng</option>
+                    </select>
+
+                    <button onClick={refetch} className="staff-battery-refresh-btn">
+                        <span>🔄</span> Làm mới
                     </button>
                 </div>
-                <div style={{ background: '#1e293b', borderRadius: '12px', overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '700px' }}>
+            </div>
+
+            {/* Cards View */}
+            {filteredBatteries.length === 0 ? (
+                <div className="staff-battery-empty">
+                    <div className="staff-battery-empty-icon">🔍</div>
+                    <h3 className="staff-battery-empty-title">Không tìm thấy</h3>
+                    <p className="staff-battery-empty-message">
+                        Không có pin nào phù hợp với bộ lọc
+                    </p>
+                </div>
+            ) : (
+                <div className="staff-battery-table-container">
+                    <table className="staff-battery-table">
                         <thead>
-                            <tr style={{ background: '#334155' }}>
-                                <th style={{ padding: '15px 20px' }}>Mã Pin</th>
-                                <th style={{ padding: '15px 20px' }}>Trạng thái</th>
-                                <th style={{ padding: '15px 20px' }}>Mức pin (%)</th>
-                                <th style={{ padding: '15px 20px' }}>Sức khỏe (%)</th>
-                                <th style={{ padding: '15px 20px' }}>Vị trí (Hộc)</th>
-                                <th style={{ padding: '15px 20px' }}>Hành động</th>
+                            <tr>
+                                <th>Mã Pin</th>
+                                <th>Mẫu Pin</th>
+                                <th>Trạng thái</th>
+                                <th>Sức khỏe</th>
+                                <th>Chu kỳ sạc</th>
+                                <th>Vị trí</th>
+                                <th>Hành động</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {batteries.map((bat) => {
-                                // Đọc dữ liệu linh hoạt từ API
+                            {filteredBatteries.map((bat) => {
                                 const id = bat.id || bat.batteryId;
                                 const status = bat.status || 'N/A';
-                                const charge = bat.stateOfHealth || bat.charge || 0;
-                                const health = bat.health || charge;
+                                const health = bat.stateOfHealth || bat.health || bat.charge || 0;
                                 const slot = bat.slotId || bat.slot || 'N/A';
+                                const model = bat.model || 'N/A';
+                                const cycles = bat.cycleCount || bat.cycles || 0;
 
                                 return (
-                                    <tr key={id} style={{ borderTop: '1px solid #334155' }}>
-                                        <td style={{ padding: '15px 20px', fontWeight: 'bold', color: 'white' }}>BAT{id}</td>
-                                        <td style={{ padding: '15px 20px' }}><span style={getStatusStyle(status)}>{status}</span></td>
-                                        <td style={{ padding: '15px 20px' }}>{charge}%</td>
-                                        <td style={{ padding: '15px 20px' }}>{health}%</td>
-                                        <td style={{ padding: '15px 20px' }}>{slot}</td>
-                                        <td style={{ padding: '15px 20px' }}>
-                                            {/* --- 3. GẮN SỰ KIỆN onClick VÀO NÚT --- */}
+                                    <tr key={id}>
+                                        {/* Battery ID */}
+                                        <td>
+                                            <div className="staff-battery-id">
+                                                <span className="staff-battery-id-icon">🔋</span>
+                                                <span className="staff-battery-id-text">BAT{id}</span>
+                                            </div>
+                                        </td>
+
+                                        {/* Model */}
+                                        <td>
+                                            <span className="staff-battery-model">{model}</span>
+                                        </td>
+
+                                        {/* Status */}
+                                        <td>
+                                            <span className={`staff-battery-status ${formatStatus(status)}`}>
+                                                {displayStatus(status)}
+                                            </span>
+                                        </td>
+
+                                        {/* Health */}
+                                        <td>
+                                            <div className="staff-battery-health">
+                                                <div className="staff-battery-health-bar">
+                                                    <div 
+                                                        className={`staff-battery-health-fill ${getHealthClass(health)}`}
+                                                        style={{ width: `${health}%` }}
+                                                    ></div>
+                                                </div>
+                                                <span className="staff-battery-health-text">{health}%</span>
+                                            </div>
+                                        </td>
+
+                                        {/* Cycles */}
+                                        <td>
+                                            <div className="staff-battery-cycles">
+                                                <span className="staff-battery-cycles-icon">🔄</span>
+                                                <span className="staff-battery-cycles-text">{cycles}</span>
+                                            </div>
+                                        </td>
+
+                                        {/* Slot */}
+                                        <td>
+                                            <span className="staff-battery-model">Hộc {slot}</span>
+                                        </td>
+
+                                        {/* Actions */}
+                                        <td>
                                             <button 
-                                                onClick={() => handleViewDetails(bat)} 
-                                                style={{ background: '#334155', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer' }}>
-                                                Chi tiết
+                                                onClick={() => handleViewDetails(bat)}
+                                                className="staff-battery-view-btn"
+                                            >
+                                                👁️ Chi tiết
                                             </button>
                                         </td>
                                     </tr>
@@ -97,10 +269,9 @@ const BatteryStockView = () => {
                         </tbody>
                     </table>
                 </div>
-            </div>
+            )}
 
-            {/* --- 4. RENDER MODAL MỘT CÁCH CÓ ĐIỀU KIỆN --- */}
-            {/* Modal chỉ hiển thị khi `selectedBattery` có giá trị */}
+            {/* Modal */}
             <BatteryDetailModal 
                 battery={selectedBattery} 
                 onClose={handleCloseModal} 
