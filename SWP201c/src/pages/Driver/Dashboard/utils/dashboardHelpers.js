@@ -34,20 +34,36 @@ export const getUserId = (user) => {
 export const processVehicles = (userVehicles) => {
   if (!userVehicles || !Array.isArray(userVehicles)) return [];
   
-  return userVehicles.map(vehicle => ({
-    id: vehicle.vehicleId || vehicle.id,
-    plateNumber: vehicle.plateNumber || vehicle.plate_number,
-    model: vehicle.vehicleModel || vehicle.model,
-    batteryLevel: vehicle.health || vehicle.batteryLevel || 0,
-    currentOdometer: vehicle.currentOdometer || vehicle.current_odometer || 0,
-    current_odometer: vehicle.currentOdometer || vehicle.current_odometer || 0,
-    batteryId: vehicle.batteryId || vehicle.battery_id,
-    batteryModel: vehicle.batteryModel || vehicle.battery_model,
-    batteryType: vehicle.batteryType || vehicle.battery_type,
-    vinNumber: vehicle.vinNumber || vehicle.vin_number,
-    compatibleBatteryTypes: vehicle.compatibleBatteryTypes || vehicle.compatible_battery_types,
-    ...vehicle
-  }));
+  return userVehicles.map(vehicle => {
+    // Lấy batteryLevel - ưu tiên từ API, không dùng 0 làm mock
+    const batteryLevel = vehicle.health !== null && vehicle.health !== undefined 
+      ? vehicle.health 
+      : (vehicle.batteryLevel !== null && vehicle.batteryLevel !== undefined 
+        ? vehicle.batteryLevel 
+        : null);
+    
+    // Lấy odometer - ưu tiên từ API, không dùng 0 làm mock
+    const currentOdometer = vehicle.currentOdometer !== null && vehicle.currentOdometer !== undefined
+      ? vehicle.currentOdometer
+      : (vehicle.current_odometer !== null && vehicle.current_odometer !== undefined
+        ? vehicle.current_odometer
+        : null);
+    
+    return {
+      id: vehicle.vehicleId || vehicle.id,
+      plateNumber: vehicle.plateNumber || vehicle.plate_number,
+      model: vehicle.vehicleModel || vehicle.model,
+      batteryLevel: batteryLevel,
+      currentOdometer: currentOdometer,
+      current_odometer: currentOdometer,
+      batteryId: vehicle.batteryId || vehicle.battery_id || vehicle.current_battery_id,
+      batteryModel: vehicle.batteryModel || vehicle.battery_model,
+      batteryType: vehicle.batteryType || vehicle.battery_type,
+      vinNumber: vehicle.vinNumber || vehicle.vin_number,
+      compatibleBatteryTypes: vehicle.compatibleBatteryTypes || vehicle.compatible_battery_types,
+      ...vehicle
+    };
+  });
 };
 
 /**

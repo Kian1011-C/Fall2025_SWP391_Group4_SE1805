@@ -1,5 +1,5 @@
 // Driver/StationsMap/index.jsx
-// Container component for StationsMap page - orchestrates stations display
+// Container component for StationsMap page - orchestrates stations display with Google Maps
 
 import React from 'react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
@@ -7,7 +7,8 @@ import { useStationsData, useStationSelection } from './hooks';
 import stationService from '../../../assets/js/services/stationService';
 import {
   StationsMapHeader,
-  StationsList
+  StationsList,
+  StationsMapView
 } from './components';
 
 const StationsMap = () => {
@@ -139,11 +140,24 @@ const StationsMap = () => {
         {/* Header */}
         <StationsMapHeader />
 
-        {/* Stations List */}
-        <StationsList
-          stations={stations}
-          onSelect={handleSelect}
-        />
+        {/* Google Maps View - Hiển thị bản đồ với các trạm */}
+        <div style={{ marginTop: '20px' }}>
+          <StationsMapView 
+            stations={stations} 
+            onStationSelect={handleSelect}
+          />
+        </div>
+
+        {/* Danh sách trạm dạng thẻ (bên dưới map) */}
+        <div style={{ marginTop: '20px' }}>
+          <h3 style={{ color: '#FFFFFF', marginBottom: '15px' }}>
+            📋 Danh sách Trạm
+          </h3>
+          <StationsList
+            stations={stations}
+            onSelect={handleSelect}
+          />
+        </div>
 
         {/* Debug info for selected station */}
         {selectedStation && import.meta.env.VITE_ENABLE_DEBUG === 'true' && (

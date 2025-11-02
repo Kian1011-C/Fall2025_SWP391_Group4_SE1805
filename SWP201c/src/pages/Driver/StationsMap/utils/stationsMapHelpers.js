@@ -59,29 +59,29 @@ export const getAvailabilityStatus = (availableSlots, totalSlots) => {
  * Get operating status
  */
 export const getOperatingStatus = (station) => {
-  console.log('🔍 getOperatingStatus - station:', station);
-  console.log('🔍 getOperatingStatus - station.status:', station.status);
-  console.log('🔍 getOperatingStatus - typeof station.status:', typeof station.status);
+  // Normalize status - kiểm tra nhiều trường hợp
+  const rawStatus = station.status || station.Status || station.state || station.State || 'unknown';
+  const status = String(rawStatus).toLowerCase().trim();
   
-  // Kiểm tra nhiều trường hợp có thể có của status
-  const status = station.status || station.Status || station.state || station.State || 'unknown';
-  console.log('🔍 getOperatingStatus - normalized status:', status);
-  
-  if (status === 'active' || status === 'Active' || status === 'ACTIVE') {
+  // Map Vietnamese và English status
+  if (status === 'active' || status === 'đang hoạt động' || status === 'hoạt động') {
     return { status: 'active', color: '#19c37d', label: 'Đang hoạt động' };
-  } else if (status === 'maintenance' || status === 'Maintenance' || status === 'MAINTENANCE') {
+  } 
+  
+  if (status === 'maintenance' || status === 'bảo trì' || status === 'baotri') {
     return { status: 'maintenance', color: '#ffa500', label: 'Bảo trì' };
-  } else if (status === 'inactive' || status === 'Inactive' || status === 'INACTIVE') {
+  } 
+  
+  if (status === 'inactive' || status === 'ngưng hoạt động' || status === 'closed') {
     return { status: 'inactive', color: '#ff6b6b', label: 'Ngưng hoạt động' };
-  } else {
-    // Nếu không có status hoặc status không rõ, mặc định là active nếu có availableSlots
-    console.log('⚠️ Unknown status, defaulting to active if has slots');
-    if (station.availableSlots > 0) {
-      return { status: 'active', color: '#19c37d', label: 'Đang hoạt động' };
-    } else {
-      return { status: 'inactive', color: '#ff6b6b', label: 'Ngưng hoạt động' };
-    }
   }
+  
+  // Default: dựa vào availableSlots
+  if (station.availableSlots > 0) {
+    return { status: 'active', color: '#19c37d', label: 'Đang hoạt động' };
+  }
+  
+  return { status: 'inactive', color: '#ff6b6b', label: 'Ngưng hoạt động' };
 };
 
 /**

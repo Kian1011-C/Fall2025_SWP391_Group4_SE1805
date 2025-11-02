@@ -64,7 +64,7 @@ class VehicleService {
     }
   }
 
-  // Add new vehicle
+  // Add new vehicle (legacy - giữ lại để tương thích)
   async addVehicle(vehicleData) {
     try {
       console.log('VehicleService: Add vehicle', vehicleData);
@@ -87,6 +87,60 @@ class VehicleService {
         success: false,
         message: errorInfo.message || 'Lỗi khi thêm phương tiện',
         error: errorInfo
+      };
+    }
+  }
+
+  // Register vehicle for user (theo API BE: POST /api/users/{userId}/vehicles)
+  // Params: plateNumber, model, vinNumber (RequestParam - dùng FormData)
+  async registerVehicleForUser(userId, plateNumber, model, vinNumber) {
+    try {
+      console.log('VehicleService: Register vehicle for user', { userId, plateNumber, model, vinNumber });
+      
+      // Validate input (theo logic của BE)
+      if (!plateNumber || plateNumber.trim() === '' || 
+          !model || model.trim() === '' || 
+          !vinNumber || vinNumber.trim() === '') {
+        return {
+          success: false,
+          message: 'Thiếu thông tin: biển số, model hoặc VIN.'
+        };
+      }
+
+      // Gọi API POST /api/users/{userId}/vehicles với FormData (RequestParam)
+      const formData = new FormData();
+      formData.append('plateNumber', plateNumber.trim());
+      formData.append('model', model.trim());
+      formData.append('vinNumber', vinNumber.trim());
+
+      console.log('VehicleService: Sending register vehicle request to /api/users/' + userId + '/vehicles');
+      const response = await apiUtils.postFormData(`/api/users/${userId}/vehicles`, formData);
+
+      console.log('VehicleService: Register vehicle response:', response);
+
+      // BE trả về { success: boolean, message: string, data: [...] } 
+      // data là danh sách xe mới nhất sau khi đăng ký
+      if (response.success) {
+        return {
+          success: true,
+          data: response.data || [], // Danh sách xe mới nhất
+          message: response.message || 'Đăng ký xe thành công!'
+        };
+      } else {
+        return {
+          success: false,
+          message: response.message || 'Đăng ký xe thất bại. Vui lòng thử lại.',
+          data: []
+        };
+      }
+    } catch (error) {
+      console.error('Register vehicle for user error:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return {
+        success: false,
+        message: errorInfo.message || 'Lỗi hệ thống: ' + (errorInfo.message || 'Không thể đăng ký xe'),
+        error: errorInfo,
+        data: []
       };
     }
   }

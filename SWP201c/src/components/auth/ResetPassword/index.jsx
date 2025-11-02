@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import authService from '../../../assets/js/services/authService';
 
 function useQuery() {
   const { search } = useLocation();
@@ -20,6 +21,9 @@ const ResetPasswordPage = () => {
   useEffect(() => {
     const t = query.get('token') || '';
     setToken(t);
+    if (!t) {
+      setError('Liên kết đặt lại mật khẩu không hợp lệ hoặc thiếu token.');
+    }
   }, [query]);
 
   const handleSubmit = async (e) => {
@@ -27,16 +31,25 @@ const ResetPasswordPage = () => {
     setError('');
     setSuccess('');
 
+    // Validate token
     if (!token) {
       setError('Liên kết đặt lại mật khẩu không hợp lệ hoặc thiếu token.');
       return;
     }
 
+    // Validate các trường nhập liệu
     if (!newPassword || !confirmPassword) {
       setError('Vui lòng nhập đầy đủ mật khẩu mới và xác nhận.');
       return;
     }
 
+    // Validate password length (theo logic của BE: tối thiểu 8 ký tự)
+    if (newPassword.length < 8) {
+      setError('Mật khẩu tối thiểu 8 ký tự.');
+      return;
+    }
+
+    // Validate password match
     if (newPassword !== confirmPassword) {
       setError('Mật khẩu xác nhận không khớp.');
       return;
@@ -44,27 +57,40 @@ const ResetPasswordPage = () => {
 
     try {
       setSubmitting(true);
-      const res = await fetch('/api/users/reset-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token, newPassword }),
-      });
+      
+      // Gọi API reset password qua authService
+      const response = await authService.resetPassword(token, newPassword);
 
-      const data = await res.json().catch(() => ({}));
-
-      if (res.ok && data && data.success) {
-        setSuccess(data.message || 'Cập nhật mật khẩu thành công!');
+      if (response.success) {
+        setSuccess(response.message || 'Đặt lại mật khẩu thành công. Hãy đăng nhập bằng mật khẩu mới.');
         // Tự động chuyển hướng sau 2.5s
         setTimeout(() => {
           navigate('/login');
         }, 2500);
       } else {
-        setError(data?.message || 'Không thể cập nhật mật khẩu.');
+        // Hiển thị message từ API hoặc thông báo lỗi rõ ràng hơn
+        let errorMessage = response.message || 'Không thể đặt lại mật khẩu. Vui lòng thử lại.';
+        
+        // Kiểm tra nếu là lỗi CORS hoặc network
+        if (response.error) {
+          const errorInfo = response.error;
+          if (errorInfo.message?.includes('CORS') || errorInfo.message?.includes('Network')) {
+            errorMessage = 'Lỗi kết nối server. Vui lòng kiểm tra backend CORS configuration hoặc thử lại sau.';
+          }
+        }
+        
+        setError(errorMessage);
       }
     } catch (err) {
-      setError('Đã xảy ra lỗi. Vui lòng thử lại.');
+      console.error('Reset password error:', err);
+      let errorMessage = err.message || 'Đã xảy ra lỗi. Vui lòng thử lại.';
+      
+      // Kiểm tra lỗi CORS
+      if (err.message?.includes('CORS') || err.message?.includes('Network') || err.code === 'ERR_NETWORK') {
+        errorMessage = 'Lỗi kết nối server (CORS). Vui lòng kiểm tra backend đã cấu hình CORS chưa hoặc liên hệ admin.';
+      }
+      
+      setError(errorMessage);
     } finally {
       setSubmitting(false);
     }

@@ -175,12 +175,51 @@ const TowerSelector = () => {
                         );
                     })
                 ) : (
-                    <p style={{ color: 'gray' }}>Trạm này hiện không có trụ nào sẵn sàng.</p>
+                    <div style={{ textAlign: 'center', padding: '20px' }}>
+                        <p style={{ color: 'gray', marginBottom: '20px' }}>Trạm này hiện không có trụ nào sẵn sàng.</p>
+                        <button 
+                            onClick={() => goToStep(STEPS.SELECT_STATION)}
+                            style={{
+                                background: 'rgba(156, 163, 175, 0.2)',
+                                color: '#9ca3af',
+                                border: '1px solid rgba(156, 163, 175, 0.3)',
+                                borderRadius: '10px',
+                                padding: '12px 24px',
+                                cursor: 'pointer',
+                                fontSize: '0.9rem',
+                                fontWeight: '600',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '8px'
+                            }}
+                        >
+                            ← Quay lại chọn trạm
+                        </button>
+                    </div>
                 )}
             </div>
 
             {cabinets.length > 0 && (
-                <div style={{ marginTop: '24px', textAlign: 'center' }}>
+                <div style={{ marginTop: '24px', textAlign: 'center', display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                    <button 
+                        className="back-button" 
+                        onClick={() => goToStep(STEPS.SELECT_STATION)}
+                        style={{
+                            background: 'rgba(156, 163, 175, 0.2)',
+                            color: '#9ca3af',
+                            border: '1px solid rgba(156, 163, 175, 0.3)',
+                            borderRadius: '10px',
+                            padding: '12px 24px',
+                            cursor: 'pointer',
+                            fontSize: '0.9rem',
+                            fontWeight: '600',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px'
+                        }}
+                    >
+                        ← Quay lại
+                    </button>
                     <button 
                         className="start-swap-button" 
                         onClick={handleStartSwap} 

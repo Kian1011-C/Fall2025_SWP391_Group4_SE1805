@@ -93,7 +93,16 @@ const VehiclesContainer = () => {
         {/* Header */}
         <div className="vehicles-header">
           <h1>Quản lý phương tiện</h1>
-          <button className="btn btn-primary" onClick={openAddModal}>
+          <button 
+            className="btn btn-primary" 
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log('🔵 Button clicked - opening modal');
+              openAddModal();
+            }}
+            style={{ cursor: 'pointer', zIndex: 10 }}
+          >
             <i className="fas fa-plus"></i>
             Thêm phương tiện
           </button>
@@ -111,16 +120,15 @@ const VehiclesContainer = () => {
       </div>
 
       {/* Add Vehicle Modal */}
-      {showAddModal && (
-        <AddVehicleModal
-          formData={formData}
-          formErrors={formErrors}
-          submitting={submitting}
-          onUpdateField={updateField}
-          onSubmit={handleAddVehicle}
-          onClose={closeAddModal}
-        />
-      )}
+      <AddVehicleModal
+        show={showAddModal}
+        formData={formData}
+        formErrors={formErrors}
+        submitting={submitting}
+        onUpdateField={updateField}
+        onSubmit={handleAddVehicle}
+        onClose={closeAddModal}
+      />
 
       {/* Vehicle Detail Modal */}
       {showDetailModal && selectedVehicle && (

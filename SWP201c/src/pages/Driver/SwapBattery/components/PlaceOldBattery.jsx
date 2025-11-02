@@ -177,6 +177,13 @@ const PlaceOldBattery = () => {
             sessionStorage.setItem('oldBatteryLevel', String(percent));
             console.log('✅ Đã lưu dung lượng pin cũ:', percent);
             
+            // Lưu emptySlotNumber (slot trống nơi đặt pin cũ) vào sessionStorage
+            // Để dùng cho SwapSuccess hiển thị "Slot trống" cho pin cũ
+            if (emptySlotNumber && emptySlotNumber !== 'undefined' && emptySlotNumber !== 'null') {
+                sessionStorage.setItem('emptySlotNumber', String(emptySlotNumber));
+                console.log('✅ Đã lưu emptySlotNumber vào sessionStorage:', emptySlotNumber);
+            }
+            
             // CHỈ GHI NHẬN - KHÔNG GỌI API
             // Tất cả cập nhật database sẽ được xử lý ở bước cuối cùng (confirmSwap)
             console.log('✅ Đã ghi nhận thông tin pin cũ:', {

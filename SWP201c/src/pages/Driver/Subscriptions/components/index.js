@@ -7,3 +7,4 @@ export { default as PlansGrid } from './PlansGrid';
 export { default as EmptyPlans } from './EmptyPlans';
 export { default as FAQSection } from './FAQSection';
 export { default as DebugInfo } from './DebugInfo';
+export { default as SubscribeModal } from './SubscribeModal';

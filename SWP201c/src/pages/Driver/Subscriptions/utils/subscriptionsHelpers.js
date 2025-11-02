@@ -163,15 +163,26 @@ export const getFAQItems = () => [
 ];
 
 /**
- * Create subscription request data
+ * Create subscription request data (theo API BE)
+ * Cần vehicleId, startDate, endDate từ modal
  */
-export const createSubscriptionRequest = (plan, userId) => {
-  return {
-    planId: plan.planId || plan.id,
+export const createSubscriptionRequest = (plan, userId, contractInfo) => {
+  const request = {
     userId: userId,
-    planName: getPlanName(plan),
-    monthlyFee: getPlanPrice(plan)
+    vehicleId: contractInfo.vehicleId,
+    startDate: contractInfo.startDate,
+    endDate: contractInfo.endDate,
+    signedPlace: contractInfo.signedPlace || 'Hà Nội'
   };
+
+  // Thêm planId hoặc planName (theo logic của BE)
+  if (plan.planId || plan.id) {
+    request.planId = plan.planId || plan.id;
+  } else {
+    request.planName = getPlanName(plan);
+  }
+
+  return request;
 };
 
 /**

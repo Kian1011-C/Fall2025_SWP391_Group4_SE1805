@@ -30,6 +30,20 @@ export const ProfileDisplay = ({ user }) => {
       gridTemplateColumns: '1fr 1fr', 
       gap: '30px'
     }}>
+      {/* User ID */}
+      <div style={infoItemStyle}>
+        <div style={labelStyle}>User ID</div>
+        <div style={{
+          ...valueStyle,
+          fontFamily: 'monospace',
+          color: '#19c37d',
+          fontSize: '1rem',
+          letterSpacing: '0.5px'
+        }}>
+          #{user?.id || user?.userId || 'N/A'}
+        </div>
+      </div>
+
       {/* Full Name */}
       <div style={infoItemStyle}>
         <div style={labelStyle}>Họ và tên</div>

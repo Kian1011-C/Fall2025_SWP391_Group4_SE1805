@@ -1,34 +1,93 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { SwapContext } from '../index';
-// import { apiUtils } from '/src/assets/js/config/api'; // Không cần - chỉ đọc từ sessionStorage
+import batteryService from '../../../../assets/js/services/batteryService';
 import '../../../../assets/css/TakeNewBattery.css';
 
 const TakeNewBattery = () => {
     const { newBattery, completeSwap, isLoading, goToStep, STEPS } = useContext(SwapContext);
     const [newBatteryId, setNewBatteryId] = useState(null);
+    const [newBatterySlot, setNewBatterySlot] = useState(null);
+    const [newBatteryLevel, setNewBatteryLevel] = useState(null);
     const [loadingBattery, setLoadingBattery] = useState(true);
     const [error, setError] = useState(null);
 
-    // ĐỌC THÔNG TIN TỪ SESSION STORAGE - KHÔNG GỌI API
+    // GỌI API ĐỂ LẤY THÔNG TIN PIN MỚI THẬT TỪ BACKEND
     useEffect(() => {
-        console.log('✅ TakeNewBattery: Đọc thông tin từ sessionStorage (không gọi API)');
-        
-        const newBatteryIdFromStorage = sessionStorage.getItem('new_battery_id');
-        const newBatterySlotFromStorage = sessionStorage.getItem('newBatterySlot');
-        const newBatteryLevelFromStorage = sessionStorage.getItem('newBatteryLevel');
-        
-        console.log('  - new_battery_id:', newBatteryIdFromStorage);
-        console.log('  - newBatterySlot:', newBatterySlotFromStorage);
-        console.log('  - newBatteryLevel:', newBatteryLevelFromStorage);
-        
-        if (newBatteryIdFromStorage) {
-            setNewBatteryId(newBatteryIdFromStorage);
-            setLoadingBattery(false);
-        } else {
-            console.error('❌ Không tìm thấy new_battery_id trong sessionStorage');
-            setError('Không tìm thấy thông tin pin mới');
-            setLoadingBattery(false);
-        }
+        const fetchNewBatteryInfo = async () => {
+            try {
+                console.log('✅ TakeNewBattery: Lấy thông tin pin mới từ API');
+                
+                // Bước 1: Lấy batteryId từ sessionStorage
+                const newBatteryIdFromStorage = sessionStorage.getItem('new_battery_id');
+                const newBatterySlotFromStorage = sessionStorage.getItem('newBatterySlot');
+                
+                console.log('  - new_battery_id từ sessionStorage:', newBatteryIdFromStorage);
+                console.log('  - newBatterySlot từ sessionStorage:', newBatterySlotFromStorage);
+                
+                if (!newBatteryIdFromStorage) {
+                    console.error('❌ Không tìm thấy new_battery_id trong sessionStorage');
+                    setError('Không tìm thấy thông tin pin mới');
+                    setLoadingBattery(false);
+                    return;
+                }
+
+                setNewBatteryId(newBatteryIdFromStorage);
+                setNewBatterySlot(newBatterySlotFromStorage);
+
+                // Bước 2: Gọi API để lấy thông tin chi tiết pin (bao gồm dung lượng THẬT)
+                console.log('🔋 Gọi API getBatteryById để lấy thông tin pin mới:', newBatteryIdFromStorage);
+                const batteryResponse = await batteryService.getBatteryById(newBatteryIdFromStorage);
+                
+                if (batteryResponse.success && batteryResponse.data) {
+                    const batteryData = batteryResponse.data;
+                    
+                    // Lấy dung lượng pin từ nhiều nguồn có thể (từ API thật)
+                    const batteryLevel = batteryData.stateOfHealth || 
+                                       batteryData.state_of_health || 
+                                       batteryData.batteryLevel || 
+                                       batteryData.battery_level ||
+                                       batteryData.health ||
+                                       batteryData.capacity || 100;
+                    
+                    console.log('✅ Đã lấy thông tin pin mới từ API:');
+                    console.log('  - Battery ID:', newBatteryIdFromStorage);
+                    console.log('  - Battery Level (THẬT từ API):', batteryLevel + '%');
+                    console.log('  - Full battery data:', batteryData);
+                    
+                    setNewBatteryLevel(batteryLevel);
+                    
+                    // Cập nhật sessionStorage với dữ liệu từ API (để đảm bảo đồng bộ)
+                    sessionStorage.setItem('newBatteryLevel', String(batteryLevel));
+                } else {
+                    console.warn('⚠️ Không lấy được thông tin pin từ API, dùng dữ liệu từ sessionStorage');
+                    // Fallback: dùng giá trị từ sessionStorage nếu API không trả về
+                    const fallbackLevel = sessionStorage.getItem('newBatteryLevel');
+                    setNewBatteryLevel(fallbackLevel ? parseInt(fallbackLevel) : 100);
+                }
+                
+                setLoadingBattery(false);
+            } catch (err) {
+                console.error('❌ Lỗi khi lấy thông tin pin mới từ API:', err);
+                
+                // Fallback: dùng dữ liệu từ sessionStorage nếu API lỗi
+                const fallbackLevel = sessionStorage.getItem('newBatteryLevel');
+                const fallbackId = sessionStorage.getItem('new_battery_id');
+                const fallbackSlot = sessionStorage.getItem('newBatterySlot');
+                
+                if (fallbackId) {
+                    setNewBatteryId(fallbackId);
+                    setNewBatterySlot(fallbackSlot);
+                    setNewBatteryLevel(fallbackLevel ? parseInt(fallbackLevel) : 100);
+                    console.warn('⚠️ Đã dùng dữ liệu fallback từ sessionStorage');
+                } else {
+                    setError('Không thể tải thông tin pin mới. Vui lòng thử lại.');
+                }
+                
+                setLoadingBattery(false);
+            }
+        };
+
+        fetchNewBatteryInfo();
     }, []);
 
     if (loadingBattery) {
@@ -46,10 +105,6 @@ const TakeNewBattery = () => {
             </div>
         );
     }
-
-    // Lấy thông tin từ sessionStorage
-    const newBatterySlot = sessionStorage.getItem('newBatterySlot');
-    const newBatteryLevel = sessionStorage.getItem('newBatteryLevel');
 
     return (
         <div className="station-selector-container">
@@ -69,7 +124,7 @@ const TakeNewBattery = () => {
                 <div className="compartment-header">
                     <span className="compartment-label">Slot pin đầy</span>
                     <div className="compartment-number">
-                        {newBatterySlot || newBattery?.newBatterySlot || '...'}
+                        {newBatterySlot || newBattery?.newBatterySlot || 'Đang tải...'}
                     </div>
                 </div>
                 <div className="compartment-indicator">
@@ -91,7 +146,7 @@ const TakeNewBattery = () => {
                     <div className="detail-item">
                         <span className="detail-label">Dung lượng:</span>
                         <span className="detail-value battery-level">
-                            {newBatteryLevel || newBattery?.newBatteryPercent || 'Đang tải...'}%
+                            {newBatteryLevel !== null ? `${newBatteryLevel}%` : (newBattery?.newBatteryPercent ? `${newBattery.newBatteryPercent}%` : 'Đang tải...')}
                         </span>
                     </div>
                 </div>
@@ -101,7 +156,7 @@ const TakeNewBattery = () => {
                     <div 
                         className="battery-level-fill" 
                         style={{ 
-                            width: `${newBatteryLevel || newBattery?.newBatteryPercent || 0}%` 
+                            width: `${newBatteryLevel !== null ? newBatteryLevel : (newBattery?.newBatteryPercent || 0)}%` 
                         }}
                     ></div>
                 </div>
@@ -112,7 +167,7 @@ const TakeNewBattery = () => {
                 <div className="confirmation-icon">✅</div>
                     <div className="confirmation-text">
                         <strong>Pin đã sẵn sàng!</strong>
-                        <p>ID: {newBatteryId} | Slot: {newBatterySlot} | Dung lượng: {newBatteryLevel}%</p>
+                        <p>ID: {newBatteryId || 'Đang tải...'} | Slot: {newBatterySlot || 'Đang tải...'} | Dung lượng: {newBatteryLevel !== null ? `${newBatteryLevel}%` : 'Đang tải...'}</p>
                     </div>
             </div>
 

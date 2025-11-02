@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import swapService from '../../../../assets/js/services/swapService';
+// ✅ SỬ DỤNG staffSwapService cho Staff
+import staffSwapService from '../../../../assets/js/services/staffSwapService';
 
 export const useSwapConfirmData = () => {
   const [requests, setRequests] = useState([]);
@@ -10,15 +11,17 @@ export const useSwapConfirmData = () => {
   const fetchRequests = useCallback(async () => {
     try {
       setError(null);
-      // 1. Gọi API để lấy TẤT CẢ các phiên đổi pin
-      const response = await swapService.getAllSwaps();
+      // 1. Gọi API để lấy TẤT CẢ các phiên đổi pin (sử dụng staffSwapService)
+      const allSwaps = await staffSwapService.getAllSwaps();
       
-      if (response.success) {
+      if (allSwaps && Array.isArray(allSwaps)) {
         // 2. LỌC ở Frontend: Chỉ giữ lại các yêu cầu có trạng thái 'INITIATED'
-        const pendingRequests = response.data.filter(swap => swap.swapStatus === 'INITIATED');
+        const pendingRequests = allSwaps.filter(swap => 
+          swap.swapStatus === 'INITIATED' || swap.status === 'INITIATED'
+        );
         setRequests(pendingRequests);
       } else {
-        throw new Error(response.message);
+        throw new Error('Dữ liệu không hợp lệ');
       }
     } catch (err) {
       setError(err.message || "Không thể tải danh sách yêu cầu.");
@@ -36,10 +39,11 @@ export const useSwapConfirmData = () => {
   const handleAcceptRequest = async (swapId) => {
     setIsSubmitting(true);
     try {
-      await swapService.updateSwapStatus(swapId, 'IN_PROGRESS');
+      // ✅ Sử dụng staffSwapService.completeSwap() để chấp nhận và hoàn thành swap
+      await staffSwapService.completeSwap(swapId);
       await fetchRequests(); // Tải lại danh sách sau khi cập nhật
     } catch (err) {
-      setError("Lỗi khi chấp nhận yêu cầu.");
+      setError("Lỗi khi chấp nhận yêu cầu: " + (err.message || ''));
     } finally {
       setIsSubmitting(false);
     }
@@ -48,10 +52,11 @@ export const useSwapConfirmData = () => {
   const handleDeclineRequest = async (swapId) => {
     setIsSubmitting(true);
     try {
-      await swapService.updateSwapStatus(swapId, 'CANCELLED');
+      // ✅ Sử dụng staffSwapService.cancelSwap() để từ chối
+      await staffSwapService.cancelSwap(swapId);
       await fetchRequests();
     } catch (err) {
-      setError("Lỗi khi từ chối yêu cầu.");
+      setError("Lỗi khi từ chối yêu cầu: " + (err.message || ''));
     } finally {
       setIsSubmitting(false);
     }

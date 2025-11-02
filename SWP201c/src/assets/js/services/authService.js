@@ -364,6 +364,61 @@ class AuthService {
     }
   }
 
+  // Reset password with token
+  async resetPassword(token, newPassword) {
+    try {
+      console.log('AuthService: Reset Password', { token: token ? 'provided' : 'missing', passwordLength: newPassword?.length });
+      
+      // Validate password length (theo logic của BE: tối thiểu 8 ký tự)
+      if (!newPassword || newPassword.length < 8) {
+        return {
+          success: false,
+          message: 'Mật khẩu tối thiểu 8 ký tự.'
+        };
+      }
+
+      // Validate token
+      if (!token) {
+        return {
+          success: false,
+          message: 'Link đã hết hạn hoặc không hợp lệ.'
+        };
+      }
+
+      // Gọi API POST /api/users/reset với RequestParam (dùng FormData như BE yêu cầu)
+      // Theo pattern của các API khác: /api/users/forgot, /api/users/register
+      const formData = new FormData();
+      formData.append('token', token);
+      formData.append('newPassword', newPassword);
+
+      console.log('AuthService: Sending reset password request to /api/users/reset');
+      const response = await apiUtils.postFormData('/api/users/reset', formData);
+
+      console.log('AuthService: Reset Password response:', response);
+
+      // BE trả về { success: boolean, message: string }
+      if (response.success) {
+        return {
+          success: true,
+          message: response.message || 'Đặt lại mật khẩu thành công. Hãy đăng nhập bằng mật khẩu mới.'
+        };
+      } else {
+        return {
+          success: false,
+          message: response.message || 'Không thể đặt lại mật khẩu. Vui lòng thử lại.'
+        };
+      }
+    } catch (error) {
+      console.error('Reset Password error:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return {
+        success: false,
+        message: errorInfo.message || 'Lỗi khi đặt lại mật khẩu. Vui lòng thử lại.',
+        error: errorInfo
+      };
+    }
+  }
+
   async getCurrentUserFromAPI() {
     try {
       const response = await apiUtils.get(API_CONFIG.ENDPOINTS.AUTH.ME);

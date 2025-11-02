@@ -1,8 +1,8 @@
 // src/hooks/useSwapBattery.js (hoặc đường dẫn của bạn)
 
 import { useState, useCallback } from 'react';
-// Đảm bảo đường dẫn này chính xác
-import swapService from '../../../../assets/js/services/swapService'; 
+// ✅ SỬ DỤNG staffSwapService cho Staff Manual Swap
+import staffSwapService from '../../../../assets/js/services/staffSwapService'; 
 
 export const useSwapBattery = (userId, staffId, defaultStationId) => {
     // 'form' = hiển thị form nhập liệu
@@ -21,11 +21,11 @@ export const useSwapBattery = (userId, staffId, defaultStationId) => {
         setIsLoading(true);
         setError(null);
         try {
-            const response = await swapService.getUserSwapHistory(userId, limit);
-            if (response.success) {
-                setSwapHistory(response.data);
+            const response = await staffSwapService.getAllSwaps({ userId, limit });
+            if (response && Array.isArray(response)) {
+                setSwapHistory(response);
             } else {
-                throw new Error(response.message || 'Không thể lấy lịch sử swap');
+                throw new Error('Không thể lấy lịch sử swap');
             }
         } catch (err) {
             setError(err.message);
@@ -35,16 +35,16 @@ export const useSwapBattery = (userId, staffId, defaultStationId) => {
         }
     }, [userId]);
 
-    // 2. Lấy tất cả swap (admin)
+    // 2. Lấy tất cả swap (admin/staff)
     const getAllSwaps = useCallback(async () => {
         setIsLoading(true);
         setError(null);
         try {
-            const response = await swapService.getAllSwaps();
-            if (response.success) {
-                setAllSwaps(response.data);
+            const response = await staffSwapService.getAllSwaps();
+            if (response && Array.isArray(response)) {
+                setAllSwaps(response);
             } else {
-                throw new Error(response.message || 'Không thể lấy tất cả swap');
+                throw new Error('Không thể lấy tất cả swap');
             }
         } catch (err) {
             setError(err.message);
@@ -54,22 +54,20 @@ export const useSwapBattery = (userId, staffId, defaultStationId) => {
         }
     }, []);
 
-    // 3. Lấy danh sách pin có sẵn ở trạm
+    // 3. Lấy danh sách pin có sẵn ở kho (in_stock)
+    // ⚠️ Staff lấy pin từ KHO (status = 'in_stock'), không phải từ tower
     const fetchAvailableBatteries = useCallback(async (stationId) => {
         setIsLoading(true);
         setError(null);
         try {
-            // Sử dụng stationId được truyền vào, hoặc defaultStationId nếu không có
-            const id = stationId || defaultStationId;
-            if (!id) {
-                throw new Error("Missing stationId to fetch batteries.");
-            }
-            const response = await swapService.getBatteriesByStation(id);
+            // Import batteryService để lấy pin từ kho
+            const batteryService = await import('../../../../assets/js/services/batteryService.js');
+            const response = await batteryService.default.getAllBatteries({ status: 'in_stock' });
+            
             if (response.success) {
-                const available = response.data.filter(bat => bat.status && bat.status.toUpperCase() === 'AVAILABLE');
-                setAvailableBatteries(available);
+                setAvailableBatteries(response.data || []);
             } else {
-                throw new Error(response.message || 'Không thể tải danh sách pin');
+                throw new Error(response.message || 'Không thể tải danh sách pin trong kho');
             }
         } catch (err) {
             setError(err.message);
@@ -77,13 +75,13 @@ export const useSwapBattery = (userId, staffId, defaultStationId) => {
         } finally {
             setIsLoading(false);
         }
-    }, [defaultStationId]);
+    }, []);
 
-    // 4. Tạo swap mới (ĐÃ THÊM LOG DEBUG + TRUYỀN ĐẦY ĐỦ DỮ LIỆU)
+    // 4. Tạo swap mới (STAFF MANUAL SWAP - SỬ DỤNG staffSwapService)
     const handleInitiateSwap = async (formData) => {
         // [LOG DEBUG 1] Kiểm tra dữ liệu thô từ Form
-        console.log('[useSwapBattery] handleInitiateSwap: Nhận được formData sau:', formData);
-        console.log(`[useSwapBattery] KIỂM TRA các field quan trọng:`);
+        console.log('[useSwapBattery - STAFF] handleInitiateSwap: Nhận được formData:', formData);
+        console.log(`[useSwapBattery - STAFF] KIỂM TRA các field quan trọng:`);
         console.log(`  ├─ userId: ${formData?.userId}`);
         console.log(`  ├─ vehicleId: ${formData?.vehicleId}`);
         console.log(`  ├─ oldBatteryId: ${formData?.oldBatteryId}`);
@@ -94,79 +92,62 @@ export const useSwapBattery = (userId, staffId, defaultStationId) => {
         setIsSubmitting(true);
         setError(null);
         try {
-            const requestBody = {
-                userId: formData.userId,
-                vehicleId: formData.vehicleId,
-                oldBatteryId: formData.oldBatteryId || null,
-                newBatteryId: formData.newBatteryId,
-                contractId: formData.contractId || null, // Truyền contractId
-                stationId: defaultStationId,
-                staffId: formData.staffId || staffId, // Ưu tiên staffId từ form
-            };
-
-            // [LOG DEBUG 2] Kiểm tra đối tượng đầy đủ TRƯỚC KHI gửi
-            console.log('[useSwapBattery] Chuẩn bị gửi requestBody này đến swapService:', requestBody);
-
-            const response = await swapService.initiateSwap(requestBody);
+            // ✅ Gọi staffSwapService.createManualSwap() thay vì swapService.initiateSwap()
+            const response = await staffSwapService.createManualSwap(formData);
             
-            if (response.swapId) {
+            if (response && response.swapId) {
+                console.log('✅ [useSwapBattery - STAFF] Tạo swap thành công:', response);
                 setSwapDetails(response);
                 setStep('in_progress');
             } else {
-                throw new Error(response.message || 'Khởi tạo swap thất bại');
+                throw new Error('Khởi tạo swap thất bại - Không nhận được swapId');
             }
         } catch (err) {
-            // Lỗi này là lỗi từ swapService (đã throw)
-            console.error('[useSwapBattery] Lỗi khi gọi handleInitiateSwap:', err);
+            console.error('[useSwapBattery - STAFF] Lỗi khi gọi handleInitiateSwap:', err);
             setError(err.message);
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    // 5. Xác nhận swap
+    // 5. Xác nhận swap (STAFF COMPLETE SWAP)
     const handleConfirmSwap = async () => {
         if (!swapDetails) return;
         setIsSubmitting(true);
         setError(null);
         try {
-            const response = await swapService.confirmSwap(swapDetails.swapId);
-            if (response) {
+            console.log('[useSwapBattery - STAFF] Xác nhận hoàn thành swap:', swapDetails.swapId);
+            
+            // ✅ Gọi staffSwapService.completeSwap() thay vì swapService.confirmSwap()
+            const response = await staffSwapService.completeSwap(swapDetails.swapId);
+            
+            if (response && response.success) {
                 alert('Đổi pin thành công!');
                 setStep('form');
                 setSwapDetails(null);
                 setAvailableBatteries([]);
             } else {
-                throw new Error('Xác nhận swap thất bại');
+                throw new Error(response?.message || 'Xác nhận swap thất bại');
             }
         } catch (err) {
+            console.error('[useSwapBattery - STAFF] Lỗi khi xác nhận swap:', err);
             setError(err.message);
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    // 6. Tạo auto swap (nếu cần)
-    const handleAutoSwap = async (formData) => {
-        setIsSubmitting(true);
-        setError(null);
-        try {
-            const response = await swapService.createAutoSwap(formData);
-            if (response.success) {
-                setSwapDetails(response.data);
-                setStep('in_progress');
-            } else {
-                throw new Error(response.message || 'Tạo auto swap thất bại');
+    // 6. Hủy swap (STAFF CANCEL SWAP)
+    const cancelSwap = async () => {
+        if (swapDetails?.swapId) {
+            try {
+                console.log('[useSwapBattery - STAFF] Hủy swap:', swapDetails.swapId);
+                await staffSwapService.cancelSwap(swapDetails.swapId);
+            } catch (err) {
+                console.error('[useSwapBattery - STAFF] Lỗi khi hủy swap:', err);
             }
-        } catch (err) {
-            setError(err.message);
-        } finally {
-            setIsSubmitting(false);
         }
-    };
-
-    // 7. Reset/hủy swap
-    const cancelSwap = () => {
+        
         setStep('form');
         setSwapDetails(null);
         setError(null);
@@ -187,7 +168,6 @@ export const useSwapBattery = (userId, staffId, defaultStationId) => {
         fetchAvailableBatteries,
         handleInitiateSwap,
         handleConfirmSwap,
-        handleAutoSwap,
         cancelSwap
     };
 };

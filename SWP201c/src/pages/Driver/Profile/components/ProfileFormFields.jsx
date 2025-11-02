@@ -36,6 +36,26 @@ export const ProfileFormFields = ({ formData, formErrors, onFieldChange }) => {
       gridTemplateColumns: '1fr 1fr', 
       gap: '25px'
     }}>
+      {/* User ID - READ ONLY */}
+      <div>
+        <label style={labelStyle}>
+          User ID
+        </label>
+        <input
+          type="text"
+          value={`#${formData.id || formData.userId || 'N/A'}`}
+          readOnly
+          disabled
+          style={{
+            ...inputStyle(false),
+            fontFamily: 'monospace',
+            color: '#19c37d',
+            cursor: 'not-allowed',
+            opacity: 0.7
+          }}
+        />
+      </div>
+
       {/* Full Name */}
       <div>
         <label style={labelStyle}>
