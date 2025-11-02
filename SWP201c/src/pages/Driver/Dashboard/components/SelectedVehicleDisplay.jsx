@@ -20,7 +20,19 @@ const SelectedVehicleDisplay = ({ selectedVehicle, contracts }) => {
     return { bg: 'rgba(255, 107, 107, 0.3)', color: '#ff6b6b' };
   };
 
-  const batteryStyle = getBatteryStyle(selectedVehicle.batteryLevel);
+  // Lấy batteryLevel - sử dụng dữ liệu từ API, không dùng mock data
+  const batteryLevel = selectedVehicle.batteryLevel !== null && selectedVehicle.batteryLevel !== undefined
+    ? selectedVehicle.batteryLevel
+    : null;
+  
+  // Lấy odometer - sử dụng dữ liệu từ API, không dùng mock data
+  const odometer = selectedVehicle.currentOdometer !== null && selectedVehicle.currentOdometer !== undefined
+    ? selectedVehicle.currentOdometer
+    : (selectedVehicle.current_odometer !== null && selectedVehicle.current_odometer !== undefined
+      ? selectedVehicle.current_odometer
+      : null);
+  
+  const batteryStyle = getBatteryStyle(batteryLevel || 0); // Dùng 0 chỉ để tính style, không hiển thị
 
   return (
     <div style={{
@@ -62,10 +74,10 @@ const SelectedVehicleDisplay = ({ selectedVehicle, contracts }) => {
             fontWeight: '700',
             marginBottom: '10px'
           }}>
-            🔋 {selectedVehicle.batteryLevel}%
+            🔋 {batteryLevel !== null ? `${batteryLevel}%` : 'N/A'}
           </div>
           <div style={{ color: '#B0B0B0', fontSize: '0.9rem', marginBottom: '5px' }}>
-            📏 {(selectedVehicle.current_odometer || selectedVehicle.currentOdometer || 0)?.toLocaleString()} km
+            📏 {odometer !== null ? `${odometer.toLocaleString()} km` : 'N/A'}
           </div>
           {selectedVehicleContracts.length > 0 && (
             <div style={{ color: '#B0B0B0', fontSize: '0.8rem' }}>

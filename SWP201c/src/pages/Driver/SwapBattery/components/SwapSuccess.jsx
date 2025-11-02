@@ -8,39 +8,62 @@ const SwapSuccess = ({ onFinish }) => {
     const context = useContext(SwapContext);
     const { summary } = context || {}; // Add fallback for undefined context
     const [oldBatteryLevel, setOldBatteryLevel] = useState(null);
+    const [newBatteryLevel, setNewBatteryLevel] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // LẤY DUNG LƯỢNG PIN CŨ THẬT TỪ API
+    // LẤY DUNG LƯỢNG PIN CŨ VÀ PIN MỚI THẬT TỪ API
     useEffect(() => {
-        const fetchOldBatteryLevel = async () => {
+        const fetchBatteryLevels = async () => {
             try {
                 setLoading(true);
                 
-                // Lấy ID pin cũ từ sessionStorage
-                const oldBatteryId = sessionStorage.getItem('batteryId') || 
+                // Lấy ID pin cũ từ sessionStorage hoặc summary
+                const oldBatteryId = summary?.oldBatteryId || 
+                                   summary?.oldBatteryCode ||
+                                   sessionStorage.getItem('batteryId') || 
                                    sessionStorage.getItem('old_battery_id') || 
                                    sessionStorage.getItem('oldBatteryId');
                 
+                // Lấy ID pin mới từ summary hoặc sessionStorage
+                const newBatteryId = summary?.newBatteryId || 
+                                    summary?.newBatteryCode ||
+                                    sessionStorage.getItem('new_battery_id') || 
+                                    sessionStorage.getItem('newBatteryId');
+                
+                // Fetch cả 2 pin song song
+                const promises = [];
+                
+                // Fetch pin cũ
                 if (oldBatteryId && oldBatteryId !== 'undefined' && oldBatteryId !== 'null') {
                     console.log('🔋 Lấy dung lượng pin cũ thật từ API cho batteryId:', oldBatteryId);
-                    
-                    const batteryResponse = await batteryService.getBatteryById(oldBatteryId);
-                    
-                    if (batteryResponse.success && batteryResponse.data) {
-                        const batteryData = batteryResponse.data;
-                        const batteryLevel = batteryData.stateOfHealth || batteryData.state_of_health || 
-                                           batteryData.batteryLevel || batteryData.battery_level || 0;
-                        
-                        console.log('✅ Dung lượng pin cũ thật từ API:', batteryLevel);
-                        setOldBatteryLevel(batteryLevel);
-                    } else {
-                        console.warn('⚠️ Không lấy được dung lượng pin cũ từ API');
-                        // Fallback từ sessionStorage
-                        const savedLevel = sessionStorage.getItem('oldBatteryLevel');
-                        if (savedLevel) {
-                            setOldBatteryLevel(parseFloat(savedLevel));
-                        }
-                    }
+                    promises.push(
+                        batteryService.getBatteryById(oldBatteryId)
+                            .then(batteryResponse => {
+                                if (batteryResponse.success && batteryResponse.data) {
+                                    const batteryData = batteryResponse.data;
+                                    const batteryLevel = batteryData.stateOfHealth || batteryData.state_of_health || 
+                                                       batteryData.batteryLevel || batteryData.battery_level || null;
+                                    
+                                    console.log('✅ Dung lượng pin cũ thật từ API:', batteryLevel);
+                                    setOldBatteryLevel(batteryLevel);
+                                } else {
+                                    console.warn('⚠️ Không lấy được dung lượng pin cũ từ API');
+                                    // Fallback từ sessionStorage
+                                    const savedLevel = sessionStorage.getItem('oldBatteryLevel');
+                                    if (savedLevel) {
+                                        setOldBatteryLevel(parseFloat(savedLevel));
+                                    }
+                                }
+                            })
+                            .catch(error => {
+                                console.error('❌ Lỗi khi lấy dung lượng pin cũ:', error);
+                                // Fallback từ sessionStorage
+                                const savedLevel = sessionStorage.getItem('oldBatteryLevel');
+                                if (savedLevel) {
+                                    setOldBatteryLevel(parseFloat(savedLevel));
+                                }
+                            })
+                    );
                 } else {
                     console.warn('⚠️ Không tìm thấy oldBatteryId');
                     // Fallback từ sessionStorage
@@ -49,20 +72,72 @@ const SwapSuccess = ({ onFinish }) => {
                         setOldBatteryLevel(parseFloat(savedLevel));
                     }
                 }
-            } catch (error) {
-                console.error('❌ Lỗi khi lấy dung lượng pin cũ:', error);
-                // Fallback từ sessionStorage
-                const savedLevel = sessionStorage.getItem('oldBatteryLevel');
-                if (savedLevel) {
-                    setOldBatteryLevel(parseFloat(savedLevel));
+                
+                // Fetch pin mới
+                if (newBatteryId && newBatteryId !== 'undefined' && newBatteryId !== 'null') {
+                    console.log('🔋 Lấy dung lượng pin mới thật từ API cho batteryId:', newBatteryId);
+                    promises.push(
+                        batteryService.getBatteryById(newBatteryId)
+                            .then(batteryResponse => {
+                                if (batteryResponse.success && batteryResponse.data) {
+                                    const batteryData = batteryResponse.data;
+                                    const batteryLevel = batteryData.stateOfHealth || batteryData.state_of_health || 
+                                                       batteryData.batteryLevel || batteryData.battery_level || null;
+                                    
+                                    console.log('✅ Dung lượng pin mới thật từ API:', batteryLevel);
+                                    setNewBatteryLevel(batteryLevel);
+                                    // Cập nhật sessionStorage với dữ liệu từ API
+                                    if (batteryLevel !== null) {
+                                        sessionStorage.setItem('newBatteryLevel', String(batteryLevel));
+                                    }
+                                } else {
+                                    console.warn('⚠️ Không lấy được dung lượng pin mới từ API');
+                                    // Fallback từ sessionStorage hoặc summary
+                                    const savedLevel = sessionStorage.getItem('newBatteryLevel');
+                                    const summaryLevel = summary?.newBatteryPercent || summary?.newBatteryLevel;
+                                    if (savedLevel) {
+                                        setNewBatteryLevel(parseFloat(savedLevel));
+                                    } else if (summaryLevel) {
+                                        setNewBatteryLevel(parseFloat(summaryLevel));
+                                    }
+                                }
+                            })
+                            .catch(error => {
+                                console.error('❌ Lỗi khi lấy dung lượng pin mới:', error);
+                                // Fallback từ sessionStorage hoặc summary
+                                const savedLevel = sessionStorage.getItem('newBatteryLevel');
+                                const summaryLevel = summary?.newBatteryPercent || summary?.newBatteryLevel;
+                                if (savedLevel) {
+                                    setNewBatteryLevel(parseFloat(savedLevel));
+                                } else if (summaryLevel) {
+                                    setNewBatteryLevel(parseFloat(summaryLevel));
+                                }
+                            })
+                    );
+                } else {
+                    console.warn('⚠️ Không tìm thấy newBatteryId');
+                    // Fallback từ sessionStorage hoặc summary
+                    const savedLevel = sessionStorage.getItem('newBatteryLevel');
+                    const summaryLevel = summary?.newBatteryPercent || summary?.newBatteryLevel;
+                    if (savedLevel) {
+                        setNewBatteryLevel(parseFloat(savedLevel));
+                    } else if (summaryLevel) {
+                        setNewBatteryLevel(parseFloat(summaryLevel));
+                    }
                 }
+                
+                // Đợi tất cả các promise hoàn thành
+                await Promise.all(promises);
+                
+            } catch (error) {
+                console.error('❌ Lỗi khi lấy dung lượng pin:', error);
             } finally {
                 setLoading(false);
             }
         };
         
-        fetchOldBatteryLevel();
-    }, []);
+        fetchBatteryLevels();
+    }, [summary]);
 
     // Debug log để kiểm tra dữ liệu
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
@@ -209,13 +284,48 @@ const SwapSuccess = ({ onFinish }) => {
         return 'N/A';
     };
     
+    // Lấy dung lượng pin cũ (ưu tiên từ API, không dùng mock data)
+    const getOldBatteryPercent = () => {
+        // Ưu tiên: oldBatteryLevel từ API > summary > sessionStorage > null
+        if (oldBatteryLevel !== null && oldBatteryLevel !== undefined) {
+            return oldBatteryLevel;
+        }
+        if (summary?.oldBatteryPercent !== null && summary?.oldBatteryPercent !== undefined) {
+            return summary.oldBatteryPercent;
+        }
+        const savedLevel = sessionStorage.getItem('oldBatteryLevel');
+        if (savedLevel && savedLevel !== 'null' && savedLevel !== 'undefined') {
+            return parseFloat(savedLevel);
+        }
+        return null; // Không dùng mock data
+    };
+    
+    // Lấy dung lượng pin mới (ưu tiên từ API, không dùng mock data)
+    const getNewBatteryPercent = () => {
+        // Ưu tiên: newBatteryLevel từ API > summary > sessionStorage > null
+        if (newBatteryLevel !== null && newBatteryLevel !== undefined) {
+            return newBatteryLevel;
+        }
+        if (summary?.newBatteryPercent !== null && summary?.newBatteryPercent !== undefined) {
+            return summary.newBatteryPercent;
+        }
+        if (summary?.newBatteryLevel !== null && summary?.newBatteryLevel !== undefined) {
+            return summary.newBatteryLevel;
+        }
+        const savedLevel = sessionStorage.getItem('newBatteryLevel');
+        if (savedLevel && savedLevel !== 'null' && savedLevel !== 'undefined') {
+            return parseFloat(savedLevel);
+        }
+        return null; // Không dùng mock data
+    };
+    
     const fallbackSummary = {
         oldBatteryCode: getOldBatteryCode(),
         oldSlotNumber: getOldSlotNumber(),
-        oldBatteryPercent: oldBatteryLevel || summary?.oldBatteryPercent || 85, // Sử dụng dữ liệu thật từ API
+        oldBatteryPercent: getOldBatteryPercent(),
         newBatteryCode: getNewBatteryCode(),
         newSlotNumber: getNewSlotNumber(),
-        newBatteryPercent: summary?.newBatteryPercent || summary?.newBatteryLevel || sessionStorage.getItem('newBatteryLevel') || 100,
+        newBatteryPercent: getNewBatteryPercent(),
         transactionId: summary?.transactionId || summary?.swapId || 'SWP-' + Date.now()
     };
     
@@ -235,7 +345,7 @@ const SwapSuccess = ({ onFinish }) => {
                 <div className="success-card">
                     <div className="success-header">
                         <div className="loading-spinner"></div>
-                        <h1 className="success-title">Đang tải thông tin pin cũ...</h1>
+                        <h1 className="success-title">Đang tải thông tin pin...</h1>
                     </div>
                 </div>
             </div>

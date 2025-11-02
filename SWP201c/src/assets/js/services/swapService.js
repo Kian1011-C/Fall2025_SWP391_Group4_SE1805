@@ -186,30 +186,39 @@ const swapService = {
                 throw new Error('Invalid response from backend');
             }
 
-            // Response structure: { success: true, message: "...", data: { swapId, status: "COMPLETED", ... } }
+            // Response structure từ BE: 
+            // { success: true, message: "Battery swap completed successfully", 
+            //   data: { swapId, userId, stationId, oldBatteryId, newBatteryId, status: "COMPLETED", swapDate, completedAt } }
             const swapData = response.data;
             
-            // Normalize các field quan trọng từ response.data (có thể có snake_case hoặc camelCase)
+            // Normalize các field quan trọng từ response.data theo đúng structure của BE
+            // BE trả về: swapId, userId, stationId, oldBatteryId, newBatteryId, status, swapDate, completedAt
             const normalizedSwapData = {
                 ...swapData,
-                // Thông tin swap
+                // Thông tin swap (theo BE)
                 swapId: swapData.swapId || swapData.swap_id || swapData.id,
-                status: swapData.status || swapData.swapStatus || 'COMPLETED',
+                status: swapData.status || 'COMPLETED',
+                swapDate: swapData.swapDate || swapData.swap_date,
+                completedAt: swapData.completedAt || swapData.completed_at || new Date(),
                 
-                // Thông tin pin
+                // Thông tin user và station (theo BE)
+                userId: swapData.userId || swapData.user_id,
+                stationId: swapData.stationId || swapData.station_id,
+                
+                // Thông tin pin (theo BE)
                 oldBatteryId: swapData.oldBatteryId || swapData.old_battery_id,
                 newBatteryId: swapData.newBatteryId || swapData.new_battery_id,
                 
-                // Thông tin slot
+                // Thông tin slot (có thể không có trong response nhưng sẽ được lấy từ swap details)
                 // Slot của pin mới (đã lấy)
                 newSlotNumber: swapData.newSlotNumber || swapData.new_slot_number || swapData.slotNumber || swapData.slot_number,
                 // Slot của pin cũ (nơi đặt pin cũ - có thể được BE trả về sau khi confirm)
                 oldSlotNumber: swapData.oldSlotNumber || swapData.old_slot_number || swapData.emptySlotNumber || swapData.empty_slot_number,
                 
-                // Thông tin khác
+                // Thông tin khác (nếu có)
                 vehicleId: swapData.vehicleId || swapData.vehicle_id,
-                stationId: swapData.stationId || swapData.station_id,
                 towerId: swapData.towerId || swapData.tower_id,
+                contractId: swapData.contractId || swapData.contract_id,
             };
             
             console.log('✅ Đổi pin hoàn tất thành công!');

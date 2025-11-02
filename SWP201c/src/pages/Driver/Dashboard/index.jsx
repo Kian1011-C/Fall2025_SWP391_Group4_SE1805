@@ -140,17 +140,6 @@ const DriverDashboard = () => {
           </div>
         )}
       </div>
-      {/* TEST BUTTON FOR SETTINGS */}
-      <button
-        className="test-settings-btn"
-        onClick={() => {
-          console.log('🧪 TEST: Navigating to /driver/settings');
-          navigate('/driver/settings');
-        }}
-      >
-        🧪 TEST Settings
-      </button>
-      
       {/* Welcome Header */}
       <WelcomeHeader 
         currentUser={currentUser} 
