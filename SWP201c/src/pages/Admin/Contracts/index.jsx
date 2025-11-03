@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useContractsData } from './hooks/useContractsData';
 import ContractDetailModal from './components/ContractDetailModal';
+import CreateContractModal from './components/CreateContractModal';
+import '../../../assets/css/AdminContractManagement.css';
 
 const getStatusStyle = (status) => {
     const s = status ? status.toLowerCase() : '';
@@ -14,10 +16,23 @@ const getStatusStyle = (status) => {
 const ContractRow = ({ contract, onViewDetails }) => (
   <tr style={{ borderTop: '1px solid #374151' }}>
     <td style={{ padding: '15px 20px', fontWeight: 'bold', color: 'white' }}>{contract.contractNumber}</td>
-    <td style={{ padding: '15px 20px' }}>{contract.userId}</td>
-    <td style={{ padding: '15px 20px' }}>{contract.vehicleId}</td>
+    <td style={{ padding: '15px 20px' }}>
+      {contract.firstName} {contract.lastName}
+      <div style={{ fontSize: '12px', color: '#9ca3af' }}>{contract.email}</div>
+    </td>
+    <td style={{ padding: '15px 20px' }}>
+      {contract.plateNumber}
+      <div style={{ fontSize: '12px', color: '#9ca3af' }}>{contract.vehicleModel}</div>
+    </td>
+    <td style={{ padding: '15px 20px' }}>
+      {contract.planName}
+      <div style={{ fontSize: '12px', color: '#9ca3af' }}>{contract.monthlyBaseFee?.toLocaleString('vi-VN')}đ/tháng</div>
+    </td>
     <td style={{ padding: '15px 20px' }}><span style={getStatusStyle(contract.status)}>{contract.status}</span></td>
-    <td style={{ padding: '15px 20px' }}>{new Date(contract.startDate).toLocaleDateString('vi-VN')}</td>
+    <td style={{ padding: '15px 20px' }}>
+      {new Date(contract.startDate).toLocaleDateString('vi-VN')}
+      <div style={{ fontSize: '12px', color: '#9ca3af' }}>đến {new Date(contract.endDate).toLocaleDateString('vi-VN')}</div>
+    </td>
     <td style={{ padding: '15px 20px' }}>
       <button onClick={() => onViewDetails(contract)} style={{ background: '#374151', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer' }}>
         Chi tiết
@@ -27,24 +42,65 @@ const ContractRow = ({ contract, onViewDetails }) => (
 );
 
 const AdminContracts = () => {
-  const { contracts, isLoading, error, refetch, filterStatus, setFilterStatus, searchQuery, setSearchQuery } = useContractsData();
+  const { 
+    contracts, 
+    isLoading, 
+    error, 
+    refetch, 
+    filterStatus, 
+    setFilterStatus, 
+    searchQuery, 
+    setSearchQuery,
+    stats 
+  } = useContractsData();
+  
   const [selectedContract, setSelectedContract] = useState(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+
+  const renderStats = () => (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '30px' }}>
+      <div style={{ background: '#1f2937', padding: '20px', borderRadius: '12px', border: '1px solid #374151' }}>
+        <div style={{ fontSize: '14px', color: '#9ca3af', marginBottom: '8px' }}>Tổng hợp đồng</div>
+        <div style={{ fontSize: '28px', fontWeight: 'bold', color: 'white' }}>{stats.total}</div>
+      </div>
+      <div style={{ background: '#1f2937', padding: '20px', borderRadius: '12px', border: '1px solid #374151' }}>
+        <div style={{ fontSize: '14px', color: '#9ca3af', marginBottom: '8px' }}>Đang hoạt động</div>
+        <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#86efac' }}>{stats.active}</div>
+      </div>
+      <div style={{ background: '#1f2937', padding: '20px', borderRadius: '12px', border: '1px solid #374151' }}>
+        <div style={{ fontSize: '14px', color: '#9ca3af', marginBottom: '8px' }}>Đang chờ</div>
+        <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#fdba74' }}>{stats.pending}</div>
+      </div>
+      <div style={{ background: '#1f2937', padding: '20px', borderRadius: '12px', border: '1px solid #374151' }}>
+        <div style={{ fontSize: '14px', color: '#9ca3af', marginBottom: '8px' }}>Hết hạn</div>
+        <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#fca5a5' }}>{stats.expired}</div>
+      </div>
+    </div>
+  );
 
   const renderContent = () => {
-    if (isLoading) return <p style={{ color: '#9ca3af', textAlign: 'center' }}>Đang tải danh sách hợp đồng...</p>;
-    if (error) return ( <div style={{ color: '#ef4444', textAlign: 'center' }}><p>Lỗi: {error}</p><button onClick={refetch}>Thử lại</button></div> );
-    if (contracts.length === 0) return <p style={{ color: '#9ca3af', textAlign: 'center' }}>Không tìm thấy hợp đồng nào.</p>;
+    if (isLoading) return <p style={{ color: '#9ca3af', textAlign: 'center', padding: '40px' }}>Đang tải danh sách hợp đồng...</p>;
+    if (error) return ( 
+      <div style={{ color: '#ef4444', textAlign: 'center', padding: '40px' }}>
+        <p>Lỗi: {error}</p>
+        <button onClick={refetch} style={{ background: '#374151', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', marginTop: '10px' }}>
+          Thử lại
+        </button>
+      </div> 
+    );
+    if (contracts.length === 0) return <p style={{ color: '#9ca3af', textAlign: 'center', padding: '40px' }}>Không tìm thấy hợp đồng nào.</p>;
 
     return (
       <div style={{ background: '#1f2937', borderRadius: '12px', overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '800px' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1000px' }}>
           <thead>
             <tr style={{ background: '#374151' }}>
               <th style={{ padding: '15px 20px' }}>Số Hợp đồng</th>
-              <th style={{ padding: '15px 20px' }}>Tài xế ID</th>
-              <th style={{ padding: '15px 20px' }}>Xe ID</th>
+              <th style={{ padding: '15px 20px' }}>Khách hàng</th>
+              <th style={{ padding: '15px 20px' }}>Xe</th>
+              <th style={{ padding: '15px 20px' }}>Gói dịch vụ</th>
               <th style={{ padding: '15px 20px' }}>Trạng thái</th>
-              <th style={{ padding: '15px 20px' }}>Ngày bắt đầu</th>
+              <th style={{ padding: '15px 20px' }}>Thời hạn</th>
               <th style={{ padding: '15px 20px' }}>Hành động</th>
             </tr>
           </thead>
@@ -62,27 +118,82 @@ const AdminContracts = () => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
           <div>
             <h1 style={{ margin: 0, fontSize: '28px' }}>Quản lý Hợp đồng</h1>
-            <p style={{ margin: '5px 0 0 0', color: '#9ca3af' }}>Xem và lọc toàn bộ hợp đồng trong hệ thống.</p>
+            <p style={{ margin: '5px 0 0 0', color: '#9ca3af' }}>Xem và quản lý toàn bộ hợp đồng trong hệ thống.</p>
           </div>
-          <div style={{ display: 'flex', gap: '15px' }}>
-            <input 
-              type="text"
-              placeholder="Tìm theo SĐT hoặc Tên..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ background: '#374151', color: 'white', border: '1px solid #4b5563', padding: '10px 15px', borderRadius: '8px' }}
-            />
-            <select value={filterStatus} onChange={(e) => setFilterStatus(e.gexprot.value)} style={{ background: '#374151', color: 'white', border: '1px solid #4b5563', padding: '10px', borderRadius: '8px' }}>
-              <option value="">Tất cả trạng thái</option>
-              <option value="ACTIVE">Hoạt động</option>
-              <option value="PENDING">Đang chờ</option>
-              <option value="EXPIRED">Hết hạn</option>
-            </select>
-          </div>
+          <button 
+            onClick={() => setShowCreateModal(true)}
+            style={{ 
+              background: '#10b981', 
+              color: 'white', 
+              border: 'none', 
+              padding: '12px 24px', 
+              borderRadius: '8px', 
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            <span style={{ fontSize: '20px' }}>+</span>
+            Tạo hợp đồng mới
+          </button>
         </div>
+
+        {renderStats()}
+
+        <div style={{ display: 'flex', gap: '15px', marginBottom: '20px' }}>
+          <input 
+            type="text"
+            placeholder="Tìm theo số hợp đồng, tên, email, SĐT, biển số..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ 
+              flex: 1,
+              background: '#374151', 
+              color: 'white', 
+              border: '1px solid #4b5563', 
+              padding: '10px 15px', 
+              borderRadius: '8px' 
+            }}
+          />
+          <select 
+            value={filterStatus} 
+            onChange={(e) => setFilterStatus(e.target.value)} 
+            style={{ 
+              background: '#374151', 
+              color: 'white', 
+              border: '1px solid #4b5563', 
+              padding: '10px 15px', 
+              borderRadius: '8px',
+              minWidth: '200px'
+            }}
+          >
+            <option value="">Tất cả trạng thái</option>
+            <option value="active">Hoạt động</option>
+            <option value="pending">Đang chờ</option>
+            <option value="expired">Hết hạn</option>
+            <option value="terminated">Đã hủy</option>
+          </select>
+        </div>
+
         {renderContent()}
       </div>
-      <ContractDetailModal contract={selectedContract} onClose={() => setSelectedContract(null)} />
+
+      <ContractDetailModal 
+        contract={selectedContract} 
+        onClose={() => setSelectedContract(null)}
+        onRefresh={refetch}
+      />
+      
+      <CreateContractModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSuccess={() => {
+          setShowCreateModal(false);
+          refetch();
+        }}
+      />
     </>
   );
 };

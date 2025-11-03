@@ -17,7 +17,8 @@ const menuItems = {
     { icon: '✅', label: 'Xác nhận đổi pin', path: '/staff/swap-confirm' },
     { icon: '📦', label: 'Kho pin', path: '/staff/battery-stock' },
     { icon: '🔧', label: 'Sự cố', path: '/staff/issues' },
-    { icon: '📊', label: 'Báo cáo', path: '/staff/reports' },
+    { icon: '�', label: 'Thanh toán', path: '/staff/payments' },
+    { icon: '�📊', label: 'Báo cáo', path: '/staff/reports' },
   ],
   admin: [
     { icon: '🏠', label: 'Trang chủ', path: '/admin/dashboard' },
@@ -26,7 +27,8 @@ const menuItems = {
     { icon: '🔋', label: 'Pin', path: '/admin/batteries' },
     { icon: '💎', label: 'Gói dịch vụ', path: '/admin/subscriptions' },
     { icon: '📋', label: 'Hợp đồng', path: '/admin/contracts' },
-    { icon: '📊', label: 'Báo cáo', path: '/admin/reports' },
+    { icon: '�', label: 'Thanh toán', path: '/admin/payments' },
+    { icon: '�📊', label: 'Báo cáo', path: '/admin/reports' },
   ],
 };
 

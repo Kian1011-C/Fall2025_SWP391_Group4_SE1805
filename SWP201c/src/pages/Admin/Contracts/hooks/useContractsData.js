@@ -31,19 +31,43 @@ export const useContractsData = () => {
 
   const filteredContracts = useMemo(() => {
     return contracts.filter(contract => {
-      const statusMatch = filterStatus ? contract.status === filterStatus : true;
-      const searchMatch = searchQuery ? 
-        (contract.contractNumber?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-         contract.userId?.toLowerCase().includes(searchQuery.toLowerCase())) 
-        : true;
+      const statusMatch = filterStatus ? contract.status?.toLowerCase() === filterStatus.toLowerCase() : true;
+      
+      if (!searchQuery) return statusMatch;
+      
+      const query = searchQuery.toLowerCase();
+      const searchMatch = 
+        contract.contractNumber?.toLowerCase().includes(query) || 
+        contract.email?.toLowerCase().includes(query) ||
+        contract.phone?.toLowerCase().includes(query) ||
+        contract.firstName?.toLowerCase().includes(query) ||
+        contract.lastName?.toLowerCase().includes(query) ||
+        contract.plateNumber?.toLowerCase().includes(query) ||
+        `${contract.firstName} ${contract.lastName}`.toLowerCase().includes(query);
+      
       return statusMatch && searchMatch;
     });
   }, [contracts, filterStatus, searchQuery]);
 
+  // Calculate statistics
+  const stats = useMemo(() => {
+    const total = contracts.length;
+    const active = contracts.filter(c => c.status?.toLowerCase() === 'active').length;
+    const pending = contracts.filter(c => c.status?.toLowerCase() === 'pending').length;
+    const expired = contracts.filter(c => c.status?.toLowerCase() === 'expired' || c.status?.toLowerCase() === 'terminated').length;
+    
+    return { total, active, pending, expired };
+  }, [contracts]);
+
   return {
     contracts: filteredContracts,
-    isLoading, error, refetch: fetchContracts,
-    filterStatus, setFilterStatus,
-    searchQuery, setSearchQuery,
+    isLoading, 
+    error, 
+    refetch: fetchContracts,
+    filterStatus, 
+    setFilterStatus,
+    searchQuery, 
+    setSearchQuery,
+    stats,
   };
 };

@@ -28,8 +28,8 @@
   align-items: flex-start;      /* Căn lên trên thay vì center */
   justify-content: center;      /* Căn giữa theo chiều ngang */
   
-  /* Z-index cao để hiển thị trên tất cả content */
-  z-index: 1000;
+  /* Z-index cao để hiển thị trên tất cả content - tăng lên 9999 để đảm bảo hiển thị trên tất cả */
+  z-index: 9999;
   
   /* Padding để modal không chạm viền màn hình + thêm padding-top */
   padding: 80px 20px 20px 20px;  /* top right bottom left */
@@ -83,6 +83,10 @@
   /* Chiều cao tối đa và scroll khi content dài */
   max-height: 90vh;
   overflow-y: auto;
+  
+  /* Đảm bảo modal hiển thị phía trên overlay */
+  position: relative;
+  z-index: 10000;
 }
 
 /* Hiệu ứng scale in cho modal */

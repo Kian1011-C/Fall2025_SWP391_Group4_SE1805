@@ -184,6 +184,106 @@ const contractService = {
         data: null
       };
     }
+  },
+
+  /**
+   * Hủy hợp đồng
+   * API: POST /api/contracts/{contractId}/terminate
+   */
+  terminateContract: async (contractId, terminationData) => {
+    try {
+      const response = await apiUtils.post(`/api/contracts/${contractId}/terminate`, terminationData);
+      
+      if (response.success) {
+        return { success: true, data: response.data, message: response.message || 'Hủy hợp đồng thành công' };
+      } else {
+        throw new Error(response.message || 'Không thể hủy hợp đồng');
+      }
+    } catch (error) {
+      console.error('Lỗi khi hủy hợp đồng:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return { success: false, message: errorInfo.message || 'Lỗi API', data: null };
+    }
+  },
+
+  /**
+   * Cập nhật hợp đồng
+   * API: PUT /api/contracts/{contractId}
+   */
+  updateContract: async (contractId, updates) => {
+    try {
+      const response = await apiUtils.put(`/api/contracts/${contractId}`, updates);
+      
+      if (response.success) {
+        return { success: true, data: response.data, message: response.message || 'Cập nhật hợp đồng thành công' };
+      } else {
+        throw new Error(response.message || 'Không thể cập nhật hợp đồng');
+      }
+    } catch (error) {
+      console.error('Lỗi khi cập nhật hợp đồng:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return { success: false, message: errorInfo.message || 'Lỗi API', data: null };
+    }
+  },
+
+  /**
+   * Lấy chi tiết hợp đồng
+   * API: GET /api/contracts/{contractId}
+   */
+  getContractDetails: async (contractId) => {
+    try {
+      const response = await apiUtils.get(`/api/contracts/${contractId}`);
+      
+      if (response.success) {
+        return { success: true, data: response.data, message: 'Lấy chi tiết hợp đồng thành công' };
+      } else {
+        throw new Error(response.message || 'Không thể lấy chi tiết hợp đồng');
+      }
+    } catch (error) {
+      console.error('Lỗi khi lấy chi tiết hợp đồng:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return { success: false, message: errorInfo.message || 'Lỗi API', data: null };
+    }
+  },
+
+  /**
+   * Gia hạn hợp đồng
+   * API: POST /api/contracts/{contractId}/renew
+   */
+  renewContract: async (contractId, renewalData) => {
+    try {
+      const response = await apiUtils.post(`/api/contracts/${contractId}/renew`, renewalData);
+      
+      if (response.success) {
+        return { success: true, data: response.data, message: response.message || 'Gia hạn hợp đồng thành công' };
+      } else {
+        throw new Error(response.message || 'Không thể gia hạn hợp đồng');
+      }
+    } catch (error) {
+      console.error('Lỗi khi gia hạn hợp đồng:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return { success: false, message: errorInfo.message || 'Lỗi API', data: null };
+    }
+  },
+
+  /**
+   * Lấy lịch sử sử dụng của hợp đồng
+   * API: GET /api/contracts/{contractId}/usage
+   */
+  getContractUsage: async (contractId) => {
+    try {
+      const response = await apiUtils.get(`/api/contracts/${contractId}/usage`);
+      
+      if (response.success) {
+        return { success: true, data: response.data, message: 'Lấy lịch sử sử dụng thành công' };
+      } else {
+        throw new Error(response.message || 'Không thể lấy lịch sử sử dụng');
+      }
+    } catch (error) {
+      console.error('Lỗi khi lấy lịch sử sử dụng:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return { success: false, message: errorInfo.message || 'Lỗi API', data: null };
+    }
   }
 };
 

@@ -14,8 +14,8 @@ const AdminLayout = () => {
     { path: '/admin/batteries', name: 'Quản lý Pin', icon: '🔋' },
     { path: '/admin/contracts', name: 'Quản lý Hợp đồng', icon: '📄' },
     { path: '/admin/subscriptions', name: 'Quản lý Gói cước', icon: '⭐' },
-    { path: '/admin/transactions', name: 'Lịch sử đổi Pin', icon: '�' },
-    { path: '/admin/reports', name: 'Báo cáo', icon: '📊' },
+    { path: '/admin/payments', name: 'Quản lý Thanh toán', icon: '💳' },
+    { path: '/admin/transactions', name: 'Lịch sử đổi Pin', icon: '🔄' },
   ];
 
   return (

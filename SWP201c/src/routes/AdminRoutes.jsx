@@ -11,7 +11,7 @@ import AdminStations from '../pages/Admin/Stations';
 import AdminBatteries from '../pages/Admin/Batteries';
 import AdminSubscriptions from '../pages/Admin/Subscriptions';
 import AdminContracts from '../pages/Admin/Contracts';
-import AdminReports from '../pages/Admin/Reports';
+import AdminPayments from '../pages/Admin/Payments';
 
 const AdminRoutes = () => {
   return (
@@ -26,7 +26,7 @@ const AdminRoutes = () => {
       <Route path="batteries" element={<AdminBatteries />} />
       <Route path="subscriptions" element={<AdminSubscriptions />} />
       <Route path="contracts" element={<AdminContracts />} />
-      <Route path="reports" element={<AdminReports />} />
+      <Route path="payments" element={<AdminPayments />} />
 
       {/* fallback */}
       <Route path="*" element={<AdminDashboard />} />

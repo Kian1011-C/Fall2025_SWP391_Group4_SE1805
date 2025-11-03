@@ -48,6 +48,7 @@ import StaffIssues from './pages/Staff/Issues';
 import StaffReports from './pages/Staff/Reports';
 import StaffTransactionManagement from './pages/Staff/TransactionManagement';
 import StaffSwapBattery from './pages/Staff/SwapBattery';
+import StaffPayments from './pages/Staff/Payments';
 
 
 // --- Admin Pages ---
@@ -59,6 +60,7 @@ import AdminSubscriptions from './pages/Admin/Subscriptions';
 import AdminContracts from './pages/Admin/Contracts';
 import AdminReports from './pages/Admin/Reports';
 import AdminTransactions from './pages/Admin/Transactions';
+import AdminPayments from './pages/Admin/Payments';
 
 // Fix default markers for React Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -109,6 +111,7 @@ function AppContent() {
             <Route path="battery-management" element={<StaffBatteryManagement />} />
             <Route path="station-management" element={<StaffStationManagement />} />
             <Route path="transaction-management" element={<StaffTransactionManagement />} />
+            <Route path="payments" element={<StaffPayments />} />
             <Route path="issues" element={<StaffIssues />} />
             <Route path="reports" element={<StaffReports />} />
             <Route path="swap-battery" element={<StaffSwapBattery />} />
@@ -124,6 +127,7 @@ function AppContent() {
             <Route path="batteries" element={<AdminBatteries />} />
             <Route path="contracts" element={<AdminContracts />} />
             <Route path="subscriptions" element={<AdminSubscriptions />} />
+            <Route path="payments" element={<AdminPayments />} />
             <Route path="reports" element={<AdminReports />} />
             <Route path="transactions" element={<AdminTransactions />} />
           </Route>

@@ -13,6 +13,7 @@ import StaffBatteryStock from '../pages/Staff/BatteryStock';
 import StaffSwapConfirm from '../pages/Staff/SwapConfirm';
 import StaffIssues from '../pages/Staff/Issues';
 import StaffReports from '../pages/Staff/Reports';
+import StaffPayments from '../pages/Staff/Payments';
 
 const StaffRoutes = () => {
   return (
@@ -25,6 +26,7 @@ const StaffRoutes = () => {
       <Route path="/swap-confirm" element={<StaffSwapConfirm />} />
       <Route path="/issues" element={<StaffIssues />} />
       <Route path="/reports" element={<StaffReports />} />
+      <Route path="/payments" element={<StaffPayments />} />
       <Route path="/" element={<StaffDashboard />} />
       <Route path="/swap-battery" element={<StaffSwapBattery />} />
     </Routes>

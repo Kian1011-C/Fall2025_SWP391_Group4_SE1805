@@ -1,52 +1,97 @@
 import React from 'react';
 import { useAdminDashboardData } from './hooks/useAdminDashboardData';
-import StatCard from './components/StatsCards';
-import { formatCurrency } from '../../../assets/js/utils/apiHelpers';
+import StatsCards from './components/StatsCards';
+import ActivityTimeline from './components/ActivityTimeline';
+import QuickActions from './components/QuickActions';
+import '../../../assets/css/AdminDashboard.css';
 
 const AdminDashboard = () => {
   const { stats, isLoading, error, refetch } = useAdminDashboardData();
 
   const renderContent = () => {
-    if (isLoading) return <p style={{ color: '#9ca3af', textAlign: 'center' }}>Đang tải dữ liệu tổng quan...</p>;
-    if (error) return (
-      <div style={{ color: '#ef4444', textAlign: 'center' }}>
-        <p>Lỗi: {error}</p>
-        <button onClick={refetch} style={{ background: '#374151', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer' }}>
-          Thử lại
-        </button>
-      </div>
-    );
-    if (!stats) return <p style={{ color: '#9ca3af', textAlign: 'center' }}>Không có dữ liệu thống kê.</p>;
+    if (isLoading) {
+      return (
+        <div className="loading-container">
+          <div className="spinner"></div>
+          <p>Đang tải dữ liệu tổng quan...</p>
+        </div>
+      );
+    }
 
-    const totalRevenue = stats.totalRevenue ? formatCurrency(stats.totalRevenue) : 'N/A';
-    const newUsers = stats.newUsersThisMonth ?? 'N/A';
-    const totalStations = stats.totalStations ?? 'N/A';
-    const swapsToday = stats.swapsToday ?? 'N/A';
+    if (error) {
+      return (
+        <div className="error-container">
+          <div className="error-icon">⚠️</div>
+          <p className="error-message">Lỗi: {error}</p>
+          <button onClick={refetch} className="retry-button">
+            🔄 Thử lại
+          </button>
+        </div>
+      );
+    }
+
+    if (!stats) {
+      return (
+        <div className="empty-container">
+          <p>Không có dữ liệu thống kê.</p>
+        </div>
+      );
+    }
 
     return (
       <>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '25px' }}>
-          <StatCard label="Tổng Doanh thu" value={totalRevenue} icon="💰" color="#f59e0b" />
-          <StatCard label="Người dùng mới (Tháng)" value={newUsers} icon="👥" color="#10b981" />
-          <StatCard label="Tổng số trạm" value={totalStations} icon="🏢" color="#3b82f6" />
-          <StatCard label="Lượt đổi pin (Hôm nay)" value={swapsToday} icon="🔄" color="#ef4444" />
-        </div>
-        <div style={{ marginTop: '40px', background: '#1f2937', padding: '30px', borderRadius: '16px', height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af' }}>
-          (Biểu đồ doanh thu sẽ được hiển thị ở đây)
+        {/* Stats Cards */}
+        <StatsCards stats={stats} />
+
+        {/* Bottom Section */}
+        <div className="dashboard-bottom">
+          {/* Quick Actions */}
+          <div className="quick-actions-section">
+            <QuickActions />
+          </div>
+
+          {/* Recent Activity */}
+          <div className="activity-section">
+            <ActivityTimeline stats={stats} />
+          </div>
         </div>
       </>
     );
   };
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-        <h1 style={{ margin: 0, fontSize: '28px' }}>Tổng quan Hệ thống</h1>
-        <button onClick={refetch} disabled={isLoading} style={{ background: '#374151', color: 'white', border: 'none', padding: '8px 15px', borderRadius: '6px', cursor: 'pointer' }}>
-            {isLoading ? 'Đang tải...' : '🔄 Tải lại'}
-        </button>
+    <div className="admin-dashboard">
+      {/* Header */}
+      <div className="dashboard-header">
+        <div className="header-content">
+          <div>
+            <h1>Tổng quan Hệ thống</h1>
+            <p className="subtitle">Xem thống kê và quản lý hệ thống EV Battery Swap</p>
+          </div>
+          <div className="header-actions">
+            <button onClick={refetch} disabled={isLoading} className="refresh-button">
+              {isLoading ? (
+                <>
+                  <span className="spinner-small"></span>
+                  Đang tải...
+                </>
+              ) : (
+                <>
+                  🔄 Tải lại
+                </>
+              )}
+            </button>
+            <button className="export-button">
+              📊 Xuất báo cáo
+            </button>
+          </div>
+        </div>
       </div>
-      {renderContent()}
+
+      {/* Content */}
+      <div className="dashboard-content">
+        {renderContent()}
+      </div>
     </div>
   );
 };

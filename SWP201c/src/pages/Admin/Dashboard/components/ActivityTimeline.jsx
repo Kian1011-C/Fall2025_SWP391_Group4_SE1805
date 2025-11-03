@@ -3,63 +3,98 @@
 
 import React from 'react';
 
-export const ActivityTimeline = ({ activities }) => {
+const ActivityTimeline = ({ stats }) => {
+  const activities = [
+    {
+      icon: '👤',
+      type: 'user',
+      title: 'Người dùng mới đăng ký',
+      description: 'Nguyễn Văn A đã đăng ký tài khoản',
+      time: '5 phút trước',
+      color: '#3b82f6'
+    },
+    {
+      icon: '🔋',
+      type: 'swap',
+      title: 'Đổi pin thành công',
+      description: 'Xe 29A-12345 đã đổi pin tại Trạm Cầu Giấy',
+      time: '12 phút trước',
+      color: '#10b981'
+    },
+    {
+      icon: '💳',
+      type: 'payment',
+      title: 'Thanh toán thành công',
+      description: 'Giao dịch 2,500,000₫ từ Trần Thị B',
+      time: '25 phút trước',
+      color: '#f59e0b'
+    },
+    {
+      icon: '⚠️',
+      type: 'alert',
+      title: 'Cảnh báo bảo trì',
+      description: 'Pin #125 cần kiểm tra định kỳ',
+      time: '1 giờ trước',
+      color: '#ef4444'
+    },
+    {
+      icon: '🏢',
+      type: 'station',
+      title: 'Trạm mới kích hoạt',
+      description: 'Trạm Thanh Xuân đã bắt đầu hoạt động',
+      time: '2 giờ trước',
+      color: '#8b5cf6'
+    },
+    {
+      icon: '📊',
+      type: 'report',
+      title: 'Báo cáo đã tạo',
+      description: 'Báo cáo doanh thu tháng 11/2025',
+      time: '3 giờ trước',
+      color: '#06b6d4'
+    },
+    {
+      icon: '👥',
+      type: 'user',
+      title: 'Hợp đồng mới',
+      description: 'Lê Văn C đã ký hợp đồng gói Premium',
+      time: '4 giờ trước',
+      color: '#ec4899'
+    },
+    {
+      icon: '✅',
+      type: 'system',
+      title: 'Cập nhật hệ thống',
+      description: 'Phiên bản 2.1.5 đã được cài đặt',
+      time: '5 giờ trước',
+      color: '#14b8a6'
+    }
+  ];
+
   return (
-    <div style={{
-      background: 'rgba(26, 32, 44, 0.8)',
-      borderRadius: '20px',
-      padding: '30px',
-      border: '1px solid rgba(255, 255, 255, 0.1)',
-      backdropFilter: 'blur(10px)'
-    }}>
-      <h3 style={{ 
-        color: '#FFFFFF', 
-        marginBottom: '25px', 
-        display: 'flex', 
-        alignItems: 'center', 
-        gap: '10px',
-        fontSize: '1.3rem'
-      }}>
-        🕒 Hoạt động gần đây
-      </h3>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+    <div className="activity-timeline">
+      <h2>Hoạt động Gần đây</h2>
+      <div className="timeline">
         {activities.map((activity, index) => (
-          <div key={index} style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '15px',
-            padding: '15px',
-            borderRadius: '12px',
-            background: 'rgba(255, 255, 255, 0.05)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            transition: 'all 0.3s ease'
-          }}>
-            <div style={{
-              fontSize: '1.5rem',
-              padding: '10px',
-              borderRadius: '10px',
-              background: `${activity.color}20`,
-              border: `1px solid ${activity.color}40`
-            }}>
-              {activity.icon}
+          <div key={index} className="timeline-item">
+            <div className="timeline-dot" style={{ backgroundColor: activity.color }}>
+              <span>{activity.icon}</span>
             </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ color: '#FFFFFF', fontSize: '0.95rem', marginBottom: '2px' }}>
-                {activity.text}
+            <div className="timeline-content">
+              <div className="timeline-header">
+                <span className="timeline-title">{activity.title}</span>
+                <span className="timeline-time">{activity.time}</span>
               </div>
-              <div style={{ color: '#B0B0B0', fontSize: '0.8rem' }}>
-                {activity.time}
-              </div>
+              <div className="timeline-description">{activity.description}</div>
             </div>
-            <div style={{
-              width: '4px',
-              height: '30px',
-              background: activity.color,
-              borderRadius: '2px'
-            }} />
           </div>
         ))}
       </div>
+      <button className="view-all-button">
+        Xem tất cả hoạt động →
+      </button>
     </div>
   );
 };
+
+export default ActivityTimeline;

@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { showToast } from '../../assets/js/helpers/helpers';
 import authService from '../../assets/js/services/authService';
 import '../../assets/css/modal.css';
+import '../../assets/css/LoginModal.css';
 
 const LoginModal = () => {
   const { 
@@ -102,19 +103,11 @@ const LoginModal = () => {
   if (!showLoginModal) return null;
 
   return (
-    <div className="modal-overlay" style={{ backdropFilter: 'blur(3px)', background: 'rgba(0,0,0,0.55)' }}>
+    <div 
+      className="modal-overlay login-modal-overlay" 
+    >
       <div
-        className="modal-container"
-        style={{
-          maxWidth: 520,
-          width: '92vw',
-          borderRadius: 20,
-          padding: 22,
-          background: 'linear-gradient(180deg, #0f172a 0%, #0b1020 100%)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          boxShadow: '0 24px 80px rgba(0,0,0,0.5)',
-          color: '#E5E7EB'
-        }}
+        className="modal-container login-modal-container"
       >
         {/* Header */}
         <div className="modal-header" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>

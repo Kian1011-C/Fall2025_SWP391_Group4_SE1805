@@ -10,24 +10,50 @@ const getStatusStyle = (status) => {
 };
 
 const IssueRow = ({ issue }) => {
-  // Đọc dữ liệu linh hoạt từ API
-  const id = issue.id || issue.issueId;
+  // Map dữ liệu từ backend
+  const id = issue.issueId || issue.id;
   const description = issue.description || 'Không có mô tả';
   const status = issue.status || 'N/A';
-  const user = issue.user_id || issue.reportedBy || 'N/A';
-  const time = issue.created_at || issue.time || new Date().toISOString();
+  const userId = issue.userId || issue.user_id || 'N/A';
+  const stationId = issue.stationId || issue.station_id || 'N/A';
+  const time = issue.createdAt || issue.created_at || new Date().toISOString();
+
+  // Format status text
+  const getStatusText = (status) => {
+    const s = status ? status.toLowerCase() : '';
+    if (s === 'open') return 'Mới';
+    if (s === 'in_progress') return 'Đang xử lý';
+    if (s === 'resolved') return 'Đã giải quyết';
+    return status;
+  };
 
   return (
     <tr style={{ borderTop: '1px solid #334155' }}>
-      <td style={{ padding: '15px 20px', fontWeight: 'bold', color: 'white' }}>{id}</td>
-      <td style={{ padding: '15px 20px', maxWidth: '300px' }}>{description}</td>
+      <td style={{ padding: '15px 20px', fontWeight: 'bold', color: 'white' }}>#{id}</td>
+      <td style={{ padding: '15px 20px', maxWidth: '300px', color: '#e2e8f0' }}>{description}</td>
       <td style={{ padding: '15px 20px' }}>
-        <span style={getStatusStyle(status)}>{status}</span>
+        <span style={getStatusStyle(status)}>{getStatusText(status)}</span>
       </td>
-      <td style={{ padding: '15px 20px' }}>{user}</td>
-      <td style={{ padding: '15px 20px' }}>{new Date(time).toLocaleString('vi-VN')}</td>
+      <td style={{ padding: '15px 20px', color: '#cbd5e1' }}>
+        <div>User: {userId}</div>
+        <div style={{ fontSize: '12px', color: '#94a3b8' }}>Trạm: #{stationId}</div>
+      </td>
+      <td style={{ padding: '15px 20px', color: '#cbd5e1' }}>
+        {new Date(time).toLocaleString('vi-VN')}
+      </td>
       <td style={{ padding: '15px 20px' }}>
-        <button style={{ background: '#334155', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer' }}>
+        <button style={{ 
+          background: '#334155', 
+          color: 'white', 
+          border: 'none', 
+          padding: '8px 12px', 
+          borderRadius: '6px', 
+          cursor: 'pointer',
+          transition: 'background 0.2s'
+        }}
+        onMouseEnter={(e) => e.target.style.background = '#475569'}
+        onMouseLeave={(e) => e.target.style.background = '#334155'}
+        >
           Xem chi tiết
         </button>
       </td>

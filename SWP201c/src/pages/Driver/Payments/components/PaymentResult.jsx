@@ -167,12 +167,15 @@ const PaymentResult = () => {
           </div>
         </div>
         <div style={{display:'flex',flexWrap:'wrap',gap:'12px',justifyContent:'flex-end',padding:'16px 24px',borderTop:'1px solid #e2e8f0',background:'#fafbff'}}>
+          <button onClick={() => navigate('/driver/dashboard')} style={{appearance:'none',border:'1px solid #e2e8f0',background:'#fff',color:'#0f172a',padding:'10px 14px',borderRadius:'10px',fontWeight:'600',cursor:'pointer'}}>
+            Quay về trang chủ
+          </button>
           <button onClick={() => navigate('/driver/payments')} style={{appearance:'none',border:'1px solid #e2e8f0',background:'#fff',color:'#0f172a',padding:'10px 14px',borderRadius:'10px',fontWeight:'600',cursor:'pointer'}}>
-            Quay về
+            Lịch sử thanh toán
           </button>
           {queryDateStr && payment?.transactionRef && (
             <button onClick={handleQueryDR} style={{appearance:'none',background:'#0b74e5',color:'#fff',border:'1px solid #0a66cc',padding:'10px 14px',borderRadius:'10px',fontWeight:'600',cursor:'pointer'}}>
-              Đối soát
+              Đối soát (QueryDR)
             </button>
           )}
         </div>

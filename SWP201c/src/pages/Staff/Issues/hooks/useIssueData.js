@@ -6,17 +6,21 @@ export const useIssueData = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchIssues = useCallback(async (filters = {}) => {
+  const fetchIssues = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await issueService.getAllIssues(filters);
+      
+      // Staff/Admin xem tất cả issues
+      const response = await issueService.getStaffIssues();
+      
       if (response.success && Array.isArray(response.data)) {
         setIssues(response.data);
       } else {
         throw new Error(response.message || "Dữ liệu sự cố không hợp lệ.");
       }
     } catch (err) {
+      console.error('useIssueData error:', err);
       setError(err.message || "Không thể tải danh sách sự cố.");
     } finally {
       setIsLoading(false);
