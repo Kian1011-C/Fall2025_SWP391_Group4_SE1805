@@ -129,6 +129,8 @@ CREATE TABLE Contracts (
     last_reset_date DATETIME DEFAULT GETDATE(),
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE(),
+    invoice_date DATETIME NULL,
+    payment_due_date DATETIME NULL,
     CONSTRAINT FK_Contracts_Vehicles FOREIGN KEY (vehicle_id) REFERENCES Vehicles(vehicle_id),
     CONSTRAINT FK_Contracts_ServicePlans FOREIGN KEY (plan_id) REFERENCES ServicePlans(plan_id)
 );
@@ -145,6 +147,7 @@ CREATE TABLE Payments (
                           currency VARCHAR(10) NOT NULL DEFAULT 'VND',
                           transaction_ref NVARCHAR(100) NOT NULL,
                           created_at DATETIME DEFAULT GETDATE(),
+                          payment_url NVARCHAR(MAX) NULL,
 
     -- VNPay fields
                           vnp_amount BIGINT NULL,
@@ -496,61 +499,80 @@ BEGIN
 END
 GO
 
-
--- Hàm chọn bậc theo TỔNG KM THÁNG (không lũy tiến)
-CREATE OR ALTER FUNCTION dbo.ufn_rate_for_total_km (@total_km INT)
-RETURNS DECIMAL(10,2)
-AS
-BEGIN
-    DECLARE @rate DECIMAL(10,2);
-    SELECT TOP (1) @rate = rate_per_km
-    FROM DistanceRateTiers
-    WHERE @total_km BETWEEN from_km AND ISNULL(to_km, 2147483647)
-    ORDER BY from_km ASC;
-    RETURN ISNULL(@rate, 0);
-END
-GO
-
--- Proc tính tiền theo bậc
-CREATE OR ALTER PROCEDURE dbo.usp_CalcMonthlyBill_ByTier
-    @contract_id INT, @year INT, @month INT
+-- Procedure: Admin xuất hóa đơn cho hợp đồng hết hạn
+CREATE OR ALTER PROCEDURE dbo.usp_GenerateInvoice
+    @contract_id INT
 AS
 BEGIN
     SET NOCOUNT ON;
-    DECLARE @first DATE = DATEFROMPARTS(@year,@month,1);
-    DECLARE @next  DATE = DATEADD(MONTH,1,@first);
-    DECLARE @yyyymm VARCHAR(7) = CONVERT(CHAR(7),@first,126);
-
-    DECLARE @base_price DECIMAL(12,2), @base_distance INT;
-    SELECT @base_price=sp.base_price,@base_distance=sp.base_distance
-    FROM Contracts c JOIN ServicePlans sp ON c.plan_id=sp.plan_id
-    WHERE c.contract_id=@contract_id;
-
-    DECLARE @total_km DECIMAL(12,2) = (
-        SELECT ISNULL(SUM(distance_used),0)
-        FROM Swaps
-        WHERE contract_id=@contract_id
-          AND status='COMPLETED'
-          AND swap_date>=@first AND swap_date<@next
-    );
-
-    DECLARE @over_km DECIMAL(12,2)=CASE WHEN @base_distance=-1 THEN 0
-                                        WHEN @total_km>@base_distance THEN @total_km-@base_distance ELSE 0 END;
-    DECLARE @rate DECIMAL(10,2)=dbo.ufn_rate_for_total_km(CAST(@total_km AS INT));
-    DECLARE @over_fee DECIMAL(12,2)=@over_km*@rate;
-    DECLARE @total_fee DECIMAL(12,2)=@base_price+@over_fee;
-
-    UPDATE Contracts SET
-        current_month=@yyyymm,
-        monthly_distance=@total_km,
-        monthly_overage_distance=@over_km,
-        monthly_overage_fee=@over_fee,
-        monthly_total_fee=@total_fee,
-        updated_at=GETDATE()
-    WHERE contract_id=@contract_id;
-
-    SELECT @contract_id contract_id,@yyyymm month,@total_km total_km,
-           @base_distance base_distance,@base_price base_price,@rate rate_per_km_applied,
-           @over_km overage_km,@over_fee overage_fee,@total_fee total_fee;
+    
+    -- Kiểm tra hợp đồng có tồn tại không
+    IF NOT EXISTS (SELECT 1 FROM Contracts WHERE contract_id = @contract_id)
+    BEGIN
+        RAISERROR('Contract not found', 16, 1);
+        RETURN;
+    END
+    
+    -- Kiểm tra hợp đồng đã hết hạn chưa
+    DECLARE @end_date DATE, @status VARCHAR(20);
+    SELECT @end_date = end_date, @status = status 
+    FROM Contracts 
+    WHERE contract_id = @contract_id;
+    
+    IF @end_date > CAST(GETDATE() AS DATE)
+    BEGIN
+        RAISERROR('Contract has not expired yet', 16, 1);
+        RETURN;
+    END
+    
+    -- Kiểm tra đã xuất invoice chưa
+    DECLARE @existing_invoice_date DATETIME;
+    SELECT @existing_invoice_date = invoice_date 
+    FROM Contracts 
+    WHERE contract_id = @contract_id;
+    
+    IF @existing_invoice_date IS NOT NULL
+    BEGIN
+        RAISERROR('Invoice already generated for this contract', 16, 1);
+        RETURN;
+    END
+    
+    -- Xuất hóa đơn: Set invoice_date = now, payment_due_date = now + 7 days
+    DECLARE @invoice_date DATETIME = GETDATE();
+    DECLARE @payment_due_date DATETIME = DATEADD(DAY, 7, @invoice_date);
+    
+    UPDATE Contracts 
+    SET invoice_date = @invoice_date,
+        payment_due_date = @payment_due_date,
+        updated_at = GETDATE()
+    WHERE contract_id = @contract_id;
+    
+    -- Trả về thông tin hóa đơn
+    SELECT 
+        c.contract_id,
+        c.contract_number,
+        c.vehicle_id,
+        v.plate_number,
+        v.user_id,
+        u.first_name,
+        u.last_name,
+        u.email,
+        u.phone,
+        sp.plan_name,
+        c.start_date,
+        c.end_date,
+        c.monthly_distance,
+        c.monthly_base_fee,
+        c.monthly_overage_distance,
+        c.monthly_overage_fee,
+        c.monthly_total_fee,
+        c.invoice_date,
+        c.payment_due_date,
+        DATEDIFF(DAY, c.invoice_date, c.payment_due_date) AS days_to_pay
+    FROM Contracts c
+    INNER JOIN Vehicles v ON c.vehicle_id = v.vehicle_id
+    INNER JOIN Users u ON v.user_id = u.user_id
+    INNER JOIN ServicePlans sp ON c.plan_id = sp.plan_id
+    WHERE c.contract_id = @contract_id;
 END
 GO

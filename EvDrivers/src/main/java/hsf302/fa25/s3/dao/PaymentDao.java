@@ -15,8 +15,8 @@ public class PaymentDao {
 
     //luu giao dich dang cho doi xu ly
     public boolean insertPending(Payment p) {
-        String sql = "INSERT INTO Payments (user_id, contract_id, amount, method, status, currency, transaction_ref, created_at) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, GETDATE())";
+        String sql = "INSERT INTO Payments (user_id, contract_id, amount, method, status, currency, transaction_ref, payment_url, created_at) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, GETDATE())";
         try (Connection c = ConnectDB.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, p.getUserId());
@@ -26,6 +26,7 @@ public class PaymentDao {
             ps.setString(5, p.getStatus());   // 'pending' nếu bạn đã thêm vào CHECK; nếu chưa, dùng 'failed' rồi update lại khi có return (không khuyến nghị)
             ps.setString(6, p.getCurrency()); // 'VND'
             ps.setString(7, p.getTransactionRef());
+            ps.setString(8, p.getPaymentUrl()); // ✅ Lưu payment URL
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("insertPending err: " + e.getMessage());
@@ -129,6 +130,59 @@ public class PaymentDao {
         }
     }
 
+    // ✅ Cập nhật invoice_date và payment_due_date khi tạo hóa đơn
+    public boolean updateInvoiceDates(int contractId) {
+        String sql = """
+            UPDATE Contracts 
+            SET invoice_date = GETDATE(),
+                payment_due_date = DATEADD(DAY, 7, GETDATE()),
+                updated_at = GETDATE()
+            WHERE contract_id = ?
+        """;
+        try (Connection c = ConnectDB.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, contractId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("updateInvoiceDates err: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // ✅ Lấy tất cả payments (Admin)
+    public List<Payment> getAllPayments() {
+        String sql = "SELECT * FROM Payments ORDER BY created_at DESC";
+        List<Payment> list = new ArrayList<>();
+        try (Connection c = ConnectDB.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(map(rs));
+            }
+        } catch (SQLException e) {
+            System.err.println("getAllPayments err: " + e.getMessage());
+        }
+        return list;
+    }
+
+    // ✅ Lấy payments của 1 user (User)
+    public List<Payment> getPaymentsByUserId(String userId) {
+        String sql = "SELECT * FROM Payments WHERE user_id = ? ORDER BY created_at DESC";
+        List<Payment> list = new ArrayList<>();
+        try (Connection c = ConnectDB.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(map(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("getPaymentsByUserId err: " + e.getMessage());
+        }
+        return list;
+    }
+
     //map ResultSet to Payment object
     private Payment map(ResultSet rs) throws SQLException {
         Timestamp payDate = rs.getTimestamp("vnp_pay_date");
@@ -141,6 +195,7 @@ public class PaymentDao {
                 .status(rs.getString("status"))
                 .currency(rs.getString("currency"))
                 .transactionRef(rs.getString("transaction_ref"))
+                .paymentUrl(rs.getString("payment_url")) // ✅
                 .vnpAmount((Long) rs.getObject("vnp_amount"))
                 .vnpResponseCode(rs.getString("vnp_response_code"))
                 .vnpTransactionNo(rs.getString("vnp_transaction_no"))

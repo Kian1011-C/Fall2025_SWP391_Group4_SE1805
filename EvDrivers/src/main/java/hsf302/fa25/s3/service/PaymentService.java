@@ -32,18 +32,6 @@ public class PaymentService {
     public String createPaymentUrl(String userId, Integer contractId, double amount, String clientIp) {
         String txnRef = vnpay.generateTxnRef();
 
-        // Lưu đơn pending
-        Payment p = Payment.builder()
-                .userId(userId)
-                .contractId(contractId)
-                .amount(amount)
-                .method("QR")
-                .status("in_progress")
-                .currency("VND")
-                .transactionRef(txnRef)
-                .build();
-        paymentDao.insertPending(p);
-
         String vnpAmount = new BigDecimal(String.valueOf(amount))
                 .multiply(new BigDecimal("100"))
                 .setScale(0, RoundingMode.HALF_UP)
@@ -59,11 +47,11 @@ public class PaymentService {
         params.put("vnp_Amount", vnpAmount);
         params.put("vnp_CurrCode", "VND");
         params.put("vnp_TxnRef", txnRef);
-        
+
         // ✅ Encode tiếng Việt đúng cách
         String orderInfo = "Thanh toan hop dong " + (contractId == null ? "N/A" : contractId);
         params.put("vnp_OrderInfo", orderInfo);
-        
+
         params.put("vnp_OrderType", "billpayment");
         params.put("vnp_Locale", "vn");
         params.put("vnp_ReturnUrl", vnpay.getVnp_ReturnUrl());
@@ -71,7 +59,23 @@ public class PaymentService {
         params.put("vnp_CreateDate", now);
         params.put("vnp_ExpireDate", expire);
 
-        return vnpay.buildPayUrl(params);
+        // Build URL
+        String paymentUrl = vnpay.buildPayUrl(params);
+
+        // Lưu đơn pending với URL
+        Payment p = Payment.builder()
+                .userId(userId)
+                .contractId(contractId)
+                .amount(amount)
+                .method("QR")
+                .status("in_progress")
+                .currency("VND")
+                .transactionRef(txnRef)
+                .paymentUrl(paymentUrl) // ✅ Lưu URL
+                .build();
+        paymentDao.insertPending(p);
+
+        return paymentUrl;
     }
 
     /* =============================================================
@@ -194,10 +198,14 @@ public class PaymentService {
        5️⃣ TÍNH TIỀN THÁNG + TẠO LINK THANH TOÁN VNPay
        ============================================================= */
     public Map<String, Object> createMonthlyBillUrl(String userId, int contractId, int year, int month, String clientIp) {
+        // 1. Tính tiền tháng và cập nhật contract
         Map<String, Object> bill = paymentDao.calculateMonthlyBill(contractId, year, month);
         if (bill == null) throw new RuntimeException("Không tính được hóa đơn");
 
-        // Lấy tổng tiền sử dụng + phí cọc pin
+        // 2. ✅ Cập nhật invoice_date và payment_due_date
+        paymentDao.updateInvoiceDates(contractId);
+
+        // 3. Lấy tổng tiền sử dụng + phí cọc pin
         double totalFee = ((BigDecimal) bill.get("totalFee")).doubleValue();
 
         // ✅ Thêm dòng này: cộng thêm deposit_fee (nếu có trong kết quả SQL)
@@ -208,10 +216,10 @@ public class PaymentService {
 
         double totalWithDeposit = totalFee + depositFee;
 
-        // Tạo URL thanh toán
+        // 4. Tạo URL thanh toán
         String url = createPaymentUrl(userId, contractId, totalWithDeposit, clientIp);
 
-        // Trả kết quả JSON có thứ tự và hiển thị đầy đủ
+        // 5. Trả kết quả JSON có thứ tự và hiển thị đầy đủ
         Map<String, Object> ordered = new LinkedHashMap<>(bill);
         ordered.put("deposit_fee", depositFee);
         ordered.put("total_with_deposit", totalWithDeposit);
@@ -220,9 +228,20 @@ public class PaymentService {
         return ordered;
     }
 
+    /* =============================================================
+       6️⃣ DANH SÁCH THANH TOÁN
+       ============================================================= */
+    public List<Payment> getAllPayments() {
+        return paymentDao.getAllPayments();
+    }
+
+    public List<Payment> getPaymentsByUserId(String userId) {
+        return paymentDao.getPaymentsByUserId(userId);
+    }
+
 
     /* =============================================================
-       6️⃣ Helpers
+       7️⃣ Helpers
        ============================================================= */
     private void updateFromReturn(String txnRef, Map<String, String> params, String status) {
         Payment p = new Payment();

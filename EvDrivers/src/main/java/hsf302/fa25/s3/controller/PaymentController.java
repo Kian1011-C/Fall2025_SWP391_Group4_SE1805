@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -85,5 +86,27 @@ public class PaymentController {
         Map<String, Object> bill = paymentService.createMonthlyBillUrl(userId, contractId, year, month, ip);
         bill.put("success", true);
         return bill;
+    }
+
+    /** ✅ Admin: Lấy tất cả thanh toán */
+    @GetMapping("/admin/all")
+    public Map<String, Object> getAllPayments() {
+        List<Payment> payments = paymentService.getAllPayments();
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("total", payments.size());
+        response.put("data", payments);
+        return response;
+    }
+
+    /** ✅ User: Lấy danh sách thanh toán của user */
+    @GetMapping("/user/{userId}")
+    public Map<String, Object> getUserPayments(@PathVariable String userId) {
+        List<Payment> payments = paymentService.getPaymentsByUserId(userId);
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("total", payments.size());
+        response.put("data", payments);
+        return response;
     }
 }

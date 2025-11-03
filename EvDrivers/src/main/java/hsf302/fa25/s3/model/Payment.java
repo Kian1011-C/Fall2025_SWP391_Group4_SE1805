@@ -18,6 +18,7 @@ public class Payment {
     private String status;          // 'success' | 'failed' | 'refund' | (nếu thêm 'pending' thì dùng pending)
     private String currency;        // 'VND'
     private String transactionRef;  // NVARCHAR(100)
+    private String paymentUrl;      // ✅ URL thanh toán VNPay
 
     private Long   vnpAmount;           // BIGINT raw *100
     private String vnpResponseCode;     // 00
