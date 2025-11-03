@@ -13,7 +13,6 @@ const StaffLayout = () => {
     { path: '/staff/transaction-management', name: 'Lịch sử đổi Pin', icon: '🔄' },
     { path: '/staff/payments', name: 'Quản lý Thanh toán', icon: '💳' },
     { path: '/staff/issues', name: 'Sự cố', icon: '🔧' },
-    { path: '/staff/reports', name: 'Báo cáo', icon: '📊' },
     { path: '/staff/swap-battery', name: 'Đổi Pin', icon: '⚡' },
   ];
 

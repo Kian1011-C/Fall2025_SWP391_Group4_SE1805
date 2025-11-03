@@ -45,7 +45,6 @@ import StaffDashboard from './pages/Staff/Dashboard';
 import StaffBatteryManagement from './pages/Staff/BatteryManagements';
 import StaffStationManagement from './pages/Staff/StationManagement';
 import StaffIssues from './pages/Staff/Issues';
-import StaffReports from './pages/Staff/Reports';
 import StaffTransactionManagement from './pages/Staff/TransactionManagement';
 import StaffSwapBattery from './pages/Staff/SwapBattery';
 import StaffPayments from './pages/Staff/Payments';
@@ -113,7 +112,6 @@ function AppContent() {
             <Route path="transaction-management" element={<StaffTransactionManagement />} />
             <Route path="payments" element={<StaffPayments />} />
             <Route path="issues" element={<StaffIssues />} />
-            <Route path="reports" element={<StaffReports />} />
             <Route path="swap-battery" element={<StaffSwapBattery />} />
             
           </Route>
