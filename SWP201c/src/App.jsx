@@ -37,6 +37,8 @@ import DriverProfile from './pages/Driver/Profile';
 import DriverStationsMap from './pages/Driver/StationsMap';
 import DriverSubscriptions from './pages/Driver/Subscriptions';
 import DriverVehicles from './pages/Driver/Vehicles';
+import MonthlyBilling from './pages/Driver/Payments/MonthlyBilling';
+import PaymentResult from './pages/Driver/Payments/components/PaymentResult';
 
 // --- Staff Pages ---
 import StaffDashboard from './pages/Staff/Dashboard';
@@ -91,6 +93,8 @@ function AppContent() {
             <Route path="subscriptions" element={<DriverSubscriptions />} />
             <Route path="contracts" element={<DriverContracts />} />
             <Route path="payments" element={<DriverPayments />} />
+            <Route path="payments/monthly-billing" element={<MonthlyBilling />} />
+            <Route path="payments/result" element={<PaymentResult />} />
             <Route path="support" element={<DriverSupport />} />
             <Route path="profile" element={<DriverProfile />} />
           </Route>

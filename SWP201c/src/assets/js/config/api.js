@@ -58,6 +58,11 @@ export const API_CONFIG = {
     PAYMENTS: {
       BASE: '/api/payments',
       PROCESS: '/api/payments/process',
+      CREATE: '/payment/create',  // VNPay create payment URL
+      PAY_MONTHLY: '/payment/pay-monthly',  // VNPay pay monthly bill
+      VNPAY_RETURN: '/payment/vnpay-return',  // VNPay return URL (HTML page)
+      VNPAY_RETURN_JSON: '/payment/vnpay-return-json',  // VNPay return JSON API
+      QUERYDR: '/payment/querydr',  // VNPay query transaction
       CALCULATE_MONTHLY: (contractId) => `/api/payments/calculate-monthly-bill/${contractId}`,
       CURRENT_BILL: (userId) => `/api/payments/current-bill-status/user/${userId}`,
       MONTHLY_SUMMARY: (contractId) => `/api/payments/monthly-usage-summary/${contractId}`,

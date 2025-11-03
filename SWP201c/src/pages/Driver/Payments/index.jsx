@@ -82,8 +82,15 @@ const DriverPayments = () => {
             setError(null);
             try {
                 // 1. Lấy lịch sử thanh toán
-                // (Giả sử bạn có hàm getPaymentHistory(userId) trong paymentService)
-                const historyResult = await paymentService.getPaymentHistory(currentUser.userId);
+                // Tạm thời dùng mock data vì backend chưa có API này
+                // TODO: Khi backend có API /api/payments/user/:userId/history thì uncomment dòng dưới
+                // const historyResult = await paymentService.getPaymentHistory(currentUser.userId);
+                
+                // Mock data tạm thời
+                const historyResult = {
+                    success: true,
+                    data: [] // Sẽ hiển thị "Chưa có lịch sử thanh toán"
+                };
                 
                 if (historyResult.success) {
                     setPaymentHistory(historyResult.data || []);
@@ -117,8 +124,8 @@ const DriverPayments = () => {
 
     // Hàm xử lý khi nhấn nút "Thanh toán" (cho hóa đơn hiện tại)
     const handleGoToCheckout = () => {
-        // Điều hướng đến trang thanh toán (PaymentPage.jsx)
-        navigate('/driver/payments/checkout');
+        // Điều hướng đến trang thanh toán hóa đơn tháng
+        navigate('/driver/payments/monthly-billing');
     };
 
     if (loading) {
@@ -137,18 +144,29 @@ const DriverPayments = () => {
             <div style={{ marginBottom: '24px' }}>
                 <div className="invoice-card" style={{ background: '#1f2937', padding: '24px', borderRadius: '16px', textAlign: 'left', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
                     <h3 style={{ color: 'white', fontSize: '1.25rem', fontWeight: '600', margin: '0 0 10px' }}>
-                        Hóa đơn tiếp theo
+                        💳 Thanh toán hóa đơn tháng
                     </h3>
                     <p style={{ color: '#d1d5db', margin: '0 0 20px' }}>
-                        Xem lại hóa đơn hoặc thanh toán ngay.
+                        Nhập thông tin hợp đồng để xem và thanh toán hóa đơn tháng qua VNPay
                     </p>
                     {/* (Hiển thị số tiền hóa đơn thật ở đây) */}
                     <button 
                         className="invoice-button" 
                         onClick={handleGoToCheckout} 
-                        style={{ maxWidth: '250px' }} // Thu nhỏ nút
+                        style={{ 
+                            background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                            color: '#fff',
+                            border: 'none',
+                            padding: '12px 24px',
+                            borderRadius: '10px',
+                            fontSize: '1rem',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            maxWidth: '250px',
+                            transition: 'all 0.3s ease'
+                        }} 
                     >
-                        Thanh toán ngay (VNPay)
+                        Thanh toán hóa đơn tháng
                     </button>
                 </div>
             </div>

@@ -215,6 +215,170 @@ class PaymentService {
       };
     }
   }
+
+  // VNPay Integration Methods
+  
+  /**
+   * Tạo URL thanh toán VNPay
+   * @param {string} userId - ID người dùng
+   * @param {number|null} contractId - ID hợp đồng (optional)
+   * @param {number} amount - Số tiền thanh toán
+   * @returns {Promise<{success: boolean, payUrl?: string, message: string}>}
+   */
+  async createVNPayPayment(userId, contractId, amount) {
+    try {
+      console.log('PaymentService: Create VNPay payment', { userId, contractId, amount });
+      
+      const params = new URLSearchParams({
+        userId: userId,
+        amount: amount.toString()
+      });
+      
+      if (contractId) {
+        params.append('contractId', contractId.toString());
+      }
+
+      const response = await apiUtils.post(
+        `${API_CONFIG.ENDPOINTS.PAYMENTS.CREATE}?${params.toString()}`
+      );
+      
+      // Backend có thể trả về vnpayUrl hoặc payUrl
+      const paymentUrl = response.vnpayUrl || response.payUrl;
+      
+      if (response.success && paymentUrl) {
+        return {
+          success: true,
+          payUrl: paymentUrl,
+          message: 'Tạo link thanh toán thành công'
+        };
+      } else {
+        throw new Error(response.message || 'Không thể tạo link thanh toán');
+      }
+    } catch (error) {
+      console.error('Create VNPay payment error:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return {
+        success: false,
+        message: errorInfo.message || 'Lỗi khi tạo link thanh toán VNPay',
+        error: errorInfo
+      };
+    }
+  }
+
+  /**
+   * Thanh toán hóa đơn tháng qua VNPay (auto calculate + create payment URL)
+   * @param {string} userId - ID người dùng
+   * @param {number} contractId - ID hợp đồng
+   * @param {number} year - Năm
+   * @param {number} month - Tháng
+   * @returns {Promise<{success: boolean, payUrl?: string, billInfo?: object, message: string}>}
+   */
+  async payMonthlyBillVNPay(userId, contractId, year, month) {
+    try {
+      console.log('PaymentService: Pay monthly bill VNPay', { userId, contractId, year, month });
+      
+      const params = new URLSearchParams({
+        userId: userId,
+        contractId: contractId.toString(),
+        year: year.toString(),
+        month: month.toString()
+      });
+
+      const response = await apiUtils.get(
+        `${API_CONFIG.ENDPOINTS.PAYMENTS.PAY_MONTHLY}?${params.toString()}`
+      );
+      
+      // Backend trả về vnpayUrl, không phải payUrl
+      const paymentUrl = response.vnpayUrl || response.payUrl;
+      
+      if (response.success && paymentUrl) {
+        return {
+          success: true,
+          payUrl: paymentUrl,
+          billInfo: response, // Chứa thông tin bill như totalAmount, totalKm, totalFee, etc.
+          message: 'Tạo hóa đơn thanh toán thành công'
+        };
+      } else {
+        throw new Error(response.message || 'Không thể tạo hóa đơn thanh toán');
+      }
+    } catch (error) {
+      console.error('Pay monthly bill VNPay error:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return {
+        success: false,
+        message: errorInfo.message || 'Lỗi khi tạo hóa đơn thanh toán tháng',
+        error: errorInfo
+      };
+    }
+  }
+
+  /**
+   * Xác thực kết quả thanh toán từ VNPay (JSON response)
+   * @param {URLSearchParams} queryParams - Query parameters từ VNPay return URL
+   * @returns {Promise<{success: boolean, payment?: object, message: string}>}
+   */
+  async verifyVNPayReturn(queryParams) {
+    try {
+      console.log('PaymentService: Verify VNPay return');
+      
+      const response = await apiUtils.get(
+        `${API_CONFIG.ENDPOINTS.PAYMENTS.VNPAY_RETURN_JSON}?${queryParams.toString()}`
+      );
+      
+      if (response.success) {
+        return {
+          success: true,
+          payment: response,
+          message: response.message || 'Xác thực thanh toán thành công'
+        };
+      } else {
+        throw new Error(response.message || 'Xác thực thanh toán thất bại');
+      }
+    } catch (error) {
+      console.error('Verify VNPay return error:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return {
+        success: false,
+        message: errorInfo.message || 'Lỗi khi xác thực thanh toán',
+        error: errorInfo
+      };
+    }
+  }
+
+  /**
+   * Query transaction từ VNPay (đối soát)
+   * @param {string} txnRef - Mã giao dịch
+   * @param {string} transactionDate - Ngày giao dịch (yyyyMMddHHmmss)
+   * @returns {Promise<{success: boolean, data?: object, message: string}>}
+   */
+  async queryVNPayTransaction(txnRef, transactionDate) {
+    try {
+      console.log('PaymentService: Query VNPay transaction', { txnRef, transactionDate });
+      
+      const params = new URLSearchParams({
+        txnRef: txnRef,
+        transactionDate: transactionDate
+      });
+
+      const response = await apiUtils.get(
+        `${API_CONFIG.ENDPOINTS.PAYMENTS.QUERYDR}?${params.toString()}`
+      );
+      
+      return {
+        success: true,
+        data: response,
+        message: 'Đối soát giao dịch thành công'
+      };
+    } catch (error) {
+      console.error('Query VNPay transaction error:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return {
+        success: false,
+        message: errorInfo.message || 'Lỗi khi đối soát giao dịch',
+        error: errorInfo
+      };
+    }
+  }
 }
 
 export default new PaymentService();

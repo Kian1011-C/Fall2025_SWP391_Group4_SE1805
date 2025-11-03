@@ -15,6 +15,8 @@ import DriverSwapBattery from '../pages/Driver/SwapBattery';
 import DriverPayments from '../pages/Driver/Payments';
 import DriverSupport from '../pages/Driver/Support';
 import DriverSettings from '../pages/Driver/Settings';
+import MonthlyBilling from '../pages/Driver/Payments/MonthlyBilling';
+import PaymentResult from '../pages/Driver/Payments/components/PaymentResult';
 
 const DriverRoutes = () => {
   return (
@@ -27,6 +29,8 @@ const DriverRoutes = () => {
       <Route path="/stations-map" element={<DriverStationsMap />} />
       <Route path="/swap-battery" element={<DriverSwapBattery />} />
       <Route path="/payments" element={<DriverPayments />} />
+      <Route path="/payments/monthly-billing" element={<MonthlyBilling />} />
+      <Route path="/payments/result" element={<PaymentResult />} />
       <Route path="/support" element={<DriverSupport />} />
       <Route path="/settings" element={<DriverSettings />} />
       <Route path="/" element={<DriverDashboard />} />
