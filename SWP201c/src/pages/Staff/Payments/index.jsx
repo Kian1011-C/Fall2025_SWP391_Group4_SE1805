@@ -1,28 +1,18 @@
-// Admin Payments Management - index.jsx
+// Staff Payments Management - index.jsx (Read Only)
 import React, { useState } from 'react';
 import { usePaymentsData } from './hooks/usePaymentsData';
 import DriverRow from './components/DriverRow';
-import GenerateInvoiceModal from './components/GenerateInvoiceModal';
 import PaymentHistoryModal from './components/PaymentHistoryModal';
 
 const Payments = () => {
   const { drivers, loading, error, searchTerm, setSearchTerm, refreshData } = usePaymentsData();
   const [selectedDriver, setSelectedDriver] = useState(null);
-  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
 
-  const handleGenerateInvoice = (driver) => {
-    setSelectedDriver(driver);
-    setShowInvoiceModal(true);
-  };
-
+  // ✅ Staff chỉ xem lịch sử, không xuất hóa đơn
   const handleViewHistory = (driver) => {
     setSelectedDriver(driver);
     setShowHistoryModal(true);
-  };
-
-  const handleInvoiceSuccess = () => {
-    refreshData();
   };
 
   const totalDrivers = drivers.length;
@@ -38,7 +28,7 @@ const Payments = () => {
           Quản lý Thanh toán
         </h1>
         <p style={{ margin: 0, fontSize: '14px', color: '#6b7280' }}>
-          Quản lý hóa đơn và thanh toán của khách hàng
+          Xem hóa đơn và lịch sử thanh toán của khách hàng
         </p>
       </div>
 
@@ -137,41 +127,6 @@ const Payments = () => {
               </div>
               <div style={{ fontSize: '24px', fontWeight: '700', color: '#ef4444' }}>
                 {unpaidBills}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div style={{
-          backgroundColor: 'white',
-          padding: '24px',
-          borderRadius: '12px',
-          border: '1px solid #e5e7eb',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{
-              width: '48px',
-              height: '48px',
-              borderRadius: '12px',
-              backgroundColor: '#fef3c7',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '24px'
-            }}>
-              💰
-            </div>
-            <div>
-              <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '4px' }}>
-                Tổng doanh thu
-              </div>
-              <div style={{ fontSize: '20px', fontWeight: '700', color: '#f59e0b' }}>
-                {new Intl.NumberFormat('vi-VN', {
-                  style: 'currency',
-                  currency: 'VND',
-                  notation: 'compact'
-                }).format(totalRevenue)}
               </div>
             </div>
           </div>
@@ -335,7 +290,6 @@ const Payments = () => {
                 <DriverRow
                   key={driver.id}
                   driver={driver}
-                  onGenerateInvoice={handleGenerateInvoice}
                   onViewHistory={handleViewHistory}
                 />
               ))}
@@ -344,18 +298,7 @@ const Payments = () => {
         )}
       </div>
 
-      {/* Modals */}
-      {showInvoiceModal && selectedDriver && (
-        <GenerateInvoiceModal
-          driver={selectedDriver}
-          onClose={() => {
-            setShowInvoiceModal(false);
-            setSelectedDriver(null);
-          }}
-          onSuccess={handleInvoiceSuccess}
-        />
-      )}
-
+      {/* Modal - Chỉ có PaymentHistory (Staff read-only) */}
       {showHistoryModal && selectedDriver && (
         <PaymentHistoryModal
           driver={selectedDriver}

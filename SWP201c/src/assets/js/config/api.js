@@ -59,10 +59,12 @@ export const API_CONFIG = {
       BASE: '/api/payments',
       PROCESS: '/api/payments/process',
       CREATE: '/payment/create',  // VNPay create payment URL
-      PAY_MONTHLY: '/payment/pay-monthly',  // VNPay pay monthly bill
+      PAY_MONTHLY: '/payment/pay-monthly',  // VNPay pay monthly bill (Admin xuất hóa đơn)
       VNPAY_RETURN: '/payment/vnpay-return',  // VNPay return URL (HTML page)
       VNPAY_RETURN_JSON: '/payment/vnpay-return-json',  // VNPay return JSON API
       QUERYDR: '/payment/querydr',  // VNPay query transaction
+      ADMIN_ALL: '/payment/admin/all',  // Admin xem tất cả payments
+      USER_PAYMENTS: (userId) => `/payment/user/${userId}`,  // User xem lịch sử của mình
       CALCULATE_MONTHLY: (contractId) => `/api/payments/calculate-monthly-bill/${contractId}`,
       CURRENT_BILL: (userId) => `/api/payments/current-bill-status/user/${userId}`,
       MONTHLY_SUMMARY: (contractId) => `/api/payments/monthly-usage-summary/${contractId}`,

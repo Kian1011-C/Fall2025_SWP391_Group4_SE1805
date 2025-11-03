@@ -1,7 +1,7 @@
-// components/DriverRow.jsx
+// components/DriverRow.jsx (Staff - Read Only)
 import React from 'react';
 
-const DriverRow = ({ driver, onGenerateInvoice, onViewHistory }) => {
+const DriverRow = ({ driver, onViewHistory }) => { // ✅ Xóa onGenerateInvoice prop
   const getStatusColor = (status) => {
     switch (status) {
       case 'active':
@@ -115,8 +115,9 @@ const DriverRow = ({ driver, onGenerateInvoice, onViewHistory }) => {
       
       <td style={{ padding: '16px' }}>
         <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+          {/* ✅ Staff chỉ có nút xem lịch sử, không có nút xuất hóa đơn */}
           <button
-            onClick={() => onGenerateInvoice(driver)}
+            onClick={() => onViewHistory(driver)}
             style={{
               padding: '8px 16px',
               backgroundColor: '#3b82f6',
@@ -134,37 +135,8 @@ const DriverRow = ({ driver, onGenerateInvoice, onViewHistory }) => {
             onMouseEnter={(e) => e.target.style.backgroundColor = '#2563eb'}
             onMouseLeave={(e) => e.target.style.backgroundColor = '#3b82f6'}
           >
-            <span>📄</span>
-            Xuất hóa đơn
-          </button>
-          
-          <button
-            onClick={() => onViewHistory(driver)}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#f3f4f6',
-              color: '#374151',
-              border: '1px solid #e5e7eb',
-              borderRadius: '8px',
-              fontSize: '13px',
-              fontWeight: '500',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = '#e5e7eb';
-              e.target.style.borderColor = '#d1d5db';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = '#f3f4f6';
-              e.target.style.borderColor = '#e5e7eb';
-            }}
-          >
             <span>📋</span>
-            Lịch sử
+            Xem lịch sử
           </button>
         </div>
       </td>

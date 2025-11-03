@@ -3,6 +3,17 @@ import React from 'react';
 
 const PaymentCard = ({ payment, onViewDetails, formatDate, formatCurrency, getStatusStyle }) => {
   const statusStyle = getStatusStyle(payment.status);
+  
+  // ✅ Kiểm tra xem có payment_url và status = 'in_progress' hay không
+  const canPay = payment.paymentUrl && payment.status === 'in_progress';
+
+  const handlePaymentClick = (e) => {
+    e.stopPropagation(); // Ngăn trigger onClick của card
+    if (canPay) {
+      // Chuyển hướng đến VNPay
+      window.location.href = payment.paymentUrl;
+    }
+  };
 
   return (
     <div 
@@ -38,23 +49,28 @@ const PaymentCard = ({ payment, onViewDetails, formatDate, formatCurrency, getSt
             fontWeight: '600',
             marginBottom: '8px'
           }}>
-            {payment.description || payment.paymentFor || 'Thanh toán'}
+            {payment.vnpOrderInfo || payment.description || payment.paymentFor || 'Thanh toán'}
           </div>
           <div style={{ 
             color: '#B0B0B0',
             fontSize: '0.9rem',
             marginBottom: '5px'
           }}>
-            🕒 {formatDate(payment.date || payment.paymentDate || payment.createdAt)}
+            🕒 {formatDate(payment.createdAt || payment.date || payment.paymentDate)}
           </div>
-          {payment.paymentMethod && (
+          <div style={{ 
+            color: '#B0B0B0',
+            fontSize: '0.85rem',
+            marginBottom: '5px'
+          }}>
+            📄 Mã GD: {payment.transactionRef || 'N/A'}
+          </div>
+          {payment.method && (
             <div style={{ 
               color: '#B0B0B0',
               fontSize: '0.9rem'
             }}>
-              💳 {payment.paymentMethod === 'card' ? 'Thẻ' : 
-                   payment.paymentMethod === 'cash' ? 'Tiền mặt' : 
-                   payment.paymentMethod}
+              💳 {payment.method === 'QR' ? 'QR Code / VNPay' : payment.method}
             </div>
           )}
         </div>
@@ -75,10 +91,40 @@ const PaymentCard = ({ payment, onViewDetails, formatDate, formatCurrency, getSt
             fontWeight: '600',
             background: statusStyle.background,
             color: statusStyle.color,
-            display: 'inline-block'
+            display: 'inline-block',
+            marginBottom: '8px'
           }}>
             {statusStyle.text}
           </span>
+          
+          {/* ✅ Nút thanh toán nếu chưa thanh toán */}
+          {canPay && (
+            <button
+              onClick={handlePaymentClick}
+              style={{
+                display: 'block',
+                width: '100%',
+                padding: '8px 16px',
+                background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '0.9rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                marginTop: '8px'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.05)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+            >
+              💳 Thanh toán ngay
+            </button>
+          )}
         </div>
       </div>
     </div>

@@ -7,43 +7,68 @@ const GenerateInvoiceModal = ({ driver, onClose, onSuccess }) => {
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
   const [billPreview, setBillPreview] = useState(null);
 
+  // ✅ Tính toán và xem trước hóa đơn
   const handleCalculateBill = async () => {
+    console.log('Generate invoice for driver:', driver);
+    
     if (!driver.contractId) {
       setError('Không tìm thấy mã hợp đồng');
       return;
     }
 
+    if (!driver.id) {
+      setError('Không tìm thấy ID người dùng');
+      return;
+    }
+
     setLoading(true);
     setError(null);
+    setSuccess(null);
 
     try {
-      const result = await paymentService.payMonthlyBillVNPay(
-        driver.id,
+      console.log('✅ [Admin] Xuất hóa đơn:', {
+        userId: driver.userId,
+        contractId: driver.contractId,
+        planName: driver.subscriptionType,
+        year,
+        month
+      });
+
+      // ✅ Gọi API backend để xuất hóa đơn (tạo payment pending)
+      const result = await paymentService.adminGenerateMonthlyInvoice(
+        driver.userId, // ✅ Dùng driver.userId thay vì driver.id
         driver.contractId,
         year,
         month
       );
 
+      console.log('✅ [Admin] Kết quả xuất hóa đơn:', result);
+
       if (result.success && result.billInfo) {
         setBillPreview(result.billInfo);
+        setSuccess('Hóa đơn đã được xuất thành công! Driver có thể thanh toán ngay.');
       } else {
-        setError(result.message || 'Không thể tính toán hóa đơn');
+        setError(result.message || 'Không thể xuất hóa đơn');
       }
     } catch (err) {
-      console.error('Calculate bill error:', err);
-      setError('Có lỗi xảy ra khi tính toán hóa đơn');
+      console.error('Generate invoice error:', err);
+      setError(`Có lỗi xảy ra khi xuất hóa đơn: ${err.message}`);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGenerateInvoice = () => {
-    // TODO: Implement actual invoice generation
-    alert(`Đã tạo hóa đơn cho ${driver.name}\nTháng ${month}/${year}\nTổng tiền: ${formatCurrency(billPreview.total_with_deposit)}`);
-    onSuccess();
-    onClose();
+  // ✅ Xác nhận và đóng modal
+  const handleConfirm = () => {
+    if (billPreview) {
+      onSuccess(); // Refresh data
+      onClose();
+    } else {
+      setError('Vui lòng tính toán hóa đơn trước');
+    }
   };
 
   const formatCurrency = (amount) => {
@@ -231,6 +256,20 @@ const GenerateInvoiceModal = ({ driver, onClose, onSuccess }) => {
             </div>
           )}
 
+          {/* Success Message */}
+          {success && (
+            <div style={{
+              padding: '12px 16px',
+              backgroundColor: '#d1fae5',
+              color: '#065f46',
+              borderRadius: '8px',
+              fontSize: '14px',
+              marginBottom: '16px'
+            }}>
+              ✅ {success}
+            </div>
+          )}
+
           {/* Bill Preview */}
           {billPreview && (
             <div style={{
@@ -335,7 +374,7 @@ const GenerateInvoiceModal = ({ driver, onClose, onSuccess }) => {
           
           {billPreview && (
             <button
-              onClick={handleGenerateInvoice}
+              onClick={handleConfirm}
               style={{
                 padding: '10px 20px',
                 backgroundColor: '#10b981',
@@ -347,7 +386,7 @@ const GenerateInvoiceModal = ({ driver, onClose, onSuccess }) => {
                 cursor: 'pointer'
               }}
             >
-              Xuất hóa đơn
+              Xác nhận
             </button>
           )}
         </div>

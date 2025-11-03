@@ -5,74 +5,69 @@ import paymentService from '/src/assets/js/services/paymentService.js';
 const PaymentHistoryModal = ({ driver, onClose }) => {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all'); // all, paid, pending, failed
+  const [error, setError] = useState(null);
+  const [filter, setFilter] = useState('all'); // all, success, in_progress, failed
 
   useEffect(() => {
     const fetchHistory = async () => {
       try {
         setLoading(true);
+        setError(null);
         
-        // TODO: Replace with actual API call
-        // const result = await paymentService.getPaymentHistory(driver.id);
+        // ✅ Gọi API thực để lấy lịch sử thanh toán của user
+        const result = await paymentService.adminGetUserPayments(driver.userId);
         
-        // Mock data
-        const mockHistory = [
-          {
-            id: 'PAY001',
-            date: '2025-10-15',
-            month: '10/2025',
-            amount: 850000,
-            status: 'paid',
-            method: 'VNPay',
-            transactionRef: 'PAYT76214274959352551',
-            totalKm: 150,
-            overageFee: 50000
-          },
-          {
-            id: 'PAY002',
-            date: '2025-09-15',
-            month: '09/2025',
-            amount: 800000,
-            status: 'paid',
-            method: 'VNPay',
-            transactionRef: 'PAYT76214274959352552',
-            totalKm: 140,
-            overageFee: 40000
-          },
-          {
-            id: 'PAY003',
-            date: '2025-08-15',
-            month: '08/2025',
-            amount: 750000,
-            status: 'paid',
-            method: 'VNPay',
-            transactionRef: 'PAYT76214274959352553',
-            totalKm: 130,
-            overageFee: 30000
-          },
-          {
-            id: 'PAY004',
-            date: null,
-            month: '11/2025',
-            amount: 900000,
-            status: 'pending',
-            method: null,
-            transactionRef: null,
-            totalKm: 160,
-            overageFee: 60000
-          }
-        ];
-        
-        setHistory(mockHistory);
+        if (result.success) {
+          // Map dữ liệu từ backend sang format hiển thị
+          const mappedHistory = (result.data || []).map(payment => ({
+            id: payment.paymentId,
+            date: payment.vnpPayDate || payment.createdAt,
+            month: extractMonthYear(payment.vnpOrderInfo || payment.createdAt),
+            amount: payment.amount,
+            status: mapStatus(payment.status),
+            method: payment.method === 'QR' ? 'VNPay' : payment.method,
+            transactionRef: payment.transactionRef,
+            vnpTransactionNo: payment.vnpTransactionNo,
+            vnpBankCode: payment.vnpBankCode,
+            vnpCardType: payment.vnpCardType,
+            vnpOrderInfo: payment.vnpOrderInfo,
+            createdAt: payment.createdAt
+          }));
+          
+          setHistory(mappedHistory);
+        } else {
+          throw new Error(result.message || 'Không thể tải lịch sử thanh toán');
+        }
       } catch (err) {
         console.error('Error fetching payment history:', err);
+        setError(err.message || 'Có lỗi xảy ra khi tải lịch sử');
       } finally {
         setLoading(false);
       }
     };
 
     fetchHistory();
-  }, [driver.id]);
+  }, [driver.userId]);
+
+  // ✅ Helper: Trích xuất tháng/năm từ orderInfo hoặc date
+  const extractMonthYear = (text) => {
+    if (!text) return 'N/A';
+    // Nếu có text như "Thanh toan hop dong 1" thì lấy từ date
+    const date = new Date(text);
+    if (!isNaN(date.getTime())) {
+      return `${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+    }
+    return 'N/A';
+  };
+
+  // ✅ Map status từ backend
+  const mapStatus = (status) => {
+    const s = status?.toLowerCase();
+    if (s === 'success') return 'paid';
+    if (s === 'in_progress') return 'pending';
+    if (s === 'failed') return 'failed';
+    return 'unknown';
+  };
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -150,7 +145,7 @@ const PaymentHistoryModal = ({ driver, onClose }) => {
               Lịch sử thanh toán
             </h2>
             <p style={{ margin: '4px 0 0 0', fontSize: '14px', color: '#6b7280' }}>
-              Khách hàng: {driver.name} • ID: {driver.id}
+              Khách hàng: {driver.name} • Contract: {driver.contractId} • Plan: {driver.subscriptionType}
             </p>
           </div>
           <button

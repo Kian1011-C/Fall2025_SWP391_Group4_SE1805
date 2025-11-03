@@ -141,41 +141,6 @@ const Payments = () => {
             </div>
           </div>
         </div>
-
-        <div style={{
-          backgroundColor: 'white',
-          padding: '24px',
-          borderRadius: '12px',
-          border: '1px solid #e5e7eb',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{
-              width: '48px',
-              height: '48px',
-              borderRadius: '12px',
-              backgroundColor: '#fef3c7',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '24px'
-            }}>
-              💰
-            </div>
-            <div>
-              <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '4px' }}>
-                Tổng doanh thu
-              </div>
-              <div style={{ fontSize: '20px', fontWeight: '700', color: '#f59e0b' }}>
-                {new Intl.NumberFormat('vi-VN', {
-                  style: 'currency',
-                  currency: 'VND',
-                  notation: 'compact'
-                }).format(totalRevenue)}
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Search and Actions */}

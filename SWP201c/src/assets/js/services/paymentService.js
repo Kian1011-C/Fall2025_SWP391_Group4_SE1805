@@ -40,12 +40,14 @@ class PaymentService {
     try {
       console.log('PaymentService: Get payment history for user', userId);
       
-      const response = await apiUtils.get(API_CONFIG.ENDPOINTS.PAYMENTS.HISTORY(userId));
+      // ✅ Sử dụng endpoint backend thực tế: /payment/user/{userId}
+      const response = await apiUtils.get(API_CONFIG.ENDPOINTS.PAYMENTS.USER_PAYMENTS(userId));
       
       if (response.success) {
         return {
           success: true,
           data: response.data,
+          total: response.total || 0,
           message: 'Lấy lịch sử thanh toán thành công'
         };
       } else {
@@ -219,13 +221,75 @@ class PaymentService {
   // VNPay Integration Methods
   
   /**
-   * Tạo URL thanh toán VNPay
+   * ✅ LẤY DANH SÁCH THANH TOÁN CỦA USER (Đã có payment_url từ backend)
+   * Driver chỉ cần lấy payment_url có sẵn để thanh toán
    * @param {string} userId - ID người dùng
-   * @param {number|null} contractId - ID hợp đồng (optional)
-   * @param {number} amount - Số tiền thanh toán
-   * @returns {Promise<{success: boolean, payUrl?: string, message: string}>}
+   * @returns {Promise<{success: boolean, data?: array, total?: number, message: string}>}
+   */
+  async getUserPayments(userId) {
+    try {
+      console.log('PaymentService: Get user payments with payment URLs', userId);
+      
+      const response = await apiUtils.get(API_CONFIG.ENDPOINTS.PAYMENTS.USER_PAYMENTS(userId));
+      
+      if (response.success) {
+        return {
+          success: true,
+          data: response.data, // Mảng payments đã có payment_url
+          total: response.total || 0,
+          message: 'Lấy danh sách thanh toán thành công'
+        };
+      } else {
+        throw new Error(response.message || 'Không thể lấy danh sách thanh toán');
+      }
+    } catch (error) {
+      console.error('Get user payments error:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return {
+        success: false,
+        message: errorInfo.message || 'Lỗi khi lấy danh sách thanh toán',
+        error: errorInfo
+      };
+    }
+  }
+
+  /**
+   * ✅ ADMIN: Lấy tất cả thanh toán (có payment_url)
+   * @returns {Promise<{success: boolean, data?: array, total?: number, message: string}>}
+   */
+  async getAllPayments() {
+    try {
+      console.log('PaymentService: Get all payments (Admin)');
+      
+      const response = await apiUtils.get(API_CONFIG.ENDPOINTS.PAYMENTS.ADMIN_ALL);
+      
+      if (response.success) {
+        return {
+          success: true,
+          data: response.data,
+          total: response.total || 0,
+          message: 'Lấy tất cả thanh toán thành công'
+        };
+      } else {
+        throw new Error(response.message || 'Không thể lấy danh sách thanh toán');
+      }
+    } catch (error) {
+      console.error('Get all payments error:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return {
+        success: false,
+        message: errorInfo.message || 'Lỗi khi lấy tất cả thanh toán',
+        error: errorInfo
+      };
+    }
+  }
+
+  /**
+   * ⚠️ DEPRECATED: Không cần dùng vì payment_url đã có sẵn từ backend
+   * Giữ lại để tương thích với code cũ
    */
   async createVNPayPayment(userId, contractId, amount) {
+    console.warn('⚠️ createVNPayPayment is deprecated. Use payment_url from getUserPayments() instead.');
     try {
       console.log('PaymentService: Create VNPay payment', { userId, contractId, amount });
       
@@ -375,6 +439,141 @@ class PaymentService {
       return {
         success: false,
         message: errorInfo.message || 'Lỗi khi đối soát giao dịch',
+        error: errorInfo
+      };
+    }
+  }
+
+  /* =============================================================
+     ADMIN METHODS - Quản lý thanh toán
+     ============================================================= */
+
+  /**
+   * ✅ ADMIN: Xuất hóa đơn tháng cho driver (Tạo payment với payment_url)
+   * Backend sẽ tự động tính toán và tạo payment với status 'in_progress'
+   * @param {string} userId - ID người dùng
+   * @param {number} contractId - ID hợp đồng
+   * @param {number} year - Năm
+   * @param {number} month - Tháng
+   * @returns {Promise<{success: boolean, billInfo?: object, paymentUrl?: string, message: string}>}
+   */
+  async adminGenerateMonthlyInvoice(userId, contractId, year, month) {
+    try {
+      console.log('PaymentService: Admin generate monthly invoice', { userId, contractId, year, month });
+      
+      const params = new URLSearchParams({
+        userId: userId,
+        contractId: contractId.toString(),
+        year: year.toString(),
+        month: month.toString()
+      });
+
+      // ✅ Gọi API backend /payment/pay-monthly (Admin xuất hóa đơn)
+      const response = await apiUtils.get(
+        `${API_CONFIG.ENDPOINTS.PAYMENTS.PAY_MONTHLY}?${params.toString()}`
+      );
+      
+      if (response.success) {
+        return {
+          success: true,
+          billInfo: response, // Chứa totalFee, totalKm, depositFee, vnpayUrl
+          paymentUrl: response.vnpayUrl || response.payUrl,
+          message: 'Xuất hóa đơn thành công'
+        };
+      } else {
+        throw new Error(response.message || 'Không thể xuất hóa đơn');
+      }
+    } catch (error) {
+      console.error('Admin generate invoice error:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return {
+        success: false,
+        message: errorInfo.message || 'Lỗi khi xuất hóa đơn',
+        error: errorInfo
+      };
+    }
+  }
+
+  /**
+   * ✅ ADMIN: Lấy tất cả payments trong hệ thống
+   * @returns {Promise<{success: boolean, data?: array, total?: number, message: string}>}
+   */
+  async adminGetAllPayments() {
+    return this.getAllPayments();
+  }
+
+  /**
+   * ✅ ADMIN/STAFF: Lấy danh sách payments của 1 user cụ thể
+   * @param {string} userId - ID người dùng
+   * @returns {Promise<{success: boolean, data?: array, total?: number, message: string}>}
+   */
+  async adminGetUserPayments(userId) {
+    return this.getUserPayments(userId);
+  }
+
+  /**
+   * ✅ ADMIN: Lấy danh sách users và thông tin thanh toán
+   * Note: Backend cần có API riêng để lấy list users với payment summary
+   * Tạm thời sử dụng getAllPayments và group by user
+   * @returns {Promise<{success: boolean, data?: array, message: string}>}
+   */
+  async adminGetUsersWithPaymentSummary() {
+    try {
+      console.log('PaymentService: Get users with payment summary');
+      
+      // ✅ TODO: Backend cần tạo API /payment/admin/users-summary
+      // Tạm thời lấy all payments và group by user
+      const paymentsResult = await this.getAllPayments();
+      
+      if (!paymentsResult.success) {
+        throw new Error(paymentsResult.message);
+      }
+
+      // Group payments by user
+      const paymentsByUser = {};
+      (paymentsResult.data || []).forEach(payment => {
+        const userId = payment.userId;
+        if (!paymentsByUser[userId]) {
+          paymentsByUser[userId] = {
+            userId: userId,
+            payments: [],
+            totalPaid: 0,
+            unpaidBills: 0,
+            lastPaymentDate: null
+          };
+        }
+        
+        paymentsByUser[userId].payments.push(payment);
+        
+        if (payment.status?.toLowerCase() === 'success') {
+          paymentsByUser[userId].totalPaid += payment.amount || 0;
+          
+          const payDate = payment.vnpPayDate || payment.createdAt;
+          if (payDate && (!paymentsByUser[userId].lastPaymentDate || 
+              new Date(payDate) > new Date(paymentsByUser[userId].lastPaymentDate))) {
+            paymentsByUser[userId].lastPaymentDate = payDate;
+          }
+        }
+        
+        if (payment.status?.toLowerCase() === 'in_progress') {
+          paymentsByUser[userId].unpaidBills += 1;
+        }
+      });
+
+      const usersData = Object.values(paymentsByUser);
+
+      return {
+        success: true,
+        data: usersData,
+        total: usersData.length,
+        message: 'Lấy danh sách users thành công'
+      };
+    } catch (error) {
+      console.error('Get users with payment summary error:', error);
+      const errorInfo = apiUtils.handleError(error);
+      return {
+        success: false,
+        message: errorInfo.message || 'Lỗi khi lấy danh sách users',
         error: errorInfo
       };
     }

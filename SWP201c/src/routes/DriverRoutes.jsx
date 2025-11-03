@@ -16,6 +16,7 @@ import DriverPayments from '../pages/Driver/Payments';
 import DriverSupport from '../pages/Driver/Support';
 import DriverSettings from '../pages/Driver/Settings';
 import MonthlyBilling from '../pages/Driver/Payments/MonthlyBilling';
+import PaymentReturn from '../pages/Driver/Payments/PaymentReturn';
 import PaymentResult from '../pages/Driver/Payments/components/PaymentResult';
 
 const DriverRoutes = () => {
@@ -30,6 +31,7 @@ const DriverRoutes = () => {
       <Route path="/swap-battery" element={<DriverSwapBattery />} />
       <Route path="/payments" element={<DriverPayments />} />
       <Route path="/payments/monthly-billing" element={<MonthlyBilling />} />
+      <Route path="/payments/return" element={<PaymentReturn />} /> {/* VNPay return URL */}
       <Route path="/payments/result" element={<PaymentResult />} />
       <Route path="/support" element={<DriverSupport />} />
       <Route path="/settings" element={<DriverSettings />} />
