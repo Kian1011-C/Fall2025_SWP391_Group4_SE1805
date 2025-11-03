@@ -31,7 +31,7 @@ export const useStationsData = () => {
       console.log('📈 GET /api/stations/stats response:', statsResult);
       
       if (stationsResult.success) {
-        const stationsData = stationsResult.data || [];
+        let stationsData = stationsResult.data || [];
         console.log('✅ Stations loaded:', stationsData.length);
         console.log('🔍 First station data structure:', stationsData[0]);
         console.log('🔍 All stations status values:', stationsData.map(s => ({ 
@@ -44,6 +44,38 @@ export const useStationsData = () => {
           latitude: s.latitude,
           longitude: s.longitude
         })));
+        // 1) Chuẩn hóa tọa độ: nếu thiếu lat/lng → geocode từ địa chỉ (Nominatim)
+        const geocodeCacheKey = 'stationGeocodeCache';
+        const cache = JSON.parse(localStorage.getItem(geocodeCacheKey) || '{}');
+
+        const geocodeAddress = async (address) => {
+          if (!address) return null;
+          if (cache[address]) return cache[address];
+          try {
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
+            const res = await fetch(url, { headers: { 'Accept-Language': 'vi' } });
+            const data = await res.json();
+            const first = Array.isArray(data) && data.length > 0 ? data[0] : null;
+            if (!first) return null;
+            const coords = { lat: parseFloat(first.lat), lng: parseFloat(first.lon) };
+            cache[address] = coords;
+            localStorage.setItem(geocodeCacheKey, JSON.stringify(cache));
+            return coords;
+          } catch (e) {
+            console.warn('⚠️ Geocode failed for', address, e);
+            return null;
+          }
+        };
+
+        const withCoords = await Promise.all(stationsData.map(async (s) => {
+          const lat = s.latitude ?? s.lat ?? s.location?.lat;
+          const lng = s.longitude ?? s.lng ?? s.location?.lng;
+          if (lat && lng) return { ...s, latitude: Number(lat), longitude: Number(lng) };
+          const coords = await geocodeAddress(s.address);
+          return coords ? { ...s, latitude: coords.lat, longitude: coords.lng } : s;
+        }));
+
+        stationsData = withCoords;
         setStations(stationsData);
       } else {
         setError(stationsResult.message || 'Không thể tải dữ liệu trạm');

@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import { createSupportRequest } from '../utils';
+import supportService from '../../../../assets/js/services/supportService.js';
 
 export const useSupportSubmit = () => {
   const [loading, setLoading] = useState(false);
@@ -14,14 +15,16 @@ export const useSupportSubmit = () => {
       const requestData = createSupportRequest(formData, userId);
       
       console.log('📝 Submitting support ticket:', requestData);
-      
-      // Note: Backend cần API POST /api/support/tickets
-      // const response = await supportService.createTicket(requestData);
-      
-      // Mock success for now
-      alert('Backend cần implement API POST /api/support/tickets để gửi yêu cầu hỗ trợ');
-      
-      return { success: true };
+      const response = await supportService.createIssue({
+        userId: requestData.userId,
+        stationId: requestData.stationId || 0,
+        description: requestData.message || requestData.description
+      });
+
+      if (response.success) {
+        return { success: true };
+      }
+      throw new Error(response.message || 'Gửi yêu cầu thất bại');
     } catch (err) {
       console.error('❌ Error submitting ticket:', err);
       alert('Có lỗi xảy ra: ' + err.message);

@@ -88,7 +88,7 @@ const ContractCard = ({ contract, onClick }) => {
             fontSize: '0.875rem',
             color: '#666'
           }}>
-            {contract.swapLimit} lần đổi
+            {contract.swapLimit} KM
           </p>
         </div>
       </div>
@@ -149,7 +149,7 @@ const ContractCard = ({ contract, onClick }) => {
             fontWeight: '600',
             color: usageColor
           }}>
-            {contract.usedSwaps}/{contract.swapLimit} lần ({usagePercentage}%)
+            {contract.usedSwaps}/{contract.swapLimit} KM
           </p>
         </div>
         

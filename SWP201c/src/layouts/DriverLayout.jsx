@@ -76,27 +76,7 @@ const DriverLayout = () => {
 
       {/* Main Content */}
       <main className="driver-main">
-        <div className="driver-topbar">
-          <h2 className="driver-page-title">
-            {(() => {
-              const p = location.pathname;
-              if (p.includes('/driver/dashboard') || p === '/driver') return 'Dashboard';
-              if (p.includes('/driver/swap-battery')) return 'Đổi pin';
-              if (p.includes('/driver/stations-map')) return 'Bản đồ trạm';
-              if (p.includes('/driver/vehicles')) return 'Xe của tôi';
-              if (p.includes('/driver/subscriptions')) return 'Gói dịch vụ';
-              if (p.includes('/driver/contracts')) return 'Hợp đồng';
-              if (p.includes('/driver/payments')) return 'Thanh toán';
-              if (p.includes('/driver/support')) return 'Hỗ trợ';
-              if (p.includes('/driver/profile')) return 'Cài đặt';
-              return 'Driver';
-            })()}
-          </h2>
-          <div className="driver-topbar-actions">
-            {/* placeholder action button similar to screenshot */}
-            <button className="btn btn-primary" onClick={() => navigate('/driver/vehicles')}>Đổi xe</button>
-          </div>
-        </div>
+        {/* topbar removed per request */}
         <div className="driver-content">
           <Outlet />
         </div>

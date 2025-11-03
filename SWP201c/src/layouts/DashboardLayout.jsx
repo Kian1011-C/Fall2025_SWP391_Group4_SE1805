@@ -3,7 +3,7 @@ import React from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 
-function DashboardLayout({ children, role = 'driver' }) {
+function DashboardLayout({ children, role = 'driver', title = null }) {
   return (
     <div style={{
       display: 'flex',
@@ -22,7 +22,7 @@ function DashboardLayout({ children, role = 'driver' }) {
         flexDirection: 'column',
         willChange: 'contents'
       }}>
-        <Header title="Dashboard" />
+        {title ? <Header title={title} /> : null}
 
         {/* Content Area */}
         <div style={{

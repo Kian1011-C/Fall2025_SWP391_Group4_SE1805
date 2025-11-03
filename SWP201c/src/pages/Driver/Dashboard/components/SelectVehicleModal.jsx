@@ -4,7 +4,7 @@ import React from 'react';
 const SelectVehicleModal = ({ vehicles = [], onSelect, vehicleBatteryInfo = {} }) => {
   return (
     <div
-      className="modal-overlay"
+      className="modal-overlay scroll-follow"
       style={{
         backdropFilter: 'blur(2px)',
         background: 'rgba(0,0,0,0.55)'

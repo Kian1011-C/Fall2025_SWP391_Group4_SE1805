@@ -33,8 +33,17 @@ export const getUserId = (user) => {
  */
 export const processVehicles = (userVehicles) => {
   if (!userVehicles || !Array.isArray(userVehicles)) return [];
+  // Deduplicate by id or plateNumber to avoid duplicate cards
+  const seen = new Set();
+  const unique = [];
+  for (const vehicle of userVehicles) {
+    const key = `${vehicle.vehicleId || vehicle.id || ''}::${vehicle.plateNumber || vehicle.plate_number || ''}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    unique.push(vehicle);
+  }
   
-  return userVehicles.map(vehicle => {
+  return unique.map(vehicle => {
     // Lấy batteryLevel - ưu tiên từ API, không dùng 0 làm mock
     const batteryLevel = vehicle.health !== null && vehicle.health !== undefined 
       ? vehicle.health 

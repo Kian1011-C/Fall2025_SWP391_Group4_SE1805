@@ -108,14 +108,11 @@ const DriverDashboard = () => {
 
   return (
     <div className="driver-dashboard">
-      {/* Selected vehicle summary */}
-      <SelectedVehicleDisplay selectedVehicle={selectedVehicle} contracts={contracts} />
+      {/* Selected vehicle summary removed per request */}
       
       {/* Vehicle selection buttons */}
       <div style={{ marginBottom: 12 }}>
-        {vehicles && vehicles.length > 0 ? (
-          <button className="btn" onClick={() => setShowSelectModal(true)}>Chọn xe khác</button>
-        ) : (
+        {vehicles && vehicles.length > 0 ? null : (
           <div style={{
             background: 'linear-gradient(135deg, #fef3c7, #fde68a)',
             border: '1px solid #f59e0b',
@@ -152,11 +149,7 @@ const DriverDashboard = () => {
         formatCurrency={formatCurrency} 
       />
       
-      {/* Quick Actions */}
-      <QuickActions 
-        selectedVehicle={selectedVehicle}
-        vehicles={vehicles}
-      />
+      {/* Quick Actions removed per request */}
       
       {/* Vehicle Management */}
       <VehicleManagement

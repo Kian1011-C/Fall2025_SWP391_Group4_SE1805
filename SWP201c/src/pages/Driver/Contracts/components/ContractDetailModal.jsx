@@ -8,15 +8,12 @@ import {
   getStatusColor,
   getStatusLabel,
   getPaymentStatusLabel,
-  getRemainingSwaps,
-  getRemainingDays
 } from '../utils';
 
 const ContractDetailModal = ({ contract, isOpen, onClose }) => {
   if (!isOpen || !contract) return null;
 
-  const remainingSwaps = getRemainingSwaps(contract);
-  const remainingDays = getRemainingDays(contract.endDate);
+
 
   return (
     <div
@@ -197,24 +194,7 @@ const ContractDetailModal = ({ contract, isOpen, onClose }) => {
               </div>
             </div>
 
-            {remainingDays !== null && (
-              <div>
-                <p style={{
-                  fontSize: '0.875rem',
-                  color: '#666',
-                  marginBottom: '0.5rem'
-                }}>
-                  Thời gian còn lại
-                </p>
-                <p style={{
-                  fontSize: '1rem',
-                  fontWeight: '600',
-                  color: remainingDays > 7 ? '#19c37d' : '#ffa500'
-                }}>
-                  {remainingDays} ngày
-                </p>
-              </div>
-            )}
+            {/* Remaining time section removed as requested */}
 
             <div style={{
               padding: '1.5rem',
@@ -230,7 +210,7 @@ const ContractDetailModal = ({ contract, isOpen, onClose }) => {
               </p>
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(3, 1fr)',
+                gridTemplateColumns: 'repeat(2, 1fr)',
                 gap: '1rem',
                 textAlign: 'center'
               }}>
@@ -247,23 +227,7 @@ const ContractDetailModal = ({ contract, isOpen, onClose }) => {
                     fontSize: '0.75rem',
                     color: '#666'
                   }}>
-                    Đã dùng
-                  </p>
-                </div>
-                <div>
-                  <p style={{
-                    fontSize: '1.5rem',
-                    fontWeight: '700',
-                    color: '#6ab7ff',
-                    marginBottom: '0.25rem'
-                  }}>
-                    {remainingSwaps}
-                  </p>
-                  <p style={{
-                    fontSize: '0.75rem',
-                    color: '#666'
-                  }}>
-                    Còn lại
+                    Đã đi
                   </p>
                 </div>
                 <div>
@@ -279,7 +243,7 @@ const ContractDetailModal = ({ contract, isOpen, onClose }) => {
                     fontSize: '0.75rem',
                     color: '#666'
                   }}>
-                    Tổng số
+                    Km
                   </p>
                 </div>
               </div>

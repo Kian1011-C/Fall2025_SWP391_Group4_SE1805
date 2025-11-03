@@ -50,6 +50,9 @@ const SelectedVehicleDisplay = ({ selectedVehicle, contracts }) => {
           <div style={{ color: '#19c37d', fontSize: '1.1rem', fontWeight: '600' }}>
             {selectedVehicle.plateNumber}
           </div>
+          <div style={{ color: '#93C5FD', fontSize: '0.95rem', marginTop: '4px' }}>
+            ID pin: {selectedVehicle.batteryId || selectedVehicle.battery_id || selectedVehicle.currentBatteryId || selectedVehicle.current_battery_id || selectedVehicle.batteryCode || selectedVehicle.battery_code || 'N/A'}
+          </div>
         </div>
         <div style={{ textAlign: 'right' }}>
           <div style={{ color: '#B0B0B0', fontSize: '0.9rem', marginBottom: '5px' }}>
