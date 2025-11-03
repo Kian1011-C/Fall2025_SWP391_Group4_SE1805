@@ -15,10 +15,13 @@ export const useSupportSubmit = () => {
       const requestData = createSupportRequest(formData, userId);
       
       console.log('📝 Submitting support ticket:', requestData);
+      const priorityMap = { low: 'Low', normal: 'Normal', high: 'High', urgent: 'Urgent' };
       const response = await supportService.createIssue({
         userId: requestData.userId,
-        stationId: requestData.stationId || 0,
-        description: requestData.message || requestData.description
+        title: requestData.subject || requestData.title,
+        description: requestData.message || requestData.description,
+        priority: priorityMap[requestData.priority] || 'Normal',
+        stationId: requestData.stationId ?? null
       });
 
       if (response.success) {

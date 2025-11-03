@@ -23,6 +23,27 @@ const ContactForm = ({ formData, onFieldChange, onSubmit, loading, errors }) => 
         📧 Gửi yêu cầu hỗ trợ
       </h3>
       <form onSubmit={handleSubmit}>
+        {/* Station ID Field (optional) */}
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{ color: '#E0E0E0', display: 'block', marginBottom: '10px' }}>
+            Mã trạm (Station ID) (tuỳ chọn)
+          </label>
+          <input
+            type="number"
+            value={formData.stationId || ''}
+            onChange={(e) => onFieldChange('stationId', e.target.value)}
+            placeholder="Nhập ID trạm nếu liên quan"
+            style={{
+              width: '100%',
+              padding: '12px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              borderRadius: '8px',
+              color: '#FFFFFF',
+              fontSize: '1rem'
+            }}
+          />
+        </div>
         {/* Subject Field */}
         <div style={{ marginBottom: '20px' }}>
           <label style={{ color: '#E0E0E0', display: 'block', marginBottom: '10px' }}>
@@ -150,7 +171,8 @@ ContactForm.propTypes = {
   formData: PropTypes.shape({
     subject: PropTypes.string.isRequired,
     message: PropTypes.string.isRequired,
-    priority: PropTypes.string.isRequired
+    priority: PropTypes.string.isRequired,
+    stationId: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
   }).isRequired,
   onFieldChange: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,

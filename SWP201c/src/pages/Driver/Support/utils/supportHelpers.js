@@ -71,7 +71,7 @@ export const getContactInfo = () => [
   {
     icon: '📧',
     label: 'Email',
-    value: 'support@evbattery.vn',
+    value: 'evdriversystem@gmail.com',
     color: '#6ab7ff',
     type: 'email'
   },
@@ -88,9 +88,7 @@ export const getContactInfo = () => [
  * Get tabs configuration
  */
 export const getTabs = () => [
-  { id: 'contact', label: '📞 Liên hệ', icon: '📞' },
-  { id: 'report', label: '🐛 Báo lỗi', icon: '🐛' },
-  { id: 'faq', label: '❓ FAQ', icon: '❓' }
+  { id: 'contact', label: '📞 Liên hệ', icon: '📞' }
 ];
 
 /**
@@ -166,6 +164,7 @@ export const createSupportRequest = (formData, userId) => {
     subject: formData.subject.trim(),
     message: formData.message.trim(),
     priority: formData.priority,
+    stationId: formData.stationId ? Number(formData.stationId) : null,
     status: 'open',
     createdAt: new Date().toISOString()
   };
@@ -177,7 +176,8 @@ export const createSupportRequest = (formData, userId) => {
 export const getInitialFormData = () => ({
   subject: '',
   message: '',
-  priority: 'normal'
+  priority: 'normal',
+  stationId: ''
 });
 
 /**

@@ -109,7 +109,7 @@ export const API_CONFIG = {
     },
     // Issues/Support
     ISSUES: {
-      // Backend controller maps @RequestMapping("/issues")
+      // Nếu BE không dùng context-path và controller map ở "/issues"
       BASE: '/issues',
     },
     
