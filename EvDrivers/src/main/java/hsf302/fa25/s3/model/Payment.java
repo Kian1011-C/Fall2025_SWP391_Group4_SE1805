@@ -10,7 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Payment {
-    private int paymentId;
+    private Integer paymentId;
     private String userId;          // FK -> Users.user_id (VARCHAR(50))
     private Integer contractId;     // nullable
     private double amount;          // DECIMAL(10,2)

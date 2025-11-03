@@ -143,7 +143,7 @@ public class ContractController {
                 SELECT c.contract_id, c.vehicle_id, c.plan_id, c.start_date, c.end_date, 
                        c.status, c.contract_number, c.signed_place, c.monthly_distance, c.monthly_base_fee,
                        sp.plan_name,
-                       v.plate_number, v.model as vehicle_model,
+                       v.plate_number, v.model as vehicle_model, v.user_id,
                        u.first_name, u.last_name, u.email, u.phone
                 FROM Contracts c
                 INNER JOIN ServicePlans sp ON c.plan_id = sp.plan_id
@@ -204,6 +204,7 @@ public class ContractController {
                     contractMap.put("vehicleModel", rs.getString("vehicle_model"));
                     
                     // User info
+                    contractMap.put("userId", rs.getString("user_id"));
                     contractMap.put("firstName", rs.getString("first_name"));
                     contractMap.put("lastName", rs.getString("last_name"));
                     contractMap.put("email", rs.getString("email"));
