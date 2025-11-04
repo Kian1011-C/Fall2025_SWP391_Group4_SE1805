@@ -27,6 +27,7 @@ const Support = () => {
   const { submitTicket, loading } = useSupportSubmit();
   const [issues, setIssues] = useState([]);
   const [issuesError, setIssuesError] = useState(null);
+  const [toast, setToast] = useState(null);
 
   // Handle contact form submission
   const handleSubmit = async () => {
@@ -39,6 +40,12 @@ const Support = () => {
 
     if (result.success) {
       reset();
+      setToast({
+        type: 'success',
+        title: 'Đã gửi yêu cầu hỗ trợ',
+        message: 'Chúng tôi sẽ phản hồi sớm qua email hoặc mục Hỗ trợ.'
+      });
+      setTimeout(() => setToast(null), 3000);
     }
   };
 
@@ -128,6 +135,42 @@ const Support = () => {
           )}
         </div>
       </div>
+      {/* Toast notification */}
+      {toast && (
+        <div style={{
+          position: 'fixed',
+          right: '24px',
+          top: '24px',
+          zIndex: 1000,
+          background: toast.type === 'success' ? 'linear-gradient(135deg, #10b981, #059669)' : 'linear-gradient(135deg, #ef4444, #b91c1c)',
+          color: '#fff',
+          padding: '14px 16px',
+          borderRadius: '12px',
+          boxShadow: '0 10px 30px rgba(0,0,0,.25)',
+          minWidth: '280px',
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: '10px',
+          animation: 'fadeInDown .25s ease both'
+        }}>
+          <div style={{
+            width: '28px', height: '28px', borderRadius: '8px',
+            background: 'rgba(255,255,255,.2)', display: 'grid', placeItems: 'center'
+          }}>
+            {toast.type === 'success' ? '✓' : '!'}
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 700 }}>{toast.title}</div>
+            {toast.message && (
+              <div style={{ opacity: .95, marginTop: 4, fontSize: '0.95rem' }}>{toast.message}</div>
+            )}
+          </div>
+          <button onClick={() => setToast(null)} style={{
+            appearance: 'none', border: 0, background: 'transparent', color: '#fff',
+            fontWeight: 700, cursor: 'pointer'
+          }}>×</button>
+        </div>
+      )}
     </DashboardLayout>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useAdminUsersData } from './hooks/useAdminUsersData';
 import UserRow from './components/UserRow';
 import UserFormModal from './components/UserFormModal'; // <-- Import Modal
@@ -73,6 +73,19 @@ const AdminUsers = () => {
     }
   };
 
+  // Pagination 8 users per page
+  const itemsPerPage = 8;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const totalPages = useMemo(() => {
+    return Math.max(1, Math.ceil((users || []).length / itemsPerPage));
+  }, [users]);
+
+  const currentUsers = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return (users || []).slice(start, start + itemsPerPage);
+  }, [users, currentPage]);
+
   const renderContent = () => {
     if (isLoading) return <p style={{ color: '#9ca3af', textAlign: 'center' }}>Đang tải danh sách người dùng...</p>;
     if (error) return ( <div style={{ color: '#ef4444', textAlign: 'center' }}><p>Lỗi: {error}</p><button onClick={refetch}>Thử lại</button></div> );
@@ -93,9 +106,38 @@ const AdminUsers = () => {
           </thead>
           <tbody>
             {/* Truyền handleOpenEditModal và handleDeleteUser xuống cho các nút Sửa và Xóa */}
-            {users.map(user => <UserRow key={user.userId} user={user} onEdit={handleOpenEditModal} onDelete={handleDeleteUser} />)}
+            {currentUsers.map(user => (
+              <UserRow key={user.userId} user={user} onEdit={handleOpenEditModal} onDelete={handleDeleteUser} />
+            ))}
           </tbody>
         </table>
+
+        {/* Pagination controls */}
+        {users.length > 0 && (
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', padding: '20px 0' }}>
+            <button
+              style={{ minWidth: 44, height: 44, padding: '0 14px', borderRadius: 12, border: '1px solid #4b5563', background: '#fff', color: '#111827', fontWeight: 700, cursor: currentPage===1 ? 'not-allowed' : 'pointer', opacity: currentPage===1 ? .5 : 1 }}
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+            >«</button>
+            {Array.from({ length: totalPages }).map((_, idx) => {
+              const page = idx + 1;
+              const isActive = page === currentPage;
+              return (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  style={{ minWidth: 44, height: 44, padding: '0 14px', borderRadius: 12, border: '1px solid #4b5563', background: isActive ? '#0b74e5' : '#fff', color: isActive ? '#fff' : '#111827', fontWeight: 700 }}
+                >{page}</button>
+              );
+            })}
+            <button
+              style={{ minWidth: 44, height: 44, padding: '0 14px', borderRadius: 12, border: '1px solid #4b5563', background: '#fff', color: '#111827', fontWeight: 700, cursor: currentPage===totalPages ? 'not-allowed' : 'pointer', opacity: currentPage===totalPages ? .5 : 1 }}
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+            >»</button>
+          </div>
+        )}
       </div>
     );
   };

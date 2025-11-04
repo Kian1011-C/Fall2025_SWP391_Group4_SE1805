@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import BatteryStockView from './components/BatteryStockView';
 import '../../../assets/css/StaffBatteryManagement.css';
 
