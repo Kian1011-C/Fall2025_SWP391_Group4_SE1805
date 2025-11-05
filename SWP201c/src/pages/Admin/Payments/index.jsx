@@ -10,7 +10,6 @@ const Payments = () => {
   const [selectedDriver, setSelectedDriver] = useState(null);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
-  const [activeTab, setActiveTab] = useState('need_invoice'); // 'need_invoice' | 'waiting_payment' | 'history'
 
   const handleGenerateInvoice = (driver) => {
     setSelectedDriver(driver);
@@ -26,54 +25,18 @@ const Payments = () => {
     refreshData();
   };
 
-  // Filter drivers based on active tab
-  const filteredDrivers = useMemo(() => {
-    if (activeTab === 'need_invoice') {
-      // Tab 1: Hiển thị contracts CHƯA có payment pending (unpaidBills === 0)
-      return drivers.filter(d => d.unpaidBills === 0);
-    } else if (activeTab === 'waiting_payment') {
-      // Tab 2: Hiển thị contracts ĐÃ có payment pending (unpaidBills > 0)
-      return drivers.filter(d => d.unpaidBills > 0);
-    } else {
-      // Tab 3: Lịch sử - Gộp theo userId (1 user có thể có nhiều contracts)
-      const userMap = new Map();
-      drivers.forEach(driver => {
-        if (!userMap.has(driver.userId)) {
-          userMap.set(driver.userId, {
-            ...driver,
-            id: driver.userId, // Dùng userId làm key
-            contracts: [driver.contractId], // Danh sách contractIds
-            totalPaid: driver.totalPaid,
-            unpaidBills: driver.unpaidBills
-          });
-        } else {
-          // Gộp thông tin từ nhiều contracts của cùng 1 user
-          const existing = userMap.get(driver.userId);
-          existing.contracts.push(driver.contractId);
-          existing.totalPaid += driver.totalPaid;
-          existing.unpaidBills += driver.unpaidBills;
-        }
-      });
-      return Array.from(userMap.values());
-    }
-  }, [drivers, activeTab]);
-
   // Pagination 8 drivers per page
   const itemsPerPage = 8;
   const [currentPage, setCurrentPage] = useState(1);
-  const totalDrivers = filteredDrivers.length;
+  const totalDrivers = drivers.length;
   const totalPages = Math.max(1, Math.ceil(totalDrivers / itemsPerPage));
   const currentDrivers = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
-    return filteredDrivers.slice(start, start + itemsPerPage);
-  }, [filteredDrivers, currentPage]);
-  
-  // Stats
+    return drivers.slice(start, start + itemsPerPage);
+  }, [drivers, currentPage]);
   const activeContracts = drivers.filter(d => d.contractStatus === 'active').length;
-  const needInvoice = drivers.filter(d => d.unpaidBills === 0).length;
-  const waitingPayment = drivers.filter(d => d.unpaidBills > 0).length;
+  const unpaidBills = drivers.reduce((sum, d) => sum + d.unpaidBills, 0);
   const totalRevenue = drivers.reduce((sum, d) => sum + d.totalPaid, 0);
-  const totalUsers = new Set(drivers.map(d => d.userId)).size; // Số user unique
 
   return (
     <div style={{ padding: '32px', backgroundColor: '#f9fafb', minHeight: '100vh' }}>
@@ -112,45 +75,14 @@ const Payments = () => {
               justifyContent: 'center',
               fontSize: '24px'
             }}>
-              �
+              👥
             </div>
             <div>
               <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '4px' }}>
-                Cần xuất hóa đơn
+                Tổng khách hàng
               </div>
-              <div style={{ fontSize: '24px', fontWeight: '700', color: '#3b82f6' }}>
-                {needInvoice}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div style={{
-          backgroundColor: 'white',
-          padding: '24px',
-          borderRadius: '12px',
-          border: '1px solid #e5e7eb',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{
-              width: '48px',
-              height: '48px',
-              borderRadius: '12px',
-              backgroundColor: '#fef3c7',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '24px'
-            }}>
-              ⏳
-            </div>
-            <div>
-              <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '4px' }}>
-                Đợi thanh toán
-              </div>
-              <div style={{ fontSize: '24px', fontWeight: '700', color: '#f59e0b' }}>
-                {waitingPayment}
+              <div style={{ fontSize: '24px', fontWeight: '700', color: '#111827' }}>
+                {totalDrivers}
               </div>
             </div>
           </div>
@@ -174,14 +106,45 @@ const Payments = () => {
               justifyContent: 'center',
               fontSize: '24px'
             }}>
-              👥
+              ✓
             </div>
             <div>
               <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '4px' }}>
-                Tổng khách hàng
+                Hợp đồng hoạt động
               </div>
               <div style={{ fontSize: '24px', fontWeight: '700', color: '#10b981' }}>
-                {totalUsers}
+                {activeContracts}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style={{
+          backgroundColor: 'white',
+          padding: '24px',
+          borderRadius: '12px',
+          border: '1px solid #e5e7eb',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{
+              width: '48px',
+              height: '48px',
+              borderRadius: '12px',
+              backgroundColor: '#fee2e2',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '24px'
+            }}>
+              ⚠️
+            </div>
+            <div>
+              <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '4px' }}>
+                Hóa đơn chưa thanh toán
+              </div>
+              <div style={{ fontSize: '24px', fontWeight: '700', color: '#ef4444' }}>
+                {unpaidBills}
               </div>
             </div>
           </div>
@@ -194,124 +157,47 @@ const Payments = () => {
         padding: '20px',
         borderRadius: '12px',
         border: '1px solid #e5e7eb',
-        marginBottom: '20px'
+        marginBottom: '20px',
+        display: 'flex',
+        gap: '16px',
+        alignItems: 'center',
+        flexWrap: 'wrap'
       }}>
-        {/* Tabs */}
-        <div style={{
-          display: 'flex',
-          gap: '8px',
-          marginBottom: '20px',
-          borderBottom: '2px solid #f3f4f6',
-          paddingBottom: '12px'
-        }}>
-          <button
-            onClick={() => {
-              setActiveTab('need_invoice');
-              setCurrentPage(1);
-            }}
+        <div style={{ flex: 1, minWidth: '250px' }}>
+          <input
+            type="text"
+            placeholder="🔍 Tìm kiếm khách hàng (tên, email, SĐT)..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             style={{
-              padding: '10px 20px',
-              backgroundColor: activeTab === 'need_invoice' ? '#3b82f6' : 'transparent',
-              color: activeTab === 'need_invoice' ? 'white' : '#6b7280',
-              border: 'none',
+              width: '100%',
+              padding: '12px 16px',
+              border: '1px solid #d1d5db',
               borderRadius: '8px',
               fontSize: '14px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
+              outline: 'none'
             }}
-          >
-            📝 Chờ xuất hóa đơn ({needInvoice})
-          </button>
-          
-          <button
-            onClick={() => {
-              setActiveTab('waiting_payment');
-              setCurrentPage(1);
-            }}
-            style={{
-              padding: '10px 20px',
-              backgroundColor: activeTab === 'waiting_payment' ? '#f59e0b' : 'transparent',
-              color: activeTab === 'waiting_payment' ? 'white' : '#6b7280',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '14px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}
-          >
-            ⏳ Đợi thanh toán ({waitingPayment})
-          </button>
-          
-          <button
-            onClick={() => {
-              setActiveTab('history');
-              setCurrentPage(1);
-            }}
-            style={{
-              padding: '10px 20px',
-              backgroundColor: activeTab === 'history' ? '#10b981' : 'transparent',
-              color: activeTab === 'history' ? 'white' : '#6b7280',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '14px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}
-          >
-            📋 Lịch sử thanh toán ({totalUsers})
-          </button>
+          />
         </div>
-
-        {/* Search */}
-        <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, minWidth: '250px' }}>
-            <input
-              type="text"
-              placeholder="🔍 Tìm kiếm khách hàng (tên, email, SĐT)..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '12px 16px',
-                border: '1px solid #d1d5db',
-                borderRadius: '8px',
-                fontSize: '14px',
-                outline: 'none'
-              }}
-            />
-          </div>
-          
-          <button
-            onClick={refreshData}
-            style={{
-              padding: '12px 20px',
-              backgroundColor: '#3b82f6',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '14px',
-              fontWeight: '500',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}
-          >
-            🔄 Làm mới
-          </button>
-        </div>
+        
+        <button
+          onClick={refreshData}
+          style={{
+            padding: '12px 20px',
+            backgroundColor: '#3b82f6',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '14px',
+            fontWeight: '500',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}
+        >
+          🔄 Làm mới
+        </button>
       </div>
 
       {/* Drivers Table */}
@@ -330,11 +216,9 @@ const Payments = () => {
           <div style={{ padding: '60px', textAlign: 'center', color: '#ef4444' }}>
             ⚠️ {error}
           </div>
-        ) : filteredDrivers.length === 0 ? (
+        ) : drivers.length === 0 ? (
           <div style={{ padding: '60px', textAlign: 'center', color: '#6b7280' }}>
-            {activeTab === 'need_invoice' && 'Không có hợp đồng nào cần xuất hóa đơn'}
-            {activeTab === 'waiting_payment' && 'Không có hóa đơn nào đang chờ thanh toán'}
-            {activeTab === 'history' && 'Không có dữ liệu lịch sử thanh toán'}
+            Không tìm thấy khách hàng nào
           </div>
         ) : (
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -395,20 +279,17 @@ const Payments = () => {
                 }}>
                   Đã thanh toán
                 </th>
-                {/* Chỉ hiển thị cột "Chưa TT" ở tab "Đợi thanh toán" */}
-                {activeTab === 'waiting_payment' && (
-                  <th style={{
-                    padding: '16px',
-                    textAlign: 'center',
-                    fontSize: '13px',
-                    fontWeight: '600',
-                    color: '#374151',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em'
-                  }}>
-                    Chưa TT
-                  </th>
-                )}
+                <th style={{
+                  padding: '16px',
+                  textAlign: 'center',
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  color: '#374151',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}>
+                  Chưa TT
+                </th>
                 <th style={{
                   padding: '16px',
                   textAlign: 'right',
@@ -429,7 +310,6 @@ const Payments = () => {
                   driver={driver}
                   onGenerateInvoice={handleGenerateInvoice}
                   onViewHistory={handleViewHistory}
-                  activeTab={activeTab}
                 />
               ))}
             </tbody>
