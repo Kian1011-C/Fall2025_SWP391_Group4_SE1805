@@ -31,7 +31,12 @@ const PaymentHistoryModal = ({ driver, onClose }) => {
             vnpBankCode: payment.vnpBankCode,
             vnpCardType: payment.vnpCardType,
             vnpOrderInfo: payment.vnpOrderInfo,
-            createdAt: payment.createdAt
+            createdAt: payment.createdAt,
+            // ✅ Thêm các field về usage
+            totalKm: payment.totalKm || 0,
+            overageFee: payment.overageFee || 0,
+            baseDistance: payment.baseDistance || 0,
+            overageKm: payment.overageKm || 0
           }));
           
           setHistory(mappedHistory);
@@ -301,22 +306,29 @@ const PaymentHistoryModal = ({ driver, onClose }) => {
                         </div>
                         
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', fontSize: '13px', color: '#6b7280' }}>
-                          <div>
-                            <span>Ngày TT: </span>
-                            <span style={{ fontWeight: '500', color: '#374151' }}>{formatDate(item.date)}</span>
-                          </div>
+                          {/* Chỉ hiển thị ngày thanh toán nếu đã thanh toán */}
+                          {item.status === 'paid' && (
+                            <div>
+                              <span>Ngày TT: </span>
+                              <span style={{ fontWeight: '500', color: '#374151' }}>{formatDate(item.date)}</span>
+                            </div>
+                          )}
                           <div>
                             <span>Phương thức: </span>
-                            <span style={{ fontWeight: '500', color: '#374151' }}>{item.method || '-'}</span>
+                            <span style={{ fontWeight: '500', color: '#374151' }}>{item.method || 'N/A'}</span>
                           </div>
-                          <div>
-                            <span>Quãng đường: </span>
-                            <span style={{ fontWeight: '500', color: '#374151' }}>{item.totalKm} km</span>
-                          </div>
-                          <div>
-                            <span>Phí vượt: </span>
-                            <span style={{ fontWeight: '500', color: '#f59e0b' }}>{formatCurrency(item.overageFee)}</span>
-                          </div>
+                          {item.totalKm > 0 && (
+                            <div>
+                              <span>Quãng đường: </span>
+                              <span style={{ fontWeight: '600', color: '#374151' }}>{item.totalKm} km</span>
+                            </div>
+                          )}
+                          {item.overageFee > 0 && (
+                            <div>
+                              <span>Phí vượt: </span>
+                              <span style={{ fontWeight: '600', color: '#dc2626' }}>{formatCurrency(item.overageFee)}</span>
+                            </div>
+                          )}
                         </div>
                         
                         {item.transactionRef && (

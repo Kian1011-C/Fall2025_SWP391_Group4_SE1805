@@ -1,5 +1,5 @@
 // Staff Payments Management - index.jsx (Read Only)
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { usePaymentsData } from './hooks/usePaymentsData';
 import DriverRow from './components/DriverRow';
 import PaymentHistoryModal from './components/PaymentHistoryModal';
@@ -15,7 +15,15 @@ const Payments = () => {
     setShowHistoryModal(true);
   };
 
+  // Pagination 8 drivers per page
+  const itemsPerPage = 8;
+  const [currentPage, setCurrentPage] = useState(1);
   const totalDrivers = drivers.length;
+  const totalPages = Math.max(1, Math.ceil(totalDrivers / itemsPerPage));
+  const currentDrivers = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return drivers.slice(start, start + itemsPerPage);
+  }, [drivers, currentPage]);
   const activeContracts = drivers.filter(d => d.contractStatus === 'active').length;
   const unpaidBills = drivers.reduce((sum, d) => sum + d.unpaidBills, 0);
   const totalRevenue = drivers.reduce((sum, d) => sum + d.totalPaid, 0);
@@ -286,7 +294,7 @@ const Payments = () => {
               </tr>
             </thead>
             <tbody>
-              {drivers.map(driver => (
+              {currentDrivers.map(driver => (
                 <DriverRow
                   key={driver.id}
                   driver={driver}
@@ -297,6 +305,33 @@ const Payments = () => {
           </table>
         )}
       </div>
+
+      {/* Pagination */}
+      {totalDrivers > 0 && (
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', padding: '20px 0' }}>
+          <button
+            style={{ minWidth: 44, height: 44, padding: '0 14px', borderRadius: 12, border: '1px solid #d1d5db', background: '#fff', fontWeight: 700, cursor: currentPage===1 ? 'not-allowed' : 'pointer', opacity: currentPage===1 ? .5 : 1 }}
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+          >«</button>
+          {Array.from({ length: totalPages }).map((_, idx) => {
+            const page = idx + 1;
+            const isActive = page === currentPage;
+            return (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                style={{ minWidth: 44, height: 44, padding: '0 14px', borderRadius: 12, border: '1px solid #d1d5db', background: isActive ? '#0b74e5' : '#fff', color: isActive ? '#fff' : '#111827', fontWeight: 700 }}
+              >{page}</button>
+            );
+          })}
+          <button
+            style={{ minWidth: 44, height: 44, padding: '0 14px', borderRadius: 12, border: '1px solid #d1d5db', background: '#fff', fontWeight: 700, cursor: currentPage===totalPages ? 'not-allowed' : 'pointer', opacity: currentPage===totalPages ? .5 : 1 }}
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+          >»</button>
+        </div>
+      )}
 
       {/* Modal - Chỉ có PaymentHistory (Staff read-only) */}
       {showHistoryModal && selectedDriver && (

@@ -103,41 +103,7 @@ export const ProfileStats = ({ user }) => {
         </div>
       </div>
 
-      {/* Profile Completion */}
-      <div>
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between',
-          marginBottom: '10px'
-        }}>
-          <span style={{ color: '#B0B0B0', fontSize: '0.9rem' }}>
-            Hoàn thiện hồ sơ
-          </span>
-          <span style={{ 
-            color: completion === 100 ? '#19c37d' : '#F59E0B',
-            fontWeight: '600'
-          }}>
-            {completion}%
-          </span>
-        </div>
-        <div style={{
-          width: '100%',
-          height: '8px',
-          background: 'rgba(255, 255, 255, 0.1)',
-          borderRadius: '4px',
-          overflow: 'hidden'
-        }}>
-          <div style={{
-            width: `${completion}%`,
-            height: '100%',
-            background: completion === 100 
-              ? 'linear-gradient(90deg, #19c37d, #15a36a)'
-              : 'linear-gradient(90deg, #F59E0B, #D97706)',
-            borderRadius: '4px',
-            transition: 'width 0.5s ease'
-          }} />
-        </div>
-      </div>
+      {/* Profile Completion removed per request */}
     </div>
   );
 };

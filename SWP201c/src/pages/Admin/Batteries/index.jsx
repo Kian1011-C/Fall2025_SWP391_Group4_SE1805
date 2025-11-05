@@ -80,10 +80,19 @@ const AdminBatteries = () => {
       alert('❌ Lỗi: ' + response.message);
       console.error("Lỗi khi xóa:", response.message);
     }
-  };
+};
 
-  // Render Loading State
-  if (isLoading) {
+// Pagination 8 per page (declare before any early returns)
+const itemsPerPage = 8;
+const [currentPage, setCurrentPage] = useState(1);
+const totalPages = Math.max(1, Math.ceil((batteries || []).length / itemsPerPage));
+const currentBatteries = useMemo(() => {
+  const start = (currentPage - 1) * itemsPerPage;
+  return (batteries || []).slice(start, start + itemsPerPage);
+}, [batteries, currentPage]);
+
+// Render Loading State
+if (isLoading) {
     return (
       <div className="admin-battery-container">
         <div className="admin-battery-loading">
@@ -242,7 +251,7 @@ const AdminBatteries = () => {
             </tr>
           </thead>
           <tbody>
-            {batteries.map(bat => (
+            {currentBatteries.map(bat => (
               <BatteryRow 
                 key={bat.batteryId} 
                 battery={bat} 
@@ -253,6 +262,40 @@ const AdminBatteries = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination */}
+      {batteries.length > 0 && (
+        <div className="pagination">
+          <button
+            className={`page-btn prev ${currentPage === 1 ? 'is-disabled' : ''}`}
+            aria-disabled={currentPage === 1}
+            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+          >
+            «
+          </button>
+          {Array.from({ length: totalPages }).map((_, idx) => {
+            const page = idx + 1;
+            const isActive = page === currentPage;
+            return (
+              <button
+                key={page}
+                className={`page-btn ${isActive ? 'is-active' : ''}`}
+                aria-current={isActive ? 'page' : undefined}
+                onClick={() => setCurrentPage(page)}
+              >
+                {page}
+              </button>
+            );
+          })}
+          <button
+            className={`page-btn next ${currentPage === totalPages ? 'is-disabled' : ''}`}
+            aria-disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+          >
+            »
+          </button>
+        </div>
+      )}
 
       {/* Modal */}
       <BatteryFormModal 

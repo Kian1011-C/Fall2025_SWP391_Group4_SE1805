@@ -24,7 +24,7 @@ const PlanCard = ({ plan, index, isPopular, onSubscribe, loading }) => {
         background: 'rgba(26, 32, 44, 0.8)',
         borderRadius: '25px',
         padding: isPopular ? '40px 30px' : '35px 30px',
-        border: isPopular ? `2px solid ${planColor}` : '1px solid rgba(255, 255, 255, 0.1)',
+        border: 'none',
         backdropFilter: 'blur(10px)',
         position: 'relative',
         transform: isPopular ? 'scale(1.05)' : 'scale(1)',
@@ -32,25 +32,6 @@ const PlanCard = ({ plan, index, isPopular, onSubscribe, loading }) => {
         boxShadow: isPopular ? `0 20px 60px ${planColor}30` : 'none'
       }}
     >
-      {/* Popular Badge */}
-      {isPopular && (
-        <div style={{
-          position: 'absolute',
-          top: '-15px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          background: `linear-gradient(135deg, ${planColor}, ${planColor}dd)`,
-          color: 'white',
-          padding: '8px 20px',
-          borderRadius: '20px',
-          fontSize: '0.85rem',
-          fontWeight: '600',
-          boxShadow: `0 4px 15px ${planColor}40`
-        }}>
-          PHỔ BIẾN NHẤT
-        </div>
-      )}
-
       {/* Plan Header */}
       <div style={{ textAlign: 'center', marginBottom: '30px' }}>
         <div style={{ 

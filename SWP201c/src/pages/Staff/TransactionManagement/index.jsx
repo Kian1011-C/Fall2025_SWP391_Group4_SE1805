@@ -177,6 +177,15 @@ const StaffSwapHistory = () => {
     </div>
   );
 
+  // Pagination 8 per page
+  const itemsPerPage = 8;
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.max(1, Math.ceil((filteredTransactions || []).length / itemsPerPage));
+  const currentItems = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return (filteredTransactions || []).slice(start, start + itemsPerPage);
+  }, [filteredTransactions, currentPage]);
+
   const renderContent = () => {
     if (isLoading) {
       return (
@@ -225,7 +234,7 @@ const StaffSwapHistory = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredTransactions.map(tx => (
+            {currentItems.map(tx => (
               <TransactionRow 
                 key={tx.swapId} 
                 transaction={tx} 
@@ -234,6 +243,38 @@ const StaffSwapHistory = () => {
             ))}
           </tbody>
         </table>
+        {/* Pagination controls */}
+        {totalPages > 1 && (
+          <div style={styles.pagination}>
+            <button
+              style={{ ...styles.pageBtn, ...(currentPage === 1 ? styles.pageBtnDisabled : {}) }}
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1}
+            >
+              «
+            </button>
+            {Array.from({ length: totalPages }).map((_, idx) => {
+              const page = idx + 1;
+              const isActive = page === currentPage;
+              return (
+                <button
+                  key={page}
+                  style={{ ...styles.pageBtn, ...(isActive ? styles.pageBtnActive : {}) }}
+                  onClick={() => setCurrentPage(page)}
+                >
+                  {page}
+                </button>
+              );
+            })}
+            <button
+              style={{ ...styles.pageBtn, ...(currentPage === totalPages ? styles.pageBtnDisabled : {}) }}
+              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+              disabled={currentPage === totalPages}
+            >
+              »
+            </button>
+          </div>
+        )}
       </div>
     );
   };
@@ -513,6 +554,34 @@ const styles = {
   },
   emptyMessage: {
     color: '#94a3b8'
+  },
+  pagination: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '12px',
+    padding: '20px 0'
+  },
+  pageBtn: {
+    minWidth: '44px',
+    height: '44px',
+    padding: '0 14px',
+    borderRadius: '12px',
+    border: '1px solid rgba(226,232,240,.6)',
+    background: '#fff',
+    color: '#0f172a',
+    fontWeight: 700,
+    fontSize: '16px',
+    cursor: 'pointer'
+  },
+  pageBtnActive: {
+    background: '#0b74e5',
+    borderColor: '#0a66cc',
+    color: '#fff'
+  },
+  pageBtnDisabled: {
+    opacity: .5,
+    cursor: 'not-allowed'
   }
 };
 

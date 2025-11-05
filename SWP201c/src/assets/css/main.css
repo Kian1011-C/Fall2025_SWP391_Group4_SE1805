@@ -47,7 +47,7 @@ header{position:sticky;top:0;z-index:40;backdrop-filter:saturate(1.2) blur(10px)
 .eyebrow{display:inline-flex;gap:8px;align-items:center;padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.12);color:var(--muted);font-size:13px;background:rgba(255,255,255,.03);margin-bottom:18px}
 .title{font-size:44px;line-height:1.1;margin:18px 0 14px}
 .title strong{background:linear-gradient(135deg,#fff,#9bc2ff);-webkit-background-clip:text;background-clip:text;color:transparent}
-.subtitle{color:var(--muted);max-width:780px;margin:0 auto 22px;font-size:16px}
+.subtitle{color:var(--muted);max-width:780px;margin:0 auto 22px;font-size:16px;text-align:center}
 .hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:6px}
 
 /* Sections */

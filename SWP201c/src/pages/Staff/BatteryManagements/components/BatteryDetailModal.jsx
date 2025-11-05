@@ -28,8 +28,17 @@ const BatteryDetailModal = ({ battery, onClose }) => {
     const charge = battery.stateOfHealth || battery.charge || 0;
     const health = battery.health || charge;
     const slot = battery.slotId || battery.slot || 'N/A';
-    const cycleCount = battery.cycleCount || 'N/A';
+    const cycleCount = battery.cycleCount || 0;
     const model = battery.model || 'Unknown';
+    
+    // Tính độ chai pin dựa trên chu kỳ sạc
+    const getDegradationInfo = (cycles) => {
+        if (cycles >= 1000) return { level: 'Chai nhiều', color: '#dc2626', icon: '🔴' };
+        if (cycles >= 500) return { level: 'Chai vừa', color: '#f59e0b', icon: '🟡' };
+        return { level: 'Tốt', color: '#16a34a', icon: '🟢' };
+    };
+    
+    const degradation = getDegradationInfo(cycleCount);
 
     return (
         <div style={{
@@ -56,6 +65,22 @@ const BatteryDetailModal = ({ battery, onClose }) => {
                     <DetailRow label="Mức pin hiện tại" value={`${charge}%`} />
                     <DetailRow label="Tình trạng sức khỏe" value={`${health}%`} />
                     <DetailRow label="Số chu kỳ sạc" value={cycleCount} />
+                    
+                    {/* Độ chai pin */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #334155' }}>
+                        <span style={{ color: '#94a3b8' }}>Độ chai pin</span>
+                        <span style={{ 
+                            color: degradation.color, 
+                            fontWeight: '700',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px'
+                        }}>
+                            <span>{degradation.icon}</span>
+                            <span>{degradation.level}</span>
+                        </span>
+                    </div>
+                    
                     <DetailRow label="Lần bảo trì cuối" value="20/09/2025" />
                 </div>
                 

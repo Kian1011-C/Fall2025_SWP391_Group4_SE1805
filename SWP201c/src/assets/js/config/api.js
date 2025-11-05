@@ -107,6 +107,11 @@ export const API_CONFIG = {
       MARK_READ: (id) => `/api/notifications/${id}/read`,
       MARK_ALL_READ: (userId) => `/api/users/${userId}/notifications/read-all`
     },
+    // Issues/Support
+    ISSUES: {
+      // Nếu BE không dùng context-path và controller map ở "/issues"
+      BASE: '/issues',
+    },
     
     // User Management
     USERS: {

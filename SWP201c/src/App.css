@@ -48,7 +48,7 @@ header{position:sticky;top:0;z-index:40;backdrop-filter:saturate(1.2) blur(10px)
 .eyebrow{display:inline-flex;gap:8px;align-items:center;padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.12);color:var(--muted);font-size:13px;background:rgba(255,255,255,.03);margin-bottom:18px}
 .title{font-size:44px;line-height:1.1;margin:18px 0 14px}
 .title strong{background:linear-gradient(135deg,#fff,#9bc2ff);-webkit-background-clip:text;background-clip:text;color:transparent}
-.subtitle{color:var(--muted);max-width:780px;margin:0 auto 22px;font-size:16px}
+.subtitle{color:var(--muted);max-width:780px;margin:0 auto 22px;font-size:16px;text-align:center}
 .hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:6px}
 
 /* Sections */
@@ -165,7 +165,7 @@ form{padding:24px}
 .driver-layout {
   display: flex;
   min-height: 100vh;
-  background: var(--bg);
+  background-color: #0f172a; /* match Staff layout bg */
   width: 100%;
   overflow-x: hidden;
   margin: 0;
@@ -174,25 +174,29 @@ form{padding:24px}
 }
 
 .driver-sidebar {
-  width: 280px;
-  min-width: 280px;
-  background: linear-gradient(180deg, #0f1419 0%, #121831 100%);
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  width: 260px;
+  min-width: 260px;
+  background-color: #1e293b; /* match Staff/Admin */
+  border-right: 1px solid #334155;
   display: flex;
   flex-direction: column;
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
   height: 100vh;
+  overflow-y: auto;
   flex-shrink: 0;
   box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
   z-index: 10;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  color: #cbd5e1;
 }
 
 .sidebar-header {
   padding: 24px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid #334155;
   background: rgba(255, 255, 255, 0.02);
 }
 
@@ -284,16 +288,16 @@ form{padding:24px}
 
 .sidebar-nav {
   flex: 1;
-  padding: 16px 0;
+  padding: 12px 0;
   overflow-y: auto;
 }
 
 .nav-item {
   width: 100%;
-  padding: 14px 24px;
+  padding: 14px 20px;
   background: none;
   border: none;
-  color: var(--muted);
+  color: #94a3b8;
   text-align: left;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -304,19 +308,18 @@ form{padding:24px}
   font-weight: 500;
   position: relative;
   margin: 2px 0;
+  border-left: 4px solid transparent;
 }
 
 .nav-item:hover {
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--text);
-  transform: translateX(4px);
+  background: #334155;
+  color: #ffffff;
 }
 
 .nav-item.active {
-  background: linear-gradient(135deg, rgba(79, 140, 255, 0.15) 0%, rgba(106, 227, 255, 0.08) 100%);
-  color: var(--brand);
-  border-right: 3px solid var(--brand);
-  box-shadow: inset 0 0 20px rgba(79, 140, 255, 0.1);
+  background: #0f172a;
+  color: #10b981; /* green like staff */
+  border-left-color: #10b981; /* left accent like admin */
 }
 
 .nav-item.active::before {
@@ -353,8 +356,9 @@ form{padding:24px}
 
 .sidebar-footer {
   padding: 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid #334155;
+  background: transparent;
+  margin-top: auto; /* push logout to bottom */
 }
 
 .user-info {
@@ -401,9 +405,9 @@ form{padding:24px}
 .logout-btn {
   width: 100%;
   padding: 12px 16px;
-  background: linear-gradient(135deg, rgba(255, 85, 115, 0.1) 0%, rgba(255, 85, 115, 0.05) 100%);
-  border: 1px solid rgba(255, 85, 115, 0.2);
-  color: var(--danger);
+  background-color: #7f1d1d; /* same as Staff */
+  border: none;
+  color: #fecaca;
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -417,21 +421,12 @@ form{padding:24px}
   overflow: hidden;
 }
 
-.logout-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-  transition: left 0.5s;
-}
+.logout-btn::before { display: none; }
 
 .logout-btn:hover {
-  background: linear-gradient(135deg, rgba(255, 85, 115, 0.2) 0%, rgba(255, 85, 115, 0.1) 100%);
+  background-color: #991b1b;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 85, 115, 0.2);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
 }
 
 .logout-btn:hover::before {
@@ -440,7 +435,7 @@ form{padding:24px}
 
 .driver-main {
   flex: 1;
-  margin-left: 0;
+  margin-left: 260px; /* compensate for fixed sidebar */
   padding: 0;
   background: var(--bg);
   min-height: 100vh;
@@ -450,19 +445,7 @@ form{padding:24px}
 
 /* Topbar sticky like screenshot */
 .driver-topbar{
-  height: 64px;
-  display:flex;
-  align-items:center;
-  justify-content: space-between;
-  padding: 0 24px;
-  position: sticky;
-  top:0;
-  z-index: 10;
-  backdrop-filter: blur(10px);
-  background: rgba(18,24,49,.6);
-  border-bottom:1px solid rgba(255,255,255,.1);
-  margin: 0;
-  width: 100%;
+  display: none; /* removed per request */
 }
 
 .driver-page-title{
@@ -659,3 +642,6 @@ form{padding:24px}
 .modal-container{border-radius:16px;overflow:hidden;position:relative;z-index:100000!important}
 .modal-btn{transition:transform .15s ease, box-shadow .2s ease}
 .modal-btn:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(0,0,0,.35)}
+
+/* Variant: overlay follows page scroll (used by SelectVehicle modal) */
+.modal-overlay.scroll-follow{position:absolute;align-items:flex-start;padding-top:80px}

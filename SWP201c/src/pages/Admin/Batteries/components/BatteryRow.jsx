@@ -7,6 +7,13 @@ const BatteryRow = ({ battery, onEdit, onDelete }) => {
     if (health >= 50) return 'medium';
     return 'low';
   };
+  
+  // Get degradation info based on cycle count
+  const getDegradationInfo = (cycleCount) => {
+    if (cycleCount >= 1000) return { level: 'high', text: 'Chai nhiều', color: '#dc2626' };
+    if (cycleCount >= 500) return { level: 'medium', text: 'Chai vừa', color: '#f59e0b' };
+    return { level: 'low', text: 'Tốt', color: '#16a34a' };
+  };
 
   // Format status for display
   const formatStatus = (status) => {
@@ -72,7 +79,21 @@ const BatteryRow = ({ battery, onEdit, onDelete }) => {
       <td>
         <div className="admin-battery-cycles">
           <span className="admin-battery-cycles-icon">🔄</span>
-          <span className="admin-battery-cycles-text">{battery.cycleCount}</span>
+          <span className="admin-battery-cycles-text">{battery.cycleCount || 0}</span>
+          <span 
+            className="admin-battery-degradation-badge"
+            style={{ 
+              marginLeft: '8px',
+              fontSize: '11px',
+              padding: '2px 6px',
+              borderRadius: '4px',
+              background: getDegradationInfo(battery.cycleCount || 0).color + '22',
+              color: getDegradationInfo(battery.cycleCount || 0).color,
+              fontWeight: '600'
+            }}
+          >
+            {getDegradationInfo(battery.cycleCount || 0).text}
+          </span>
         </div>
       </td>
 

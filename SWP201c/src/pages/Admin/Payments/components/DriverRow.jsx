@@ -1,7 +1,7 @@
 // components/DriverRow.jsx
 import React from 'react';
 
-const DriverRow = ({ driver, onGenerateInvoice, onViewHistory }) => {
+const DriverRow = ({ driver, onGenerateInvoice, onViewHistory, activeTab = 'need_invoice' }) => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'active':
@@ -52,21 +52,38 @@ const DriverRow = ({ driver, onGenerateInvoice, onViewHistory }) => {
       </td>
       
       <td style={{ padding: '16px', fontSize: '14px', textAlign: 'center' }}>
-        <div style={{ marginBottom: '4px', fontWeight: '500' }}>
-          #{driver.contractId}
-        </div>
-        <span style={{
-          display: 'inline-block',
-          padding: '2px 8px',
-          borderRadius: '12px',
-          fontSize: '12px',
-          fontWeight: '500',
-          backgroundColor: `${getStatusColor(driver.contractStatus)}20`,
-          color: getStatusColor(driver.contractStatus)
-        }}>
-          {driver.contractStatus === 'active' ? 'Hoạt động' : 
-           driver.contractStatus === 'inactive' ? 'Không hoạt động' : 'Tạm ngưng'}
-        </span>
+        {activeTab === 'history' && driver.contracts ? (
+          // Tab lịch sử: Hiển thị danh sách contracts
+          <div style={{ fontSize: '12px' }}>
+            {driver.contracts.map((contractId, idx) => (
+              <div key={contractId} style={{ 
+                marginBottom: idx < driver.contracts.length - 1 ? '4px' : '0',
+                fontWeight: '500'
+              }}>
+                #{contractId}
+              </div>
+            ))}
+          </div>
+        ) : (
+          // Tab khác: Hiển thị 1 contract và status
+          <>
+            <div style={{ marginBottom: '4px', fontWeight: '500' }}>
+              #{driver.contractId}
+            </div>
+            <span style={{
+              display: 'inline-block',
+              padding: '2px 8px',
+              borderRadius: '12px',
+              fontSize: '12px',
+              fontWeight: '500',
+              backgroundColor: `${getStatusColor(driver.contractStatus)}20`,
+              color: getStatusColor(driver.contractStatus)
+            }}>
+              {driver.contractStatus === 'active' ? 'Hoạt động' : 
+               driver.contractStatus === 'inactive' ? 'Không hoạt động' : 'Tạm ngưng'}
+            </span>
+          </>
+        )}
       </td>
       
       <td style={{ padding: '16px', fontSize: '14px', textAlign: 'center' }}>
@@ -92,80 +109,90 @@ const DriverRow = ({ driver, onGenerateInvoice, onViewHistory }) => {
         </div>
       </td>
       
-      <td style={{ padding: '16px', fontSize: '14px', textAlign: 'center' }}>
-        {driver.unpaidBills > 0 ? (
-          <span style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '28px',
-            height: '28px',
-            borderRadius: '50%',
-            backgroundColor: '#fee2e2',
-            color: '#dc2626',
-            fontWeight: '600',
-            fontSize: '13px'
-          }}>
-            {driver.unpaidBills}
-          </span>
-        ) : (
-          <span style={{ color: '#10b981', fontWeight: '500' }}>✓</span>
-        )}
-      </td>
+      {/* Chỉ hiển thị cột "Chưa TT" ở tab "Đợi thanh toán" */}
+      {activeTab === 'waiting_payment' && (
+        <td style={{ padding: '16px', fontSize: '14px', textAlign: 'center' }}>
+          {driver.unpaidBills > 0 ? (
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '28px',
+              height: '28px',
+              borderRadius: '50%',
+              backgroundColor: '#fee2e2',
+              color: '#dc2626',
+              fontWeight: '600',
+              fontSize: '13px'
+            }}>
+              {driver.unpaidBills}
+            </span>
+          ) : (
+            <span style={{ color: '#10b981', fontWeight: '500' }}>✓</span>
+          )}
+        </td>
+      )}
       
       <td style={{ padding: '16px' }}>
         <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-          <button
-            onClick={() => onGenerateInvoice(driver)}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#3b82f6',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '13px',
-              fontWeight: '500',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-            onMouseEnter={(e) => e.target.style.backgroundColor = '#2563eb'}
-            onMouseLeave={(e) => e.target.style.backgroundColor = '#3b82f6'}
-          >
-            <span>📄</span>
-            Xuất hóa đơn
-          </button>
+          {/* Tab 1: Chờ xuất hóa đơn - Chỉ hiển thị nút "Xuất hóa đơn" */}
+          {activeTab === 'need_invoice' && (
+            <button
+              onClick={() => onGenerateInvoice(driver)}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: '#3b82f6',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '13px',
+                fontWeight: '500',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+              onMouseEnter={(e) => e.target.style.backgroundColor = '#2563eb'}
+              onMouseLeave={(e) => e.target.style.backgroundColor = '#3b82f6'}
+            >
+              <span>📄</span>
+              Xuất hóa đơn
+            </button>
+          )}
           
-          <button
-            onClick={() => onViewHistory(driver)}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#f3f4f6',
-              color: '#374151',
-              border: '1px solid #e5e7eb',
-              borderRadius: '8px',
-              fontSize: '13px',
-              fontWeight: '500',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = '#e5e7eb';
-              e.target.style.borderColor = '#d1d5db';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = '#f3f4f6';
-              e.target.style.borderColor = '#e5e7eb';
-            }}
-          >
-            <span>📋</span>
-            Lịch sử
-          </button>
+          {/* Tab 2: Đợi thanh toán - Chỉ hiển thị nút "Xem lịch sử" */}
+          {/* Tab 3: Lịch sử - Chỉ hiển thị nút "Xem lịch sử" */}
+          {(activeTab === 'waiting_payment' || activeTab === 'history') && (
+            <button
+              onClick={() => onViewHistory(driver)}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: '#f3f4f6',
+                color: '#374151',
+                border: '1px solid #e5e7eb',
+                borderRadius: '8px',
+                fontSize: '13px',
+                fontWeight: '500',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.backgroundColor = '#e5e7eb';
+                e.target.style.borderColor = '#d1d5db';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = '#f3f4f6';
+                e.target.style.borderColor = '#e5e7eb';
+              }}
+            >
+              <span>📋</span>
+              Lịch sử
+            </button>
+          )}
         </div>
       </td>
     </tr>

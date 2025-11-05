@@ -1,8 +1,8 @@
 // Driver/StationsMap/components/StationsMapView.jsx
 // Component hiển thị Leaflet Map với các trạm đổi pin - KHÔNG CẦN API KEY!
 
-import React, { useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import React, { useMemo, useEffect, useState, useRef } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
 import { useNavigate } from 'react-router-dom';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -94,6 +94,9 @@ const createStationIcon = (available) => {
 
 const StationsMapView = ({ stations = [], onStationSelect }) => {
   const navigate = useNavigate();
+  const mapRef = useRef(null);
+  const [myLocation, setMyLocation] = useState(null);
+  const [locError, setLocError] = useState(null);
 
   // Sử dụng stations từ backend, nếu không có thì dùng mock data
   const stationsData = useMemo(() => {
@@ -161,11 +164,32 @@ const StationsMapView = ({ stations = [], onStationSelect }) => {
 
   // Tính center của map
   const mapCenter = useMemo(() => {
+    if (myLocation) return [myLocation.lat, myLocation.lng];
     if (stationsData.length === 0) return [21.0285, 105.8542]; // Hà Nội
     const avgLat = stationsData.reduce((sum, s) => sum + s.lat, 0) / stationsData.length;
     const avgLng = stationsData.reduce((sum, s) => sum + s.lng, 0) / stationsData.length;
     return [avgLat, avgLng];
-  }, [stationsData]);
+  }, [stationsData, myLocation]);
+
+  // Lấy vị trí hiện tại của Driver (trình duyệt)
+  useEffect(() => {
+    if (!('geolocation' in navigator)) {
+      setLocError('Trình duyệt không hỗ trợ định vị.');
+      return;
+    }
+    const watchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        setMyLocation({ lat: latitude, lng: longitude, accuracy: pos.coords.accuracy });
+      },
+      (err) => {
+        console.warn('⚠️ Không thể lấy vị trí:', err);
+        setLocError(err.message || 'Không thể lấy vị trí');
+      },
+      { enableHighAccuracy: true, maximumAge: 10000, timeout: 10000 }
+    );
+    return () => navigator.geolocation.clearWatch && navigator.geolocation.clearWatch(watchId);
+  }, []);
 
   // Chuyển đến trang đổi pin
   const handleSwapBattery = (station) => {
@@ -191,12 +215,23 @@ const StationsMapView = ({ stations = [], onStationSelect }) => {
         zoom={13} 
         style={styles.mapContainer}
         scrollWheelZoom={true}
+        whenCreated={(map) => { mapRef.current = map; }}
       >
         {/* Tile Layer - Bản đồ từ OpenStreetMap (MIỄN PHÍ) */}
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+
+        {/* Vị trí hiện tại của Driver */}
+        {myLocation && (
+          <>
+            <Marker position={[myLocation.lat, myLocation.lng]}>
+              <Popup>Tôi đang ở đây</Popup>
+            </Marker>
+            <Circle center={[myLocation.lat, myLocation.lng]} radius={myLocation.accuracy || 50} pathOptions={{ color: '#3b82f6', fillColor: '#60a5fa', fillOpacity: 0.2 }}/>
+          </>
+        )}
 
         {/* Markers cho các trạm */}
         {stationsData.map((station) => {
@@ -250,6 +285,18 @@ const StationsMapView = ({ stations = [], onStationSelect }) => {
           );
         })}
       </MapContainer>
+      {/* Nút về vị trí của tôi */}
+      <button
+        onClick={() => {
+          if (myLocation && mapRef.current) {
+            mapRef.current.setView([myLocation.lat, myLocation.lng], 15, { animate: true });
+          }
+        }}
+        style={styles.locateBtn}
+        title={locError || 'Về vị trí của tôi'}
+      >
+        📍 Vị trí của tôi
+      </button>
       
       {/* Debug Info Overlay */}
       <div style={styles.debugOverlay}>
@@ -363,6 +410,18 @@ const styles = {
   debugItem: {
     marginBottom: '5px',
     lineHeight: '1.6'
+  },
+  locateBtn: {
+    position: 'absolute',
+    left: '10px',
+    top: '10px',
+    zIndex: 1000,
+    background: '#1f2937',
+    color: '#fff',
+    border: '1px solid rgba(255,255,255,0.2)',
+    borderRadius: '8px',
+    padding: '8px 12px',
+    cursor: 'pointer'
   }
 };
 

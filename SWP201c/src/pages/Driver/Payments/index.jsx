@@ -1,5 +1,6 @@
 // src/pages/Driver/Payments/index.jsx
 import React, { useState, useEffect } from 'react';
+import '/src/assets/css/payment.css';
 import { useNavigate } from 'react-router-dom';
 // ❗️ Đảm bảo bạn import file CSS (nếu cần, ví dụ file CSS chung của dashboard)
 // import './Payment.css'; // (Hoặc import file CSS của riêng bạn)

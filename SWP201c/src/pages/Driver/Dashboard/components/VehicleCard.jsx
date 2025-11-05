@@ -54,6 +54,13 @@ const VehicleCard = ({ vehicle, isSelected, onClick, contracts }) => {
           }}>
             {vehicle.plateNumber}
           </div>
+          <div style={{ 
+            color: '#A5B4FC', 
+            fontSize: '0.8rem', 
+            marginTop: '2px'
+          }}>
+            ID pin: {vehicle.batteryId || vehicle.battery_id || vehicle.currentBatteryId || vehicle.current_battery_id || vehicle.batteryCode || vehicle.battery_code || 'N/A'}
+          </div>
         </div>
       </div>
 

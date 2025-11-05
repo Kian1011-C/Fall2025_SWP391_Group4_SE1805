@@ -18,13 +18,33 @@ const LandingPage = () => {
       <header>
         <div className="container">
           <nav className="nav">
-            <div className="brand">
-              <div className="logo">
-                <svg viewBox="0 0 24 24">
-                  <path d="M13 3l3.5 6L12 11.5 8.5 9 13 3zm4.5 9L16 14.5 12 17l-4-2.5 1.5-2.5 4.5 2.5L17.5 12zM12 19l-7.5-12L3 5l9 14 9-14-1.5 2L12 19z"/>
-                </svg>
+            <div className="brand" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{
+                width: '50px',
+                height: '50px',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #a855f7 0%, #3b82f6 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 15px rgba(168, 85, 247, 0.4), 0 0 20px rgba(59, 130, 246, 0.2)',
+                position: 'relative'
+              }}>
+                <span style={{
+                  color: '#000000',
+                  fontSize: '18px',
+                  fontWeight: '900',
+                  fontFamily: 'sans-serif',
+                  letterSpacing: '-1px'
+                }}>EV</span>
               </div>
-              SWP201
+              <span style={{
+                color: '#FFFFFF',
+                fontSize: '20px',
+                fontWeight: '700',
+                fontFamily: 'sans-serif',
+                letterSpacing: '0.5px'
+              }}>Battery SWAP</span>
             </div>
             <div className="nav-links">
               <a href="#features">Tính năng</a>
@@ -49,7 +69,14 @@ const LandingPage = () => {
               Đổi pin xe điện <strong>nhanh chóng</strong><br/>
               và <strong>tiện lợi</strong>
             </h1>
-            <p className="subtitle">
+            <p style={{ 
+              color: 'var(--muted)', 
+              maxWidth: '780px', 
+              margin: '0 auto 22px', 
+              fontSize: '16px',
+              textAlign: 'center',
+              width: '100%'
+            }}>
               Giải pháp đổi pin tự động cho xe điện với mạng lưới trạm sạc rộng khắp thành phố. 
               Chỉ 3 phút để có pin đầy 100%.
             </p>
@@ -539,6 +566,314 @@ const LandingPage = () => {
           </div>
         </section>
       </main>
+
+      <footer style={{
+        background: 'linear-gradient(180deg, #0a0f1e 0%, #050813 100%)',
+        borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+        padding: '60px 0 30px',
+        marginTop: '80px'
+      }}>
+        <div className="container">
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+            gap: '40px',
+            marginBottom: '40px'
+          }}>
+            {/* Brand Section */}
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+                <div style={{
+                  width: '45px',
+                  height: '45px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #a855f7 0%, #3b82f6 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 4px 15px rgba(168, 85, 247, 0.4)'
+                }}>
+                  <span style={{
+                    color: '#000000',
+                    fontSize: '16px',
+                    fontWeight: '900',
+                    fontFamily: 'sans-serif',
+                    letterSpacing: '-1px'
+                  }}>EV</span>
+                </div>
+                <span style={{
+                  color: '#FFFFFF',
+                  fontSize: '18px',
+                  fontWeight: '700',
+                  fontFamily: 'sans-serif',
+                  letterSpacing: '0.5px'
+                }}>Battery SWAP</span>
+              </div>
+              <p style={{
+                color: 'rgba(255, 255, 255, 0.6)',
+                fontSize: '14px',
+                lineHeight: '1.6',
+                marginBottom: '20px',
+                maxWidth: '280px'
+              }}>
+                Giải pháp đổi pin tự động cho xe điện với mạng lưới trạm sạc rộng khắp. Đổi pin nhanh chóng, tiện lợi chỉ trong 3 phút.
+              </p>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <a href="#" style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '8px',
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'rgba(255, 255, 255, 0.8)',
+                  textDecoration: 'none',
+                  transition: 'all 0.3s ease'
+                }} onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #a855f7, #3b82f6)';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                }} onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}>
+                  <span style={{ fontSize: '18px' }}>📘</span>
+                </a>
+                <a href="#" style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '8px',
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'rgba(255, 255, 255, 0.8)',
+                  textDecoration: 'none',
+                  transition: 'all 0.3s ease'
+                }} onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #a855f7, #3b82f6)';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                }} onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}>
+                  <span style={{ fontSize: '18px' }}>📷</span>
+                </a>
+                <a href="#" style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '8px',
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'rgba(255, 255, 255, 0.8)',
+                  textDecoration: 'none',
+                  transition: 'all 0.3s ease'
+                }} onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #a855f7, #3b82f6)';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                }} onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}>
+                  <span style={{ fontSize: '18px' }}>🐦</span>
+                </a>
+              </div>
+            </div>
+
+            {/* Quick Links */}
+            <div>
+              <h4 style={{
+                color: '#FFFFFF',
+                fontSize: '18px',
+                fontWeight: '700',
+                marginBottom: '20px'
+              }}>Liên kết nhanh</h4>
+              <ul style={{
+                listStyle: 'none',
+                padding: 0,
+                margin: 0
+              }}>
+                <li style={{ marginBottom: '12px' }}>
+                  <a href="#features" style={{
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    textDecoration: 'none',
+                    fontSize: '14px',
+                    transition: 'color 0.3s ease'
+                  }} onMouseEnter={(e) => e.currentTarget.style.color = '#FFFFFF'} onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)'}>
+                    Tính năng
+                  </a>
+                </li>
+                <li style={{ marginBottom: '12px' }}>
+                  <a href="#pricing" style={{
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    textDecoration: 'none',
+                    fontSize: '14px',
+                    transition: 'color 0.3s ease'
+                  }} onMouseEnter={(e) => e.currentTarget.style.color = '#FFFFFF'} onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)'}>
+                    Gói dịch vụ
+                  </a>
+                </li>
+                <li style={{ marginBottom: '12px' }}>
+                  <a href="#about" style={{
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    textDecoration: 'none',
+                    fontSize: '14px',
+                    transition: 'color 0.3s ease'
+                  }} onMouseEnter={(e) => e.currentTarget.style.color = '#FFFFFF'} onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)'}>
+                    Về chúng tôi
+                  </a>
+                </li>
+                <li style={{ marginBottom: '12px' }}>
+                  <a href="#" style={{
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    textDecoration: 'none',
+                    fontSize: '14px',
+                    transition: 'color 0.3s ease'
+                  }} onMouseEnter={(e) => e.currentTarget.style.color = '#FFFFFF'} onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)'}>
+                    Hỗ trợ
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Contact Info */}
+            <div>
+              <h4 style={{
+                color: '#FFFFFF',
+                fontSize: '18px',
+                fontWeight: '700',
+                marginBottom: '20px'
+              }}>Liên hệ</h4>
+              <ul style={{
+                listStyle: 'none',
+                padding: 0,
+                margin: 0
+              }}>
+                <li style={{
+                  marginBottom: '12px',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '10px'
+                }}>
+                  <span style={{ fontSize: '16px', marginTop: '2px' }}>📍</span>
+                  <span style={{
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    fontSize: '14px',
+                    lineHeight: '1.6'
+                  }}>
+                    123 Đường ABC, Quận XYZ,<br />TP. Hồ Chí Minh
+                  </span>
+                </li>
+                <li style={{
+                  marginBottom: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px'
+                }}>
+                  <span style={{ fontSize: '16px' }}>📞</span>
+                  <a href="tel:+84901234567" style={{
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    textDecoration: 'none',
+                    fontSize: '14px',
+                    transition: 'color 0.3s ease'
+                  }} onMouseEnter={(e) => e.currentTarget.style.color = '#FFFFFF'} onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)'}>
+                    090 123 4567
+                  </a>
+                </li>
+                <li style={{
+                  marginBottom: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px'
+                }}>
+                  <span style={{ fontSize: '16px' }}>✉️</span>
+                  <a href="mailto:evdriversystem@gmail.com" style={{
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    textDecoration: 'none',
+                    fontSize: '14px',
+                    transition: 'color 0.3s ease'
+                  }} onMouseEnter={(e) => e.currentTarget.style.color = '#FFFFFF'} onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)'}>
+                   evdriversystem@gmail.com
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Legal Links */}
+            <div>
+              <h4 style={{
+                color: '#FFFFFF',
+                fontSize: '18px',
+                fontWeight: '700',
+                marginBottom: '20px'
+              }}>Chính sách</h4>
+              <ul style={{
+                listStyle: 'none',
+                padding: 0,
+                margin: 0
+              }}>
+                <li style={{ marginBottom: '12px' }}>
+                  <a href="#" style={{
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    textDecoration: 'none',
+                    fontSize: '14px',
+                    transition: 'color 0.3s ease'
+                  }} onMouseEnter={(e) => e.currentTarget.style.color = '#FFFFFF'} onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)'}>
+                    Điều khoản sử dụng
+                  </a>
+                </li>
+                <li style={{ marginBottom: '12px' }}>
+                  <a href="#" style={{
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    textDecoration: 'none',
+                    fontSize: '14px',
+                    transition: 'color 0.3s ease'
+                  }} onMouseEnter={(e) => e.currentTarget.style.color = '#FFFFFF'} onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)'}>
+                    Chính sách bảo mật
+                  </a>
+                </li>
+                <li style={{ marginBottom: '12px' }}>
+                  <a href="#" style={{
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    textDecoration: 'none',
+                    fontSize: '14px',
+                    transition: 'color 0.3s ease'
+                  }} onMouseEnter={(e) => e.currentTarget.style.color = '#FFFFFF'} onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)'}>
+                    Chính sách hoàn tiền
+                  </a>
+                </li>
+                <li style={{ marginBottom: '12px' }}>
+                  <a href="#" style={{
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    textDecoration: 'none',
+                    fontSize: '14px',
+                    transition: 'color 0.3s ease'
+                  }} onMouseEnter={(e) => e.currentTarget.style.color = '#FFFFFF'} onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)'}>
+                    Câu hỏi thường gặp
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Copyright */}
+          <div style={{
+            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+            paddingTop: '30px',
+            textAlign: 'center'
+          }}>
+            <p style={{
+              color: 'rgba(255, 255, 255, 0.5)',
+              fontSize: '14px',
+              margin: 0
+            }}>
+              © {new Date().getFullYear()} Battery SWAP. Tất cả các quyền được bảo lưu.
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

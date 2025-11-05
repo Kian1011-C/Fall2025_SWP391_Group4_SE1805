@@ -168,8 +168,7 @@ const DriverProfile = () => {
           )}
         </div>
 
-        {/* Profile Statistics */}
-        <ProfileStats user={user} />
+        {/* Profile Statistics removed per request */}
       </div>
     </DashboardLayout>
   );

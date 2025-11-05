@@ -34,6 +34,16 @@ const BatteryStockView = () => {
         });
     }, [batteries, searchQuery, statusFilter]);
 
+    // Pagination (8 per page)
+    const itemsPerPage = 8;
+    const [currentPage, setCurrentPage] = useState(1);
+    const totalPages = Math.max(1, Math.ceil(filteredBatteries.length / itemsPerPage));
+    const currentItems = useMemo(() => {
+        const start = (currentPage - 1) * itemsPerPage;
+        return filteredBatteries.slice(start, start + itemsPerPage);
+    }, [filteredBatteries, currentPage]);
+    const goToPage = (p) => setCurrentPage(Math.min(Math.max(1, p), totalPages));
+
     const handleViewDetails = (battery) => {
         setSelectedBattery(battery);
     };
@@ -47,6 +57,13 @@ const BatteryStockView = () => {
         if (health >= 80) return 'high';
         if (health >= 50) return 'medium';
         return 'low';
+    };
+    
+    // Get degradation info based on cycle count
+    const getDegradationInfo = (cycleCount) => {
+        if (cycleCount >= 1000) return { level: 'Chai nhiều', color: '#dc2626', icon: '🔴' };
+        if (cycleCount >= 500) return { level: 'Chai vừa', color: '#f59e0b', icon: '🟡' };
+        return { level: 'Tốt', color: '#16a34a', icon: '🟢' };
     };
 
     // Format status
@@ -198,7 +215,7 @@ const BatteryStockView = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredBatteries.map((bat) => {
+                            {currentItems.map((bat) => {
                                 const id = bat.id || bat.batteryId;
                                 const status = bat.status || 'N/A';
                                 const health = bat.stateOfHealth || bat.health || bat.charge || 0;
@@ -246,6 +263,24 @@ const BatteryStockView = () => {
                                             <div className="staff-battery-cycles">
                                                 <span className="staff-battery-cycles-icon">🔄</span>
                                                 <span className="staff-battery-cycles-text">{cycles}</span>
+                                                <span 
+                                                    className="staff-battery-degradation-badge"
+                                                    style={{ 
+                                                        marginLeft: '8px',
+                                                        fontSize: '10px',
+                                                        padding: '3px 7px',
+                                                        borderRadius: '12px',
+                                                        background: getDegradationInfo(cycles).color + '22',
+                                                        color: getDegradationInfo(cycles).color,
+                                                        fontWeight: '700',
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        gap: '3px'
+                                                    }}
+                                                >
+                                                    <span>{getDegradationInfo(cycles).icon}</span>
+                                                    <span>{getDegradationInfo(cycles).level}</span>
+                                                </span>
                                             </div>
                                         </td>
 
@@ -268,6 +303,40 @@ const BatteryStockView = () => {
                             })}
                         </tbody>
                     </table>
+                </div>
+            )}
+
+            {/* Pagination */}
+            {filteredBatteries.length > 0 && (
+                <div className="pagination">
+                    <button
+                        className={`page-btn prev ${currentPage === 1 ? 'is-disabled' : ''}`}
+                        aria-disabled={currentPage === 1}
+                        onClick={() => goToPage(currentPage - 1)}
+                    >
+                        «
+                    </button>
+                    {Array.from({ length: totalPages }).map((_, idx) => {
+                        const page = idx + 1;
+                        const isActive = page === currentPage;
+                        return (
+                            <button
+                                key={page}
+                                className={`page-btn ${isActive ? 'is-active' : ''}`}
+                                aria-current={isActive ? 'page' : undefined}
+                                onClick={() => goToPage(page)}
+                            >
+                                {page}
+                            </button>
+                        );
+                    })}
+                    <button
+                        className={`page-btn next ${currentPage === totalPages ? 'is-disabled' : ''}`}
+                        aria-disabled={currentPage === totalPages}
+                        onClick={() => goToPage(currentPage + 1)}
+                    >
+                        »
+                    </button>
                 </div>
             )}
 
