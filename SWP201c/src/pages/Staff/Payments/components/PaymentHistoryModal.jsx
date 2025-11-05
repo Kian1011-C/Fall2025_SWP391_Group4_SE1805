@@ -21,7 +21,8 @@ const PaymentHistoryModal = ({ driver, onClose }) => {
           // Map dữ liệu từ backend sang format hiển thị
           const mappedHistory = (result.data || []).map(payment => ({
             id: payment.paymentId,
-            date: payment.vnpPayDate || payment.createdAt,
+            // ✅ Chỉ có ngày thanh toán khi đã thanh toán thành công
+            date: payment.status?.toLowerCase() === 'success' ? payment.vnpPayDate : null,
             month: extractMonthYear(payment.vnpOrderInfo || payment.createdAt),
             amount: payment.amount,
             status: mapStatus(payment.status),
@@ -300,22 +301,10 @@ const PaymentHistoryModal = ({ driver, onClose }) => {
                           </span>
                         </div>
                         
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', fontSize: '13px', color: '#6b7280' }}>
-                          <div>
-                            <span>Ngày TT: </span>
-                            <span style={{ fontWeight: '500', color: '#374151' }}>{formatDate(item.date)}</span>
-                          </div>
+                        <div style={{ fontSize: '13px', color: '#6b7280' }}>
                           <div>
                             <span>Phương thức: </span>
                             <span style={{ fontWeight: '500', color: '#374151' }}>{item.method || '-'}</span>
-                          </div>
-                          <div>
-                            <span>Quãng đường: </span>
-                            <span style={{ fontWeight: '500', color: '#374151' }}>{item.totalKm} km</span>
-                          </div>
-                          <div>
-                            <span>Phí vượt: </span>
-                            <span style={{ fontWeight: '500', color: '#f59e0b' }}>{formatCurrency(item.overageFee)}</span>
                           </div>
                         </div>
                         

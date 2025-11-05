@@ -10,6 +10,7 @@ const Payments = () => {
   const [selectedDriver, setSelectedDriver] = useState(null);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [activeTab, setActiveTab] = useState('generate'); // 'generate', 'pending', 'history'
 
   const handleGenerateInvoice = (driver) => {
     setSelectedDriver(driver);
@@ -23,17 +24,56 @@ const Payments = () => {
 
   const handleInvoiceSuccess = () => {
     refreshData();
+    setActiveTab('pending'); // Chuyển sang tab "Chờ thanh toán"
   };
+
+  // Filter drivers based on active tab
+  const filteredDrivers = useMemo(() => {
+    if (activeTab === 'pending') {
+      // Tab "Chờ thanh toán": Chỉ hiện những cái đã xuất hóa đơn (có payment in_progress)
+      return drivers.filter(driver => driver.hasGeneratedInvoice);
+    } else if (activeTab === 'history') {
+      // Tab "Lịch sử": Gộp users có cùng email
+      const userMap = new Map();
+      drivers.forEach(driver => {
+        const key = driver.email || driver.userId;
+        if (!userMap.has(key)) {
+          userMap.set(key, { 
+            ...driver,
+            subscriptionTypes: [driver.subscriptionType] // Lưu array các gói
+          });
+        } else {
+          const existing = userMap.get(key);
+          existing.totalPaid += driver.totalPaid;
+          existing.unpaidBills += driver.unpaidBills;
+          // Thêm gói mới nếu chưa có
+          if (!existing.subscriptionTypes.includes(driver.subscriptionType)) {
+            existing.subscriptionTypes.push(driver.subscriptionType);
+          }
+        }
+      });
+      return Array.from(userMap.values());
+    }
+    // Tab "Xuất hóa đơn": Show tất cả
+    return drivers;
+  }, [drivers, activeTab]);
 
   // Pagination 8 drivers per page
   const itemsPerPage = 8;
   const [currentPage, setCurrentPage] = useState(1);
-  const totalDrivers = drivers.length;
+  
+  // Reset page when tab changes
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab]);
+
+  const totalDrivers = filteredDrivers.length;
   const totalPages = Math.max(1, Math.ceil(totalDrivers / itemsPerPage));
   const currentDrivers = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
-    return drivers.slice(start, start + itemsPerPage);
-  }, [drivers, currentPage]);
+    return filteredDrivers.slice(start, start + itemsPerPage);
+  }, [filteredDrivers, currentPage]);
+  
   const activeContracts = drivers.filter(d => d.contractStatus === 'active').length;
   const unpaidBills = drivers.reduce((sum, d) => sum + d.unpaidBills, 0);
   const totalRevenue = drivers.reduce((sum, d) => sum + d.totalPaid, 0);
@@ -200,6 +240,69 @@ const Payments = () => {
         </button>
       </div>
 
+      {/* Tabs Navigation */}
+      <div style={{
+        backgroundColor: 'white',
+        borderRadius: '12px',
+        border: '1px solid #e5e7eb',
+        marginBottom: '20px',
+        padding: '8px',
+        display: 'flex',
+        gap: '8px'
+      }}>
+        <button
+          onClick={() => setActiveTab('generate')}
+          style={{
+            flex: 1,
+            padding: '12px 20px',
+            backgroundColor: activeTab === 'generate' ? '#3b82f6' : 'transparent',
+            color: activeTab === 'generate' ? 'white' : '#6b7280',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '14px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            transition: 'all 0.2s'
+          }}
+        >
+          📝 Xuất hóa đơn
+        </button>
+        <button
+          onClick={() => setActiveTab('pending')}
+          style={{
+            flex: 1,
+            padding: '12px 20px',
+            backgroundColor: activeTab === 'pending' ? '#3b82f6' : 'transparent',
+            color: activeTab === 'pending' ? 'white' : '#6b7280',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '14px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            transition: 'all 0.2s'
+          }}
+        >
+          ⏳ Chờ thanh toán
+        </button>
+        <button
+          onClick={() => setActiveTab('history')}
+          style={{
+            flex: 1,
+            padding: '12px 20px',
+            backgroundColor: activeTab === 'history' ? '#3b82f6' : 'transparent',
+            color: activeTab === 'history' ? 'white' : '#6b7280',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '14px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            transition: 'all 0.2s'
+          }}
+        >
+          📜 Lịch sử
+        </button>
+      </div>
+
       {/* Drivers Table */}
       <div style={{
         backgroundColor: 'white',
@@ -216,7 +319,7 @@ const Payments = () => {
           <div style={{ padding: '60px', textAlign: 'center', color: '#ef4444' }}>
             ⚠️ {error}
           </div>
-        ) : drivers.length === 0 ? (
+        ) : filteredDrivers.length === 0 ? (
           <div style={{ padding: '60px', textAlign: 'center', color: '#6b7280' }}>
             Không tìm thấy khách hàng nào
           </div>
@@ -268,39 +371,48 @@ const Payments = () => {
                 }}>
                   Gói
                 </th>
-                <th style={{
-                  padding: '16px',
-                  textAlign: 'right',
-                  fontSize: '13px',
-                  fontWeight: '600',
-                  color: '#374151',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em'
-                }}>
-                  Đã thanh toán
-                </th>
-                <th style={{
-                  padding: '16px',
-                  textAlign: 'center',
-                  fontSize: '13px',
-                  fontWeight: '600',
-                  color: '#374151',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em'
-                }}>
-                  Chưa TT
-                </th>
-                <th style={{
-                  padding: '16px',
-                  textAlign: 'right',
-                  fontSize: '13px',
-                  fontWeight: '600',
-                  color: '#374151',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em'
-                }}>
-                  Thao tác
-                </th>
+                {/* Chỉ hiện cột "Đã thanh toán" ở tab "Lịch sử" */}
+                {activeTab === 'history' && (
+                  <th style={{
+                    padding: '16px',
+                    textAlign: 'right',
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    color: '#374151',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
+                  }}>
+                    Đã thanh toán
+                  </th>
+                )}
+                {/* Chỉ hiện cột "Chưa TT" ở tab "pending" */}
+                {activeTab === 'pending' && (
+                  <th style={{
+                    padding: '16px',
+                    textAlign: 'center',
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    color: '#374151',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
+                  }}>
+                    Chưa TT
+                  </th>
+                )}
+                {/* Ẩn cột "Thao tác" ở tab "Chờ thanh toán" */}
+                {activeTab !== 'pending' && (
+                  <th style={{
+                    padding: '16px',
+                    textAlign: 'right',
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    color: '#374151',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
+                  }}>
+                    Thao tác
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -310,6 +422,7 @@ const Payments = () => {
                   driver={driver}
                   onGenerateInvoice={handleGenerateInvoice}
                   onViewHistory={handleViewHistory}
+                  activeTab={activeTab}
                 />
               ))}
             </tbody>

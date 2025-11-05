@@ -86,6 +86,9 @@ export const usePaymentsData = () => {
             .filter(p => p.status?.toLowerCase() === 'in_progress')
             .length;
 
+          // ✅ Kiểm tra xem có hóa đơn đã xuất (trạng thái in_progress) không
+          const hasGeneratedInvoice = unpaidBills > 0;
+
           // Lấy ngày thanh toán gần nhất (CHỈ của contract này)
           const paidPayments = contractPayments
             .filter(p => p.status?.toLowerCase() === 'success' && (p.vnpPayDate || p.createdAt))
@@ -110,6 +113,7 @@ export const usePaymentsData = () => {
             totalPaid: totalPaid,
             lastPaymentDate: lastPaymentDate,
             unpaidBills: unpaidBills,
+            hasGeneratedInvoice: hasGeneratedInvoice, // ✅ Đã xuất hóa đơn = có payment in_progress
             startDate: contract.startDate,
             endDate: contract.endDate,
             // ✅ Thêm các thông tin cần thiết cho việc xuất hóa đơn

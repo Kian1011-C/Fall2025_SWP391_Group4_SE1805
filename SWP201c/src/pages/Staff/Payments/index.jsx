@@ -15,15 +15,38 @@ const Payments = () => {
     setShowHistoryModal(true);
   };
 
+  // ✅ Gộp users có cùng email (giống tab "Lịch sử" của Admin)
+  const consolidatedDrivers = useMemo(() => {
+    const userMap = new Map();
+    drivers.forEach(driver => {
+      const key = driver.email || driver.userId;
+      if (!userMap.has(key)) {
+        userMap.set(key, { 
+          ...driver,
+          subscriptionTypes: [driver.subscriptionType] // Lưu array các gói
+        });
+      } else {
+        const existing = userMap.get(key);
+        existing.totalPaid += driver.totalPaid;
+        existing.unpaidBills += driver.unpaidBills;
+        // Thêm gói mới nếu chưa có
+        if (!existing.subscriptionTypes.includes(driver.subscriptionType)) {
+          existing.subscriptionTypes.push(driver.subscriptionType);
+        }
+      }
+    });
+    return Array.from(userMap.values());
+  }, [drivers]);
+
   // Pagination 8 drivers per page
   const itemsPerPage = 8;
   const [currentPage, setCurrentPage] = useState(1);
-  const totalDrivers = drivers.length;
+  const totalDrivers = consolidatedDrivers.length;
   const totalPages = Math.max(1, Math.ceil(totalDrivers / itemsPerPage));
   const currentDrivers = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
-    return drivers.slice(start, start + itemsPerPage);
-  }, [drivers, currentPage]);
+    return consolidatedDrivers.slice(start, start + itemsPerPage);
+  }, [consolidatedDrivers, currentPage]);
   const activeContracts = drivers.filter(d => d.contractStatus === 'active').length;
   const unpaidBills = drivers.reduce((sum, d) => sum + d.unpaidBills, 0);
   const totalRevenue = drivers.reduce((sum, d) => sum + d.totalPaid, 0);
@@ -268,17 +291,6 @@ const Payments = () => {
                   letterSpacing: '0.05em'
                 }}>
                   Đã thanh toán
-                </th>
-                <th style={{
-                  padding: '16px',
-                  textAlign: 'center',
-                  fontSize: '13px',
-                  fontWeight: '600',
-                  color: '#374151',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em'
-                }}>
-                  Chưa TT
                 </th>
                 <th style={{
                   padding: '16px',
