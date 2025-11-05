@@ -7,16 +7,11 @@ import {
   formatShortDate,
   getStatusColor,
   getStatusLabel,
-  getPaymentStatusColor,
-  getPaymentStatusLabel,
-  calculateUsagePercentage,
-  getUsageColor
+
 } from '../utils';
 
 const ContractCard = ({ contract, onClick }) => {
-  const usagePercentage = calculateUsagePercentage(contract.usedSwaps, contract.swapLimit);
-  const usageColor = getUsageColor(usagePercentage);
-
+  
   return (
     <div
       onClick={() => onClick(contract)}
@@ -134,44 +129,6 @@ const ContractCard = ({ contract, onClick }) => {
           }}>
             {formatShortDate(contract.endDate)}
           </p>
-        </div>
-        
-        <div>
-          <p style={{
-            fontSize: '0.75rem',
-            color: '#666',
-            marginBottom: '0.25rem'
-          }}>
-            Đã sử dụng
-          </p>
-          <p style={{
-            fontSize: '0.875rem',
-            fontWeight: '600',
-            color: usageColor
-          }}>
-            {contract.usedSwaps}/{contract.swapLimit} KM
-          </p>
-        </div>
-        
-        <div>
-          <p style={{
-            fontSize: '0.75rem',
-            color: '#666',
-            marginBottom: '0.25rem'
-          }}>
-            Thanh toán
-          </p>
-          <span style={{
-            display: 'inline-block',
-            padding: '0.25rem 0.5rem',
-            borderRadius: '6px',
-            fontSize: '0.75rem',
-            fontWeight: '600',
-            backgroundColor: getPaymentStatusColor(contract.paymentStatus) + '20',
-            color: getPaymentStatusColor(contract.paymentStatus)
-          }}>
-            {getPaymentStatusLabel(contract.paymentStatus)}
-          </span>
         </div>
       </div>
     </div>

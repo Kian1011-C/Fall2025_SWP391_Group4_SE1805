@@ -40,11 +40,14 @@ export const useContractsData = () => {
           amount: c.monthlyTotalFee ?? c.monthlyFee ?? c.monthlyBaseFee ?? 0,
           // Giới hạn sử dụng: dùng baseDistance như "số lượt/đơn vị" cho UI hiện tại
           swapLimit: c.swapLimit ?? c.baseDistance ?? 0,
+          baseDistance: c.baseDistance, // Thêm baseDistance trực tiếp để modal dùng
           usedSwaps: c.usedSwaps ?? 0,
           usedDistance: c.usedDistance ?? 0,
           monthlyBaseFee: c.monthlyBaseFee,
           monthlyOverageFee: c.monthlyOverageFee,
           monthlyTotalFee: c.monthlyTotalFee,
+          monthlyFee: c.monthlyFee, // Thêm monthlyFee để đảm bảo có đầy đủ
+          depositFee: c.depositFee, // Thêm depositFee để modal hiển thị
           currentMonth: c.currentMonth,
           description: c.description,
           isUnlimited: c.isUnlimited ?? false,
