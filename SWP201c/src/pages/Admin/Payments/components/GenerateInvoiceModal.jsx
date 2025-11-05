@@ -145,20 +145,20 @@ const GenerateInvoiceModal = ({ driver, onClose, onSuccess }) => {
           }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '14px' }}>
               <div>
-                <span style={{ color: '#6b7280' }}>Email:</span>
-                <span style={{ marginLeft: '8px', fontWeight: '500' }}>{driver.email}</span>
+                <span style={{ color: '#374151', fontWeight: '600' }}>Email:</span>
+                <span style={{ marginLeft: '8px', fontWeight: '600', color: '#111827' }}>{driver.email}</span>
               </div>
               <div>
-                <span style={{ color: '#6b7280' }}>SĐT:</span>
-                <span style={{ marginLeft: '8px', fontWeight: '500' }}>{driver.phone}</span>
+                <span style={{ color: '#374151', fontWeight: '600' }}>SĐT:</span>
+                <span style={{ marginLeft: '8px', fontWeight: '600', color: '#111827' }}>{driver.phone}</span>
               </div>
               <div>
-                <span style={{ color: '#6b7280' }}>Hợp đồng:</span>
-                <span style={{ marginLeft: '8px', fontWeight: '500' }}>#{driver.contractId}</span>
+                <span style={{ color: '#374151', fontWeight: '600' }}>Hợp đồng:</span>
+                <span style={{ marginLeft: '8px', fontWeight: '600', color: '#111827' }}>#{driver.contractId}</span>
               </div>
               <div>
-                <span style={{ color: '#6b7280' }}>Gói:</span>
-                <span style={{ marginLeft: '8px', fontWeight: '500' }}>{driver.subscriptionType}</span>
+                <span style={{ color: '#374151', fontWeight: '600' }}>Gói:</span>
+                <span style={{ marginLeft: '8px', fontWeight: '600', color: '#111827' }}>{driver.subscriptionType}</span>
               </div>
             </div>
           </div>
@@ -168,21 +168,22 @@ const GenerateInvoiceModal = ({ driver, onClose, onSuccess }) => {
             <label style={{
               display: 'block',
               marginBottom: '8px',
-              fontSize: '14px',
-              fontWeight: '500',
-              color: '#374151'
+              fontSize: '15px',
+              fontWeight: '700',
+              color: '#111827'
             }}>
               Kỳ thanh toán
             </label>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               <div>
-                <label style={{ display: 'block', marginBottom: '4px', fontSize: '13px', color: '#6b7280' }}>
+                <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', color: '#374151', fontWeight: '600' }}>
                   Năm
                 </label>
                 <input
                   type="number"
                   value={year}
                   onChange={(e) => setYear(parseInt(e.target.value))}
+                  disabled={!!billPreview}
                   min="2020"
                   max="2030"
                   style={{
@@ -190,23 +191,34 @@ const GenerateInvoiceModal = ({ driver, onClose, onSuccess }) => {
                     padding: '10px 12px',
                     border: '1px solid #d1d5db',
                     borderRadius: '8px',
-                    fontSize: '14px'
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: '#111827',
+                    backgroundColor: billPreview ? '#f3f4f6' : 'white',
+                    cursor: billPreview ? 'not-allowed' : 'text',
+                    opacity: billPreview ? 0.6 : 1
                   }}
                 />
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '4px', fontSize: '13px', color: '#6b7280' }}>
+                <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', color: '#374151', fontWeight: '600' }}>
                   Tháng
                 </label>
                 <select
                   value={month}
                   onChange={(e) => setMonth(parseInt(e.target.value))}
+                  disabled={!!billPreview}
                   style={{
                     width: '100%',
                     padding: '10px 12px',
                     border: '1px solid #d1d5db',
                     borderRadius: '8px',
-                    fontSize: '14px'
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: '#111827',
+                    backgroundColor: billPreview ? '#f3f4f6' : 'white',
+                    cursor: billPreview ? 'not-allowed' : 'pointer',
+                    opacity: billPreview ? 0.6 : 1
                   }}
                 >
                   {[...Array(12)].map((_, i) => (
@@ -291,54 +303,54 @@ const GenerateInvoiceModal = ({ driver, onClose, onSuccess }) => {
               
               <div style={{ display: 'grid', gap: '12px', fontSize: '14px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#6b7280' }}>Tổng quãng đường:</span>
-                  <span style={{ fontWeight: '500' }}>{billPreview.totalKm} km</span>
+                  <span style={{ color: '#374151', fontWeight: '600' }}>Tổng quãng đường:</span>
+                  <span style={{ fontWeight: '700', color: '#111827', fontSize: '15px' }}>{billPreview.totalKm} km</span>
                 </div>
                 
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#6b7280' }}>Quãng đường cơ bản:</span>
-                  <span style={{ fontWeight: '500' }}>{billPreview.baseDistance} km</span>
+                  <span style={{ color: '#374151', fontWeight: '600' }}>Quãng đường cơ bản:</span>
+                  <span style={{ fontWeight: '700', color: '#111827', fontSize: '15px' }}>{billPreview.baseDistance} km</span>
                 </div>
                 
                 {billPreview.overageKm > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: '#6b7280' }}>Vượt quá:</span>
-                    <span style={{ fontWeight: '500', color: '#f59e0b' }}>{billPreview.overageKm} km</span>
+                    <span style={{ color: '#374151', fontWeight: '600' }}>Vượt quá:</span>
+                    <span style={{ fontWeight: '700', color: '#f59e0b', fontSize: '15px' }}>{billPreview.overageKm} km</span>
                   </div>
                 )}
                 
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#6b7280' }}>Giá cơ bản:</span>
-                  <span style={{ fontWeight: '500' }}>{formatCurrency(billPreview.basePrice)}</span>
+                  <span style={{ color: '#374151', fontWeight: '600' }}>Giá cơ bản:</span>
+                  <span style={{ fontWeight: '700', color: '#111827', fontSize: '15px' }}>{formatCurrency(billPreview.basePrice)}</span>
                 </div>
                 
                 {billPreview.overageFee > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: '#6b7280' }}>Phí vượt quá:</span>
-                    <span style={{ fontWeight: '500', color: '#f59e0b' }}>{formatCurrency(billPreview.overageFee)}</span>
+                    <span style={{ color: '#374151', fontWeight: '600' }}>Phí vượt quá:</span>
+                    <span style={{ fontWeight: '700', color: '#f59e0b', fontSize: '15px' }}>{formatCurrency(billPreview.overageFee)}</span>
                   </div>
                 )}
                 
                 {billPreview.deposit_fee > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: '#6b7280' }}>Phí đặt cọc:</span>
-                    <span style={{ fontWeight: '500', color: '#3b82f6' }}>{formatCurrency(billPreview.deposit_fee)}</span>
+                    <span style={{ color: '#374151', fontWeight: '600' }}>Phí đặt cọc:</span>
+                    <span style={{ fontWeight: '700', color: '#3b82f6', fontSize: '15px' }}>{formatCurrency(billPreview.deposit_fee)}</span>
                   </div>
                 )}
                 
                 <div style={{ 
-                  borderTop: '1px solid #e5e7eb', 
+                  borderTop: '2px solid #e5e7eb', 
                   paddingTop: '12px',
                   marginTop: '8px'
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ fontWeight: '500' }}>Phí sử dụng tháng:</span>
-                    <span style={{ fontWeight: '600', fontSize: '15px' }}>{formatCurrency(billPreview.totalFee)}</span>
+                    <span style={{ fontWeight: '700', color: '#111827', fontSize: '15px' }}>Phí sử dụng tháng:</span>
+                    <span style={{ fontWeight: '700', fontSize: '16px', color: '#111827' }}>{formatCurrency(billPreview.totalFee)}</span>
                   </div>
                   
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ fontWeight: '700', fontSize: '16px', color: '#10b981' }}>Tổng thanh toán:</span>
-                    <span style={{ fontWeight: '700', fontSize: '18px', color: '#10b981' }}>
+                    <span style={{ fontWeight: '700', fontSize: '17px', color: '#10b981' }}>Tổng thanh toán:</span>
+                    <span style={{ fontWeight: '800', fontSize: '20px', color: '#10b981' }}>
                       {formatCurrency(billPreview.total_with_deposit)}
                     </span>
                   </div>
