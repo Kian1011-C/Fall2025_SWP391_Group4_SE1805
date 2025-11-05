@@ -58,13 +58,6 @@ const BatteryStockView = () => {
         if (health >= 50) return 'medium';
         return 'low';
     };
-    
-    // Get degradation info based on cycle count
-    const getDegradationInfo = (cycleCount) => {
-        if (cycleCount >= 1000) return { level: 'Chai nhiều', color: '#dc2626', icon: '🔴' };
-        if (cycleCount >= 500) return { level: 'Chai vừa', color: '#f59e0b', icon: '🟡' };
-        return { level: 'Tốt', color: '#16a34a', icon: '🟢' };
-    };
 
     // Format status
     const formatStatus = (status) => {
@@ -263,24 +256,6 @@ const BatteryStockView = () => {
                                             <div className="staff-battery-cycles">
                                                 <span className="staff-battery-cycles-icon">🔄</span>
                                                 <span className="staff-battery-cycles-text">{cycles}</span>
-                                                <span 
-                                                    className="staff-battery-degradation-badge"
-                                                    style={{ 
-                                                        marginLeft: '8px',
-                                                        fontSize: '10px',
-                                                        padding: '3px 7px',
-                                                        borderRadius: '12px',
-                                                        background: getDegradationInfo(cycles).color + '22',
-                                                        color: getDegradationInfo(cycles).color,
-                                                        fontWeight: '700',
-                                                        display: 'inline-flex',
-                                                        alignItems: 'center',
-                                                        gap: '3px'
-                                                    }}
-                                                >
-                                                    <span>{getDegradationInfo(cycles).icon}</span>
-                                                    <span>{getDegradationInfo(cycles).level}</span>
-                                                </span>
                                             </div>
                                         </td>
 
