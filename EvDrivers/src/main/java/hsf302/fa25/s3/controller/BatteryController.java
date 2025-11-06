@@ -784,7 +784,7 @@ public class BatteryController {
             if (battery.getCapacity() <= 0) {
                 battery.setCapacity(existingBattery.getCapacity());
             }
-            if (battery.getStateOfHealth() < 0 || battery.getStateOfHealth() > 100) {
+            if (battery.getStateOfHealth() <= 0 || battery.getStateOfHealth() > 100) {
                 battery.setStateOfHealth(existingBattery.getStateOfHealth());
             }
             if (battery.getStatus() == null || battery.getStatus().isEmpty()) {
@@ -793,6 +793,10 @@ public class BatteryController {
             // Preserve existing slotId when the incoming request does not include it
             if (battery.getSlotId() == null) {
                 battery.setSlotId(existingBattery.getSlotId());
+            }
+
+            if (battery.getCycleCount() <= 0) {
+                battery.setCycleCount(existingBattery.getCycleCount());
             }
             
             boolean updated = batteryDao.updateBattery(battery);
@@ -813,7 +817,7 @@ public class BatteryController {
                             switch (bs) {
                                 case "in_use":
                                 case "in-use":
-                                    slotStatus = "empty"; // battery removed from slot
+                                    slotStatus = "empty";// battery removed from slot
                                     break;
                                 case "charging":
                                     slotStatus = "charging"; // battery present and charging

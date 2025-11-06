@@ -13,7 +13,7 @@ import java.sql.SQLException;
 public class BatteryChargingService {
 
     // Run every 10 minutes (600,000 ms). Initial delay 10s to allow app start.
-    @Scheduled(initialDelay = 10000L, fixedDelay = 150000L)
+    @Scheduled(initialDelay = 10000L, fixedDelay = 6000L)
     public void runChargingCycle() {
         System.out.println("[BatteryChargingScheduler] Starting charging cycle...");
 

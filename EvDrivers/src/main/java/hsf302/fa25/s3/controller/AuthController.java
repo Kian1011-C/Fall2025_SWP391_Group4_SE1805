@@ -39,24 +39,6 @@ public class AuthController {
             "phone", user.getPhone(),
             "status", user.getStatus()
         ));
-        
-        String redirectUrl;
-        switch (user.getRole().toUpperCase()) {
-            case "ADMIN":
-                redirectUrl = "/admin/dashboard?id=" + user.getUserId();
-                break;
-            case "STAFF":
-                redirectUrl = "/staff/home?id=" + user.getUserId();
-                break;
-            case "EV DRIVER":
-                redirectUrl = "/driver/home?id=" + user.getUserId();
-                break;
-            default:
-                redirectUrl = "/";
-                break;
-        }
-        response.put("redirect", redirectUrl);
-        
         return ResponseEntity.ok(response);
     }
 
@@ -64,65 +46,13 @@ public class AuthController {
     public ResponseEntity<?> logout(@RequestHeader(value = "Authorization", required = false) String token) {
         // TODO: Implement token invalidation
         Map<String, Object> response = new HashMap<>();
+        if (token == null || token.isBlank()) {
+            response.put("success", false);
+            response.put("message", "No token provided");
+            return ResponseEntity.status(400).body(response);
+        }
         response.put("success", true);
         response.put("message", "Logout successful");
-        
-        return ResponseEntity.ok(response);
-    }
-
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody Map<String, Object> registerRequest) {
-        // TODO: Implement actual registration logic with UserDao
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", false);
-        response.put("message", "Registration feature is not implemented yet");
-        
-        return ResponseEntity.status(501).body(response);
-    }
-
-    @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser(@RequestHeader(value = "Authorization", required = false) String token) {
-        if (token == null || token.isEmpty()) {
-            return ResponseEntity.status(401).body(Map.of(
-                "success", false,
-                "message", "Unauthorized"
-            ));
-        }
-        
-        // TODO: Implement actual JWT token validation and extract user ID
-        // For now, return mock data until token validation is implemented
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("user", Map.of(
-            "id", 1,
-            "email", "test@example.com",
-            "name", "Test User", 
-            "role", "DRIVER",
-            "phone", "0123456789",
-            "status", "ACTIVE"
-        ));
-        response.put("note", "Mock data - JWT token validation not implemented yet");
-        
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/check")
-    public ResponseEntity<?> checkAuthentication(@RequestHeader(value = "Authorization", required = false) String token) {
-        Map<String, Object> response = new HashMap<>();
-        
-        if (token != null && !token.isEmpty()) {
-            // TODO: Validate JWT token and get real user data
-            response.put("authenticated", true);
-            response.put("user", Map.of(
-                "id", 1,
-                "email", "test@example.com",
-                "name", "Test User",
-                "role", "DRIVER"
-            ));
-            response.put("note", "Mock data - JWT validation not implemented");
-        } else {
-            response.put("authenticated", false);
-        }
         
         return ResponseEntity.ok(response);
     }

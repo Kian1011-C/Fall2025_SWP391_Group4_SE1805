@@ -107,64 +107,6 @@ public class UserController {
         return response;
     }
 
-    @GetMapping("/{userId}/notifications")
-    public Map<String, Object> getUserNotifications(@PathVariable String userId) {
-        // Mock data - Notification table not implemented yet
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("data", new java.util.ArrayList<>());
-        response.put("unreadCount", 0);
-        response.put("note", "Mock data - Notification table not implemented");
-        return response;
-    }
-
-    @GetMapping("/{userId}/statistics")
-    public Map<String, Object> getUserStatistics(@PathVariable String userId) {
-        Map<String, Object> response = new HashMap<>();
-        try {
-            // TODO: Implement real statistics calculation from Swaps and Contracts tables
-            // For now, return mock data based on user data
-            Map<String, Object> stats = new HashMap<>();
-            stats.put("monthlySwaps", 12);
-            stats.put("totalDistance", 324);
-            stats.put("totalSavings", 156000);
-            stats.put("batteryLevel", 75);
-            stats.put("batteryHealth", 92);
-            
-            response.put("success", true);
-            response.put("data", stats);
-            response.put("note", "Mock data - Real statistics calculation not implemented yet");
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "Error: " + e.getMessage());
-        }
-        return response;
-    }
-
-    @GetMapping("/{userId}/subscription")
-    public Map<String, Object> getUserSubscription(@PathVariable String userId) {
-        Map<String, Object> response = new HashMap<>();
-        try {
-            // TODO: Implement real subscription lookup from Contracts table
-            // For now, return mock data
-            Map<String, Object> subscription = new HashMap<>();
-            subscription.put("planName", "Gói Cơ Bản");
-            subscription.put("monthlyFee", 270000);
-            subscription.put("maxDistance", 400);
-            subscription.put("startDate", "2024-01-01");
-            subscription.put("endDate", "2024-12-31");
-            subscription.put("status", "ACTIVE");
-            
-            response.put("success", true);
-            response.put("data", subscription);
-            response.put("note", "Mock data - Real subscription lookup not implemented yet");
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "Error: " + e.getMessage());
-        }
-        return response;
-    }
-
     @PostMapping("/register")
     public Map<String,Object> register(@RequestParam String firstName,
                                        @RequestParam String lastName,
@@ -224,7 +166,7 @@ public class UserController {
             }
 
             res.put("success", true);
-            res.put("userId", userId);
+            res.put("data", u);
             res.put("redirect", "/verify-otp?userId=" + userId);
             res.put("message", "Đăng ký thành công! Vui lòng kiểm tra email để nhập OTP.");
             return res;
