@@ -9,9 +9,8 @@ export const useBatteryStockData = () => {
     const fetchBatteries = useCallback(async () => {
         try {
             setError(null);
-            setIsLoading(true); // Bắt đầu tải
+            setIsLoading(true);
             
-            // --- THAY DỮ LIỆU GIẢ BẰNG API THẬT ---
             const response = await batteryService.getAllBatteries();
 
             if (response.success && Array.isArray(response.data)) {
@@ -22,7 +21,7 @@ export const useBatteryStockData = () => {
         } catch(err) {
             setError(err.message || "Không thể kết nối đến server.");
         } finally {
-            setIsLoading(false); // Kết thúc tải
+            setIsLoading(false);
         }
     }, []);
 
@@ -30,5 +29,19 @@ export const useBatteryStockData = () => {
         fetchBatteries();
     }, [fetchBatteries]);
 
-    return { batteries, isLoading, error, refetch: fetchBatteries }; // Thêm hàm refetch
+    const handleUpdate = async (batteryId, batteryData) => {
+        const response = await batteryService.updateBattery(batteryId, batteryData);
+        if (response.success) {
+            fetchBatteries();
+        }
+        return response;
+    };
+
+    return { 
+        batteries, 
+        isLoading, 
+        error, 
+        refetch: fetchBatteries,
+        handleUpdate 
+    };
 };

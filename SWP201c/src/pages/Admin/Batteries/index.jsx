@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useBatteriesData } from './hooks/useBatteriesData';
 import BatteryRow from './components/BatteryRow';
 import BatteryFormModal from './components/BatteryFormModal';
+import BatteryDetailModal from './components/BatteryDetailModal';
 import '../../../assets/css/AdminBatteryManagement.css';
 
 const AdminBatteries = () => {
@@ -9,6 +10,8 @@ const AdminBatteries = () => {
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBattery, setEditingBattery] = useState(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedBattery, setSelectedBattery] = useState(null);
 
   // Calculate statistics
   const stats = useMemo(() => {
@@ -17,10 +20,14 @@ const AdminBatteries = () => {
     const charging = batteries.filter(b => b.status?.toLowerCase() === 'charging').length;
     const maintenance = batteries.filter(b => b.status?.toLowerCase() === 'maintenance').length;
     const avgHealth = batteries.length > 0 
-      ? (batteries.reduce((sum, b) => sum + (b.healthStatus || 0), 0) / batteries.length).toFixed(1)
+      ? (batteries.reduce((sum, b) => sum + (b.stateOfHealth || 0), 0) / batteries.length).toFixed(1)
       : 0;
+    const avgCycles = batteries.length > 0
+      ? Math.round(batteries.reduce((sum, b) => sum + (b.cycleCount || 0), 0) / batteries.length)
+      : 0;
+    const totalCycles = batteries.reduce((sum, b) => sum + (b.cycleCount || 0), 0);
     
-    return { total, available, charging, maintenance, avgHealth };
+    return { total, available, charging, maintenance, avgHealth, avgCycles, totalCycles };
   }, [batteries]);
 
   const handleOpenCreateModal = () => {
@@ -39,6 +46,18 @@ const AdminBatteries = () => {
     console.log('🟢 AdminBatteries: Closing modal');
     setIsModalOpen(false);
     setEditingBattery(null);
+  };
+
+  const handleViewDetail = (battery) => {
+    console.log('🟢 AdminBatteries: Opening detail modal for battery:', battery);
+    setSelectedBattery(battery);
+    setIsDetailModalOpen(true);
+  };
+
+  const handleCloseDetailModal = () => {
+    console.log('🟢 AdminBatteries: Closing detail modal');
+    setIsDetailModalOpen(false);
+    setSelectedBattery(null);
   };
 
   const handleSave = async (formData, batteryId) => {
@@ -189,22 +208,6 @@ if (isLoading) {
             <h2 className="admin-battery-stat-value">{stats.charging}</h2>
           </div>
         </div>
-
-        <div className="admin-battery-stat-card">
-          <div className="admin-battery-stat-icon">🔧</div>
-          <div className="admin-battery-stat-content">
-            <span className="admin-battery-stat-label">Bảo trì</span>
-            <h2 className="admin-battery-stat-value">{stats.maintenance}</h2>
-          </div>
-        </div>
-
-        <div className="admin-battery-stat-card">
-          <div className="admin-battery-stat-icon">❤️</div>
-          <div className="admin-battery-stat-content">
-            <span className="admin-battery-stat-label">Sức khỏe TB</span>
-            <h2 className="admin-battery-stat-value">{stats.avgHealth}%</h2>
-          </div>
-        </div>
       </div>
 
       {/* Filters */}
@@ -245,7 +248,7 @@ if (isLoading) {
               <th>Mã Pin</th>
               <th>Mẫu Pin</th>
               <th>Trạng thái</th>
-              <th>Sức khỏe</th>
+              <th>Dung lượng</th>
               <th>Chu kỳ sạc</th>
               <th>Hành động</th>
             </tr>
@@ -256,7 +259,8 @@ if (isLoading) {
                 key={bat.batteryId} 
                 battery={bat} 
                 onEdit={handleOpenEditModal} 
-                onDelete={handleDeleteBattery} 
+                onDelete={handleDeleteBattery}
+                onViewDetail={handleViewDetail}
               />
             ))}
           </tbody>
@@ -303,6 +307,13 @@ if (isLoading) {
         onClose={handleCloseModal}
         onSave={handleSave}
         battery={editingBattery}
+      />
+
+      {/* Detail Modal */}
+      <BatteryDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={handleCloseDetailModal}
+        battery={selectedBattery}
       />
     </div>
   );

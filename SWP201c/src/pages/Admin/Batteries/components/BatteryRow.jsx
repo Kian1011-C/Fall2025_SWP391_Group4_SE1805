@@ -1,6 +1,6 @@
 import React from 'react';
 
-const BatteryRow = ({ battery, onEdit, onDelete }) => {
+const BatteryRow = ({ battery, onEdit, onDelete, onViewDetail }) => {
   // Get health class
   const getHealthClass = (health) => {
     if (health >= 80) return 'high';
@@ -72,13 +72,28 @@ const BatteryRow = ({ battery, onEdit, onDelete }) => {
       <td>
         <div className="admin-battery-cycles">
           <span className="admin-battery-cycles-icon">🔄</span>
-          <span className="admin-battery-cycles-text">{battery.cycleCount}</span>
+          <div className="admin-battery-cycles-info">
+            <span className="admin-battery-cycles-text">{battery.cycleCount || 0}</span>
+            {battery.cycleCount > 2000 && (
+              <span className="admin-battery-cycles-warning" title="Pin đã qua nhiều chu kỳ sạc">⚠️</span>
+            )}
+            {battery.cycleCount > 2500 && (
+              <span className="admin-battery-cycles-critical" title="Nên thay pin sớm">🔴</span>
+            )}
+          </div>
         </div>
       </td>
 
       {/* Actions */}
       <td>
         <div className="admin-battery-actions">
+          <button 
+            onClick={() => onViewDetail(battery)} 
+            className="admin-battery-action-btn view"
+            title="Xem chi tiết"
+          >
+            👁️ Chi tiết
+          </button>
           <button 
             onClick={() => onEdit(battery)} 
             className="admin-battery-action-btn edit"
