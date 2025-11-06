@@ -134,7 +134,7 @@ const BatteryFormModal = ({ isOpen, onClose, onSave, battery }) => {
               >
                 <option value="available">Sẵn sàng (Available)</option>
                 <option value="charging">Đang sạc (Charging)</option>
-                <option value="maintenance">Bảo trì (Maintenance)</option>
+                <option value="faulty">Bảo trì (Maintenance)</option>
                 <option value="in_use">Đang sử dụng (In Use)</option>
                 <option value="in_stock">Trong kho (In Stock)</option>
               </select>

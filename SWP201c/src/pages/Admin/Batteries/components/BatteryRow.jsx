@@ -14,6 +14,7 @@ const BatteryRow = ({ battery, onEdit, onDelete, onViewDetail }) => {
       'available': 'available',
       'in_stock': 'in_stock',
       'charging': 'charging',
+      'faulty': 'maintenance',
       'maintenance': 'maintenance',
       'in_use': 'in_use',
       'low': 'low'

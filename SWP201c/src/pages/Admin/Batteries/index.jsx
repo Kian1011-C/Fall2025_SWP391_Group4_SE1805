@@ -16,9 +16,11 @@ const AdminBatteries = () => {
   // Calculate statistics
   const stats = useMemo(() => {
     const total = batteries.length;
-    const available = batteries.filter(b => b.status?.toLowerCase() === 'available' || b.status?.toLowerCase() === 'in_stock').length;
+    const available = batteries.filter(b => b.status?.toLowerCase() === 'available').length;
+    const inStock = batteries.filter(b => b.status?.toLowerCase() === 'in_stock').length;
     const charging = batteries.filter(b => b.status?.toLowerCase() === 'charging').length;
-    const maintenance = batteries.filter(b => b.status?.toLowerCase() === 'maintenance').length;
+    const maintenance = batteries.filter(b => b.status?.toLowerCase() === 'faulty' || b.status?.toLowerCase() === 'maintenance').length;
+    const inUse = batteries.filter(b => b.status?.toLowerCase() === 'in_use').length;
     const avgHealth = batteries.length > 0 
       ? (batteries.reduce((sum, b) => sum + (b.stateOfHealth || 0), 0) / batteries.length).toFixed(1)
       : 0;
@@ -27,7 +29,7 @@ const AdminBatteries = () => {
       : 0;
     const totalCycles = batteries.reduce((sum, b) => sum + (b.cycleCount || 0), 0);
     
-    return { total, available, charging, maintenance, avgHealth, avgCycles, totalCycles };
+    return { total, available, inStock, charging, maintenance, inUse, avgHealth, avgCycles, totalCycles };
   }, [batteries]);
 
   const handleOpenCreateModal = () => {
@@ -202,10 +204,34 @@ if (isLoading) {
         </div>
 
         <div className="admin-battery-stat-card">
+          <div className="admin-battery-stat-icon">📦</div>
+          <div className="admin-battery-stat-content">
+            <span className="admin-battery-stat-label">Trong kho</span>
+            <h2 className="admin-battery-stat-value">{stats.inStock}</h2>
+          </div>
+        </div>
+
+        <div className="admin-battery-stat-card">
           <div className="admin-battery-stat-icon">⚡</div>
           <div className="admin-battery-stat-content">
             <span className="admin-battery-stat-label">Đang sạc</span>
             <h2 className="admin-battery-stat-value">{stats.charging}</h2>
+          </div>
+        </div>
+
+        <div className="admin-battery-stat-card">
+          <div className="admin-battery-stat-icon">🔧</div>
+          <div className="admin-battery-stat-content">
+            <span className="admin-battery-stat-label">Bảo trì</span>
+            <h2 className="admin-battery-stat-value">{stats.maintenance}</h2>
+          </div>
+        </div>
+
+        <div className="admin-battery-stat-card">
+          <div className="admin-battery-stat-icon">🚗</div>
+          <div className="admin-battery-stat-content">
+            <span className="admin-battery-stat-label">Đang sử dụng</span>
+            <h2 className="admin-battery-stat-value">{stats.inUse}</h2>
           </div>
         </div>
       </div>
@@ -230,7 +256,7 @@ if (isLoading) {
             <option value="available">✅ Sẵn sàng</option>
             <option value="in_stock">✅ Trong kho</option>
             <option value="charging">⚡ Đang sạc</option>
-            <option value="maintenance">🔧 Bảo trì</option>
+            <option value="faulty">🔧 Bảo trì</option>
             <option value="in_use">🚗 Đang sử dụng</option>
           </select>
 
