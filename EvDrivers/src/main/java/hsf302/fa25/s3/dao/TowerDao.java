@@ -12,7 +12,7 @@ public class TowerDao {
 
     public List<Tower> getTowersByStationId(int stationId) {
         List<Tower> list = new ArrayList<>();
-        String sql = "SELECT * FROM Towers WHERE station_id=? AND status='active'";
+        String sql = "SELECT * FROM Towers WHERE station_id=? ORDER BY tower_number";
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 

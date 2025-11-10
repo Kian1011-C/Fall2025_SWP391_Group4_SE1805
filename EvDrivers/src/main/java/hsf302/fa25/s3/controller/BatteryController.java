@@ -920,6 +920,222 @@ public class BatteryController {
         }
     }
 
+    @PostMapping("/{batteryId}/assign-slot")
+    public ResponseEntity<?> assignBatteryToSlot(
+            @PathVariable Long batteryId,
+            @RequestBody Map<String, Object> request) {
+        try {
+            Integer slotId = request.get("slotId") != null ? 
+                Integer.valueOf(request.get("slotId").toString()) : null;
+            
+            if (slotId == null) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "slotId is required");
+                return ResponseEntity.status(400).body(response);
+            }
+            
+            // Check if battery exists
+            Battery battery = batteryDao.getBatteryById(batteryId.intValue());
+            if (battery == null) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Battery not found");
+                return ResponseEntity.status(404).body(response);
+            }
+            
+            // Check if battery is in_use (cannot assign to slot)
+            if ("in_use".equalsIgnoreCase(battery.getStatus()) || "IN_USE".equals(battery.getStatus())) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Cannot assign battery that is currently in use");
+                return ResponseEntity.status(400).body(response);
+            }
+            
+            try (java.sql.Connection conn = hsf302.fa25.s3.context.ConnectDB.getConnection()) {
+                conn.setAutoCommit(false);
+                
+                try {
+                    // 1. Check if slot exists and is empty
+                    String checkSlotSql = """
+                        SELECT sl.slot_id, sl.status, t.tower_id, t.tower_number, t.station_id
+                        FROM Slots sl
+                        INNER JOIN Towers t ON sl.tower_id = t.tower_id
+                        WHERE sl.slot_id = ?
+                    """;
+                    
+                    Integer towerId = null;
+                    String slotStatus = null;
+                    
+                    try (java.sql.PreparedStatement checkPs = conn.prepareStatement(checkSlotSql)) {
+                        checkPs.setInt(1, slotId);
+                        java.sql.ResultSet rs = checkPs.executeQuery();
+                        
+                        if (!rs.next()) {
+                            conn.rollback();
+                            Map<String, Object> response = new HashMap<>();
+                            response.put("success", false);
+                            response.put("message", "Slot not found");
+                            return ResponseEntity.status(404).body(response);
+                        }
+                        
+                        slotStatus = rs.getString("status");
+                        towerId = rs.getInt("tower_id");
+                    }
+                    
+                    // Check if slot is empty
+                    if (!"empty".equalsIgnoreCase(slotStatus)) {
+                        conn.rollback();
+                        Map<String, Object> response = new HashMap<>();
+                        response.put("success", false);
+                        response.put("message", "Slot is not empty. Current status: " + slotStatus);
+                        return ResponseEntity.status(400).body(response);
+                    }
+                    
+                    // 2. Check if slot already has another battery
+                    String checkBatteryInSlotSql = "SELECT COUNT(*) FROM Batteries WHERE slot_id = ?";
+                    try (java.sql.PreparedStatement checkBatPs = conn.prepareStatement(checkBatteryInSlotSql)) {
+                        checkBatPs.setInt(1, slotId);
+                        java.sql.ResultSet rs = checkBatPs.executeQuery();
+                        if (rs.next() && rs.getInt(1) > 0) {
+                            conn.rollback();
+                            Map<String, Object> response = new HashMap<>();
+                            response.put("success", false);
+                            response.put("message", "Slot already has a battery assigned");
+                            return ResponseEntity.status(400).body(response);
+                        }
+                    }
+                    
+                    // 3. Update battery: set slot_id and status
+                    String updateBatterySql = "UPDATE Batteries SET slot_id = ?, status = ? WHERE battery_id = ?";
+                    String newBatteryStatus = "available"; // Battery in slot and ready
+                    
+                    try (java.sql.PreparedStatement updateBatPs = conn.prepareStatement(updateBatterySql)) {
+                        updateBatPs.setInt(1, slotId);
+                        updateBatPs.setString(2, newBatteryStatus);
+                        updateBatPs.setLong(3, batteryId);
+                        updateBatPs.executeUpdate();
+                    }
+                    
+                    // 4. Update slot status to 'full'
+                    String updateSlotSql = "UPDATE Slots SET status = 'full' WHERE slot_id = ?";
+                    try (java.sql.PreparedStatement updateSlotPs = conn.prepareStatement(updateSlotSql)) {
+                        updateSlotPs.setInt(1, slotId);
+                        updateSlotPs.executeUpdate();
+                    }
+                    
+                    conn.commit();
+                    
+                    // Get updated info
+                    Battery updatedBattery = batteryDao.getBatteryById(batteryId.intValue());
+                    
+                    Map<String, Object> resultData = new HashMap<>();
+                    resultData.put("batteryId", batteryId);
+                    resultData.put("slotId", slotId);
+                    resultData.put("towerId", towerId);
+                    resultData.put("batteryStatus", updatedBattery.getStatus());
+                    resultData.put("slotStatus", "full");
+                    
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("success", true);
+                    response.put("message", "Battery assigned to slot successfully");
+                    response.put("data", resultData);
+                    
+                    return ResponseEntity.ok(response);
+                    
+                } catch (Exception e) {
+                    conn.rollback();
+                    throw e;
+                }
+            }
+            
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Error assigning battery to slot: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    @PostMapping("/{batteryId}/remove-from-slot")
+    public ResponseEntity<?> removeBatteryFromSlot(@PathVariable Long batteryId) {
+        try {
+            // Check if battery exists
+            Battery battery = batteryDao.getBatteryById(batteryId.intValue());
+            if (battery == null) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Battery not found");
+                return ResponseEntity.status(404).body(response);
+            }
+            
+            if (battery.getSlotId() == null) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Battery is not assigned to any slot");
+                return ResponseEntity.status(400).body(response);
+            }
+            
+            // Check if battery is in_use (cannot remove)
+            if ("in_use".equalsIgnoreCase(battery.getStatus()) || "IN_USE".equals(battery.getStatus())) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Cannot remove battery that is currently in use");
+                return ResponseEntity.status(400).body(response);
+            }
+            
+            try (java.sql.Connection conn = hsf302.fa25.s3.context.ConnectDB.getConnection()) {
+                conn.setAutoCommit(false);
+                
+                try {
+                    Integer oldSlotId = battery.getSlotId();
+                    
+                    // 1. Update battery: clear slot_id and set status to 'charging' or 'faulty' based on current
+                    String newStatus = "faulty".equalsIgnoreCase(battery.getStatus()) ? "faulty" : "charging";
+                    String updateBatterySql = "UPDATE Batteries SET slot_id = NULL, status = ? WHERE battery_id = ?";
+                    
+                    try (java.sql.PreparedStatement updateBatPs = conn.prepareStatement(updateBatterySql)) {
+                        updateBatPs.setString(1, newStatus);
+                        updateBatPs.setLong(2, batteryId);
+                        updateBatPs.executeUpdate();
+                    }
+                    
+                    // 2. Update slot status to 'empty'
+                    String updateSlotSql = "UPDATE Slots SET status = 'empty' WHERE slot_id = ?";
+                    try (java.sql.PreparedStatement updateSlotPs = conn.prepareStatement(updateSlotSql)) {
+                        updateSlotPs.setInt(1, oldSlotId);
+                        updateSlotPs.executeUpdate();
+                    }
+                    
+                    conn.commit();
+                    
+                    Map<String, Object> resultData = new HashMap<>();
+                    resultData.put("batteryId", batteryId);
+                    resultData.put("previousSlotId", oldSlotId);
+                    resultData.put("batteryStatus", newStatus);
+                    resultData.put("slotStatus", "empty");
+                    
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("success", true);
+                    response.put("message", "Battery removed from slot successfully");
+                    response.put("data", resultData);
+                    
+                    return ResponseEntity.ok(response);
+                    
+                } catch (Exception e) {
+                    conn.rollback();
+                    throw e;
+                }
+            }
+            
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Error removing battery from slot: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
     @PutMapping("/bulk")
     public ResponseEntity<?> bulkUpdateBatteries(@RequestBody Map<String, Object> request) {
         try {
