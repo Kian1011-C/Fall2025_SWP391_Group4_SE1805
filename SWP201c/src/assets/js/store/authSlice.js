@@ -3,7 +3,7 @@
 
 import { create } from 'zustand';
 
-const useAuthStore = create((set, get) => ({
+const useAuthStore = create((set) => ({
   // State
   user: null,
   isAuthenticated: false,

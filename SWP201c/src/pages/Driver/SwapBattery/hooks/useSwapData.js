@@ -384,18 +384,25 @@ export const useSwapData = (goToStep, STEPS) => {
                 if (status === 'full' || status === 'available') {
                     const derivedBatteryId = slot.batteryId || slot.battery_id || slot?.battery?.id;
                     const derivedSlotNumber = slot.slotNumber || slot.slot_number || slot.slot_id;
-                    newBatteryId = derivedBatteryId ?? `BAT-SLOT-${derivedSlotNumber}`;
-                    newBatterySlot = derivedSlotNumber;
-                    newBatteryLevel = slot.stateOfHealth || slot.state_of_health || 
-                                     slot.batteryLevel || slot.battery_level || 100;
                     
-                    console.log('✅ ĐÃ CHỌN PIN MỚI:', {
-                        batteryId: newBatteryId,
-                        slotNumber: newBatterySlot,
-                        level: newBatteryLevel,
-                        status: status
-                    });
-                    break;
+                    // ⚠️ CHỈ DÙNG batteryId THẬT (số), KHÔNG tạo ID giả
+                    if (derivedBatteryId) {
+                        newBatteryId = derivedBatteryId;
+                        newBatterySlot = derivedSlotNumber;
+                        newBatteryLevel = slot.stateOfHealth || slot.state_of_health || 
+                                         slot.batteryLevel || slot.battery_level || 100;
+                        
+                        console.log('✅ ĐÃ CHỌN PIN MỚI:', {
+                            batteryId: newBatteryId,
+                            slotNumber: newBatterySlot,
+                            level: newBatteryLevel,
+                            status: status
+                        });
+                        break;
+                    } else {
+                        console.warn('⚠️ Slot', derivedSlotNumber, 'có status', status, 'nhưng KHÔNG CÓ batteryId!');
+                        console.warn('   Backend cần sửa API /api/driver/slots để trả về batteryId.');
+                    }
                 }
             }
 
@@ -462,41 +469,18 @@ export const useSwapData = (goToStep, STEPS) => {
             console.log('  └─ Full response:', JSON.stringify(response, null, 2));
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             
-            // GỌI THÊM API ĐỂ LẤY CHI TIẾT SWAP SAU KHI CONFIRM (bao gồm slot numbers)
-            let swapDetails = null;
-            try {
-                console.log('📡 Gọi API GET swap details để lấy thông tin slot numbers...');
-                swapDetails = await swapService.getSwapDetails(response.swapId);
-                console.log('✅ Swap details từ API:', JSON.stringify(swapDetails, null, 2));
-                
-                // Lấy slot numbers từ swap details nếu có
-                if (swapDetails) {
-                    console.log('📦 Thông tin slot từ swap details:');
-                    console.log('  ├─ oldSlotNumber:', swapDetails.oldSlotNumber || swapDetails.old_slot_number);
-                    console.log('  ├─ newSlotNumber:', swapDetails.newSlotNumber || swapDetails.new_slot_number);
-                    console.log('  ├─ slotNumber:', swapDetails.slotNumber || swapDetails.slot_number);
-                }
-            } catch (detailError) {
-                console.warn('⚠️ Không lấy được swap details từ API:', detailError);
-                console.warn('⚠️ Sẽ dùng dữ liệu từ confirm response và sessionStorage');
-            }
-            
-            // Merge dữ liệu từ nhiều nguồn để đảm bảo có đầy đủ thông tin
+            // Sử dụng data trực tiếp từ response của POST /api/swaps/{swapId}/confirm
             const enrichedSummary = {
                 ...response,
                 // Đảm bảo có oldSlotNumber (slot trống nơi đặt pin cũ)
-                // Ưu tiên: swapDetails > confirm response > sessionStorage
-                oldSlotNumber: swapDetails?.oldSlotNumber || 
-                              swapDetails?.old_slot_number ||
-                              response.oldSlotNumber || 
+                // Ưu tiên: confirm response > sessionStorage
+                oldSlotNumber: response.oldSlotNumber || 
                               response.old_slot_number ||
                               sessionStorage.getItem('emptySlotNumber') || 
                               null,
                 // Đảm bảo có newSlotNumber (slot của pin mới)
-                // Ưu tiên: swapDetails > confirm response > sessionStorage
-                newSlotNumber: swapDetails?.newSlotNumber || 
-                              swapDetails?.new_slot_number ||
-                              response.newSlotNumber || 
+                // Ưu tiên: confirm response > sessionStorage
+                newSlotNumber: response.newSlotNumber || 
                               response.new_slot_number ||
                               response.newSlot || 
                               response.slotNumber ||
@@ -505,15 +489,13 @@ export const useSwapData = (goToStep, STEPS) => {
             };
             
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.log('📦 ENRICHED SUMMARY (sau khi merge tất cả nguồn):');
+            console.log('📦 SUMMARY từ confirm response:');
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             console.log('  ├─ oldSlotNumber:', enrichedSummary.oldSlotNumber, '(slot trống nơi đặt pin cũ)');
-            console.log('  │  └─ Nguồn:', swapDetails?.oldSlotNumber ? 'swapDetails API' : 
-                                                (response.oldSlotNumber ? 'confirm response' : 'sessionStorage'));
+            console.log('  │  └─ Nguồn:', response.oldSlotNumber ? 'confirm response' : 'sessionStorage');
             console.log('  ├─ newSlotNumber:', enrichedSummary.newSlotNumber, '(slot của pin mới)');
-            console.log('  │  └─ Nguồn:', swapDetails?.newSlotNumber ? 'swapDetails API' : 
-                                                (response.newSlotNumber ? 'confirm response' : 'sessionStorage'));
-            console.log('  └─ Full enriched summary:', JSON.stringify(enrichedSummary, null, 2));
+            console.log('  │  └─ Nguồn:', response.newSlotNumber ? 'confirm response' : 'sessionStorage');
+            console.log('  └─ Full summary:', JSON.stringify(enrichedSummary, null, 2));
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             
             // Lưu dữ liệu tóm tắt (swap đã update, status = "COMPLETED")

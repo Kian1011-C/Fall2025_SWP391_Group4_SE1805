@@ -152,14 +152,14 @@ const TowerSelector = () => {
             
             <div className="station-grid"> 
                 {cabinets.length > 0 ? (
-                    cabinets.map(cab => {
+                    cabinets.map((cab, index) => {
                         const cabinetId = cab.id || cab.cabinetId;
                         const slotInfo = towerSlotInfo[cabinetId];
                         const hasAvailableBatteries = slotInfo && slotInfo.availableBatteries > 0;
                         
                         return (
                             <CabinetCard 
-                                key={cabinetId}
+                                key={cabinetId || `cabinet-${index}`}
                                 cabinet={cab}
                                 isSelected={selectedCabinet?.id === cab.id}
                                 onSelect={() => {

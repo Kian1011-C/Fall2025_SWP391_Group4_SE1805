@@ -1,7 +1,7 @@
 // Stats Cards Component
 import React from 'react';
 
-const StatsCards = ({ stats, formatCurrency }) => {
+const StatsCards = ({ stats }) => {
   const statsConfig = [
     {
       icon: '🔋',
@@ -12,28 +12,12 @@ const StatsCards = ({ stats, formatCurrency }) => {
       fontSize: '2rem'
     },
     {
-      icon: '💎',
-      value: stats.currentPlans.length > 0 ? stats.currentPlans.join(', ') : 'Chưa có gói',
-      label: stats.currentPlans.length > 1 ? 'Các gói hiện tại' : 'Gói hiện tại',
-      color: 'rgba(106, 183, 255, 0.3)',
-      valueColor: '#6ab7ff',
-      fontSize: '1.1rem'
-    },
-    {
       icon: '🚗',
       value: stats.activeVehicles,
       label: 'Xe đang sử dụng',
       color: 'rgba(255, 165, 0, 0.3)',
       valueColor: '#ffa500',
       fontSize: '2rem'
-    },
-    {
-      icon: '💰',
-      value: formatCurrency(stats.monthlySpent),
-      label: 'Chi phí tháng này',
-      color: 'rgba(156, 136, 255, 0.3)',
-      valueColor: '#9c88ff',
-      fontSize: '1.3rem'
     },
     {
       icon: '📏',

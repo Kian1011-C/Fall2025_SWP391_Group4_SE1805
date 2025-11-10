@@ -34,33 +34,44 @@ const TakeNewBattery = () => {
                 setNewBatteryId(newBatteryIdFromStorage);
                 setNewBatterySlot(newBatterySlotFromStorage);
 
-                // Bước 2: Gọi API để lấy thông tin chi tiết pin (bao gồm dung lượng THẬT)
-                console.log('🔋 Gọi API getBatteryById để lấy thông tin pin mới:', newBatteryIdFromStorage);
-                const batteryResponse = await batteryService.getBatteryById(newBatteryIdFromStorage);
+                // Bước 2: Gọi API để lấy thông tin chi tiết pin (CHỈ NẾU ID là số hợp lệ)
+                // ⚠️ Kiểm tra: Battery ID phải là số, không được là string như "BAT-SLOT-1"
+                const isValidBatteryId = !isNaN(newBatteryIdFromStorage) && newBatteryIdFromStorage !== null;
                 
-                if (batteryResponse.success && batteryResponse.data) {
-                    const batteryData = batteryResponse.data;
+                if (isValidBatteryId) {
+                    console.log('🔋 Gọi API getBatteryById để lấy thông tin pin mới:', newBatteryIdFromStorage);
+                    const batteryResponse = await batteryService.getBatteryById(newBatteryIdFromStorage);
                     
-                    // Lấy dung lượng pin từ nhiều nguồn có thể (từ API thật)
-                    const batteryLevel = batteryData.stateOfHealth || 
-                                       batteryData.state_of_health || 
-                                       batteryData.batteryLevel || 
-                                       batteryData.battery_level ||
-                                       batteryData.health ||
-                                       batteryData.capacity || 100;
-                    
-                    console.log('✅ Đã lấy thông tin pin mới từ API:');
-                    console.log('  - Battery ID:', newBatteryIdFromStorage);
-                    console.log('  - Battery Level (THẬT từ API):', batteryLevel + '%');
-                    console.log('  - Full battery data:', batteryData);
-                    
-                    setNewBatteryLevel(batteryLevel);
-                    
-                    // Cập nhật sessionStorage với dữ liệu từ API (để đảm bảo đồng bộ)
-                    sessionStorage.setItem('newBatteryLevel', String(batteryLevel));
+                    if (batteryResponse.success && batteryResponse.data) {
+                        const batteryData = batteryResponse.data;
+                        
+                        // Lấy dung lượng pin từ nhiều nguồn có thể (từ API thật)
+                        const batteryLevel = batteryData.stateOfHealth || 
+                                           batteryData.state_of_health || 
+                                           batteryData.batteryLevel || 
+                                           batteryData.battery_level ||
+                                           batteryData.health ||
+                                           batteryData.capacity || 100;
+                        
+                        console.log('✅ Đã lấy thông tin pin mới từ API:');
+                        console.log('  - Battery ID:', newBatteryIdFromStorage);
+                        console.log('  - Battery Level (THẬT từ API):', batteryLevel + '%');
+                        console.log('  - Full battery data:', batteryData);
+                        
+                        setNewBatteryLevel(batteryLevel);
+                        
+                        // Cập nhật sessionStorage với dữ liệu từ API (để đảm bảo đồng bộ)
+                        sessionStorage.setItem('newBatteryLevel', String(batteryLevel));
+                    } else {
+                        console.warn('⚠️ Không lấy được thông tin pin từ API, dùng dữ liệu từ sessionStorage');
+                        // Fallback: dùng giá trị từ sessionStorage nếu API không trả về
+                        const fallbackLevel = sessionStorage.getItem('newBatteryLevel');
+                        setNewBatteryLevel(fallbackLevel ? parseInt(fallbackLevel) : 100);
+                    }
                 } else {
-                    console.warn('⚠️ Không lấy được thông tin pin từ API, dùng dữ liệu từ sessionStorage');
-                    // Fallback: dùng giá trị từ sessionStorage nếu API không trả về
+                    console.warn('⚠️ Battery ID không hợp lệ (không phải số):', newBatteryIdFromStorage);
+                    console.warn('   Backend cần trả về batteryId thật từ API /api/driver/slots');
+                    // Dùng dữ liệu fallback từ sessionStorage
                     const fallbackLevel = sessionStorage.getItem('newBatteryLevel');
                     setNewBatteryLevel(fallbackLevel ? parseInt(fallbackLevel) : 100);
                 }
