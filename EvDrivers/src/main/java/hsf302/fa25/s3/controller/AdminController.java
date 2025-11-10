@@ -2,7 +2,9 @@ package hsf302.fa25.s3.controller;
 
 import hsf302.fa25.s3.dao.UserDao;
 import hsf302.fa25.s3.dao.VehicleDao;
+import hsf302.fa25.s3.dao.StationDao;
 import hsf302.fa25.s3.model.User;
+import hsf302.fa25.s3.model.Station;
 import hsf302.fa25.s3.model.VehicleBatteryInfo;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +16,7 @@ import java.util.stream.Collectors;
 public class AdminController {
 
     private final UserDao userDao = new UserDao();
+    private final StationDao stationDao = new StationDao();
     private VehicleDao vehicleDao;
 
     public AdminController() {
@@ -411,6 +414,344 @@ public class AdminController {
                 Map<String, Object> response = new HashMap<>();
                 response.put("success", false);
                 response.put("message", "Error fetching statistics: " + e.getMessage());
+                return ResponseEntity.status(500).body(response);
+            }
+        }
+
+        // ==================== STATION MANAGEMENT APIs ====================
+
+        @GetMapping("/stations")
+        public ResponseEntity<?> getAllStations(
+                @RequestParam(required = false) String status) {
+            try {
+                List<Station> stations;
+                if (status != null && !status.isEmpty()) {
+                    stations = stationDao.getStationsByStatus(status);
+                } else {
+                    stations = stationDao.getAllStations();
+                }
+
+                // Thêm thông tin chi tiết cho mỗi station
+                List<Map<String, Object>> stationsWithDetails = new ArrayList<>();
+                for (Station station : stations) {
+                    Map<String, Object> stationData = new HashMap<>();
+                    stationData.put("stationId", station.getStationId());
+                    stationData.put("name", station.getName());
+                    stationData.put("location", station.getLocation());
+                    stationData.put("status", station.getStatus());
+
+                    // Lấy thống kê chi tiết
+                    Map<String, Object> details = stationDao.getStationDetails(station.getStationId());
+                    stationData.putAll(details);
+
+                    stationsWithDetails.add(stationData);
+                }
+
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", true);
+                response.put("data", stationsWithDetails);
+                response.put("total", stationsWithDetails.size());
+
+                return ResponseEntity.ok(response);
+            } catch (Exception e) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Error fetching stations: " + e.getMessage());
+                return ResponseEntity.status(500).body(response);
+            }
+        }
+
+        @GetMapping("/stations/{stationId}")
+        public ResponseEntity<?> getStationById(@PathVariable int stationId) {
+            try {
+                Station station = stationDao.getStationById(stationId);
+                if (station == null) {
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("success", false);
+                    response.put("message", "Station not found");
+                    return ResponseEntity.status(404).body(response);
+                }
+
+                Map<String, Object> stationData = new HashMap<>();
+                stationData.put("stationId", station.getStationId());
+                stationData.put("name", station.getName());
+                stationData.put("location", station.getLocation());
+                stationData.put("status", station.getStatus());
+
+                // Lấy thông tin chi tiết
+                Map<String, Object> details = stationDao.getStationDetails(stationId);
+                stationData.putAll(details);
+
+                // Lấy danh sách towers
+                List<Map<String, Object>> towers = stationDao.getTowersByStation(stationId);
+                stationData.put("towers", towers);
+
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", true);
+                response.put("data", stationData);
+
+                return ResponseEntity.ok(response);
+            } catch (Exception e) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Error fetching station: " + e.getMessage());
+                return ResponseEntity.status(500).body(response);
+            }
+        }
+
+        @PostMapping("/stations")
+        public ResponseEntity<?> createStation(@RequestBody Station station) {
+            try {
+                // Validate required fields
+                if (station.getName() == null || station.getName().trim().isEmpty()) {
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("success", false);
+                    response.put("message", "Station name is required");
+                    return ResponseEntity.status(400).body(response);
+                }
+
+                if (station.getLocation() == null || station.getLocation().trim().isEmpty()) {
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("success", false);
+                    response.put("message", "Station location is required");
+                    return ResponseEntity.status(400).body(response);
+                }
+
+                // Set default status if not provided
+                if (station.getStatus() == null || station.getStatus().isEmpty()) {
+                    station.setStatus("active");
+                }
+
+                // Tạo station với 1 tower và 8 slots tự động
+                int stationId = stationDao.createStationWithTower(station, 8);
+
+                if (stationId > 0) {
+                    Station createdStation = stationDao.getStationById(stationId);
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("success", true);
+                    response.put("message", "Station created successfully with 1 tower and 8 slots");
+                    response.put("data", createdStation);
+                    return ResponseEntity.status(201).body(response);
+                } else {
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("success", false);
+                    response.put("message", "Failed to create station");
+                    return ResponseEntity.status(500).body(response);
+                }
+            } catch (Exception e) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Error creating station: " + e.getMessage());
+                return ResponseEntity.status(500).body(response);
+            }
+        }
+
+        @PutMapping("/stations/{stationId}")
+        public ResponseEntity<?> updateStation(@PathVariable int stationId, @RequestBody Station station) {
+            try {
+                Station existing = stationDao.getStationById(stationId);
+                if (existing == null) {
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("success", false);
+                    response.put("message", "Station not found");
+                    return ResponseEntity.status(404).body(response);
+                }
+
+                // Merge fields
+                station.setStationId(stationId);
+                if (station.getName() == null) station.setName(existing.getName());
+                if (station.getLocation() == null) station.setLocation(existing.getLocation());
+                if (station.getStatus() == null) station.setStatus(existing.getStatus());
+
+                boolean updated = stationDao.updateStation(station);
+
+                Map<String, Object> response = new HashMap<>();
+                if (updated) {
+                    response.put("success", true);
+                    response.put("message", "Station updated successfully");
+                    response.put("data", stationDao.getStationById(stationId));
+                    return ResponseEntity.ok(response);
+                } else {
+                    response.put("success", false);
+                    response.put("message", "Failed to update station");
+                    return ResponseEntity.status(500).body(response);
+                }
+            } catch (Exception e) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Error updating station: " + e.getMessage());
+                return ResponseEntity.status(500).body(response);
+            }
+        }
+
+        @DeleteMapping("/stations/{stationId}")
+        public ResponseEntity<?> deleteStation(@PathVariable int stationId) {
+            try {
+                Station existing = stationDao.getStationById(stationId);
+                if (existing == null) {
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("success", false);
+                    response.put("message", "Station not found");
+                    return ResponseEntity.status(404).body(response);
+                }
+
+                boolean deleted = stationDao.deleteStation(stationId);
+
+                Map<String, Object> response = new HashMap<>();
+                if (deleted) {
+                    response.put("success", true);
+                    response.put("message", "Station marked as maintenance (soft delete)");
+                    return ResponseEntity.ok(response);
+                } else {
+                    response.put("success", false);
+                    response.put("message", "Failed to delete station");
+                    return ResponseEntity.status(500).body(response);
+                }
+            } catch (Exception e) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Error deleting station: " + e.getMessage());
+                return ResponseEntity.status(500).body(response);
+            }
+        }
+
+        // ==================== TOWER MANAGEMENT APIs ====================
+
+        @GetMapping("/stations/{stationId}/towers")
+        public ResponseEntity<?> getStationTowers(@PathVariable int stationId) {
+            try {
+                Station station = stationDao.getStationById(stationId);
+                if (station == null) {
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("success", false);
+                    response.put("message", "Station not found");
+                    return ResponseEntity.status(404).body(response);
+                }
+
+                List<Map<String, Object>> towers = stationDao.getTowersByStation(stationId);
+
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", true);
+                response.put("data", towers);
+                response.put("total", towers.size());
+
+                return ResponseEntity.ok(response);
+            } catch (Exception e) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Error fetching towers: " + e.getMessage());
+                return ResponseEntity.status(500).body(response);
+            }
+        }
+
+        @PostMapping("/stations/{stationId}/towers")
+        public ResponseEntity<?> addTowerToStation(
+                @PathVariable int stationId,
+                @RequestParam(required = false, defaultValue = "8") int numberOfSlots) {
+            try {
+                Station station = stationDao.getStationById(stationId);
+                if (station == null) {
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("success", false);
+                    response.put("message", "Station not found");
+                    return ResponseEntity.status(404).body(response);
+                }
+
+                int towerId = stationDao.addTowerToStation(stationId, numberOfSlots);
+
+                Map<String, Object> response = new HashMap<>();
+                if (towerId > 0) {
+                    response.put("success", true);
+                    response.put("message", "Tower added successfully with " + numberOfSlots + " slots");
+                    response.put("data", Map.of("towerId", towerId));
+                    return ResponseEntity.status(201).body(response);
+                } else {
+                    response.put("success", false);
+                    response.put("message", "Failed to add tower");
+                    return ResponseEntity.status(500).body(response);
+                }
+            } catch (Exception e) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Error adding tower: " + e.getMessage());
+                return ResponseEntity.status(500).body(response);
+            }
+        }
+
+        @PutMapping("/towers/{towerId}")
+        public ResponseEntity<?> updateTower(
+                @PathVariable int towerId,
+                @RequestBody Map<String, String> body) {
+            try {
+                String status = body.get("status");
+                if (status == null || status.isEmpty()) {
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("success", false);
+                    response.put("message", "Status is required");
+                    return ResponseEntity.status(400).body(response);
+                }
+
+                boolean updated = stationDao.updateTower(towerId, status);
+
+                Map<String, Object> response = new HashMap<>();
+                if (updated) {
+                    response.put("success", true);
+                    response.put("message", "Tower updated successfully");
+                    return ResponseEntity.ok(response);
+                } else {
+                    response.put("success", false);
+                    response.put("message", "Failed to update tower");
+                    return ResponseEntity.status(500).body(response);
+                }
+            } catch (Exception e) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Error updating tower: " + e.getMessage());
+                return ResponseEntity.status(500).body(response);
+            }
+        }
+
+        @DeleteMapping("/towers/{towerId}")
+        public ResponseEntity<?> deleteTower(@PathVariable int towerId) {
+            try {
+                // Kiểm tra tower có tồn tại không
+                Map<String, Object> tower = stationDao.getTowerById(towerId);
+                if (tower == null) {
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("success", false);
+                    response.put("message", "Tower not found");
+                    return ResponseEntity.status(404).body(response);
+                }
+
+                // Kiểm tra tower có batteries không
+                int fullSlots = (int) tower.getOrDefault("fullSlots", 0);
+                int chargingSlots = (int) tower.getOrDefault("chargingSlots", 0);
+                
+                if (fullSlots > 0 || chargingSlots > 0) {
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("success", false);
+                    response.put("message", "Cannot delete tower with batteries. Please remove all batteries first.");
+                    response.put("fullSlots", fullSlots);
+                    response.put("chargingSlots", chargingSlots);
+                    return ResponseEntity.status(400).body(response);
+                }
+
+                boolean deleted = stationDao.deleteTower(towerId);
+
+                Map<String, Object> response = new HashMap<>();
+                if (deleted) {
+                    response.put("success", true);
+                    response.put("message", "Tower and its slots deleted successfully");
+                    return ResponseEntity.ok(response);
+                } else {
+                    response.put("success", false);
+                    response.put("message", "Failed to delete tower");
+                    return ResponseEntity.status(500).body(response);
+                }
+            } catch (Exception e) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Error deleting tower: " + e.getMessage());
                 return ResponseEntity.status(500).body(response);
             }
         }

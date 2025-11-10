@@ -28,46 +28,35 @@ public class StationController {
             
             List<Map<String, Object>> stationMaps = new ArrayList<>();
             for (Station station : stations) {
+                // Apply search filter if provided
+                if (search != null && !search.isEmpty()) {
+                    if (!station.getName().toLowerCase().contains(search.toLowerCase()) &&
+                        !station.getLocation().toLowerCase().contains(search.toLowerCase())) {
+                        continue;
+                    }
+                }
+                
                 Map<String, Object> stationMap = new HashMap<>();
+                stationMap.put("stationId", station.getStationId());
                 stationMap.put("id", station.getStationId());
                 stationMap.put("name", station.getName());
+                stationMap.put("location", station.getLocation());
                 stationMap.put("address", station.getLocation());
-                stationMap.put("status", "active".equals(station.getStatus()) ? "Hoạt động" : "Bảo trì");
+                stationMap.put("status", station.getStatus());
                 
                 // Lấy thông tin chi tiết từ database
                 Map<String, Object> details = stationDao.getStationDetails(station.getStationId());
-                
+                stationMap.put("totalTowers", details.getOrDefault("totalTowers", 0));
                 stationMap.put("totalSlots", details.getOrDefault("totalSlots", 0));
                 stationMap.put("availableSlots", details.getOrDefault("availableSlots", 0));
-                // Ensure availableSlots is the count of full batteries (ready to use)
-                stationMap.put("available_slots", details.getOrDefault("availableSlots", 0));
                 stationMap.put("chargingSlots", details.getOrDefault("chargingSlots", 0));
                 stationMap.put("emptySlots", details.getOrDefault("emptySlots", 0));
-                stationMap.put("todayTransactions", details.getOrDefault("todayTransactions", 0));
                 stationMap.put("totalBatteries", details.getOrDefault("totalBatteries", 0));
                 stationMap.put("availableBatteries", details.getOrDefault("availableBatteries", 0));
                 stationMap.put("chargingBatteries", details.getOrDefault("chargingBatteries", 0));
+                stationMap.put("todayTransactions", details.getOrDefault("todayTransactions", 0));
                 
-                // Các field khác có thể hardcode tạm thời (sẽ cần thêm vào DB sau)
-                stationMap.put("phone", "028-1234-567" + station.getStationId());
-                stationMap.put("manager", "Manager " + station.getStationId());
-                stationMap.put("capacity", details.getOrDefault("totalSlots", 0) + " slots");
-                stationMap.put("maintenanceBatteries", 0);
-                stationMap.put("lastMaintenance", "2024-01-10");
-                stationMap.put("nextMaintenance", "2024-02-10");
-                stationMap.put("operatingHours", "24/7");
-                stationMap.put("pricePerSwap", 25000);
-                stationMap.put("rating", 4.5);
-                stationMap.put("services", Arrays.asList("Đổi pin", "Sạc nhanh", "Bảo trì"));
-                stationMap.put("amenities", Arrays.asList("Parking", "Restroom"));
-                stationMap.put("totalTransactions", ((Integer) details.getOrDefault("todayTransactions", 0)) * 30); // Estimate monthly
-                
-                // Apply search filter if provided
-                if (search == null || search.isEmpty() ||
-                    station.getName().toLowerCase().contains(search.toLowerCase()) ||
-                    station.getLocation().toLowerCase().contains(search.toLowerCase())) {
-                    stationMaps.add(stationMap);
-                }
+                stationMaps.add(stationMap);
             }
             
             Map<String, Object> response = new HashMap<>();
@@ -95,10 +84,28 @@ public class StationController {
             Map<String, Object> response = new HashMap<>();
             if (station != null) {
                 Map<String, Object> stationMap = new HashMap<>();
+                stationMap.put("stationId", station.getStationId());
                 stationMap.put("id", station.getStationId());
                 stationMap.put("name", station.getName());
+                stationMap.put("location", station.getLocation());
                 stationMap.put("address", station.getLocation());
-                stationMap.put("status", "active".equals(station.getStatus()) ? "Hoạt động" : "Bảo trì");
+                stationMap.put("status", station.getStatus());
+                
+                // Lấy thông tin chi tiết từ database
+                Map<String, Object> details = stationDao.getStationDetails(station.getStationId());
+                stationMap.put("totalTowers", details.getOrDefault("totalTowers", 0));
+                stationMap.put("totalSlots", details.getOrDefault("totalSlots", 0));
+                stationMap.put("availableSlots", details.getOrDefault("availableSlots", 0));
+                stationMap.put("chargingSlots", details.getOrDefault("chargingSlots", 0));
+                stationMap.put("emptySlots", details.getOrDefault("emptySlots", 0));
+                stationMap.put("totalBatteries", details.getOrDefault("totalBatteries", 0));
+                stationMap.put("availableBatteries", details.getOrDefault("availableBatteries", 0));
+                stationMap.put("chargingBatteries", details.getOrDefault("chargingBatteries", 0));
+                stationMap.put("todayTransactions", details.getOrDefault("todayTransactions", 0));
+                
+                // Lấy danh sách towers
+                List<Map<String, Object>> towers = stationDao.getTowersByStation(station.getStationId());
+                stationMap.put("towers", towers);
                 
                 response.put("success", true);
                 response.put("data", stationMap);

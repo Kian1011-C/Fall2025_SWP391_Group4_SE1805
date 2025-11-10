@@ -45,20 +45,14 @@ public class StationDao {
         return null;
     }
 
-    // Tìm trạm gần nhất (giả sử có tọa độ latitude, longitude trong DB)
+    // Tìm trạm gần nhất (tạm thời trả về tất cả active stations - có thể cải thiện sau)
     public List<Station> getNearbyStations(double latitude, double longitude, int limit) {
         List<Station> list = new ArrayList<>();
-        // Công thức tính khoảng cách đơn giản (có thể cải thiện bằng Haversine formula)
-        // Use OFFSET/FETCH to parameterize limit (SQL Server doesn't support TOP(?) with parameter)
-        String sql = "SELECT *, SQRT(POWER(latitude - ?, 2) + POWER(longitude - ?, 2)) as distance " +
-                    "FROM Stations WHERE status='active' " +
-                    "ORDER BY distance OFFSET 0 ROWS FETCH NEXT ? ROWS ONLY";
+        String sql = "SELECT TOP (?) * FROM Stations WHERE status='active' ORDER BY station_id";
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setDouble(1, latitude);
-            ps.setDouble(2, longitude);
-            ps.setInt(3, limit);
+            ps.setInt(1, limit);
             
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -90,17 +84,61 @@ public class StationDao {
         return list;
     }
 
-    // Tạo trạm mới
-    public boolean createStation(Station station) {
-        String sql = "INSERT INTO Stations (name, location, status, latitude, longitude) VALUES (?, ?, ?, ?, ?)";
+    // Tạo trạm mới (trả về station_id)
+    public int createStation(Station station) {
+        String sql = "INSERT INTO Stations (name, location, status) VALUES (?, ?, ?)";
         try (Connection conn = ConnectDB.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
 
             ps.setString(1, station.getName());
             ps.setString(2, station.getLocation());
             ps.setString(3, station.getStatus() != null ? station.getStatus() : "active");
-            ps.setObject(4, station.getLatitude(), java.sql.Types.DOUBLE);
-            ps.setObject(5, station.getLongitude(), java.sql.Types.DOUBLE);
+
+            int affected = ps.executeUpdate();
+            if (affected > 0) {
+                ResultSet generatedKeys = ps.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    return generatedKeys.getInt(1);
+                }
+            }
+            return -1;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
+    // Tạo tower mới (trả về tower_id)
+    public int createTower(int stationId, int towerNumber) {
+        String sql = "INSERT INTO Towers (station_id, tower_number, status) VALUES (?, ?, 'active')";
+        try (Connection conn = ConnectDB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+
+            ps.setInt(1, stationId);
+            ps.setInt(2, towerNumber);
+
+            int affected = ps.executeUpdate();
+            if (affected > 0) {
+                ResultSet generatedKeys = ps.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    return generatedKeys.getInt(1);
+                }
+            }
+            return -1;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
+    // Tạo slot mới
+    public boolean createSlot(int towerId, int slotNumber) {
+        String sql = "INSERT INTO Slots (tower_id, slot_number, status) VALUES (?, ?, 'empty')";
+        try (Connection conn = ConnectDB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, towerId);
+            ps.setInt(2, slotNumber);
 
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
@@ -109,18 +147,218 @@ public class StationDao {
         }
     }
 
+    // Tạo station với tower và slots tự động
+    public int createStationWithTower(Station station, int numberOfSlots) {
+        try {
+            // Tạo station trước
+            int stationId = createStation(station);
+            if (stationId <= 0) {
+                return -1;
+            }
+
+            // Tạo 1 tower mặc định
+            int towerId = createTower(stationId, 1);
+            if (towerId <= 0) {
+                return -1;
+            }
+
+            // Tạo slots cho tower (mặc định 8 slots)
+            int slots = numberOfSlots > 0 ? numberOfSlots : 8;
+            for (int i = 1; i <= slots; i++) {
+                createSlot(towerId, i);
+            }
+
+            return stationId;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
+    // Thêm tower mới vào station có sẵn
+    public int addTowerToStation(int stationId, int numberOfSlots) {
+        try {
+            // Lấy số tower hiện tại để tạo tower_number mới
+            String sql = "SELECT MAX(tower_number) as max_tower FROM Towers WHERE station_id = ?";
+            int nextTowerNumber = 1;
+            
+            try (Connection conn = ConnectDB.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, stationId);
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) {
+                    nextTowerNumber = rs.getInt("max_tower") + 1;
+                }
+            }
+
+            // Tạo tower mới
+            int towerId = createTower(stationId, nextTowerNumber);
+            if (towerId <= 0) {
+                return -1;
+            }
+
+            // Tạo slots cho tower (mặc định 8 slots)
+            int slots = numberOfSlots > 0 ? numberOfSlots : 8;
+            for (int i = 1; i <= slots; i++) {
+                createSlot(towerId, i);
+            }
+
+            return towerId;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
+    // Lấy danh sách towers của một station
+    public List<Map<String, Object>> getTowersByStation(int stationId) {
+        List<Map<String, Object>> towers = new ArrayList<>();
+        String sql = """
+            SELECT t.tower_id, t.tower_number, t.status,
+                   COUNT(sl.slot_id) as total_slots,
+                   SUM(CASE WHEN sl.status = 'full' THEN 1 ELSE 0 END) as full_slots,
+                   SUM(CASE WHEN sl.status = 'charging' THEN 1 ELSE 0 END) as charging_slots,
+                   SUM(CASE WHEN sl.status = 'empty' THEN 1 ELSE 0 END) as empty_slots
+            FROM Towers t
+            LEFT JOIN Slots sl ON t.tower_id = sl.tower_id
+            WHERE t.station_id = ?
+            GROUP BY t.tower_id, t.tower_number, t.status
+            ORDER BY t.tower_number
+        """;
+        
+        try (Connection conn = ConnectDB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, stationId);
+            ResultSet rs = ps.executeQuery();
+            
+            while (rs.next()) {
+                Map<String, Object> tower = new HashMap<>();
+                tower.put("towerId", rs.getInt("tower_id"));
+                tower.put("towerNumber", rs.getInt("tower_number"));
+                tower.put("status", rs.getString("status"));
+                tower.put("totalSlots", rs.getInt("total_slots"));
+                tower.put("fullSlots", rs.getInt("full_slots"));
+                tower.put("chargingSlots", rs.getInt("charging_slots"));
+                tower.put("emptySlots", rs.getInt("empty_slots"));
+                towers.add(tower);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        return towers;
+    }
+
+    // Cập nhật tower
+    public boolean updateTower(int towerId, String status) {
+        String sql = "UPDATE Towers SET status = ? WHERE tower_id = ?";
+        try (Connection conn = ConnectDB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, status);
+            ps.setInt(2, towerId);
+
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // Xóa tower (hard delete - xóa cả slots và batteries liên quan)
+    public boolean deleteTower(int towerId) {
+        try (Connection conn = ConnectDB.getConnection()) {
+            // Bắt đầu transaction
+            conn.setAutoCommit(false);
+            
+            try {
+                // 1. Xóa batteries trong các slots của tower này
+                String deleteBatteriesSql = """
+                    DELETE FROM Batteries 
+                    WHERE slot_id IN (
+                        SELECT slot_id FROM Slots WHERE tower_id = ?
+                    )
+                """;
+                try (PreparedStatement ps = conn.prepareStatement(deleteBatteriesSql)) {
+                    ps.setInt(1, towerId);
+                    ps.executeUpdate();
+                }
+                
+                // 2. Xóa slots của tower
+                String deleteSlotsSql = "DELETE FROM Slots WHERE tower_id = ?";
+                try (PreparedStatement ps = conn.prepareStatement(deleteSlotsSql)) {
+                    ps.setInt(1, towerId);
+                    ps.executeUpdate();
+                }
+                
+                // 3. Xóa tower
+                String deleteTowerSql = "DELETE FROM Towers WHERE tower_id = ?";
+                try (PreparedStatement ps = conn.prepareStatement(deleteTowerSql)) {
+                    ps.setInt(1, towerId);
+                    ps.executeUpdate();
+                }
+                
+                conn.commit();
+                return true;
+            } catch (Exception e) {
+                conn.rollback();
+                e.printStackTrace();
+                return false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // Lấy thông tin tower theo ID
+    public Map<String, Object> getTowerById(int towerId) {
+        String sql = """
+            SELECT t.tower_id, t.station_id, t.tower_number, t.status,
+                   COUNT(sl.slot_id) as total_slots,
+                   SUM(CASE WHEN sl.status = 'full' THEN 1 ELSE 0 END) as full_slots,
+                   SUM(CASE WHEN sl.status = 'charging' THEN 1 ELSE 0 END) as charging_slots,
+                   SUM(CASE WHEN sl.status = 'empty' THEN 1 ELSE 0 END) as empty_slots
+            FROM Towers t
+            LEFT JOIN Slots sl ON t.tower_id = sl.tower_id
+            WHERE t.tower_id = ?
+            GROUP BY t.tower_id, t.station_id, t.tower_number, t.status
+        """;
+        
+        try (Connection conn = ConnectDB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, towerId);
+            ResultSet rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                Map<String, Object> tower = new HashMap<>();
+                tower.put("towerId", rs.getInt("tower_id"));
+                tower.put("stationId", rs.getInt("station_id"));
+                tower.put("towerNumber", rs.getInt("tower_number"));
+                tower.put("status", rs.getString("status"));
+                tower.put("totalSlots", rs.getInt("total_slots"));
+                tower.put("fullSlots", rs.getInt("full_slots"));
+                tower.put("chargingSlots", rs.getInt("charging_slots"));
+                tower.put("emptySlots", rs.getInt("empty_slots"));
+                return tower;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        return null;
+    }
+
     // Cập nhật trạm
     public boolean updateStation(Station station) {
-        String sql = "UPDATE Stations SET name=?, location=?, status=?, latitude=?, longitude=? WHERE station_id=?";
+        String sql = "UPDATE Stations SET name=?, location=?, status=? WHERE station_id=?";
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, station.getName());
             ps.setString(2, station.getLocation());
             ps.setString(3, station.getStatus());
-            ps.setObject(4, station.getLatitude(), java.sql.Types.DOUBLE);
-            ps.setObject(5, station.getLongitude(), java.sql.Types.DOUBLE);
-            ps.setInt(6, station.getStationId());
+            ps.setInt(4, station.getStationId());
 
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
@@ -130,8 +368,9 @@ public class StationDao {
     }
 
     // Xóa trạm (soft delete)
+    // Xóa trạm (soft delete - set status = maintenance)
     public boolean deleteStation(int stationId) {
-        String sql = "UPDATE Stations SET status='inactive' WHERE station_id=?";
+        String sql = "UPDATE Stations SET status='maintenance' WHERE station_id=?";
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -297,14 +536,6 @@ public class StationDao {
         s.setName(rs.getString("name"));
         s.setLocation(rs.getString("location"));
         s.setStatus(rs.getString("status"));
-        
-        // Kiểm tra xem có cột latitude, longitude không
-        try {
-            s.setLatitude(rs.getDouble("latitude"));
-            s.setLongitude(rs.getDouble("longitude"));
-        } catch (Exception ignored) {
-            // Nếu không có cột này thì bỏ qua
-        }
         
         return s;
     }

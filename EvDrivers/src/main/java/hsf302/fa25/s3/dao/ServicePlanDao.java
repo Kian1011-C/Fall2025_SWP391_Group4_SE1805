@@ -4,9 +4,7 @@ import hsf302.fa25.s3.context.ConnectDB;
 import hsf302.fa25.s3.model.ServicePlan;
 import hsf302.fa25.s3.model.DistanceRateTier;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.math.BigDecimal;
@@ -135,5 +133,101 @@ public class ServicePlanDao {
         plan.setActive(rs.getBoolean("is_active"));
         plan.setCreatedAt(rs.getTimestamp("created_at"));
         return plan;
+    }
+
+    /**
+     * Thêm mới. Trả về id sinh ra (>=1) hoặc -1 nếu lỗi.
+     */
+    public int create(ServicePlan plan) {
+        String sql = "INSERT INTO ServicePlans "
+                + "(plan_name, base_price, base_distance, deposit_fee, description, is_active, created_at) "
+                + "VALUES (?,?,?,?,?,?, GETDATE())";
+        try (Connection conn = ConnectDB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            ps.setString(1, plan.getPlanName());
+            ps.setBigDecimal(2, plan.getBasePrice());
+            ps.setInt(3, plan.getBaseDistance());
+            ps.setBigDecimal(4, plan.getDepositFee());
+
+            if (plan.getDescription() == null) {
+                ps.setNull(5, Types.NVARCHAR);
+            } else {
+                ps.setString(5, plan.getDescription());
+            }
+
+            ps.setBoolean(6, plan.isActive());
+
+            ps.executeUpdate();
+
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    /**
+     * Cập nhật theo plan_id. Trả về true nếu thành công.
+     */
+    public boolean update(ServicePlan plan) {
+        String sql = "UPDATE ServicePlans SET "
+                + "plan_name=?, base_price=?, base_distance=?, deposit_fee=?, description=?, is_active=? "
+                + "WHERE plan_id=?";
+        try (Connection conn = ConnectDB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, plan.getPlanName());
+            ps.setBigDecimal(2, plan.getBasePrice());
+            ps.setInt(3, plan.getBaseDistance());
+            ps.setBigDecimal(4, plan.getDepositFee());
+
+            if (plan.getDescription() == null) {
+                ps.setNull(5, Types.NVARCHAR);
+            } else {
+                ps.setString(5, plan.getDescription());
+            }
+
+            ps.setBoolean(6, plan.isActive());
+            ps.setInt(7, plan.getPlanId());
+
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Xoá mềm (deactivate): set is_active = 0 theo plan_id.
+     */
+    public boolean deactivate(int planId) {
+        String sql = "UPDATE ServicePlans SET is_active = 0 WHERE plan_id = ?";
+        try (Connection conn = ConnectDB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, planId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // tranh trung ten
+    public boolean existsByName(String planName) {
+        String sql = "SELECT 1 FROM ServicePlans WHERE plan_name = ?";
+        try (Connection conn = ConnectDB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, planName);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }
