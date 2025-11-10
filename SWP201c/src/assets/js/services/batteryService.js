@@ -106,6 +106,54 @@ const batteryService = {
       return { success: false, message: errorInfo.message || 'Lỗi API' };
     }
   },
+
+  /**
+   * Gán pin vào slot (cho Admin/Staff).
+   * @param {number} batteryId - ID của pin cần gán
+   * @param {number} slotId - ID của slot
+   */
+  assignBatteryToSlot: async (batteryId, slotId) => {
+    try {
+      console.log(`BatteryService: Gán pin ${batteryId} vào slot ${slotId}`);
+      const response = await apiUtils.post(
+        `${API_CONFIG.ENDPOINTS.BATTERIES.BASE}/${batteryId}/assign-slot`,
+        { slotId }
+      );
+      
+      if (response.success) {
+        return { success: true, data: response.data, message: response.message || 'Gán pin vào hộc thành công' };
+      } else {
+        throw new Error(response.message || 'Không thể gán pin vào hộc');
+      }
+    } catch (error) {
+      console.error(`Lỗi khi gán pin ${batteryId} vào slot ${slotId}:`, error);
+      const errorInfo = apiUtils.handleError(error);
+      return { success: false, message: errorInfo.message || 'Lỗi API' };
+    }
+  },
+
+  /**
+   * Tháo pin khỏi hộc (slot)
+   * @param {number} batteryId - ID của pin cần tháo
+   */
+  removeBatteryFromSlot: async (batteryId) => {
+    try {
+      console.log('BatteryService: Tháo pin khỏi hộc', batteryId);
+      const response = await apiUtils.post(
+        `/api/batteries/${batteryId}/remove-from-slot`
+      );
+      
+      if (response.success) {
+        return { success: true, data: response.data, message: response.message || 'Tháo pin khỏi hộc thành công' };
+      } else {
+        throw new Error(response.message || 'Không thể tháo pin khỏi hộc');
+      }
+    } catch (error) {
+      console.error(`Lỗi khi tháo pin ${batteryId} khỏi slot:`, error);
+      const errorInfo = apiUtils.handleError(error);
+      return { success: false, message: errorInfo.message || 'Lỗi API' };
+    }
+  },
 };
 
 export default batteryService;

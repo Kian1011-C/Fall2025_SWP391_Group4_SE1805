@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { useSubscriptionsData } from './hooks/useSubscriptionsData';
 import SubscriptionRow from './components/SubscriptionRow';
 import SubscriptionFormModal from './components/SubscriptionFormModal';
+import '../../../assets/css/AdminSubscriptions.css';
 
 const AdminSubscriptions = () => {
-  const { plans, isLoading, error, refetch, handleCreate, handleUpdate } = useSubscriptionsData();
+  const { plans, isLoading, error, refetch, handleCreate, handleUpdate, handleDelete } = useSubscriptionsData();
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState(null);
@@ -31,33 +32,74 @@ const AdminSubscriptions = () => {
     } else {
       response = await handleCreate(formData);
     }
+    
     if (response.success) {
+      alert(response.message || 'Thao tác thành công!');
       handleCloseModal();
     } else {
-      alert(response.message); // Hiển thị lỗi
+      alert(`Lỗi: ${response.message}`);
+    }
+  };
+
+  const handleDeletePlan = async (planId) => {
+    const response = await handleDelete(planId);
+    if (response.success) {
+      alert(response.message || 'Xóa gói cước thành công!');
+    } else {
+      alert(`Lỗi: ${response.message}`);
     }
   };
 
   const renderContent = () => {
-    if (isLoading) return <p style={{ color: '#9ca3af', textAlign: 'center' }}>Đang tải danh sách gói cước...</p>;
-    if (error) return ( <div style={{ color: '#ef4444', textAlign: 'center' }}><p>Lỗi: {error}</p><button onClick={refetch}>Thử lại</button></div> );
-    if (plans.length === 0) return <p style={{ color: '#9ca3af', textAlign: 'center' }}>Không tìm thấy gói cước nào.</p>;
+    if (isLoading) {
+      return (
+        <div className="subscriptions-loading">
+          <div className="subscriptions-loading-spinner"></div>
+          <p>Đang tải danh sách gói cước...</p>
+        </div>
+      );
+    }
+    
+    if (error) {
+      return (
+        <div className="subscriptions-error">
+          <p>⚠️ Lỗi: {error}</p>
+          <button onClick={refetch}>🔄 Thử lại</button>
+        </div>
+      );
+    }
+    
+    if (plans.length === 0) {
+      return (
+        <div className="subscriptions-empty">
+          <div className="subscriptions-empty-icon">📦</div>
+          <p>Không tìm thấy gói cước nào</p>
+        </div>
+      );
+    }
 
     return (
-      <div style={{ background: '#1f2937', borderRadius: '12px', overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+      <div className="subscriptions-table-container">
+        <table className="subscriptions-table">
           <thead>
-            <tr style={{ background: '#374151' }}>
-              <th style={{ padding: '15px 20px' }}>ID</th>
-              <th style={{ padding: '15px 20px' }}>Tên Gói cước</th>
-              <th style={{ padding: '15px 20px' }}>Phí (VNĐ)</th>
-              <th style={{ padding: '15px 20px' }}>Quãng đường</th>
-              <th style={{ padding: '15px 20px' }}>Mô tả</th>
-              <th style={{ padding: '15px 20px' }}>Hành động</th>
+            <tr>
+              <th>ID</th>
+              <th>Tên Gói cước</th>
+              <th>Phí cơ bản</th>
+              <th>Quãng đường</th>
+              <th>Mô tả</th>
+              <th>Hành động</th>
             </tr>
           </thead>
           <tbody>
-            {plans.map(plan => <SubscriptionRow key={plan.planId} plan={plan} onEdit={handleOpenEditModal} />)}
+            {plans.map(plan => (
+              <SubscriptionRow 
+                key={plan.planId} 
+                plan={plan} 
+                onEdit={handleOpenEditModal}
+                onDelete={handleDeletePlan}
+              />
+            ))}
           </tbody>
         </table>
       </div>
@@ -65,26 +107,26 @@ const AdminSubscriptions = () => {
   };
 
   return (
-    <>
-      <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-          <div>
-            <h1 style={{ margin: 0, fontSize: '28px' }}>Quản lý Gói cước</h1>
-            <p style={{ margin: '5px 0 0 0', color: '#9ca3af' }}>Tạo, sửa và quản lý các gói cước dịch vụ.</p>
-          </div>
-          <button onClick={handleOpenCreateModal} style={{ background: '#f59e0b', color: '#111827', border: 'none', padding: '10px 15px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
-            + Thêm Gói cước
-          </button>
+    <div className="subscriptions-container">
+      <div className="subscriptions-header">
+        <div className="subscriptions-header-left">
+          <h1>⚡ Quản lý Gói cước</h1>
+          <p>Tạo, sửa và quản lý các gói cước dịch vụ cho khách hàng</p>
         </div>
-        {renderContent()}
+        <button onClick={handleOpenCreateModal} className="subscriptions-add-btn">
+          ➕ Thêm Gói cước
+        </button>
       </div>
+      
+      {renderContent()}
+      
       <SubscriptionFormModal 
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         onSave={handleSave}
         plan={editingPlan}
       />
-    </>
+    </div>
   );
 };
 

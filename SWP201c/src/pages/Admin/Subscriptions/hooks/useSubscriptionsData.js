@@ -45,9 +45,17 @@ export const useSubscriptionsData = () => {
     return response;
   };
 
+  const handleDelete = async (planId) => {
+    const response = await servicePlanService.deleteServicePlan(planId);
+    if (response.success) {
+      fetchPlans(); // Tải lại danh sách
+    }
+    return response;
+  };
+
   return {
     plans,
     isLoading, error, refetch: fetchPlans,
-    handleCreate, handleUpdate,
+    handleCreate, handleUpdate, handleDelete,
   };
 };

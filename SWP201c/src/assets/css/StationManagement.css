@@ -82,7 +82,8 @@
 }
 
 .station-refresh-btn,
-.station-create-btn {
+.station-create-btn,
+.station-add-btn {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -106,13 +107,15 @@
   transform: rotate(180deg);
 }
 
-.station-create-btn {
+.station-create-btn,
+.station-add-btn {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
   box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
 }
 
-.station-create-btn:hover {
+.station-create-btn:hover,
+.station-add-btn:hover {
   background: linear-gradient(135deg, #059669 0%, #047857 100%);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.6);
@@ -622,13 +625,42 @@
   opacity: 0.5;
 }
 
-.station-empty-text {
+.slot-empty-text {
   font-size: 18px;
   font-weight: 600;
   margin-bottom: 8px;
 }
 
-.station-empty-subtext {
+.slot-add-battery-btn {
+  margin-top: 16px;
+  width: 100%;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.slot-add-battery-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+}
+
+.slot-add-battery-btn:active {
+  transform: translateY(0);
+}
+
+.slot-empty-subtext {
   font-size: 14px;
   color: #475569;
 }

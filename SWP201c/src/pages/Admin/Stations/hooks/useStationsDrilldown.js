@@ -29,7 +29,12 @@ export const useStationsDrilldown = () => {
       setIsLoading(true);
       setError(null);
       const response = await stationService.getAllStations();
-      setStations(safeExtractData(response));
+      const allStations = safeExtractData(response);
+      
+      // Hiển thị TẤT CẢ các trạm (active, offline, maintenance)
+      console.log('📊 Total stations:', allStations.length);
+      
+      setStations(allStations);
     } catch (err) {
       setError(err.message || "Không thể tải danh sách trạm.");
     } finally {

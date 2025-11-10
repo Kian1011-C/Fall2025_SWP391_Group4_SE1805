@@ -221,7 +221,8 @@ const stationService = {
     createStation: async (stationData) => {
         try {
             console.log('StationService (Admin): Tạo trạm mới', stationData);
-            const response = await apiUtils.post(ENDPOINTS.STATIONS.BASE, stationData);
+            // Backend AdminController sử dụng /api/admin/stations
+            const response = await apiUtils.post('/api/admin/stations', stationData);
             
             if (response.success) {
                 return { success: true, data: response.data, message: 'Tạo trạm thành công' };
@@ -243,7 +244,8 @@ const stationService = {
     updateStation: async (stationId, stationData) => {
         try {
             console.log(`StationService (Admin): Cập nhật trạm ${stationId}`, stationData);
-            const response = await apiUtils.put(ENDPOINTS.STATIONS.BY_ID(stationId), stationData);
+            // Backend AdminController sử dụng /api/admin/stations/{id}
+            const response = await apiUtils.put(`/api/admin/stations/${stationId}`, stationData);
             
             if (response.success) {
                 return { success: true, data: response.data, message: 'Cập nhật trạm thành công' };
@@ -252,6 +254,28 @@ const stationService = {
             }
         } catch (error) {
             console.error(`Lỗi khi cập nhật trạm ${stationId} (Admin):`, error);
+            const errorInfo = apiUtils.handleError(error);
+            return { success: false, message: errorInfo.message || 'Lỗi API' };
+        }
+    },
+
+    /**
+     * API 9 (Admin): Xóa một trạm
+     * @param {number} stationId - ID của trạm cần xóa
+     */
+    deleteStation: async (stationId) => {
+        try {
+            console.log(`StationService (Admin): Xóa trạm ${stationId}`);
+            // Backend AdminController sử dụng /api/admin/stations/{id}
+            const response = await apiUtils.delete(`/api/admin/stations/${stationId}`);
+            
+            if (response.success) {
+                return { success: true, message: 'Xóa trạm thành công' };
+            } else {
+                throw new Error(response.message || 'Không thể xóa trạm');
+            }
+        } catch (error) {
+            console.error(`Lỗi khi xóa trạm ${stationId} (Admin):`, error);
             const errorInfo = apiUtils.handleError(error);
             return { success: false, message: errorInfo.message || 'Lỗi API' };
         }
@@ -298,6 +322,77 @@ const stationService = {
     } catch (error) {
       console.error(`Lỗi khi lấy hộc (Admin) của trụ ${towerId}:`, error);
       throw error;
+    }
+  },
+
+  // ==================== TOWER MANAGEMENT APIs ====================
+  
+  /**
+   * API 10 (Admin): Thêm trụ mới vào trạm
+   * @param {number} stationId - ID của trạm
+   * @param {number} numberOfSlots - Số hộc cho trụ mới (mặc định 8)
+   * @param {string} status - Trạng thái ban đầu (mặc định 'active')
+   */
+  addTowerToStation: async (stationId, numberOfSlots = 8, status = 'active') => {
+    try {
+      console.log(`StationService (Admin): Thêm trụ vào trạm ${stationId} với status: ${status}`);
+      const response = await apiUtils.post(
+        `/api/admin/stations/${stationId}/towers?numberOfSlots=${numberOfSlots}`,
+        { status } // Gửi status trong body
+      );
+      
+      if (response.success) {
+        return { success: true, data: response.data, message: 'Thêm trụ thành công' };
+      } else {
+        throw new Error(response.message || 'Không thể thêm trụ');
+      }
+    } catch (error) {
+      console.error(`Lỗi khi thêm trụ (Admin):`, error);
+      const errorInfo = apiUtils.handleError(error);
+      return { success: false, message: errorInfo.message || 'Lỗi API' };
+    }
+  },
+
+  /**
+   * API 11 (Admin): Cập nhật trạng thái trụ
+   * @param {number} towerId - ID của trụ
+   * @param {string} status - Trạng thái mới (active/maintenance/offline)
+   */
+  updateTower: async (towerId, status) => {
+    try {
+      console.log(`StationService (Admin): Cập nhật trụ ${towerId}`);
+      const response = await apiUtils.put(`/api/admin/towers/${towerId}`, { status });
+      
+      if (response.success) {
+        return { success: true, data: response.data, message: 'Cập nhật trụ thành công' };
+      } else {
+        throw new Error(response.message || 'Không thể cập nhật trụ');
+      }
+    } catch (error) {
+      console.error(`Lỗi khi cập nhật trụ ${towerId} (Admin):`, error);
+      const errorInfo = apiUtils.handleError(error);
+      return { success: false, message: errorInfo.message || 'Lỗi API' };
+    }
+  },
+
+  /**
+   * API 12 (Admin): Xóa trụ
+   * @param {number} towerId - ID của trụ cần xóa
+   */
+  deleteTower: async (towerId) => {
+    try {
+      console.log(`StationService (Admin): Xóa trụ ${towerId}`);
+      const response = await apiUtils.delete(`/api/admin/towers/${towerId}`);
+      
+      if (response.success) {
+        return { success: true, message: 'Xóa trụ thành công' };
+      } else {
+        throw new Error(response.message || 'Không thể xóa trụ');
+      }
+    } catch (error) {
+      console.error(`Lỗi khi xóa trụ ${towerId} (Admin):`, error);
+      const errorInfo = apiUtils.handleError(error);
+      return { success: false, message: errorInfo.message || 'Lỗi API' };
     }
   },
 };

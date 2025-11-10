@@ -25,9 +25,16 @@ const getBatteryLevelClass = (level) => {
   return 'low';
 };
 
-const SlotCard = ({ slot }) => {
+const SlotCard = ({ slot, onAddBattery }) => {
   const hasBattery = !!slot.batteryId;
   const status = getSlotStatus(slot);
+  
+  const handleAddBattery = (e) => {
+    e.stopPropagation();
+    if (onAddBattery) {
+      onAddBattery(slot);
+    }
+  };
   
   return (
     <div className={`slot-card ${status}`}>
@@ -71,7 +78,7 @@ const SlotCard = ({ slot }) => {
   );
 };
 
-const SlotGridView = ({ slots }) => {
+const SlotGridView = ({ slots, onAddBattery }) => {
   if (!slots || slots.length === 0) {
     return (
       <div className="station-empty">
@@ -85,7 +92,11 @@ const SlotGridView = ({ slots }) => {
   return (
     <div className="slot-grid">
       {slots.map(slot => (
-        <SlotCard key={slot.id || slot.slotId} slot={slot} />
+        <SlotCard 
+          key={slot.id || slot.slotId} 
+          slot={slot} 
+          onAddBattery={onAddBattery}
+        />
       ))}
     </div>
   );

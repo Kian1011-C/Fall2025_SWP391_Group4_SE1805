@@ -5,19 +5,23 @@ const getStatusClass = (status = '') => {
   return s || 'unknown';
 };
 
-const StationRow = ({ station, onSelect }) => (
-  <tr onClick={() => onSelect(station)}>
-    <td>{station.id}</td>
-    <td>{station.name}</td>
-    <td style={{ maxWidth: '350px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-      {station.address}
+const StationRow = ({ station, onSelect, onEdit }) => (
+  <tr>
+    <td onClick={() => onSelect(station)} style={{ cursor: 'pointer' }}>
+      {station.id || station.stationId}
     </td>
-    <td>
+    <td onClick={() => onSelect(station)} style={{ cursor: 'pointer' }}>
+      {station.name}
+    </td>
+    <td onClick={() => onSelect(station)} style={{ cursor: 'pointer', maxWidth: '350px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+      {station.address || station.location}
+    </td>
+    <td onClick={() => onSelect(station)} style={{ cursor: 'pointer' }}>
       <span className={`station-status-badge ${getStatusClass(station.status)}`}>
         {station.status}
       </span>
     </td>
-    <td>
+    <td onClick={() => onSelect(station)} style={{ cursor: 'pointer' }}>
       <span style={{ fontWeight: 'bold', color: '#10b981' }}>
         {station.availableBatteries ?? 0}
       </span>
@@ -26,10 +30,32 @@ const StationRow = ({ station, onSelect }) => (
         {station.totalSlots ?? 0}
       </span>
     </td>
+    <td>
+      <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit(station);
+          }}
+          style={{
+            background: '#3b82f6',
+            color: 'white',
+            border: 'none',
+            padding: '6px 12px',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '14px'
+          }}
+          title="Chỉnh sửa"
+        >
+          ✏️ Sửa
+        </button>
+      </div>
+    </td>
   </tr>
 );
 
-const StationListView = ({ stations, onSelectStation }) => {
+const StationListView = ({ stations, onSelectStation, onEditStation }) => {
   if (!stations || stations.length === 0) {
     return (
       <div className="station-empty">
@@ -50,14 +76,16 @@ const StationListView = ({ stations, onSelectStation }) => {
             <th>Địa chỉ</th>
             <th>Trạng thái</th>
             <th>Pin (Sẵn/Tổng)</th>
+            <th style={{ width: '100px' }}>Thao tác</th>
           </tr>
         </thead>
         <tbody>
           {stations.map(station => (
             <StationRow 
-              key={station.id} 
+              key={station.id || station.stationId} 
               station={station} 
-              onSelect={onSelectStation} 
+              onSelect={onSelectStation}
+              onEdit={onEditStation}
             />
           ))}
         </tbody>

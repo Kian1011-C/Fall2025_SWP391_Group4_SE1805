@@ -18,15 +18,6 @@ const TowerRow = ({ tower, onSelect }) => (
         {tower.status}
       </span>
     </td>
-    <td>
-      <span style={{ fontWeight: 'bold', color: '#10b981' }}>
-        {tower.availableSlots ?? 0}
-      </span>
-      {' / '}
-      <span style={{ color: '#94a3b8' }}>
-        {tower.totalSlots ?? 0}
-      </span>
-    </td>
   </tr>
 );
 
@@ -49,7 +40,6 @@ const TowerListView = ({ towers, onSelectTower }) => {
             <th>ID Trụ</th>
             <th>Số hiệu Trụ</th>
             <th>Trạng thái</th>
-            <th>Hộc (Trống/Tổng)</th>
           </tr>
         </thead>
         <tbody>
