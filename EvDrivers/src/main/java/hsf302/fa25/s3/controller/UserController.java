@@ -22,7 +22,6 @@ public class UserController {
     private final UserDao userDao = new UserDao();
     private final UserDashboardDao dashboardDao;
     private final VehicleDao vehicleDao;
-
     @Autowired
     private EmailService emailService;
 
@@ -73,7 +72,7 @@ public class UserController {
                 userProfile.put("avatar", "https://via.placeholder.com/150");
                 userProfile.put("cccd", user.getCccd());
                 userProfile.put("joinDate", user.getCreatedAt());
-                
+
                 response.put("success", true);
                 response.put("data", userProfile);
             } else {
@@ -94,7 +93,7 @@ public class UserController {
         try {
             List<VehicleBatteryInfo> vehicles = vehicleDao.getVehiclesWithBatteryByUser(userId);
             System.out.println("🚗 UserController: VehicleDao returned " + vehicles.size() + " vehicles");
-            
+
             response.put("success", true);
             response.put("data", vehicles);
             response.put("total", vehicles.size());
@@ -107,13 +106,70 @@ public class UserController {
         return response;
     }
 
+    @GetMapping("/{userId}/notifications")
+    public Map<String, Object> getUserNotifications(@PathVariable String userId) {
+        // Mock data - Notification table not implemented yet
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("data", new java.util.ArrayList<>());
+        response.put("unreadCount", 0);
+        response.put("note", "Mock data - Notification table not implemented");
+        return response;
+    }
+
+    @GetMapping("/{userId}/statistics")
+    public Map<String, Object> getUserStatistics(@PathVariable String userId) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            // TODO: Implement real statistics calculation from Swaps and Contracts tables
+            // For now, return mock data based on user data
+            Map<String, Object> stats = new HashMap<>();
+            stats.put("monthlySwaps", 12);
+            stats.put("totalDistance", 324);
+            stats.put("totalSavings", 156000);
+            stats.put("batteryLevel", 75);
+            stats.put("batteryHealth", 92);
+
+            response.put("success", true);
+            response.put("data", stats);
+            response.put("note", "Mock data - Real statistics calculation not implemented yet");
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Error: " + e.getMessage());
+        }
+        return response;
+    }
+
+    @GetMapping("/{userId}/subscription")
+    public Map<String, Object> getUserSubscription(@PathVariable String userId) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            // TODO: Implement real subscription lookup from Contracts table
+            // For now, return mock data
+            Map<String, Object> subscription = new HashMap<>();
+            subscription.put("planName", "Gói Cơ Bản");
+            subscription.put("monthlyFee", 270000);
+            subscription.put("maxDistance", 400);
+            subscription.put("startDate", "2024-01-01");
+            subscription.put("endDate", "2024-12-31");
+            subscription.put("status", "ACTIVE");
+
+            response.put("success", true);
+            response.put("data", subscription);
+            response.put("note", "Mock data - Real subscription lookup not implemented yet");
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Error: " + e.getMessage());
+        }
+        return response;
+    }
+
     @PostMapping("/register")
     public Map<String,Object> register(@RequestParam String firstName,
                                        @RequestParam String lastName,
                                        @RequestParam String email,
                                        @RequestParam(required = false) String phone,
-                                       @RequestParam String password,
-                                       @RequestParam(required = false) String cccd ) {
+                                       @RequestParam String password) {
         Map<String,Object> res = new HashMap<>();
         try {
             // validate tồn tại
@@ -143,7 +199,7 @@ public class UserController {
                     .phone(phone)
                     .password(password)
                     .role("EV Driver")     // bạn có thể để cố định EV Driver khi tự đăng ký
-                    .cccd(cccd)
+                    .cccd(null)
                     .status("inactive")
                     .otpCode(otp)
                     .otpExpire(expire)
@@ -166,7 +222,7 @@ public class UserController {
             }
 
             res.put("success", true);
-            res.put("data", u);
+            res.put("userId", userId);
             res.put("redirect", "/verify-otp?userId=" + userId);
             res.put("message", "Đăng ký thành công! Vui lòng kiểm tra email để nhập OTP.");
             return res;
@@ -187,15 +243,14 @@ public class UserController {
         if (ok) {
             res.put("success", true);
             res.put("message", "Xác thực thành công. Tài khoản đã được kích hoạt.");
-            res.put("redirect", "/api/users" + userId);
+            // ĐỔI TỪ /home?id=... THÀNH /driver/home?id=...
+            res.put("redirect", "/driver/home?id=" + userId);
         } else {
             res.put("success", false);
             res.put("message", "OTP không đúng hoặc đã hết hạn.");
         }
         return res;
     }
-
-    // (login & các API khác của bạn giữ nguyên)
 
     // Quen mat khau - gui mail reset
     @PostMapping("/forgot")
@@ -216,6 +271,8 @@ public class UserController {
 
             // Link reset
             String link = "http://localhost:8080/reset?token=" + token;
+
+            // Gửi mail hoặc in log (DEV)
             emailService.sendResetEmail(u.get().getEmail(), link);
 
             res.put("success", true);
@@ -228,7 +285,6 @@ public class UserController {
             return res;
         }
     }
-
     @GetMapping("/reset/verify")
     public Map<String,Object> verifyResetToken(@RequestParam String token){
         Map<String,Object> res = new HashMap<>();
@@ -357,5 +413,3 @@ public class UserController {
         return s == null || s.trim().isEmpty();
     }
 }
-
-

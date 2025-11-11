@@ -94,7 +94,7 @@ public class BatteryDao {
 
     // Cập nhật pin
     public boolean updateBattery(Battery battery) {
-        String sql = "UPDATE Batteries SET model=?, capacity=?, state_of_health=?, status=?, slot_id=?, cycle_count=? WHERE battery_id=?";
+        String sql = "UPDATE Batteries SET model=?, capacity=?, state_of_health=?, status=?, slot_id=? WHERE battery_id=?";
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -103,8 +103,7 @@ public class BatteryDao {
             ps.setDouble(3, battery.getStateOfHealth());
             ps.setString(4, battery.getStatus());
             ps.setObject(5, battery.getSlotId(), java.sql.Types.INTEGER);
-            ps.setInt(6, battery.getCycleCount());
-            ps.setInt(7, battery.getBatteryId());
+            ps.setInt(6, battery.getBatteryId());
 
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
@@ -115,7 +114,7 @@ public class BatteryDao {
 
     // Tạo pin mới
     public boolean createBattery(Battery battery) {
-        String sql = "INSERT INTO Batteries (model, capacity, state_of_health, status, slot_id, cycle_count) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Batteries (model, capacity, state_of_health, status, slot_id) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -124,7 +123,6 @@ public class BatteryDao {
             ps.setDouble(3, battery.getStateOfHealth());
             ps.setString(4, battery.getStatus());
             ps.setObject(5, battery.getSlotId(), java.sql.Types.INTEGER);
-            ps.setInt(6, battery.getCycleCount());
 
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
@@ -172,7 +170,6 @@ public class BatteryDao {
         b.setCapacity(rs.getInt("capacity"));
         b.setStateOfHealth(rs.getDouble("state_of_health"));
         b.setStatus(rs.getString("status"));
-        b.setCycleCount(rs.getInt("cycle_count"));
         Object slotObj = rs.getObject("slot_id");
         if (slotObj != null) b.setSlotId(((Number) slotObj).intValue());
         return b;

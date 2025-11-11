@@ -2,9 +2,7 @@ package hsf302.fa25.s3.controller;
 
 import hsf302.fa25.s3.dao.UserDao;
 import hsf302.fa25.s3.dao.VehicleDao;
-import hsf302.fa25.s3.dao.StationDao;
 import hsf302.fa25.s3.model.User;
-import hsf302.fa25.s3.model.Station;
 import hsf302.fa25.s3.model.VehicleBatteryInfo;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +14,6 @@ import java.util.stream.Collectors;
 public class AdminController {
 
     private final UserDao userDao = new UserDao();
-    private final StationDao stationDao = new StationDao();
     private VehicleDao vehicleDao;
 
     public AdminController() {
@@ -27,11 +24,10 @@ public class AdminController {
         }
     }
 
-    // ==================== UNIFIED USER MANAGEMENT CRUD APIs ====================
+    // ==================== DRIVER MANAGEMENT CRUD APIs ====================
 
-    @GetMapping("/users")
-    public ResponseEntity<?> getAllUsers(
-            @RequestParam(required = false) String role,
+    @GetMapping("/drivers")
+    public ResponseEntity<?> getAllDrivers(
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String search,
             @RequestParam(required = false, defaultValue = "0") int page,
@@ -39,163 +35,137 @@ public class AdminController {
         try {
             List<User> allUsers = userDao.getAllUsers();
 
-            // Normalize incoming role query param to match stored role values.
-            // Frontend may send values like: "driver", "staff", "admin"
-            // but DB stores values like: "EV Driver", "Staff", "Admin".
-            String normalizedRole = null;
-            if (role != null && !role.trim().isEmpty()) {
-                String rp = role.trim().toLowerCase();
-                if (rp.equals("driver") || rp.equals("drivers") || rp.equals("ev driver") || rp.equals("ev_driver")) {
-                    normalizedRole = "EV Driver";
-                } else if (rp.equals("staff") || rp.equals("staffs") || rp.equals("staff_member")) {
-                    normalizedRole = "Staff";
-                } else if (rp.equals("admin") || rp.equals("administrator")) {
-                    normalizedRole = "Admin";
-                } else {
-                    // Unknown mapping: use raw value and rely on equalsIgnoreCase
-                    normalizedRole = role.trim();
-                }
-            }
-
-            // Filter by role when provided
-            List<User> filtered = allUsers;
-            if (normalizedRole != null) {
-                final String roleToMatch = normalizedRole;
-                filtered = filtered.stream()
-                        .filter(u -> roleToMatch.equalsIgnoreCase(u.getRole()))
-                        .collect(Collectors.toList());
-            }
+            // Filter only drivers
+            List<User> drivers = allUsers.stream()
+                    .filter(user -> "EV Driver".equalsIgnoreCase(user.getRole()))
+                    .collect(Collectors.toList());
 
             // Apply status filter
             if (status != null && !status.isEmpty()) {
-                filtered = filtered.stream()
-                        .filter(u -> status.equalsIgnoreCase(u.getStatus()))
+                drivers = drivers.stream()
+                        .filter(driver -> status.equalsIgnoreCase(driver.getStatus()))
                         .collect(Collectors.toList());
             }
 
             // Apply search filter
             if (search != null && !search.trim().isEmpty()) {
                 String searchLower = search.toLowerCase().trim();
-                filtered = filtered.stream()
-                        .filter(u ->
-                                (u.getFirstName() != null && u.getFirstName().toLowerCase().contains(searchLower)) ||
-                                        (u.getLastName() != null && u.getLastName().toLowerCase().contains(searchLower)) ||
-                                        (u.getEmail() != null && u.getEmail().toLowerCase().contains(searchLower)) ||
-                                        (u.getPhone() != null && u.getPhone().contains(search)) ||
-                                        (u.getCccd() != null && u.getCccd().contains(search))
+                drivers = drivers.stream()
+                        .filter(driver ->
+                                (driver.getFirstName() != null && driver.getFirstName().toLowerCase().contains(searchLower)) ||
+                                        (driver.getLastName() != null && driver.getLastName().toLowerCase().contains(searchLower)) ||
+                                        (driver.getEmail() != null && driver.getEmail().toLowerCase().contains(searchLower)) ||
+                                        (driver.getPhone() != null && driver.getPhone().contains(search)) ||
+                                        (driver.getCccd() != null && driver.getCccd().contains(search))
                         )
                         .collect(Collectors.toList());
             }
 
             // Apply pagination
             int start = page * size;
-            int end = Math.min(start + size, filtered.size());
-            List<User> paginated = filtered.subList(Math.min(start, filtered.size()), Math.max(start, end));
+            int end = Math.min(start + size, drivers.size());
+            List<User> paginatedDrivers = drivers.subList(start, end);
 
-            // Build response list (include vehicles for drivers)
-            List<Map<String, Object>> usersWithExtras = new ArrayList<>();
-            for (User u : paginated) {
-                Map<String, Object> udata = new HashMap<>();
-                udata.put("userId", u.getUserId());
-                udata.put("firstName", u.getFirstName());
-                udata.put("lastName", u.getLastName());
-                udata.put("email", u.getEmail());
-                udata.put("phone", u.getPhone());
-                udata.put("cccd", u.getCccd());
-                udata.put("status", u.getStatus());
-                udata.put("role", u.getRole());
-                udata.put("createdAt", u.getCreatedAt());
-                udata.put("updatedAt", u.getUpdatedAt());
+            // Get vehicle information for each driver
+            List<Map<String, Object>> driversWithVehicles = new ArrayList<>();
+            for (User driver : paginatedDrivers) {
+                Map<String, Object> driverData = new HashMap<>();
+                driverData.put("userId", driver.getUserId());
+                driverData.put("firstName", driver.getFirstName());
+                driverData.put("lastName", driver.getLastName());
+                driverData.put("email", driver.getEmail());
+                driverData.put("phone", driver.getPhone());
+                driverData.put("cccd", driver.getCccd());
+                driverData.put("status", driver.getStatus());
+                driverData.put("createdAt", driver.getCreatedAt());
+                driverData.put("updatedAt", driver.getUpdatedAt());
 
-                if (u.getRole() != null && "EV Driver".equalsIgnoreCase(u.getRole())) {
-                    try {
-                        List<VehicleBatteryInfo> vehicles = vehicleDao.getVehiclesWithBatteryByUser(u.getUserId());
-                        udata.put("vehicles", vehicles);
-                        udata.put("vehicleCount", vehicles.size());
-                    } catch (Exception e) {
-                        udata.put("vehicles", new ArrayList<>());
-                        udata.put("vehicleCount", 0);
-                    }
+                // Get vehicles for this driver
+                try {
+                    List<VehicleBatteryInfo> vehicles = vehicleDao.getVehiclesWithBatteryByUser(driver.getUserId());
+                    driverData.put("vehicles", vehicles);
+                    driverData.put("vehicleCount", vehicles.size());
+                } catch (Exception e) {
+                    driverData.put("vehicles", new ArrayList<>());
+                    driverData.put("vehicleCount", 0);
                 }
 
-                usersWithExtras.add(udata);
+                driversWithVehicles.add(driverData);
             }
 
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
-            response.put("data", usersWithExtras);
-            response.put("total", filtered.size());
+            response.put("data", driversWithVehicles);
+            response.put("total", drivers.size());
             response.put("page", page);
             response.put("size", size);
-            response.put("totalPages", (filtered.size() + size - 1) / size);
+            response.put("totalPages", (drivers.size() + size - 1) / size);
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Map<String, Object> response = new HashMap<>();
             response.put("success", false);
-            response.put("message", "Error fetching users: " + e.getMessage());
+            response.put("message", "Error fetching drivers: " + e.getMessage());
             return ResponseEntity.status(500).body(response);
         }
     }
 
-    @GetMapping("/users/{userId}")
-    public ResponseEntity<?> getUserById(@PathVariable String userId) {
+    @GetMapping("/drivers/{userId}")
+    public ResponseEntity<?> getDriverById(@PathVariable String userId) {
         try {
-            User user = userDao.getUserById(userId);
+            User driver = userDao.getUserById(userId);
 
-            if (user == null) {
+            if (driver == null || !"EV Driver".equalsIgnoreCase(driver.getRole())) {
                 Map<String, Object> response = new HashMap<>();
                 response.put("success", false);
-                response.put("message", "User not found");
+                response.put("message", "Driver not found");
                 return ResponseEntity.status(404).body(response);
             }
 
-            Map<String, Object> userData = new HashMap<>();
-            userData.put("userId", user.getUserId());
-            userData.put("firstName", user.getFirstName());
-            userData.put("lastName", user.getLastName());
-            userData.put("email", user.getEmail());
-            userData.put("phone", user.getPhone());
-            userData.put("cccd", user.getCccd());
-            userData.put("status", user.getStatus());
-            userData.put("role", user.getRole());
-            userData.put("createdAt", user.getCreatedAt());
-            userData.put("updatedAt", user.getUpdatedAt());
+            Map<String, Object> driverData = new HashMap<>();
+            driverData.put("userId", driver.getUserId());
+            driverData.put("firstName", driver.getFirstName());
+            driverData.put("lastName", driver.getLastName());
+            driverData.put("email", driver.getEmail());
+            driverData.put("phone", driver.getPhone());
+            driverData.put("cccd", driver.getCccd());
+            driverData.put("status", driver.getStatus());
+            driverData.put("createdAt", driver.getCreatedAt());
+            driverData.put("updatedAt", driver.getUpdatedAt());
 
-            if (user.getRole() != null && "EV Driver".equalsIgnoreCase(user.getRole())) {
-                try {
-                    List<VehicleBatteryInfo> vehicles = vehicleDao.getVehiclesWithBatteryByUser(userId);
-                    userData.put("vehicles", vehicles);
-                } catch (Exception e) {
-                    userData.put("vehicles", new ArrayList<>());
-                }
+            // Get vehicles for this driver
+            try {
+                List<VehicleBatteryInfo> vehicles = vehicleDao.getVehiclesWithBatteryByUser(userId);
+                driverData.put("vehicles", vehicles);
+            } catch (Exception e) {
+                driverData.put("vehicles", new ArrayList<>());
             }
 
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
-            response.put("data", userData);
+            response.put("data", driverData);
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Map<String, Object> response = new HashMap<>();
             response.put("success", false);
-            response.put("message", "Error fetching user: " + e.getMessage());
+            response.put("message", "Error fetching driver: " + e.getMessage());
             return ResponseEntity.status(500).body(response);
         }
     }
 
-    @PostMapping("/users")
-    public ResponseEntity<?> createUser(@RequestBody User user) {
+    @PostMapping("/drivers")
+    public ResponseEntity<?> createDriver(@RequestBody User driver) {
         try {
             // Validate required fields
-            if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
+            if (driver.getEmail() == null || driver.getEmail().trim().isEmpty()) {
                 Map<String, Object> response = new HashMap<>();
                 response.put("success", false);
                 response.put("message", "Email is required");
                 return ResponseEntity.status(400).body(response);
             }
 
-            if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
+            if (driver.getPassword() == null || driver.getPassword().trim().isEmpty()) {
                 Map<String, Object> response = new HashMap<>();
                 response.put("success", false);
                 response.put("message", "Password is required");
@@ -205,7 +175,7 @@ public class AdminController {
             // Check if email already exists
             List<User> existingUsers = userDao.getAllUsers();
             boolean emailExists = existingUsers.stream()
-                    .anyMatch(u -> user.getEmail().equalsIgnoreCase(u.getEmail()));
+                    .anyMatch(user -> driver.getEmail().equalsIgnoreCase(user.getEmail()));
 
             if (emailExists) {
                 Map<String, Object> response = new HashMap<>();
@@ -214,545 +184,419 @@ public class AdminController {
                 return ResponseEntity.status(400).body(response);
             }
 
-            // Set role and defaults
-            if (user.getRole() == null || user.getRole().isEmpty()) {
-                user.setRole("EV Driver");
+            // Set driver role and defaults
+            driver.setRole("EV Driver");
+            if (driver.getStatus() == null || driver.getStatus().isEmpty()) {
+                driver.setStatus("active");
             }
-            if (user.getStatus() == null || user.getStatus().isEmpty()) {
-                user.setStatus("active");
-            }
-
-            // Ensure DB non-nullable fields are not null
-            if (user.getPhone() == null) user.setPhone("");
-            if (user.getFirstName() == null) user.setFirstName("");
-            if (user.getLastName() == null) user.setLastName("");
 
             // Generate user ID if not provided
-            if (user.getUserId() == null || user.getUserId().isEmpty()) {
-                user.setUserId(user.getEmail()); // Use email as user ID
+            if (driver.getUserId() == null || driver.getUserId().isEmpty()) {
+                driver.setUserId(driver.getEmail()); // Use email as user ID
             }
 
-            boolean created = userDao.addUser(user);
+            boolean created = userDao.addUser(driver);
 
             Map<String, Object> response = new HashMap<>();
             if (created) {
                 response.put("success", true);
-                response.put("message", "User created successfully");
-                response.put("data", user);
+                response.put("message", "Driver created successfully");
+                response.put("data", driver);
             } else {
                 response.put("success", false);
-                response.put("message", "Failed to create user");
+                response.put("message", "Failed to create driver");
                 return ResponseEntity.status(500).body(response);
             }
 
             return ResponseEntity.status(201).body(response);
-            } catch (Exception e) {
-                Map<String, Object> response = new HashMap<>();
-                response.put("success", false);
-                response.put("message", "Error creating staff member: " + e.getMessage());
-                return ResponseEntity.status(500).body(response);
-            }
-        }
-
-    @PutMapping("/users/{userId}")
-    public ResponseEntity<?> updateUser(@PathVariable String userId, @RequestBody User user) {
-        try {
-            User existing = userDao.getUserById(userId);
-            if (existing == null) {
-                Map<String, Object> resp = new HashMap<>();
-                resp.put("success", false);
-                resp.put("message", "User not found");
-                return ResponseEntity.status(404).body(resp);
-            }
-
-            // Validate email uniqueness if changed
-            if (user.getEmail() != null && !user.getEmail().equalsIgnoreCase(existing.getEmail())) {
-                if (userDao.emailExists(user.getEmail())) {
-                    Map<String, Object> resp = new HashMap<>();
-                    resp.put("success", false);
-                    resp.put("message", "Email already in use");
-                    return ResponseEntity.status(400).body(resp);
-                }
-            }
-
-            // Validate phone uniqueness if provided and changed
-            if (user.getPhone() != null && !user.getPhone().isBlank() && !user.getPhone().equals(existing.getPhone())) {
-                if (userDao.phoneExists(user.getPhone())) {
-                    Map<String, Object> resp = new HashMap<>();
-                    resp.put("success", false);
-                    resp.put("message", "Phone already in use");
-                    return ResponseEntity.status(400).body(resp);
-                }
-            }
-
-            // Merge incoming fields (preserve existing values when omitted)
-            user.setUserId(userId);
-            if (user.getFirstName() == null) user.setFirstName(existing.getFirstName());
-            if (user.getLastName() == null) user.setLastName(existing.getLastName());
-            if (user.getEmail() == null) user.setEmail(existing.getEmail());
-            if (user.getPhone() == null) user.setPhone(existing.getPhone());
-            if (user.getPassword() == null) user.setPassword(existing.getPassword());
-            if (user.getRole() == null) user.setRole(existing.getRole());
-            if (user.getCccd() == null) user.setCccd(existing.getCccd());
-            if (user.getStatus() == null) user.setStatus(existing.getStatus());
-
-            boolean ok = userDao.updateUser(user);
-            Map<String, Object> resp = new HashMap<>();
-            if (ok) {
-                resp.put("success", true);
-                resp.put("message", "User updated successfully");
-                resp.put("data", userDao.getUserById(userId));
-                return ResponseEntity.ok(resp);
-            } else {
-                resp.put("success", false);
-                resp.put("message", "Failed to update user");
-                return ResponseEntity.status(500).body(resp);
-            }
         } catch (Exception e) {
-            Map<String, Object> resp = new HashMap<>();
-            resp.put("success", false);
-            resp.put("message", "Error updating user: " + e.getMessage());
-            return ResponseEntity.status(500).body(resp);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Error creating driver: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
         }
     }
 
-    @DeleteMapping("/users/{userId}")
-    public ResponseEntity<?> deleteUser(@PathVariable String userId) {
+    @PutMapping("/drivers/{userId}")
+    public ResponseEntity<?> updateDriver(@PathVariable String userId, @RequestBody User driver) {
         try {
-            User existing = userDao.getUserById(userId);
-            if (existing == null) {
-                Map<String, Object> resp = new HashMap<>();
-                resp.put("success", false);
-                resp.put("message", "User not found");
-                return ResponseEntity.status(404).body(resp);
+            // Check if driver exists
+            User existingDriver = userDao.getUserById(userId);
+            if (existingDriver == null || !"EV Driver".equalsIgnoreCase(existingDriver.getRole())) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Driver not found");
+                return ResponseEntity.status(404).body(response);
+            }
+
+            // Set the user ID for update
+            driver.setUserId(userId);
+            driver.setRole("EV Driver"); // Ensure role remains EV Driver
+
+            // Keep existing values if not provided
+            if (driver.getFirstName() == null) driver.setFirstName(existingDriver.getFirstName());
+            if (driver.getLastName() == null) driver.setLastName(existingDriver.getLastName());
+            if (driver.getEmail() == null) driver.setEmail(existingDriver.getEmail());
+            if (driver.getPhone() == null) driver.setPhone(existingDriver.getPhone());
+            if (driver.getPassword() == null) driver.setPassword(existingDriver.getPassword());
+            if (driver.getCccd() == null) driver.setCccd(existingDriver.getCccd());
+            if (driver.getStatus() == null) driver.setStatus(existingDriver.getStatus());
+
+            boolean updated = userDao.updateUser(driver);
+
+            Map<String, Object> response = new HashMap<>();
+            if (updated) {
+                response.put("success", true);
+                response.put("message", "Driver updated successfully");
+                response.put("data", driver);
+            } else {
+                response.put("success", false);
+                response.put("message", "Failed to update driver");
+                return ResponseEntity.status(500).body(response);
+            }
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Error updating driver: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    @DeleteMapping("/drivers/{userId}")
+    public ResponseEntity<?> deleteDriver(@PathVariable String userId) {
+        try {
+            // Check if driver exists
+            User existingDriver = userDao.getUserById(userId);
+            if (existingDriver == null || !"EV Driver".equalsIgnoreCase(existingDriver.getRole())) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Driver not found");
+                return ResponseEntity.status(404).body(response);
+            }
+
+            // Check if driver has active vehicles/contracts
+            try {
+                List<VehicleBatteryInfo> vehicles = vehicleDao.getVehiclesWithBatteryByUser(userId);
+                if (!vehicles.isEmpty()) {
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("success", false);
+                    response.put("message", "Cannot delete driver with registered vehicles. Remove vehicles first.");
+                    return ResponseEntity.status(400).body(response);
+                }
+            } catch (Exception e) {
+                // Continue with deletion even if vehicle check fails
             }
 
             boolean deleted = userDao.deleteUser(userId);
-            Map<String, Object> resp = new HashMap<>();
+
+            Map<String, Object> response = new HashMap<>();
             if (deleted) {
-                resp.put("success", true);
-                resp.put("message", "User deleted successfully");
-                return ResponseEntity.ok(resp);
+                response.put("success", true);
+                response.put("message", "Driver deleted successfully");
             } else {
-                resp.put("success", false);
-                resp.put("message", "Failed to delete user");
-                return ResponseEntity.status(500).body(resp);
+                response.put("success", false);
+                response.put("message", "Failed to delete driver");
+                return ResponseEntity.status(500).body(response);
             }
+
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            Map<String, Object> resp = new HashMap<>();
-            resp.put("success", false);
-            resp.put("message", "Error deleting user: " + e.getMessage());
-            return ResponseEntity.status(500).body(resp);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Error deleting driver: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
         }
     }
 
-        // Staff-specific endpoints removed — manage staff via unified /users CRUD
+    // ==================== STAFF MANAGEMENT CRUD APIs ====================
 
-        // ==================== VEHICLE MANAGEMENT APIs ====================
+    @GetMapping("/staff")
+    public ResponseEntity<?> getAllStaff(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "20") int size) {
+        try {
+            List<User> allUsers = userDao.getAllUsers();
 
-        @GetMapping("/users/{userId}/vehicles")
-        public ResponseEntity<?> getUserVehicles(@PathVariable String userId) {
-            try {
-                // Check if driver exists
-                User driver = userDao.getUserById(userId);
-                if (driver == null) {
-                    Map<String, Object> response = new HashMap<>();
-                    response.put("success", false);
-                    response.put("message", "User not found");
-                    return ResponseEntity.status(404).body(response);
-                }
+            // Filter only staff
+            List<User> staff = allUsers.stream()
+                    .filter(user -> "Staff".equalsIgnoreCase(user.getRole()))
+                    .collect(Collectors.toList());
 
-                if (!"EV Driver".equalsIgnoreCase(driver.getRole())) {
-                    Map<String, Object> response = new HashMap<>();
-                    response.put("success", false);
-                    response.put("message", "User is not a driver");
-                    return ResponseEntity.status(400).body(response);
-                }
-
-                List<VehicleBatteryInfo> vehicles = vehicleDao.getVehiclesWithBatteryByUser(userId);
-
-                Map<String, Object> response = new HashMap<>();
-                response.put("success", true);
-                response.put("data", vehicles);
-                response.put("total", vehicles.size());
-
-                return ResponseEntity.ok(response);
-            } catch (Exception e) {
-                Map<String, Object> response = new HashMap<>();
-                response.put("success", false);
-                response.put("message", "Error fetching driver vehicles: " + e.getMessage());
-                return ResponseEntity.status(500).body(response);
+            // Apply status filter
+            if (status != null && !status.isEmpty()) {
+                staff = staff.stream()
+                        .filter(s -> status.equalsIgnoreCase(s.getStatus()))
+                        .collect(Collectors.toList());
             }
-        }
 
-        @GetMapping("/statistics")
-        public ResponseEntity<?> getAdminStatistics() {
-            try {
-                List<User> allUsers = userDao.getAllUsers();
-
-                long driverCount = allUsers.stream().filter(u -> "EV Driver".equalsIgnoreCase(u.getRole())).count();
-                long staffCount = allUsers.stream().filter(u -> "Staff".equalsIgnoreCase(u.getRole())).count();
-                long activeDrivers = allUsers.stream()
-                        .filter(u -> "EV Driver".equalsIgnoreCase(u.getRole()) && "active".equalsIgnoreCase(u.getStatus()))
-                        .count();
-                long activeStaff = allUsers.stream()
-                        .filter(u -> "Staff".equalsIgnoreCase(u.getRole()) && "active".equalsIgnoreCase(u.getStatus()))
-                        .count();
-
-                Map<String, Object> stats = new HashMap<>();
-                stats.put("totalDrivers", driverCount);
-                stats.put("totalStaff", staffCount);
-                stats.put("activeDrivers", activeDrivers);
-                stats.put("activeStaff", activeStaff);
-
-                Map<String, Object> response = new HashMap<>();
-                response.put("success", true);
-                response.put("data", stats);
-
-                return ResponseEntity.ok(response);
-            } catch (Exception e) {
-                Map<String, Object> response = new HashMap<>();
-                response.put("success", false);
-                response.put("message", "Error fetching statistics: " + e.getMessage());
-                return ResponseEntity.status(500).body(response);
+            // Apply search filter
+            if (search != null && !search.trim().isEmpty()) {
+                String searchLower = search.toLowerCase().trim();
+                staff = staff.stream()
+                        .filter(s ->
+                                (s.getFirstName() != null && s.getFirstName().toLowerCase().contains(searchLower)) ||
+                                        (s.getLastName() != null && s.getLastName().toLowerCase().contains(searchLower)) ||
+                                        (s.getEmail() != null && s.getEmail().toLowerCase().contains(searchLower)) ||
+                                        (s.getPhone() != null && s.getPhone().contains(search)) ||
+                                        (s.getCccd() != null && s.getCccd().contains(search))
+                        )
+                        .collect(Collectors.toList());
             }
-        }
 
-        // ==================== STATION MANAGEMENT APIs ====================
+            // Apply pagination
+            int start = page * size;
+            int end = Math.min(start + size, staff.size());
+            List<User> paginatedStaff = staff.subList(start, end);
 
-        @GetMapping("/stations")
-        public ResponseEntity<?> getAllStations(
-                @RequestParam(required = false) String status) {
-            try {
-                List<Station> stations;
-                if (status != null && !status.isEmpty()) {
-                    stations = stationDao.getStationsByStatus(status);
-                } else {
-                    stations = stationDao.getAllStations();
-                }
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("data", paginatedStaff);
+            response.put("total", staff.size());
+            response.put("page", page);
+            response.put("size", size);
+            response.put("totalPages", (staff.size() + size - 1) / size);
 
-                // Thêm thông tin chi tiết cho mỗi station
-                List<Map<String, Object>> stationsWithDetails = new ArrayList<>();
-                for (Station station : stations) {
-                    Map<String, Object> stationData = new HashMap<>();
-                    stationData.put("stationId", station.getStationId());
-                    stationData.put("name", station.getName());
-                    stationData.put("location", station.getLocation());
-                    stationData.put("status", station.getStatus());
-
-                    // Lấy thống kê chi tiết
-                    Map<String, Object> details = stationDao.getStationDetails(station.getStationId());
-                    stationData.putAll(details);
-
-                    stationsWithDetails.add(stationData);
-                }
-
-                Map<String, Object> response = new HashMap<>();
-                response.put("success", true);
-                response.put("data", stationsWithDetails);
-                response.put("total", stationsWithDetails.size());
-
-                return ResponseEntity.ok(response);
-            } catch (Exception e) {
-                Map<String, Object> response = new HashMap<>();
-                response.put("success", false);
-                response.put("message", "Error fetching stations: " + e.getMessage());
-                return ResponseEntity.status(500).body(response);
-            }
-        }
-
-        @GetMapping("/stations/{stationId}")
-        public ResponseEntity<?> getStationById(@PathVariable int stationId) {
-            try {
-                Station station = stationDao.getStationById(stationId);
-                if (station == null) {
-                    Map<String, Object> response = new HashMap<>();
-                    response.put("success", false);
-                    response.put("message", "Station not found");
-                    return ResponseEntity.status(404).body(response);
-                }
-
-                Map<String, Object> stationData = new HashMap<>();
-                stationData.put("stationId", station.getStationId());
-                stationData.put("name", station.getName());
-                stationData.put("location", station.getLocation());
-                stationData.put("status", station.getStatus());
-
-                // Lấy thông tin chi tiết
-                Map<String, Object> details = stationDao.getStationDetails(stationId);
-                stationData.putAll(details);
-
-                // Lấy danh sách towers
-                List<Map<String, Object>> towers = stationDao.getTowersByStation(stationId);
-                stationData.put("towers", towers);
-
-                Map<String, Object> response = new HashMap<>();
-                response.put("success", true);
-                response.put("data", stationData);
-
-                return ResponseEntity.ok(response);
-            } catch (Exception e) {
-                Map<String, Object> response = new HashMap<>();
-                response.put("success", false);
-                response.put("message", "Error fetching station: " + e.getMessage());
-                return ResponseEntity.status(500).body(response);
-            }
-        }
-
-        @PostMapping("/stations")
-        public ResponseEntity<?> createStation(@RequestBody Station station) {
-            try {
-                // Validate required fields
-                if (station.getName() == null || station.getName().trim().isEmpty()) {
-                    Map<String, Object> response = new HashMap<>();
-                    response.put("success", false);
-                    response.put("message", "Station name is required");
-                    return ResponseEntity.status(400).body(response);
-                }
-
-                if (station.getLocation() == null || station.getLocation().trim().isEmpty()) {
-                    Map<String, Object> response = new HashMap<>();
-                    response.put("success", false);
-                    response.put("message", "Station location is required");
-                    return ResponseEntity.status(400).body(response);
-                }
-
-                // Set default status if not provided
-                if (station.getStatus() == null || station.getStatus().isEmpty()) {
-                    station.setStatus("active");
-                }
-
-                // Tạo station với 1 tower và 8 slots tự động
-                int stationId = stationDao.createStationWithTower(station, 8);
-
-                if (stationId > 0) {
-                    Station createdStation = stationDao.getStationById(stationId);
-                    Map<String, Object> response = new HashMap<>();
-                    response.put("success", true);
-                    response.put("message", "Station created successfully with 1 tower and 8 slots");
-                    response.put("data", createdStation);
-                    return ResponseEntity.status(201).body(response);
-                } else {
-                    Map<String, Object> response = new HashMap<>();
-                    response.put("success", false);
-                    response.put("message", "Failed to create station");
-                    return ResponseEntity.status(500).body(response);
-                }
-            } catch (Exception e) {
-                Map<String, Object> response = new HashMap<>();
-                response.put("success", false);
-                response.put("message", "Error creating station: " + e.getMessage());
-                return ResponseEntity.status(500).body(response);
-            }
-        }
-
-        @PutMapping("/stations/{stationId}")
-        public ResponseEntity<?> updateStation(@PathVariable int stationId, @RequestBody Station station) {
-            try {
-                Station existing = stationDao.getStationById(stationId);
-                if (existing == null) {
-                    Map<String, Object> response = new HashMap<>();
-                    response.put("success", false);
-                    response.put("message", "Station not found");
-                    return ResponseEntity.status(404).body(response);
-                }
-
-                // Merge fields
-                station.setStationId(stationId);
-                if (station.getName() == null) station.setName(existing.getName());
-                if (station.getLocation() == null) station.setLocation(existing.getLocation());
-                if (station.getStatus() == null) station.setStatus(existing.getStatus());
-
-                boolean updated = stationDao.updateStation(station);
-
-                Map<String, Object> response = new HashMap<>();
-                if (updated) {
-                    response.put("success", true);
-                    response.put("message", "Station updated successfully");
-                    response.put("data", stationDao.getStationById(stationId));
-                    return ResponseEntity.ok(response);
-                } else {
-                    response.put("success", false);
-                    response.put("message", "Failed to update station");
-                    return ResponseEntity.status(500).body(response);
-                }
-            } catch (Exception e) {
-                Map<String, Object> response = new HashMap<>();
-                response.put("success", false);
-                response.put("message", "Error updating station: " + e.getMessage());
-                return ResponseEntity.status(500).body(response);
-            }
-        }
-
-        @DeleteMapping("/stations/{stationId}")
-        public ResponseEntity<?> deleteStation(@PathVariable int stationId) {
-            try {
-                Station existing = stationDao.getStationById(stationId);
-                if (existing == null) {
-                    Map<String, Object> response = new HashMap<>();
-                    response.put("success", false);
-                    response.put("message", "Station not found");
-                    return ResponseEntity.status(404).body(response);
-                }
-
-                boolean deleted = stationDao.deleteStation(stationId);
-
-                Map<String, Object> response = new HashMap<>();
-                if (deleted) {
-                    response.put("success", true);
-                    response.put("message", "Station marked as maintenance (soft delete)");
-                    return ResponseEntity.ok(response);
-                } else {
-                    response.put("success", false);
-                    response.put("message", "Failed to delete station");
-                    return ResponseEntity.status(500).body(response);
-                }
-            } catch (Exception e) {
-                Map<String, Object> response = new HashMap<>();
-                response.put("success", false);
-                response.put("message", "Error deleting station: " + e.getMessage());
-                return ResponseEntity.status(500).body(response);
-            }
-        }
-
-        // ==================== TOWER MANAGEMENT APIs ====================
-
-        @GetMapping("/stations/{stationId}/towers")
-        public ResponseEntity<?> getStationTowers(@PathVariable int stationId) {
-            try {
-                Station station = stationDao.getStationById(stationId);
-                if (station == null) {
-                    Map<String, Object> response = new HashMap<>();
-                    response.put("success", false);
-                    response.put("message", "Station not found");
-                    return ResponseEntity.status(404).body(response);
-                }
-
-                List<Map<String, Object>> towers = stationDao.getTowersByStation(stationId);
-
-                Map<String, Object> response = new HashMap<>();
-                response.put("success", true);
-                response.put("data", towers);
-                response.put("total", towers.size());
-
-                return ResponseEntity.ok(response);
-            } catch (Exception e) {
-                Map<String, Object> response = new HashMap<>();
-                response.put("success", false);
-                response.put("message", "Error fetching towers: " + e.getMessage());
-                return ResponseEntity.status(500).body(response);
-            }
-        }
-
-        @PostMapping("/stations/{stationId}/towers")
-        public ResponseEntity<?> addTowerToStation(
-                @PathVariable int stationId,
-                @RequestParam(required = false, defaultValue = "8") int numberOfSlots) {
-            try {
-                Station station = stationDao.getStationById(stationId);
-                if (station == null) {
-                    Map<String, Object> response = new HashMap<>();
-                    response.put("success", false);
-                    response.put("message", "Station not found");
-                    return ResponseEntity.status(404).body(response);
-                }
-
-                int towerId = stationDao.addTowerToStation(stationId, numberOfSlots);
-
-                Map<String, Object> response = new HashMap<>();
-                if (towerId > 0) {
-                    response.put("success", true);
-                    response.put("message", "Tower added successfully with " + numberOfSlots + " slots");
-                    response.put("data", Map.of("towerId", towerId));
-                    return ResponseEntity.status(201).body(response);
-                } else {
-                    response.put("success", false);
-                    response.put("message", "Failed to add tower");
-                    return ResponseEntity.status(500).body(response);
-                }
-            } catch (Exception e) {
-                Map<String, Object> response = new HashMap<>();
-                response.put("success", false);
-                response.put("message", "Error adding tower: " + e.getMessage());
-                return ResponseEntity.status(500).body(response);
-            }
-        }
-
-        @PutMapping("/towers/{towerId}")
-        public ResponseEntity<?> updateTower(
-                @PathVariable int towerId,
-                @RequestBody Map<String, String> body) {
-            try {
-                String status = body.get("status");
-                if (status == null || status.isEmpty()) {
-                    Map<String, Object> response = new HashMap<>();
-                    response.put("success", false);
-                    response.put("message", "Status is required");
-                    return ResponseEntity.status(400).body(response);
-                }
-
-                boolean updated = stationDao.updateTower(towerId, status);
-
-                Map<String, Object> response = new HashMap<>();
-                if (updated) {
-                    response.put("success", true);
-                    response.put("message", "Tower updated successfully");
-                    return ResponseEntity.ok(response);
-                } else {
-                    response.put("success", false);
-                    response.put("message", "Failed to update tower");
-                    return ResponseEntity.status(500).body(response);
-                }
-            } catch (Exception e) {
-                Map<String, Object> response = new HashMap<>();
-                response.put("success", false);
-                response.put("message", "Error updating tower: " + e.getMessage());
-                return ResponseEntity.status(500).body(response);
-            }
-        }
-
-        @DeleteMapping("/towers/{towerId}")
-        public ResponseEntity<?> deleteTower(@PathVariable int towerId) {
-            try {
-                // Kiểm tra tower có tồn tại không
-                Map<String, Object> tower = stationDao.getTowerById(towerId);
-                if (tower == null) {
-                    Map<String, Object> response = new HashMap<>();
-                    response.put("success", false);
-                    response.put("message", "Tower not found");
-                    return ResponseEntity.status(404).body(response);
-                }
-
-                // Kiểm tra tower có batteries không
-                int fullSlots = (int) tower.getOrDefault("fullSlots", 0);
-                int chargingSlots = (int) tower.getOrDefault("chargingSlots", 0);
-                
-                if (fullSlots > 0 || chargingSlots > 0) {
-                    Map<String, Object> response = new HashMap<>();
-                    response.put("success", false);
-                    response.put("message", "Cannot delete tower with batteries. Please remove all batteries first.");
-                    response.put("fullSlots", fullSlots);
-                    response.put("chargingSlots", chargingSlots);
-                    return ResponseEntity.status(400).body(response);
-                }
-
-                boolean deleted = stationDao.deleteTower(towerId);
-
-                Map<String, Object> response = new HashMap<>();
-                if (deleted) {
-                    response.put("success", true);
-                    response.put("message", "Tower and its slots deleted successfully");
-                    return ResponseEntity.ok(response);
-                } else {
-                    response.put("success", false);
-                    response.put("message", "Failed to delete tower");
-                    return ResponseEntity.status(500).body(response);
-                }
-            } catch (Exception e) {
-                Map<String, Object> response = new HashMap<>();
-                response.put("success", false);
-                response.put("message", "Error deleting tower: " + e.getMessage());
-                return ResponseEntity.status(500).body(response);
-            }
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Error fetching staff: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
         }
     }
+
+    @GetMapping("/staff/{userId}")
+    public ResponseEntity<?> getStaffById(@PathVariable String userId) {
+        try {
+            User staff = userDao.getUserById(userId);
+
+            if (staff == null || !"Staff".equalsIgnoreCase(staff.getRole())) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Staff member not found");
+                return ResponseEntity.status(404).body(response);
+            }
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("data", staff);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Error fetching staff member: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    @PostMapping("/staff")
+    public ResponseEntity<?> createStaff(@RequestBody User staff) {
+        try {
+            // Validate required fields
+            if (staff.getEmail() == null || staff.getEmail().trim().isEmpty()) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Email is required");
+                return ResponseEntity.status(400).body(response);
+            }
+
+            if (staff.getPassword() == null || staff.getPassword().trim().isEmpty()) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Password is required");
+                return ResponseEntity.status(400).body(response);
+            }
+
+            // Check if email already exists
+            List<User> existingUsers = userDao.getAllUsers();
+            boolean emailExists = existingUsers.stream()
+                    .anyMatch(user -> staff.getEmail().equalsIgnoreCase(user.getEmail()));
+
+            if (emailExists) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Email already exists");
+                return ResponseEntity.status(400).body(response);
+            }
+
+            // Set staff role and defaults
+            staff.setRole("Staff");
+            if (staff.getStatus() == null || staff.getStatus().isEmpty()) {
+                staff.setStatus("active");
+            }
+
+            // Generate user ID if not provided
+            if (staff.getUserId() == null || staff.getUserId().isEmpty()) {
+                staff.setUserId(staff.getEmail()); // Use email as user ID
+            }
+
+            boolean created = userDao.addUser(staff);
+
+            Map<String, Object> response = new HashMap<>();
+            if (created) {
+                response.put("success", true);
+                response.put("message", "Staff member created successfully");
+                response.put("data", staff);
+            } else {
+                response.put("success", false);
+                response.put("message", "Failed to create staff member");
+                return ResponseEntity.status(500).body(response);
+            }
+
+            return ResponseEntity.status(201).body(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Error creating staff member: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    @PutMapping("/staff/{userId}")
+    public ResponseEntity<?> updateStaff(@PathVariable String userId, @RequestBody User staff) {
+        try {
+            // Check if staff exists
+            User existingStaff = userDao.getUserById(userId);
+            if (existingStaff == null || !"Staff".equalsIgnoreCase(existingStaff.getRole())) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Staff member not found");
+                return ResponseEntity.status(404).body(response);
+            }
+
+            // Set the user ID for update
+            staff.setUserId(userId);
+            staff.setRole("Staff"); // Ensure role remains Staff
+
+            // Keep existing values if not provided
+            if (staff.getFirstName() == null) staff.setFirstName(existingStaff.getFirstName());
+            if (staff.getLastName() == null) staff.setLastName(existingStaff.getLastName());
+            if (staff.getEmail() == null) staff.setEmail(existingStaff.getEmail());
+            if (staff.getPhone() == null) staff.setPhone(existingStaff.getPhone());
+            if (staff.getPassword() == null) staff.setPassword(existingStaff.getPassword());
+            if (staff.getCccd() == null) staff.setCccd(existingStaff.getCccd());
+            if (staff.getStatus() == null) staff.setStatus(existingStaff.getStatus());
+
+            boolean updated = userDao.updateUser(staff);
+
+            Map<String, Object> response = new HashMap<>();
+            if (updated) {
+                response.put("success", true);
+                response.put("message", "Staff member updated successfully");
+                response.put("data", staff);
+            } else {
+                response.put("success", false);
+                response.put("message", "Failed to update staff member");
+                return ResponseEntity.status(500).body(response);
+            }
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Error updating staff member: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    @DeleteMapping("/staff/{userId}")
+    public ResponseEntity<?> deleteStaff(@PathVariable String userId) {
+        try {
+            // Check if staff exists
+            User existingStaff = userDao.getUserById(userId);
+            if (existingStaff == null || !"Staff".equalsIgnoreCase(existingStaff.getRole())) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Staff member not found");
+                return ResponseEntity.status(404).body(response);
+            }
+
+            boolean deleted = userDao.deleteUser(userId);
+
+            Map<String, Object> response = new HashMap<>();
+            if (deleted) {
+                response.put("success", true);
+                response.put("message", "Staff member deleted successfully");
+            } else {
+                response.put("success", false);
+                response.put("message", "Failed to delete staff member");
+                return ResponseEntity.status(500).body(response);
+            }
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Error deleting staff member: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    // ==================== VEHICLE MANAGEMENT APIs ====================
+
+    @GetMapping("/drivers/{userId}/vehicles")
+    public ResponseEntity<?> getDriverVehicles(@PathVariable String userId) {
+        try {
+            // Check if driver exists
+            User driver = userDao.getUserById(userId);
+            if (driver == null || !"EV Driver".equalsIgnoreCase(driver.getRole())) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Driver not found");
+                return ResponseEntity.status(404).body(response);
+            }
+
+            List<VehicleBatteryInfo> vehicles = vehicleDao.getVehiclesWithBatteryByUser(userId);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("data", vehicles);
+            response.put("total", vehicles.size());
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Error fetching driver vehicles: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    @GetMapping("/statistics")
+    public ResponseEntity<?> getAdminStatistics() {
+        try {
+            List<User> allUsers = userDao.getAllUsers();
+
+            long driverCount = allUsers.stream().filter(u -> "EV Driver".equalsIgnoreCase(u.getRole())).count();
+            long staffCount = allUsers.stream().filter(u -> "Staff".equalsIgnoreCase(u.getRole())).count();
+            long activeDrivers = allUsers.stream()
+                    .filter(u -> "EV Driver".equalsIgnoreCase(u.getRole()) && "active".equalsIgnoreCase(u.getStatus()))
+                    .count();
+            long activeStaff = allUsers.stream()
+                    .filter(u -> "Staff".equalsIgnoreCase(u.getRole()) && "active".equalsIgnoreCase(u.getStatus()))
+                    .count();
+
+            Map<String, Object> stats = new HashMap<>();
+            stats.put("totalDrivers", driverCount);
+            stats.put("totalStaff", staffCount);
+            stats.put("activeDrivers", activeDrivers);
+            stats.put("activeStaff", activeStaff);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("data", stats);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Error fetching statistics: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+}

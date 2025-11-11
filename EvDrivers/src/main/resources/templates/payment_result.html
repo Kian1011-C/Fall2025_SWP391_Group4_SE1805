@@ -155,7 +155,16 @@
 
         <!-- Footer / Actions -->
         <div class="foot">
-            <a class="btn primary" href="http://localhost:3000/driver/payments">Quay về trang chủ</a>
+            <a class="btn" th:href="@{${driverHomeUrl}}">Quay về trang chủ</a>
+            <a class="btn" th:href="@{/orders}" href="/orders">Đơn hàng của tôi</a>
+            <a class="btn primary"
+               th:href="@{/payment/querydr(
+              txnRef=${payment != null and payment.transactionRef != null ? payment.transactionRef : ''},
+              transactionDate=${queryDateStr}
+            )}">
+                Đối soát (QueryDR)
+            </a>
+
         </div>
     </div>
 </div>

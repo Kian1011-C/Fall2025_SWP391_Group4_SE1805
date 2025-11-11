@@ -56,26 +56,4 @@ public class SlotDao {
         }
         return null; // Không có pin trong slot này
     }
-
-    // Lấy 1 slot trống trong tower (top 1 theo slot_number)
-    public Slot getOneEmptySlotInTower(int towerId) {
-        String sql = "SELECT TOP 1 * FROM Slots WHERE tower_id = ? AND status = 'empty' ORDER BY slot_number";
-        try (Connection conn = ConnectDB.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, towerId);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                Slot s = new Slot();
-                s.setSlotId(rs.getInt("slot_id"));
-                s.setTowerId(rs.getInt("tower_id"));
-                s.setSlotNumber(rs.getInt("slot_number"));
-                s.setStatus(rs.getString("status"));
-                return s;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 }

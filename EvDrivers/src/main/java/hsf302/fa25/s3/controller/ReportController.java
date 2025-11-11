@@ -15,6 +15,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class ReportController {
     private final ReportService service;
+
     @GetMapping("/overview")
     public ResponseEntity<?> getOverviewReport(@RequestParam(required = false) String dateRange) {
         try {

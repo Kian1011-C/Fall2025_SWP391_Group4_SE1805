@@ -8,7 +8,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -18,7 +17,7 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
-    /** Tạo URL thanh toán (Return + QueryDR, không IPN) */
+    /** Tạo URL thanh toán (Return + QueryDR) */
     @PostMapping("/create")
     public Map<String, Object> create(
             @RequestParam String userId,
@@ -34,12 +33,13 @@ public class PaymentController {
         return res;
     }
 
-    /** Return URL: VNPAY redirect về */
+    /** Return URL: VNPay redirect về (trả JSON) */
     @GetMapping("/vnpay-return-json")
     public Map<String, Object> vnpReturn(@RequestParam Map<String, String> params) {
         Payment p = paymentService.handleReturn(params);
         Map<String, Object> res = new HashMap<>();
         if (p != null && "success".equalsIgnoreCase(p.getStatus())) {
+
             res.put("success", true);
             res.put("message", "Thanh toán thành công");
         } else {
@@ -54,25 +54,22 @@ public class PaymentController {
         return res;
     }
 
+    /** ✅ IPN: VNPay gọi server-to-server để xác nhận thanh toán */
+    @GetMapping("/vnpay-ipn")
+    public Map<String, String> vnpIpn(@RequestParam Map<String, String> params, HttpServletRequest req) {
+        String rawQuery = req.getQueryString(); // để audit nếu cần
+        return paymentService.handleIpn(params, rawQuery);
+    }
+
     /** (Tuỳ chọn) Endpoint test QueryDR thủ công */
     @GetMapping(value = "/querydr", produces = MediaType.APPLICATION_JSON_VALUE)
     public Map<String, Object> querydr(
             @RequestParam String txnRef,
-            @RequestParam String transactionDate // yyyyMMddHHmmss lúc PAY
+            @RequestParam String transactionDate // yyyyMMddHHmmss lúc PAY (createdAt format)
     ) throws Exception {
         return paymentService.queryDrPipeFormat(
                 txnRef, "Manual query", transactionDate, "127.0.0.1"
         );
-    }
-
-    private String getClientIp(HttpServletRequest request) {
-        String ip = request.getHeader("X-Forwarded-For");
-        if (ip != null && !ip.isBlank() && !"unknown".equalsIgnoreCase(ip)) return ip.split(",")[0].trim();
-        ip = request.getHeader("X-Real-IP");
-        if (ip != null && !ip.isBlank() && !"unknown".equalsIgnoreCase(ip)) return ip.trim();
-        ip = request.getRemoteAddr();
-        if ("0:0:0:0:0:0:0:1".equals(ip) || "::1".equals(ip)) return "127.0.0.1";
-        return ip;
     }
 
     /** (Tuỳ chọn) Tính tiền tháng + trả URL VNPay ngay cho FE */
@@ -88,25 +85,13 @@ public class PaymentController {
         return bill;
     }
 
-    /** ✅ Admin: Lấy tất cả thanh toán */
-    @GetMapping("/admin/all")
-    public Map<String, Object> getAllPayments() {
-        List<Payment> payments = paymentService.getAllPayments();
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("total", payments.size());
-        response.put("data", payments);
-        return response;
-    }
-
-    /** ✅ User: Lấy danh sách thanh toán của user */
-    @GetMapping("/user/{userId}")
-    public Map<String, Object> getUserPayments(@PathVariable String userId) {
-        List<Payment> payments = paymentService.getPaymentsByUserId(userId);
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("total", payments.size());
-        response.put("data", payments);
-        return response;
+    private String getClientIp(HttpServletRequest request) {
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip != null && !ip.isBlank() && !"unknown".equalsIgnoreCase(ip)) return ip.split(",")[0].trim();
+        ip = request.getHeader("X-Real-IP");
+        if (ip != null && !ip.isBlank() && !"unknown".equalsIgnoreCase(ip)) return ip.trim();
+        ip = request.getRemoteAddr();
+        if ("0:0:0:0:0:0:0:1".equals(ip) || "::1".equals(ip)) return "127.0.0.1";
+        return ip;
     }
 }

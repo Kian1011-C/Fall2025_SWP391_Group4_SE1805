@@ -7,13 +7,13 @@ import java.sql.SQLException;
 public class ConnectDB {
 
     private static final String URL =
-            "jdbc:sqlserver://localhost\\MSSQL2022;"
+            "jdbc:sqlserver://localhost:1433;"
                     + "databaseName=ev_battery_swap;"
                     + "encrypt=true;"
-                    + "trustServerCertificate=true;"
-                    + "sslProtocol=TLSv1.2;";
+                    + "trustServerCertificate=true;";
+
     private static final String USER = "sa";
-    private static final String PASSWORD = "123";
+    private static final String PASSWORD = "12345";
 
     public static Connection getConnection() {
         Connection conn = null;

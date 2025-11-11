@@ -7,8 +7,6 @@ import hsf302.fa25.s3.model.Slot;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.*;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 @RestController
 @RequestMapping("/api/driver")
@@ -75,7 +73,7 @@ public class DriverController {
                 Map<String, Object> batteryInfo = slotDao.getBatteryInfoBySlotId(slot.getSlotId());
                 if (batteryInfo != null) {
                     slotMap.put("batteryId", batteryInfo.get("battery_id"));
-                    slotMap.put("batteryLevel", batteryInfo.get("state_of_health"));
+                    slotMap.put("batteryLevel", batteryInfo.get("state_of_health")); // SOH as battery level
                     slotMap.put("batteryModel", batteryInfo.get("model"));
                     slotMap.put("batteryStatus", batteryInfo.get("battery_status"));
                 } else {
@@ -100,55 +98,6 @@ public class DriverController {
             response.put("message", "Lỗi khi lấy danh sách slot: " + e.getMessage());
             response.put("data", new ArrayList<>());
             
-            return ResponseEntity.status(500).body(response);
-        }
-    }
-
-    @GetMapping("/slot/empty")
-    public ResponseEntity<?> getOneEmptySlot(@RequestParam int towerId) {
-        try {
-            Slot slot = slotDao.getOneEmptySlotInTower(towerId);
-            Map<String, Object> response = new HashMap<>();
-            if (slot == null) {
-                response.put("success", true);
-                response.put("data", null);
-                response.put("message", "Không tìm thấy slot trống trong trụ này");
-                return ResponseEntity.ok(response);
-            }
-
-            Map<String, Object> slotMap = new HashMap<>();
-            slotMap.put("id", slot.getSlotId());
-            slotMap.put("slotNumber", slot.getSlotNumber());
-            slotMap.put("status", slot.getStatus());
-
-            // Thêm thông tin pin trong slot (nếu có)
-            Map<String, Object> batteryInfo = slotDao.getBatteryInfoBySlotId(slot.getSlotId());
-            if (batteryInfo != null) {
-                slotMap.put("batteryId", batteryInfo.get("battery_id"));
-                try {
-                    double soh = ((Number) batteryInfo.get("state_of_health")).doubleValue();
-                    int percentDrop = new Random().nextInt(16);
-                    double displayed = soh - (soh * percentDrop / 100.0);
-                    double rounded = BigDecimal.valueOf(displayed).setScale(2, RoundingMode.HALF_UP).doubleValue();
-                    slotMap.put("batteryLevel", rounded);
-                } catch (Exception ex) {
-                    slotMap.put("batteryLevel", batteryInfo.get("state_of_health"));
-                }
-                slotMap.put("batteryModel", batteryInfo.get("model"));
-                slotMap.put("batteryStatus", batteryInfo.get("battery_status"));
-            } else {
-                slotMap.put("batteryId", null);
-            }
-
-            response.put("success", true);
-            response.put("data", slotMap);
-            response.put("message", "Found empty slot");
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", false);
-            response.put("message", "Lỗi khi tìm slot trống: " + e.getMessage());
-            response.put("data", null);
             return ResponseEntity.status(500).body(response);
         }
     }

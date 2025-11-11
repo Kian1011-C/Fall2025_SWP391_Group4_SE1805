@@ -14,10 +14,10 @@ public class ServicePlanDao {
     public List<ServicePlan> getAllActivePlans() {
         List<ServicePlan> plans = new ArrayList<>();
         String sql = "SELECT * FROM ServicePlans WHERE is_active = 1 ORDER BY base_price";
-        
+
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 ServicePlan plan = createServicePlanFromResultSet(rs);
@@ -31,13 +31,13 @@ public class ServicePlanDao {
 
     public ServicePlan getPlanById(int planId) {
         String sql = "SELECT * FROM ServicePlans WHERE plan_id = ?";
-        
+
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+
             ps.setInt(1, planId);
             ResultSet rs = ps.executeQuery();
-            
+
             if (rs.next()) {
                 return createServicePlanFromResultSet(rs);
             }
@@ -49,13 +49,13 @@ public class ServicePlanDao {
 
     public ServicePlan getPlanByName(String planName) {
         String sql = "SELECT * FROM ServicePlans WHERE plan_name = ? AND is_active = 1";
-        
+
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+
             ps.setString(1, planName);
             ResultSet rs = ps.executeQuery();
-            
+
             if (rs.next()) {
                 return createServicePlanFromResultSet(rs);
             }
@@ -68,22 +68,22 @@ public class ServicePlanDao {
     public List<DistanceRateTier> getDistanceRateTiers() {
         List<DistanceRateTier> tiers = new ArrayList<>();
         String sql = "SELECT * FROM DistanceRateTiers ORDER BY from_km";
-        
+
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 DistanceRateTier tier = new DistanceRateTier();
                 tier.setTierId(rs.getInt("tier_id"));
                 tier.setFromKm(rs.getInt("from_km"));
-                
+
                 int toKmValue = rs.getInt("to_km");
                 tier.setToKm(rs.wasNull() ? null : toKmValue);
-                
+
                 tier.setRatePerKm(rs.getBigDecimal("rate_per_km"));
                 tier.setDescription(rs.getString("description"));
-                
+
                 tiers.add(tier);
             }
         } catch (Exception e) {
@@ -114,7 +114,7 @@ public class ServicePlanDao {
                 int chargeableDistance = Math.min(remainingDistance - tierFromKm, tierToKm - tierFromKm);
                 BigDecimal tierCharge = tier.getRatePerKm().multiply(new BigDecimal(chargeableDistance));
                 totalCharge = totalCharge.add(tierCharge);
-                
+
                 remainingDistance -= chargeableDistance;
             }
         }

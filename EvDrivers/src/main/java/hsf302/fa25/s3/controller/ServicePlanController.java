@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
-        import java.math.BigDecimal;
+import java.math.BigDecimal;
 import java.util.*;
 
 @RestController
@@ -17,6 +17,13 @@ public class ServicePlanController {
     private final ServicePlanDao planDao = new ServicePlanDao();
 
     // ===== Helpers =====
+    private boolean isAdmin(HttpServletRequest req) {
+        // Tuỳ hệ thống session của bạn:
+        Object role = req.getSession().getAttribute("userRole");
+        if (role != null && "ADMIN".equalsIgnoreCase(String.valueOf(role))) return true;
+        Object roleId = req.getSession().getAttribute("roleId");
+        return roleId != null && "1".equals(String.valueOf(roleId));
+    }
     private static boolean isBlank(String s) { return s == null || s.trim().isEmpty(); }
     private static Integer asInt(Object o) {
         if (o == null) return null;
@@ -58,20 +65,10 @@ public class ServicePlanController {
     }
 
     // ============== ADD ==============
-    /**
-     * POST /api/admin/serviceplan/add
-     * Body JSON:
-     * {
-     *   "planName": "Cơ bản",
-     *   "basePrice": 350000,
-     *   "baseDistance": 400,     // -1 nếu unlimited
-     *   "depositFee": 500000,
-     *   "description": "Gói tiêu chuẩn",
-     *   "active": true
-     * }
-     */
+
     @PostMapping("/add")
-    public ResponseEntity<?> addPlan(@RequestBody Map<String, Object> body) {
+    public ResponseEntity<?> addPlan(@RequestBody Map<String, Object> body, HttpServletRequest req) {
+        if (!isAdmin(req)) return ResponseEntity.status(403).body(Map.of("success", false, "message", "No permission"));
 
         try {
             String planName = body.get("planName") == null ? null : String.valueOf(body.get("planName"));
@@ -117,21 +114,10 @@ public class ServicePlanController {
     }
 
     // ============== UPDATE ==============
-    /**
-     * POST /api/admin/serviceplan/update
-     * Body JSON:
-     * {
-     *   "planId": 3,
-     *   "planName": "...",
-     *   "basePrice": ...,
-     *   "baseDistance": ...,
-     *   "depositFee": ...,
-     *   "description": "...",
-     *   "active": true/false
-     * }
-     */
+    //
     @PostMapping("/update")
-    public ResponseEntity<?> updatePlan(@RequestBody Map<String, Object> body) {
+    public ResponseEntity<?> updatePlan(@RequestBody Map<String, Object> body, HttpServletRequest req) {
+        if (!isAdmin(req)) return ResponseEntity.status(403).body(Map.of("success", false, "message", "No permission"));
 
         try {
             Integer planId = asInt(body.get("planId"));
@@ -184,15 +170,13 @@ public class ServicePlanController {
     }
 
     // ============== DELETE (soft) ==============
-    /**
-     * POST /api/admin/serviceplan/delete
-     * Body JSON: { "id": 3 }
-     * → Xoá mềm: set is_active = 0
-     */
+    //
     @PostMapping("/delete")
-    public ResponseEntity<?> deletePlan(@RequestBody Map<String, Object> body) {
+    public ResponseEntity<?> deletePlan(@RequestBody Map<String, Object> body, HttpServletRequest req) {
+        if (!isAdmin(req)) return ResponseEntity.status(403).body(Map.of("success", false, "message", "No permission"));
+
         try {
-            Integer id = asInt(body.get("planId"));
+            Integer id = asInt(body.get("id"));
             if (id == null) return ResponseEntity.badRequest().body(Map.of("success", false, "message", "id is required"));
 
             ServicePlan existing = planDao.getPlanById(id);

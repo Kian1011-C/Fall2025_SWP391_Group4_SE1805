@@ -28,12 +28,17 @@ public class SwapController {
             @PathVariable String userId,
             @RequestParam(defaultValue = "10") int limit) {
         
-        System.out.println("SwapController: Getting swap history for user: " + userId);
+        System.out.println("SwapController: Getting swap history for user: " + userId + " with limit: " + limit);
         Map<String, Object> response = new HashMap<>();
         
         try {
             List<Swap> swaps = swapDao.getSwapsByUserId(userId);
-
+            
+            // Apply limit if needed
+            if (swaps != null && swaps.size() > limit) {
+                swaps = swaps.subList(0, limit);
+            }
+            
             if (swaps != null && !swaps.isEmpty()) {
                 System.out.println("SwapController: Found " + swaps.size() + " swaps for user: " + userId);
                 response.put("success", true);
@@ -100,20 +105,18 @@ public class SwapController {
         Map<String, Object> response = new HashMap<>();
         
         try {
-            Integer swapId = swapDao.createSwap(swap);
-            if (swapId != null) {
-                // set generated id back to model for client
-                try { swap.setSwapId(swapId); } catch (Exception ignore) {}
+            boolean created = swapDao.createSwap(swap);
+            
+            if (created) {
                 response.put("success", true);
                 response.put("data", swap);
-                response.put("swapId", swapId);
                 response.put("message", "Tạo bản ghi đổi pin thành công");
             } else {
                 response.put("success", false);
                 response.put("message", "Không thể tạo bản ghi đổi pin");
                 response.put("data", null);
             }
-
+            
         } catch (Exception e) {
             System.err.println("SwapController Error: " + e.getMessage());
             e.printStackTrace();
@@ -156,32 +159,6 @@ public class SwapController {
             response.put("data", null);
         }
 
-        return response;
-    }
-
-    /**
-     * Confirm (complete) a swap and apply related updates (vehicle, batteries, slot)
-     * POST /api/swaps/{swapId}/confirm
-     */
-    @PostMapping("/swaps/{swapId}/confirm")
-    public Map<String, Object> confirmSwap(@PathVariable int swapId) {
-        Map<String, Object> response = new HashMap<>();
-        try {
-            boolean ok = swapDao.completeSwap(swapId);
-            if (ok) {
-                response.put("success", true);
-                response.put("message", "Swap completed and related records updated");
-                // Return the updated swap and related rows for verification
-                response.put("data", swapDao.getSwapById(swapId));
-            } else {
-                response.put("success", false);
-                response.put("message", "Could not complete swap or no changes applied");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.put("success", false);
-            response.put("message", "Error while confirming swap: " + e.getMessage());
-        }
         return response;
     }
 }

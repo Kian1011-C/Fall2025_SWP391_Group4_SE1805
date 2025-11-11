@@ -5,6 +5,12 @@ import hsf302.fa25.s3.context.ConnectDB;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import hsf302.fa25.s3.model.User;
+import hsf302.fa25.s3.context.ConnectDB;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class UserDao {
@@ -79,25 +85,19 @@ public class UserDao {
 
     public boolean addUser(User user) {
         // ✅ Cũng đổi password_hash → password
-        // Ensure userId is set (controller normally sets it to email when missing)
-        if (user.getUserId() == null || user.getUserId().isEmpty()) {
-            user.setUserId(user.getEmail());
-        }
-
-        String sql = "INSERT INTO Users (user_id, first_name, last_name, email, phone, password, role, cccd, status, created_at, updated_at) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE(), GETDATE())";
+        String sql = "INSERT INTO Users (first_name, last_name, email, phone, password, role, cccd, status, created_at, updated_at) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, GETDATE(), GETDATE())";
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, user.getUserId());
-            ps.setString(2, user.getFirstName());
-            ps.setString(3, user.getLastName());
-            ps.setString(4, user.getEmail());
-            ps.setString(5, user.getPhone());
-            ps.setString(6, user.getPassword());
-            ps.setString(7, user.getRole());
-            ps.setString(8, user.getCccd());
-            ps.setString(9, user.getStatus());
+            ps.setString(1, user.getFirstName());
+            ps.setString(2, user.getLastName());
+            ps.setString(3, user.getEmail());
+            ps.setString(4, user.getPhone());
+            ps.setString(5, user.getPassword());
+            ps.setString(6, user.getRole());
+            ps.setString(7, user.getCccd());
+            ps.setString(8, user.getStatus());
 
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {

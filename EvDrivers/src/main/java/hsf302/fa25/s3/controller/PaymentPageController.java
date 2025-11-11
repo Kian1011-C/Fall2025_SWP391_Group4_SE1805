@@ -47,7 +47,7 @@ public class PaymentPageController {
                 p.setVnpPayDate(java.sql.Timestamp.valueOf(dt));
             }
         }
-
+       
 
         model.addAttribute("payment", p);
         model.addAttribute("queryDateStr", queryDateStr);
