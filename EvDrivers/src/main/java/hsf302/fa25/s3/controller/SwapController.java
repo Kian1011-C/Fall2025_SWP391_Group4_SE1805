@@ -12,6 +12,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api")
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class SwapController {
 
     private final SwapDao swapDao = new SwapDao();
@@ -125,40 +126,6 @@ public class SwapController {
             response.put("data", null);
         }
         
-        return response;
-    }
-
-    /**
-     * Create an automatic swap record (system-generated)
-     * This endpoint uses the DAO method that defaults status to 'AUTO' and sets swap_date to current time.
-     * Accessible at POST /api/swaps/auto
-     */
-    @PostMapping("/swaps/auto")
-    public Map<String, Object> createAutoSwap(@RequestBody Swap swap) {
-        System.out.println("SwapController: Creating AUTO swap for user: " + swap.getUserId());
-        Map<String, Object> response = new HashMap<>();
-
-        try {
-            boolean created = swapDao.createAutoSwap(swap);
-
-            if (created) {
-                response.put("success", true);
-                response.put("data", swap);
-                response.put("message", "Tạo bản ghi auto swap thành công");
-            } else {
-                response.put("success", false);
-                response.put("message", "Không thể tạo bản ghi auto swap");
-                response.put("data", null);
-            }
-
-        } catch (Exception e) {
-            System.err.println("SwapController Error (auto): " + e.getMessage());
-            e.printStackTrace();
-            response.put("success", false);
-            response.put("message", "Lỗi khi tạo bản ghi auto swap: " + e.getMessage());
-            response.put("data", null);
-        }
-
         return response;
     }
 }

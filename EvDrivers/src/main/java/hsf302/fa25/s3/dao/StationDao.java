@@ -49,16 +49,16 @@ public class StationDao {
     public List<Station> getNearbyStations(double latitude, double longitude, int limit) {
         List<Station> list = new ArrayList<>();
         // Công thức tính khoảng cách đơn giản (có thể cải thiện bằng Haversine formula)
-        // Use OFFSET/FETCH to parameterize limit (SQL Server doesn't support TOP(?) with parameter)
-        String sql = "SELECT *, SQRT(POWER(latitude - ?, 2) + POWER(longitude - ?, 2)) as distance " +
+        String sql = "SELECT TOP (?) *, " +
+                    "SQRT(POWER(latitude - ?, 2) + POWER(longitude - ?, 2)) as distance " +
                     "FROM Stations WHERE status='active' " +
-                    "ORDER BY distance OFFSET 0 ROWS FETCH NEXT ? ROWS ONLY";
+                    "ORDER BY distance";
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setDouble(1, latitude);
-            ps.setDouble(2, longitude);
-            ps.setInt(3, limit);
+            ps.setInt(1, limit);
+            ps.setDouble(2, latitude);
+            ps.setDouble(3, longitude);
             
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -274,7 +274,7 @@ public class StationDao {
         String swapSql = """
             SELECT COUNT(*) as today_swaps 
             FROM Swaps 
-            WHERE station_id = ? AND CAST(swap_date AS DATE) = CAST(GETDATE() AS DATE)
+            WHERE station_id = ? AND CAST(swap_time AS DATE) = CAST(GETDATE() AS DATE)
         """;
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(swapSql)) {

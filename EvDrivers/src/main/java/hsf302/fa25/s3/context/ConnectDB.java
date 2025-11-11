@@ -8,7 +8,7 @@ public class ConnectDB {
 
     private static final String URL =
             "jdbc:sqlserver://localhost:1433;"
-                    + "databaseName=ev_battery_swap;"
+                    + "databaseName=ev_battery;"
                     + "encrypt=true;"
                     + "trustServerCertificate=true;";
 

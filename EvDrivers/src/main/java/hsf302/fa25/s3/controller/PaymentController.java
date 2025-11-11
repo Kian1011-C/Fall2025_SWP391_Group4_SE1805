@@ -1,30 +1,30 @@
 package hsf302.fa25.s3.controller;
 
+
 import hsf302.fa25.s3.model.Payment;
 import hsf302.fa25.s3.service.PaymentService;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.springframework.web.bind.annotation.*;
+import java.util.*;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/payment")
 public class PaymentController {
 
     private final PaymentService paymentService;
+    public PaymentController(PaymentService paymentService) {
+        this.paymentService = paymentService;
+    }
 
-    /** Tạo URL thanh toán (Return + QueryDR) */
+    /** Tạo URL thanh toán */
     @PostMapping("/create")
     public Map<String, Object> create(
             @RequestParam String userId,
             @RequestParam(required = false) Integer contractId,
             @RequestParam double amount,
             HttpServletRequest req
-    ) {
+    ) throws Exception {
         String ip = getClientIp(req);
         String url = paymentService.createPaymentUrl(userId, contractId, amount, ip);
         Map<String, Object> res = new HashMap<>();
@@ -33,65 +33,37 @@ public class PaymentController {
         return res;
     }
 
-    /** Return URL: VNPay redirect về (trả JSON) */
-    @GetMapping("/vnpay-return-json")
+    /** Return URL (trình duyệt của user sẽ quay về đây) */
+    @GetMapping("/vnpay-return")
     public Map<String, Object> vnpReturn(@RequestParam Map<String, String> params) {
         Payment p = paymentService.handleReturn(params);
         Map<String, Object> res = new HashMap<>();
         if (p != null && "success".equalsIgnoreCase(p.getStatus())) {
-
             res.put("success", true);
             res.put("message", "Thanh toán thành công");
+            res.put("txnRef", p.getTransactionRef());
         } else {
             res.put("success", false);
-            res.put("message", "Thanh toán thất bại hoặc chưa xác nhận");
-        }
-        if (p != null) {
-            res.put("txnRef", p.getTransactionRef());
-            res.put("status", p.getStatus());
-            res.put("responseCode", p.getVnpResponseCode());
+            res.put("message", "Thanh toán thất bại hoặc không hợp lệ");
         }
         return res;
     }
 
-    /** ✅ IPN: VNPay gọi server-to-server để xác nhận thanh toán */
+    /** IPN (server-to-server) – VNPay gọi ngược lại hệ thống của bạn */
     @GetMapping("/vnpay-ipn")
-    public Map<String, String> vnpIpn(@RequestParam Map<String, String> params, HttpServletRequest req) {
-        String rawQuery = req.getQueryString(); // để audit nếu cần
-        return paymentService.handleIpn(params, rawQuery);
-    }
-
-    /** (Tuỳ chọn) Endpoint test QueryDR thủ công */
-    @GetMapping(value = "/querydr", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Map<String, Object> querydr(
-            @RequestParam String txnRef,
-            @RequestParam String transactionDate // yyyyMMddHHmmss lúc PAY (createdAt format)
-    ) throws Exception {
-        return paymentService.queryDrPipeFormat(
-                txnRef, "Manual query", transactionDate, "127.0.0.1"
-        );
-    }
-
-    /** (Tuỳ chọn) Tính tiền tháng + trả URL VNPay ngay cho FE */
-    @GetMapping("/pay-monthly")
-    public Map<String, Object> payMonthly(@RequestParam String userId,
-                                          @RequestParam int contractId,
-                                          @RequestParam int year,
-                                          @RequestParam int month,
-                                          HttpServletRequest req) {
-        String ip = getClientIp(req);
-        Map<String, Object> bill = paymentService.createMonthlyBillUrl(userId, contractId, year, month, ip);
-        bill.put("success", true);
-        return bill;
+    public String vnpIpn(@RequestParam Map<String, String> params) {
+        return paymentService.handleIpn(params);
     }
 
     private String getClientIp(HttpServletRequest request) {
         String ip = request.getHeader("X-Forwarded-For");
-        if (ip != null && !ip.isBlank() && !"unknown".equalsIgnoreCase(ip)) return ip.split(",")[0].trim();
+        if (ip != null && ip.length() != 0 && !"unknown".equalsIgnoreCase(ip)) {
+            return ip.split(",")[0];
+        }
         ip = request.getHeader("X-Real-IP");
-        if (ip != null && !ip.isBlank() && !"unknown".equalsIgnoreCase(ip)) return ip.trim();
-        ip = request.getRemoteAddr();
-        if ("0:0:0:0:0:0:0:1".equals(ip) || "::1".equals(ip)) return "127.0.0.1";
-        return ip;
+        if (ip != null && ip.length() != 0 && !"unknown".equalsIgnoreCase(ip)) {
+            return ip;
+        }
+        return request.getRemoteAddr();
     }
 }

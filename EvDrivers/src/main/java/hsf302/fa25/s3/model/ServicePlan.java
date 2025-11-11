@@ -17,7 +17,7 @@ public class ServicePlan {
     public ServicePlan() {}
 
     // Constructor with parameters
-    public ServicePlan(String planName, BigDecimal basePrice, int baseDistance,
+    public ServicePlan(String planName, BigDecimal basePrice, int baseDistance, 
                       BigDecimal depositFee, String description) {
         this.planName = planName;
         this.basePrice = basePrice;

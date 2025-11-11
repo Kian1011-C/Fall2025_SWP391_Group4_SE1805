@@ -10,6 +10,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/driver")
+@CrossOrigin(origins = "*")
 public class DriverController {
     
     private final TowerDao towerDao = new TowerDao();

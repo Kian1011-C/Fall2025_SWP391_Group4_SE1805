@@ -11,7 +11,7 @@ import lombok.*;
 @AllArgsConstructor
 public class Issue {
     private int issueId;
-    private String userId;
+    private int userId;
     private int stationId;
     private String description;
     private String status;

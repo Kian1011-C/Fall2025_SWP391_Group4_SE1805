@@ -89,60 +89,21 @@ public class SwapDao {
     }
 
     // Tạo swap mới
-    // Includes user_id and vehicle_id to persist which user/vehicle initiated the swap.
     public boolean createSwap(Swap swap) {
-        String sql = "INSERT INTO Swaps (user_id, contract_id, vehicle_id, station_id, tower_id, staff_id, old_battery_id, new_battery_id, odometer_before, odometer_after, status, swap_date) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE())";
+        String sql = "INSERT INTO Swaps (contract_id, station_id, tower_id, staff_id, old_battery_id, new_battery_id, odometer_before, odometer_after, swap_status) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            // user_id
-            if (swap.getUserId() != null) {
-                ps.setString(1, swap.getUserId());
-            } else {
-                ps.setNull(1, java.sql.Types.VARCHAR);
-            }
-
-            // contract_id (required)
-            if (swap.getContractId() != null) {
-                ps.setInt(2, swap.getContractId());
-            } else {
-                ps.setNull(2, java.sql.Types.INTEGER);
-            }
-
-            // vehicle_id (nullable)
-            if (swap.getVehicleId() != null) {
-                ps.setInt(3, swap.getVehicleId());
-            } else {
-                ps.setNull(3, java.sql.Types.INTEGER);
-            }
-
-            // station_id and tower_id
-            if (swap.getStationId() != null) ps.setInt(4, swap.getStationId());
-            else ps.setNull(4, java.sql.Types.INTEGER);
-            if (swap.getTowerId() != null) ps.setInt(5, swap.getTowerId());
-            else ps.setNull(5, java.sql.Types.INTEGER);
-
-            // staffId
-            if (swap.getStaffId() != null) {
-                ps.setString(6, swap.getStaffId());
-            } else {
-                ps.setNull(6, java.sql.Types.VARCHAR);
-            }
-
-            // battery ids and odometers (nullable)
-            if (swap.getOldBatteryId() != null) ps.setInt(7, swap.getOldBatteryId());
-            else ps.setNull(7, java.sql.Types.INTEGER);
-            if (swap.getNewBatteryId() != null) ps.setInt(8, swap.getNewBatteryId());
-            else ps.setNull(8, java.sql.Types.INTEGER);
-
-            if (swap.getOdometerBefore() != null) ps.setDouble(9, swap.getOdometerBefore());
-            else ps.setNull(9, java.sql.Types.DOUBLE);
-            if (swap.getOdometerAfter() != null) ps.setDouble(10, swap.getOdometerAfter());
-            else ps.setNull(10, java.sql.Types.DOUBLE);
-
-            ps.setString(11, swap.getSwapStatus() != null ? swap.getSwapStatus() : "INITIATED");
-
+            ps.setInt(1, swap.getContractId());
+            ps.setInt(2, swap.getStationId());
+            ps.setInt(3, swap.getTowerId());
+            ps.setInt(4, swap.getStaffId());
+            ps.setObject(5, swap.getOldBatteryId() != 0 ? swap.getOldBatteryId() : null);
+            ps.setObject(6, swap.getNewBatteryId() != 0 ? swap.getNewBatteryId() : null);
+            ps.setDouble(7, swap.getOdometerBefore());
+            ps.setDouble(8, swap.getOdometerAfter());
+            ps.setString(9, swap.getSwapStatus());
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
@@ -152,7 +113,7 @@ public class SwapDao {
 
     // Cập nhật trạng thái swap
     public boolean updateSwapStatus(int swapId, String status) {
-        String sql = "UPDATE Swaps SET status=? WHERE swap_id=?";
+        String sql = "UPDATE Swaps SET swap_status=? WHERE swap_id=?";
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -167,7 +128,7 @@ public class SwapDao {
 
     // Hoàn thành swap
     public boolean completeSwap(int swapId) {
-        String sql = "UPDATE Swaps SET status='COMPLETED', swap_date=GETDATE() WHERE swap_id=?";
+        String sql = "UPDATE Swaps SET swap_status='COMPLETED', completed_time=GETDATE() WHERE swap_id=?";
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -182,8 +143,7 @@ public class SwapDao {
     // Lấy swap gần đây
     public List<Swap> getRecentSwaps(int limit) {
         List<Swap> list = new ArrayList<>();
-        // Use OFFSET/FETCH so we can parameterize the number of rows to return
-        String sql = "SELECT * FROM Swaps ORDER BY swap_id DESC OFFSET 0 ROWS FETCH NEXT ? ROWS ONLY";
+        String sql = "SELECT TOP (?) * FROM Swaps ORDER BY swap_id DESC";
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -258,14 +218,14 @@ public class SwapDao {
         Map<String, Object> stats = new HashMap<>();
         
         // Thống kê theo trạng thái
-        String statusSql = "SELECT status, COUNT(*) as count FROM Swaps GROUP BY status";
+        String statusSql = "SELECT swap_status, COUNT(*) as count FROM Swaps GROUP BY swap_status";
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(statusSql)) {
 
             ResultSet rs = ps.executeQuery();
             Map<String, Integer> statusCount = new HashMap<>();
             while (rs.next()) {
-                statusCount.put(rs.getString("status"), rs.getInt("count"));
+                statusCount.put(rs.getString("swap_status"), rs.getInt("count"));
             }
             stats.put("byStatus", statusCount);
         } catch (Exception e) {
@@ -285,8 +245,8 @@ public class SwapDao {
             e.printStackTrace();
         }
 
-    // Swap trong tháng này (use swap_date for both month and year)
-    String monthlySql = "SELECT COUNT(*) as monthly FROM Swaps WHERE MONTH(swap_date) = MONTH(GETDATE()) AND YEAR(swap_date) = YEAR(GETDATE())";
+        // Swap trong tháng này
+        String monthlySql = "SELECT COUNT(*) as monthly FROM Swaps WHERE MONTH(created_time) = MONTH(GETDATE()) AND YEAR(created_time) = YEAR(GETDATE())";
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(monthlySql)) {
 
@@ -304,51 +264,19 @@ public class SwapDao {
     // Helper method để tạo Swap object từ ResultSet
     private Swap createSwapFromResultSet(ResultSet rs) throws Exception {
         Swap swap = new Swap();
-        // swap_id
-        Object swapIdObj = rs.getObject("swap_id");
-        if (swapIdObj != null) swap.setSwapId(((Number) swapIdObj).intValue());
-
-        // user_id
-        try { swap.setUserId(rs.getString("user_id")); } catch (Exception ignore) { swap.setUserId(null); }
-
-        // contract_id
-        Object contractObj = rs.getObject("contract_id");
-        if (contractObj != null) swap.setContractId(((Number) contractObj).intValue());
-
-        // vehicle_id
-        try {
-            Object vObj = rs.getObject("vehicle_id");
-            if (vObj != null) swap.setVehicleId(((Number) vObj).intValue());
-        } catch (Exception ignore) {}
-
-        // station/tower
-        Object stationObj = rs.getObject("station_id");
-        if (stationObj != null) swap.setStationId(((Number) stationObj).intValue());
-        Object towerObj = rs.getObject("tower_id");
-        if (towerObj != null) swap.setTowerId(((Number) towerObj).intValue());
-
-        // staff_id
-        try { swap.setStaffId(rs.getString("staff_id")); } catch (Exception ex) {
-            try { int staffInt = rs.getInt("staff_id"); swap.setStaffId(String.valueOf(staffInt)); } catch (Exception ignore) { swap.setStaffId(null); }
-        }
-
-        // old/new batteries
-        Object oldObj = rs.getObject("old_battery_id");
-        if (oldObj != null) swap.setOldBatteryId(((Number) oldObj).intValue());
-        Object newObj = rs.getObject("new_battery_id");
-        if (newObj != null) swap.setNewBatteryId(((Number) newObj).intValue());
-
-        // odometers
-        Object odoBefore = rs.getObject("odometer_before");
-        if (odoBefore != null) swap.setOdometerBefore(((Number) odoBefore).doubleValue());
-        Object odoAfter = rs.getObject("odometer_after");
-        if (odoAfter != null) swap.setOdometerAfter(((Number) odoAfter).doubleValue());
-
-        swap.setSwapStatus(rs.getString("status"));
-
-        // swap_date
-        try { java.sql.Timestamp ts = rs.getTimestamp("swap_date"); if (ts != null) swap.setSwapDate(ts); } catch (Exception ignore) {}
-
+        swap.setSwapId(rs.getInt("swap_id"));
+        swap.setContractId(rs.getInt("contract_id"));
+        swap.setStationId(rs.getInt("station_id"));
+        swap.setTowerId(rs.getInt("tower_id"));
+        swap.setStaffId(rs.getInt("staff_id"));
+        swap.setOldBatteryId(rs.getInt("old_battery_id"));
+        swap.setNewBatteryId(rs.getInt("new_battery_id"));
+        swap.setOdometerBefore(rs.getDouble("odometer_before"));
+        swap.setOdometerAfter(rs.getDouble("odometer_after"));
+        swap.setSwapStatus(rs.getString("swap_status"));
+        
+        // Có thể thêm timestamp fields nếu cần trong tương lai
+        
         return swap;
     }
 
@@ -408,45 +336,5 @@ public class SwapDao {
             e.printStackTrace();
         }
         return activeSwaps;
-    }
-
-    // Tạo swap tự động (không cần staff_id). Thêm swap_date = GETDATE() và trạng thái mặc định 'AUTO'.
-    // Sử dụng khi hệ thống tự tạo swap (ví dụ: theo lịch hoặc khi detect cần đổi pin),
-    // staff_id sẽ để NULL trong DB.
-    public boolean createAutoSwap(Swap swap) {
-        // include user_id and vehicle_id where available; swap_date is set to GETDATE()
-        String sql = "INSERT INTO Swaps (user_id, contract_id, vehicle_id, station_id, tower_id, old_battery_id, new_battery_id, odometer_before, odometer_after, status, swap_date) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE())";
-        try (Connection conn = ConnectDB.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            if (swap.getUserId() != null) {
-                ps.setString(1, swap.getUserId());
-            } else {
-                ps.setNull(1, java.sql.Types.VARCHAR);
-            }
-
-            if (swap.getContractId() != null) ps.setInt(2, swap.getContractId());
-            else ps.setNull(2, java.sql.Types.INTEGER);
-
-            if (swap.getVehicleId() != null) ps.setInt(3, swap.getVehicleId());
-            else ps.setNull(3, java.sql.Types.INTEGER);
-
-            if (swap.getStationId() != null) ps.setInt(4, swap.getStationId()); else ps.setNull(4, java.sql.Types.INTEGER);
-            if (swap.getTowerId() != null) ps.setInt(5, swap.getTowerId()); else ps.setNull(5, java.sql.Types.INTEGER);
-
-            if (swap.getOldBatteryId() != null) ps.setInt(6, swap.getOldBatteryId()); else ps.setNull(6, java.sql.Types.INTEGER);
-            if (swap.getNewBatteryId() != null) ps.setInt(7, swap.getNewBatteryId()); else ps.setNull(7, java.sql.Types.INTEGER);
-
-            if (swap.getOdometerBefore() != null) ps.setDouble(8, swap.getOdometerBefore()); else ps.setNull(8, java.sql.Types.DOUBLE);
-            if (swap.getOdometerAfter() != null) ps.setDouble(9, swap.getOdometerAfter()); else ps.setNull(9, java.sql.Types.DOUBLE);
-
-            ps.setString(10, swap.getSwapStatus() != null ? swap.getSwapStatus() : "AUTO");
-
-            return ps.executeUpdate() > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
     }
 }
