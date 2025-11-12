@@ -20,6 +20,8 @@ const LoginModal = () => {
 
   const [errors, setErrors] = useState({});
   const [isSendingReset, setIsSendingReset] = useState(false);
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [showWarning, setShowWarning] = useState(false);
 
   // Lock scroll when modal is open
   useEffect(() => {
@@ -85,13 +87,42 @@ const LoginModal = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    console.log('LoginModal: Form submitted');
     
     if (!validateForm()) {
+      console.log('LoginModal: Validation failed');
       return;
     }
 
-    await handleLogin(formData.email, formData.password);
+    try {
+      console.log('LoginModal: Calling handleLogin');
+      const result = await handleLogin(formData.email, formData.password);
+      console.log('LoginModal: Login result:', result);
+      
+      // Check if login failed
+      if (!result || !result.success) {
+        const newAttempts = loginAttempts + 1;
+        console.log('LoginModal: Login failed, attempts:', newAttempts);
+        setLoginAttempts(newAttempts);
+        
+        // Show warning after 3 failed attempts
+        if (newAttempts >= 3) {
+          setShowWarning(true);
+        }
+      } else {
+        // Reset on successful login
+        console.log('LoginModal: Login successful');
+        setLoginAttempts(0);
+        setShowWarning(false);
+      }
+    } catch (error) {
+      console.error('LoginModal: Error during login:', error);
+    }
   };
 
   const handleForgotPassword = async () => {
@@ -125,6 +156,8 @@ const LoginModal = () => {
       setShowLoginModal(false);
       setFormData({ email: '', password: '' });
       setErrors({});
+      setLoginAttempts(0);
+      setShowWarning(false);
     }
   };
 
@@ -233,7 +266,45 @@ const LoginModal = () => {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        {/* Warning after 3 failed attempts */}
+        {showWarning && (
+          <div style={{
+            marginBottom: 20,
+            padding: '16px',
+            background: 'rgba(239, 68, 68, 0.1)',
+            border: '2px solid rgba(239, 68, 68, 0.3)',
+            borderRadius: '12px',
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '12px'
+          }}>
+            <span style={{ fontSize: '20px', flexShrink: 0 }}>⚠️</span>
+            <div style={{ flex: 1 }}>
+              <p style={{
+                margin: 0,
+                color: '#fca5a5',
+                fontSize: '14px',
+                fontWeight: '600',
+                lineHeight: '1.6'
+              }}>
+                <strong style={{ color: '#ef4444' }}>Cảnh báo bảo mật!</strong>
+                <br />
+                Bạn đã đăng nhập sai {loginAttempts} lần. Vui lòng kiểm tra lại email và mật khẩu. 
+                Nếu quên mật khẩu, hãy sử dụng chức năng "Quên mật khẩu?" bên dưới.
+              </p>
+            </div>
+          </div>
+        )}
+
+        <form 
+          onSubmit={handleSubmit}
+          onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && e.target.type !== 'submit') {
+              e.preventDefault();
+            }
+          }}
+        >
           {/* Email Field */}
           <div className="modal-form-group" style={{ marginBottom: 20 }}>
             <label className="modal-label" style={{
@@ -412,7 +483,8 @@ const LoginModal = () => {
               Hủy
             </button>
             <button
-              type="submit"
+              type="button"
+              onClick={handleSubmit}
               disabled={isLoggingIn}
               className="modal-btn modal-btn-primary"
               style={{

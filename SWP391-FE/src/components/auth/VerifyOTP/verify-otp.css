@@ -41,37 +41,167 @@
   background: linear-gradient(135deg, #667eea, #764ba2);
   animation: pulse 2s ease-in-out infinite;
 }
-.otp-title { font-size: 28px; font-weight: 700; color: #2d3748; margin: 0 0 8px 0; letter-spacing: -0.5px; }
-.otp-subtitle { font-size: 16px; color: #718096; margin: 0; line-height: 1.5; }
+.otp-title { 
+  font-size: 32px; 
+  font-weight: 800; 
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 8px 0; 
+  letter-spacing: -0.5px; 
+}
+.otp-subtitle { font-size: 16px; color: #4a5568; margin: 0; line-height: 1.5; font-weight: 500; }
 
 .otp-info {
-  background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
-  border: 1px solid #7dd3fc; border-radius: 16px; padding: 20px;
-  margin-bottom: 32px; text-align: center; position: relative; overflow: hidden;
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  border: 2px solid #3b82f6; 
+  border-radius: 16px; 
+  padding: 20px;
+  margin-bottom: 32px; 
+  text-align: center; 
+  position: relative; 
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
 }
-.otp-info-dot { position: absolute; top: -10px; right: -10px; width: 40px; height: 40px; border-radius: 50%; background: rgba(125,211,252,0.2); }
-.otp-info-email { font-size: 18px; font-weight: 600; color: #0369a1; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-.otp-info-note { font-size: 14px; color: #0369a1; margin-bottom: 8px; }
-.otp-info-id { font-size: 12px; color: #0369a1; opacity: 0.7; background: rgba(3,105,161,0.1); padding: 4px 8px; border-radius: 8px; display: inline-block; }
+.otp-info-dot { 
+  position: absolute; 
+  top: -10px; 
+  right: -10px; 
+  width: 40px; 
+  height: 40px; 
+  border-radius: 50%; 
+  background: rgba(59, 130, 246, 0.2); 
+}
+.otp-info-email { 
+  font-size: 18px; 
+  font-weight: 700; 
+  color: #1e40af; 
+  margin-bottom: 8px; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  gap: 8px; 
+}
+.otp-info-note { 
+  font-size: 14px; 
+  color: #1e3a8a; 
+  margin-bottom: 8px; 
+  font-weight: 500;
+}
+.otp-info-id { 
+  font-size: 12px; 
+  color: #1e40af; 
+  background: rgba(59, 130, 246, 0.15); 
+  padding: 6px 12px; 
+  border-radius: 8px; 
+  display: inline-block; 
+  font-weight: 600;
+}
 
 .otp-input-group { margin-bottom: 32px; }
-.otp-input-label { display: block; text-align: center; font-size: 16px; font-weight: 600; color: #2d3748; margin-bottom: 16px; }
+.otp-input-label { 
+  display: block; 
+  text-align: center; 
+  font-size: 16px; 
+  font-weight: 700; 
+  color: #1a202c; 
+  margin-bottom: 16px; 
+}
 .otp-inputs { display: flex; justify-content: center; gap: 12px; margin-bottom: 12px; }
 .otp-input {
-  width: 48px; height: 48px; font-size: 20px; font-weight: 600; text-align: center;
-  border: 2px solid #e2e8f0; border-radius: 12px; background: #f8fafc; color: #2d3748; transition: all .3s ease; outline: none;
+  width: 56px; 
+  height: 56px; 
+  font-size: 24px; 
+  font-weight: 700; 
+  text-align: center;
+  border: 2px solid #cbd5e0; 
+  border-radius: 12px; 
+  background: #ffffff; 
+  color: #1a202c; 
+  transition: all .3s ease; 
+  outline: none;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
-.otp-help { text-align: center; font-size: 14px; color: #718096; margin: 0; }
+.otp-input:focus {
+  border-color: #667eea !important;
+  background: #ffffff !important;
+  transform: scale(1.05) !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1), 0 4px 8px rgba(0,0,0,0.1) !important;
+}
+.otp-help { text-align: center; font-size: 14px; color: #1a202c; margin: 0; font-weight: 600; }
 
-.otp-resend { text-align: center; margin-bottom: 32px; padding: 16px; background: rgba(102,126,234,0.05); border-radius: 12px; border: 1px solid rgba(102,126,234,0.1); }
-.otp-resend-timer { font-size: 14px; color: #667eea; font-weight: 500; }
+.otp-resend { 
+  text-align: center; 
+  margin-bottom: 32px; 
+  padding: 16px; 
+  background: rgba(102, 126, 234, 0.08); 
+  border-radius: 12px; 
+  border: 2px solid rgba(102, 126, 234, 0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.otp-resend-timer { 
+  font-size: 14px; 
+  color: #5b21b6; 
+  font-weight: 600; 
+}
 
 .otp-actions { display: flex; gap: 16px; justify-content: center; margin-top: 24px; }
-.btn { padding: 14px 28px; font-size: 16px; font-weight: 600; border-radius: 12px; transition: all .3s ease; }
-.btn-ghost { background: rgba(107,114,128,0.1); color: #6b7280; border: 1px solid rgba(107,114,128,0.2); white-space: nowrap; }
-.btn-gradient { color: #fff; border: none; background: linear-gradient(135deg, #667eea, #764ba2); box-shadow: 0 4px 12px rgba(102,126,234,0.3); display: flex; align-items: center; justify-content: center; gap: 8px; }
-.btn-disabled { opacity: .6; cursor: not-allowed; }
+.btn { 
+  padding: 14px 28px; 
+  font-size: 16px; 
+  font-weight: 700; 
+  border-radius: 12px; 
+  transition: all .3s ease; 
+  cursor: pointer;
+}
+.btn-ghost { 
+  background: rgba(71, 85, 105, 0.1); 
+  color: #334155; 
+  border: 2px solid rgba(71, 85, 105, 0.2); 
+  white-space: nowrap; 
+}
+.btn-ghost:hover:not(.btn-disabled) {
+  background: rgba(71, 85, 105, 0.15);
+  border-color: rgba(71, 85, 105, 0.3);
+}
+.btn-gradient { 
+  color: #fff; 
+  border: none; 
+  background: linear-gradient(135deg, #667eea, #764ba2); 
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  gap: 8px; 
+}
+.btn-gradient:hover:not(.btn-disabled) {
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+  transform: translateY(-2px);
+}
+.btn-disabled { 
+  opacity: .5; 
+  cursor: not-allowed; 
+}
 .spinner-light { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top: 2px solid #fff; border-radius: 50%; animation: spin 1s linear infinite; }
+
+.otp-help-box {
+  margin-top: 24px;
+  padding: 16px;
+  background: rgba(102, 126, 234, 0.08);
+  border-radius: 12px;
+  border-left: 4px solid #667eea;
+}
+
+.otp-help-text {
+  font-size: 14px;
+  color: #1a202c;
+  font-weight: 600;
+  line-height: 1.6;
+  text-align: left;
+}
 
 @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)} }
 @keyframes slideUp { from{opacity:0; transform:translateY(30px)} to{opacity:1; transform:translateY(0)} }

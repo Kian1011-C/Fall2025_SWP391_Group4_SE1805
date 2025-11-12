@@ -6,6 +6,7 @@ import authService from '../assets/js/services/authService';
 
 const AuthContext = createContext();
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -63,7 +64,9 @@ export const AuthProvider = ({ children }) => {
         try {
           localStorage.removeItem('selectedVehicle');
           sessionStorage.removeItem('selectedVehicle');
-        } catch {}
+        } catch (err) {
+          console.warn('Could not clear vehicle selection:', err);
+        }
         
         console.log('🚀 AuthContext: Navigating to:', redirectPath, 'for role:', normalizedRole, 'redirect from API:', response.redirect);
         showToast(`Chào mừng ${userData.name}! Đang chuyển đến ${normalizedRole.toUpperCase()} Dashboard...`, 'success');
@@ -73,12 +76,16 @@ export const AuthProvider = ({ children }) => {
           console.log('🎯 AuthContext: Executing navigation to:', redirectPath);
           navigate(redirectPath);
         }, 500);
+        
+        return { success: true };
       } else {
         showToast(response.message || 'Đăng nhập thất bại!', 'error');
+        return { success: false };
       }
     } catch (error) {
       console.error('Login error:', error);
       showToast('Có lỗi xảy ra khi đăng nhập!', 'error');
+      return { success: false };
     } finally {
       setIsLoggingIn(false);
     }
