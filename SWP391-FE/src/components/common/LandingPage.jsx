@@ -15,9 +15,17 @@ const LandingPage = () => {
 
   return (
     <div id="landing" style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #0b1020 0%, #0e1430 100%)' }}>
-      <header>
+      <header style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 1000,
+        background: 'rgba(11, 16, 32, 0.85)',
+        backdropFilter: 'blur(12px)',
+        borderBottom: '1px solid rgba(148, 163, 184, 0.1)',
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+      }}>
         <div className="container">
-          <nav className="nav">
+          <nav className="nav" style={{ padding: '16px 0' }}>
             <div className="brand" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <div style={{
                 width: '50px',
@@ -27,33 +35,137 @@ const LandingPage = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 4px 15px rgba(168, 85, 247, 0.4), 0 0 20px rgba(59, 130, 246, 0.2)',
-                position: 'relative'
+                boxShadow: '0 8px 20px rgba(168, 85, 247, 0.5), 0 0 30px rgba(59, 130, 246, 0.3)',
+                position: 'relative',
+                transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                cursor: 'pointer'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.1) rotate(5deg)';
+                e.currentTarget.style.boxShadow = '0 12px 30px rgba(168, 85, 247, 0.6), 0 0 40px rgba(59, 130, 246, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1) rotate(0deg)';
+                e.currentTarget.style.boxShadow = '0 8px 20px rgba(168, 85, 247, 0.5), 0 0 30px rgba(59, 130, 246, 0.3)';
               }}>
                 <span style={{
-                  color: '#000000',
+                  color: '#FFFFFF',
                   fontSize: '18px',
                   fontWeight: '900',
                   fontFamily: 'sans-serif',
-                  letterSpacing: '-1px'
+                  letterSpacing: '-1px',
+                  textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)'
                 }}>EV</span>
               </div>
               <span style={{
-                color: '#FFFFFF',
-                fontSize: '20px',
-                fontWeight: '700',
+                background: 'linear-gradient(135deg, #a855f7, #3b82f6)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                fontSize: '22px',
+                fontWeight: '800',
                 fontFamily: 'sans-serif',
                 letterSpacing: '0.5px'
               }}>Battery SWAP</span>
             </div>
-            <div className="nav-links">
-              <a href="#features">Tính năng</a>
-              <a href="#pricing">Gói dịch vụ</a>
-              <a href="#about">Về chúng tôi</a>
+            <div className="nav-links" style={{ display: 'flex', gap: '32px' }}>
+              <a href="#features" style={{
+                color: '#e2e8f0',
+                fontSize: '15px',
+                fontWeight: '500',
+                transition: 'all 0.3s ease',
+                position: 'relative',
+                textDecoration: 'none'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.color = '#a855f7';
+                e.target.style.transform = 'translateY(-2px)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.color = '#e2e8f0';
+                e.target.style.transform = 'translateY(0)';
+              }}>Tính năng</a>
+              <a href="#pricing" style={{
+                color: '#e2e8f0',
+                fontSize: '15px',
+                fontWeight: '500',
+                transition: 'all 0.3s ease',
+                position: 'relative',
+                textDecoration: 'none'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.color = '#a855f7';
+                e.target.style.transform = 'translateY(-2px)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.color = '#e2e8f0';
+                e.target.style.transform = 'translateY(0)';
+              }}>Gói dịch vụ</a>
+              <a href="#about" style={{
+                color: '#e2e8f0',
+                fontSize: '15px',
+                fontWeight: '500',
+                transition: 'all 0.3s ease',
+                position: 'relative',
+                textDecoration: 'none'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.color = '#a855f7';
+                e.target.style.transform = 'translateY(-2px)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.color = '#e2e8f0';
+                e.target.style.transform = 'translateY(0)';
+              }}>Về chúng tôi</a>
             </div>
-            <div className="auth-buttons">
-              <button className="btn" onClick={handleLoginClick}>Đăng nhập</button>
-              <button className="btn btn-primary" onClick={handleRegisterClick}>Đăng ký</button>
+            <div className="auth-buttons" style={{ display: 'flex', gap: '12px' }}>
+              <button 
+                className="btn" 
+                onClick={handleLoginClick}
+                style={{
+                  padding: '10px 24px',
+                  borderRadius: '10px',
+                  border: '2px solid rgba(168, 85, 247, 0.3)',
+                  background: 'transparent',
+                  color: '#e2e8f0',
+                  fontWeight: '600',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.background = 'rgba(168, 85, 247, 0.1)';
+                  e.target.style.borderColor = '#a855f7';
+                  e.target.style.transform = 'translateY(-2px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = 'transparent';
+                  e.target.style.borderColor = 'rgba(168, 85, 247, 0.3)';
+                  e.target.style.transform = 'translateY(0)';
+                }}>Đăng nhập</button>
+              <button 
+                className="btn btn-primary" 
+                onClick={handleRegisterClick}
+                style={{
+                  padding: '10px 24px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #a855f7, #3b82f6)',
+                  color: '#FFFFFF',
+                  fontWeight: '600',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 4px 12px rgba(168, 85, 247, 0.4)'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 6px 20px rgba(168, 85, 247, 0.6)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 4px 12px rgba(168, 85, 247, 0.4)';
+                }}>Đăng ký</button>
             </div>
           </nav>
         </div>

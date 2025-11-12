@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { showToast } from '../../assets/js/helpers/helpers';
 import authService from '../../assets/js/services/authService';
@@ -20,6 +20,34 @@ const LoginModal = () => {
 
   const [errors, setErrors] = useState({});
   const [isSendingReset, setIsSendingReset] = useState(false);
+
+  // Lock scroll when modal is open
+  useEffect(() => {
+    if (showLoginModal) {
+      // Save current scroll position
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+    } else {
+      // Restore scroll position
+      const scrollY = document.body.style.top;
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+      window.scrollTo(0, parseInt(scrollY || '0') * -1);
+    }
+
+    // Cleanup when component unmounts
+    return () => {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+    };
+  }, [showLoginModal]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -104,60 +132,118 @@ const LoginModal = () => {
 
   return (
     <div 
-      className="modal-overlay login-modal-overlay" 
+      className="modal-overlay login-modal-overlay"
+      onClick={handleClose}
+      style={{
+        position: 'fixed',
+        top: '0',
+        left: '0',
+        right: '0',
+        bottom: '0',
+        width: '100vw',
+        height: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '20px',
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        backdropFilter: 'blur(8px)',
+        zIndex: 999999,
+        overflow: 'hidden'
+      }}
     >
       <div
         className="modal-container login-modal-container"
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          maxHeight: '90vh',
+          overflowY: 'auto'
+        }}
       >
         {/* Header */}
-        <div className="modal-header" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{
-            width: 44,
-            height: 44,
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: 'linear-gradient(135deg, #06b6d4, #3b82f6)'
-          }}>🔐</div>
-          <h2 className="modal-title" style={{ margin: 0, fontSize: 22, fontWeight: 800, color: '#FFFFFF' }}>Đăng nhập</h2>
+        <div className="modal-header" style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          position: 'relative',
+          marginBottom: 8,
+          paddingBottom: 0,
+          borderBottom: 'none'
+        }}>
+          <h2 className="modal-title" style={{ 
+            margin: 0,
+            fontSize: 32, 
+            fontWeight: 800, 
+            background: 'linear-gradient(135deg, #60a5fa, #a78bfa)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            letterSpacing: '-0.5px',
+            flex: 1,
+            textAlign: 'center'
+          }}>Đăng nhập</h2>
           <button
             onClick={handleClose}
             disabled={isLoggingIn}
             className="modal-close-btn"
+            style={{
+              position: 'absolute',
+              right: 0,
+              width: 36,
+              height: 36,
+              borderRadius: '10px',
+              border: '1px solid rgba(148, 163, 184, 0.2)',
+              background: 'rgba(148, 163, 184, 0.1)',
+              color: '#94a3b8',
+              fontSize: 24,
+              cursor: isLoggingIn ? 'not-allowed' : 'pointer',
+              transition: 'all 0.2s ease',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            onMouseEnter={(e) => {
+              if (!isLoggingIn) {
+                e.target.style.background = 'rgba(239, 68, 68, 0.2)';
+                e.target.style.color = '#ef4444';
+                e.target.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = 'rgba(148, 163, 184, 0.1)';
+              e.target.style.color = '#94a3b8';
+              e.target.style.borderColor = 'rgba(148, 163, 184, 0.2)';
+            }}
           >
             ×
           </button>
         </div>
 
-        {/* Demo Accounts Info */}
-        <div
-          className="modal-info-box"
-          style={{
-            background: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(6,182,212,0.12))',
-            border: '1px solid rgba(148,163,184,0.25)',
-            borderRadius: 14,
-            padding: 14,
-            color: '#D1D5DB',
-            marginTop: 14,
-            marginBottom: 18
-          }}
-        >
-          <h4 className="modal-info-title" style={{ margin: 0, marginBottom: 8, color: '#93C5FD', fontWeight: 700 }}>
-            📋 Tài khoản Demo
-          </h4>
-          <div className="modal-info-content" style={{ lineHeight: 1.6 }}>
-            <div><strong style={{ color: '#FFFFFF' }}>Admin:</strong> admin@evswap.com / admin123</div>
-            <div><strong style={{ color: '#FFFFFF' }}>Staff:</strong> duc.staff@evswap.com / staff123</div>
-            <div><strong style={{ color: '#FFFFFF' }}>Driver:</strong> minh.driver@gmail.com / driver123</div>
-          </div>
+        {/* Welcome Text */}
+        <div style={{
+          marginBottom: 24,
+          textAlign: 'center'
+        }}>
+          <p style={{
+            color: '#94a3b8',
+            fontSize: 15,
+            lineHeight: 1.6,
+            margin: 0
+          }}>
+            Chào mừng bạn trở lại! Đăng nhập để tiếp tục sử dụng dịch vụ đổi pin xe điện của chúng tôi.
+          </p>
         </div>
 
         <form onSubmit={handleSubmit}>
           {/* Email Field */}
-          <div className="modal-form-group" style={{ marginBottom: 14 }}>
-            <label className="modal-label">
-              Email *
+          <div className="modal-form-group" style={{ marginBottom: 20 }}>
+            <label className="modal-label" style={{
+              display: 'block',
+              marginBottom: 8,
+              fontSize: 14,
+              fontWeight: 600,
+              color: '#e2e8f0'
+            }}>
+              Email
             </label>
             <input
               type="email"
@@ -165,25 +251,56 @@ const LoginModal = () => {
               value={formData.email}
               onChange={handleInputChange}
               disabled={isLoggingIn}
-              placeholder="Nhập email của bạn"
+              placeholder="example@email.com"
               className={`modal-input ${errors.email ? 'error' : ''}`}
               style={{
-                background: 'rgba(2,6,23,0.6)',
-                border: '1px solid rgba(148,163,184,0.25)',
-                color: '#E5E7EB'
+                width: '100%',
+                padding: '12px 16px',
+                background: 'rgba(15, 23, 42, 0.8)',
+                border: errors.email ? '2px solid #ef4444' : '2px solid rgba(148, 163, 184, 0.2)',
+                borderRadius: '12px',
+                color: '#E5E7EB',
+                fontSize: 15,
+                transition: 'all 0.2s ease',
+                outline: 'none'
+              }}
+              onFocus={(e) => {
+                if (!errors.email) {
+                  e.target.style.borderColor = '#3b82f6';
+                  e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
+                }
+              }}
+              onBlur={(e) => {
+                if (!errors.email) {
+                  e.target.style.borderColor = 'rgba(148, 163, 184, 0.2)';
+                  e.target.style.boxShadow = 'none';
+                }
               }}
             />
             {errors.email && (
-              <div className="modal-error-message">
+              <div className="modal-error-message" style={{
+                marginTop: 8,
+                fontSize: 13,
+                color: '#ef4444',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6
+              }}>
                 ⚠️ {errors.email}
               </div>
             )}
           </div>
 
           {/* Password Field */}
-          <div className="modal-form-group" style={{ marginBottom: 6 }}>
-            <label className="modal-label">
-              Mật khẩu *
+          <div className="modal-form-group" style={{ marginBottom: 8 }}>
+            <label className="modal-label" style={{
+              display: 'block',
+              marginBottom: 8,
+              fontSize: 14,
+              fontWeight: 600,
+              color: '#e2e8f0'
+            }}>
+              Mật khẩu
             </label>
             <input
               type="password"
@@ -191,20 +308,45 @@ const LoginModal = () => {
               value={formData.password}
               onChange={handleInputChange}
               disabled={isLoggingIn}
-              placeholder="Nhập mật khẩu của bạn"
+              placeholder="••••••••"
               className={`modal-input ${errors.password ? 'error' : ''}`}
               style={{
-                background: 'rgba(2,6,23,0.6)',
-                border: '1px solid rgba(148,163,184,0.25)',
-                color: '#E5E7EB'
+                width: '100%',
+                padding: '12px 16px',
+                background: 'rgba(15, 23, 42, 0.8)',
+                border: errors.password ? '2px solid #ef4444' : '2px solid rgba(148, 163, 184, 0.2)',
+                borderRadius: '12px',
+                color: '#E5E7EB',
+                fontSize: 15,
+                transition: 'all 0.2s ease',
+                outline: 'none'
+              }}
+              onFocus={(e) => {
+                if (!errors.password) {
+                  e.target.style.borderColor = '#3b82f6';
+                  e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
+                }
+              }}
+              onBlur={(e) => {
+                if (!errors.password) {
+                  e.target.style.borderColor = 'rgba(148, 163, 184, 0.2)';
+                  e.target.style.boxShadow = 'none';
+                }
               }}
             />
             {errors.password && (
-              <div className="modal-error-message">
+              <div className="modal-error-message" style={{
+                marginTop: 8,
+                fontSize: 13,
+                color: '#ef4444',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6
+              }}>
                 ⚠️ {errors.password}
               </div>
             )}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 12, marginBottom: 24 }}>
               <button
                 type="button"
                 onClick={handleForgotPassword}
@@ -212,10 +354,20 @@ const LoginModal = () => {
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: '#60a5fa',
-                  textDecoration: 'underline',
+                  color: '#3b82f6',
+                  fontSize: 14,
+                  fontWeight: 500,
                   cursor: isLoggingIn || isSendingReset ? 'not-allowed' : 'pointer',
-                  padding: 0
+                  padding: 0,
+                  transition: 'color 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  if (!isLoggingIn && !isSendingReset) {
+                    e.target.style.color = '#60a5fa';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.color = '#3b82f6';
                 }}
               >
                 {isSendingReset ? 'Đang gửi...' : 'Quên mật khẩu?'}
@@ -224,13 +376,38 @@ const LoginModal = () => {
           </div>
 
           {/* Action Buttons */}
-          <div className="modal-actions">
+          <div className="modal-actions" style={{ 
+            display: 'flex', 
+            gap: 12,
+            marginTop: 8
+          }}>
             <button
               type="button"
               onClick={handleClose}
               disabled={isLoggingIn}
               className="modal-btn modal-btn-cancel"
-              style={{ background: 'rgba(148,163,184,0.15)', color: '#E5E7EB', border: '1px solid rgba(148,163,184,0.25)' }}
+              style={{ 
+                flex: 1,
+                padding: '14px 24px',
+                background: 'rgba(148, 163, 184, 0.1)', 
+                color: '#cbd5e1', 
+                border: '2px solid rgba(148, 163, 184, 0.2)',
+                borderRadius: '12px',
+                fontSize: 15,
+                fontWeight: 600,
+                cursor: isLoggingIn ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                if (!isLoggingIn) {
+                  e.target.style.background = 'rgba(148, 163, 184, 0.2)';
+                  e.target.style.borderColor = 'rgba(148, 163, 184, 0.3)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = 'rgba(148, 163, 184, 0.1)';
+                e.target.style.borderColor = 'rgba(148, 163, 184, 0.2)';
+              }}
             >
               Hủy
             </button>
@@ -239,9 +416,31 @@ const LoginModal = () => {
               disabled={isLoggingIn}
               className="modal-btn modal-btn-primary"
               style={{
-                background: isLoggingIn ? 'rgba(16,185,129,0.35)' : 'linear-gradient(135deg, #22c55e, #16a34a)',
+                flex: 2,
+                padding: '14px 24px',
+                background: isLoggingIn ? 'rgba(59, 130, 246, 0.5)' : 'linear-gradient(135deg, #3b82f6, #2563eb)',
                 border: 'none',
-                boxShadow: '0 10px 30px rgba(34,197,94,0.25)'
+                borderRadius: '12px',
+                color: '#ffffff',
+                fontSize: 15,
+                fontWeight: 600,
+                boxShadow: isLoggingIn ? 'none' : '0 4px 12px rgba(59, 130, 246, 0.4)',
+                cursor: isLoggingIn ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8
+              }}
+              onMouseEnter={(e) => {
+                if (!isLoggingIn) {
+                  e.target.style.transform = 'translateY(-1px)';
+                  e.target.style.boxShadow = '0 6px 16px rgba(59, 130, 246, 0.5)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.4)';
               }}
             >
               {isLoggingIn ? (
@@ -251,44 +450,12 @@ const LoginModal = () => {
                 </>
               ) : (
                 <>
-                  🚀 Đăng nhập
+                  Đăng nhập
                 </>
               )}
             </button>
           </div>
         </form>
-
-        {/* Quick Login Buttons */}
-        <div className="modal-divider" style={{ borderTop: '1px dashed rgba(148,163,184,0.25)', marginTop: 18 }}>
-          <div className="modal-quick-login-title">
-            Đăng nhập nhanh:
-          </div>
-          <div className="modal-quick-login-buttons" style={{ gap: 10 }}>
-            {[
-              { label: 'Admin', email: 'admin@evswap.com', password: 'admin123', className: 'admin' },
-              { label: 'Staff', email: 'duc.staff@evswap.com', password: 'staff123', className: 'staff' },
-              { label: 'Driver', email: 'minh.driver@gmail.com', password: 'driver123', className: 'driver' }
-            ].map((account, index) => (
-              <button
-                key={index}
-                type="button"
-                disabled={isLoggingIn}
-                onClick={() => {
-                  setFormData({ email: account.email, password: account.password });
-                  setErrors({});
-                }}
-                className={`modal-quick-btn ${account.className}`}
-                style={{
-                  border: '1px solid rgba(148,163,184,0.25)',
-                  background: 'rgba(2,6,23,0.6)',
-                  color: '#E5E7EB'
-                }}
-              >
-                {account.label}
-              </button>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   );

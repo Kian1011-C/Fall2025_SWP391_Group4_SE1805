@@ -6,24 +6,49 @@
   right: 0 !important;
   bottom: 0 !important;
   z-index: 999999 !important;
-  background: rgba(0, 0, 0, 0.75) !important;
-  backdrop-filter: blur(3px) !important;
+  background: rgba(0, 0, 0, 0.8) !important;
+  backdrop-filter: blur(8px) !important;
   display: flex !important;
-  align-items: flex-start !important;
+  align-items: center !important;
   justify-content: center !important;
-  padding: 80px 20px 20px 20px !important;
-  overflow-y: auto !important;
+  padding: 20px !important;
+  animation: fadeInModal 0.2s ease-out !important;
+  overflow: hidden !important;
+}
+
+@keyframes fadeInModal {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUpModal {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .login-modal-container {
   position: relative !important;
   z-index: 1000000 !important;
-  max-width: 520px !important;
-  width: 92vw !important;
-  background: linear-gradient(180deg, #0f172a 0%, #0b1020 100%) !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
-  border-radius: 20px !important;
-  padding: 22px !important;
-  box-shadow: 0 24px 80px rgba(0,0,0,0.5) !important;
+  max-width: 460px !important;
+  width: 100% !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%) !important;
+  border: 1px solid rgba(148, 163, 184, 0.2) !important;
+  border-radius: 24px !important;
+  padding: 32px !important;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05) inset !important;
   color: #E5E7EB !important;
+  animation: slideUpModal 0.3s ease-out !important;
+  margin: auto !important;
 }

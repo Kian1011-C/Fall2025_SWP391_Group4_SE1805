@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { showToast } from '../../assets/js/helpers/helpers';
@@ -19,6 +19,45 @@ const RegisterModal = () => {
     cccd: ''
   });
   const [errors, setErrors] = useState({});
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (showRegisterModal) {
+      // Save current scroll position
+      const scrollY = window.scrollY;
+      
+      // Lock body scroll
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+    } else {
+      // Restore scroll position
+      const scrollY = document.body.style.top;
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+      
+      // Scroll back to original position
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      }
+    }
+
+    return () => {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+    };
+  }, [showRegisterModal]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -167,15 +206,92 @@ const RegisterModal = () => {
   if (!showRegisterModal) return null;
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-container" style={{ maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto' }}>
+    <div 
+      className="modal-overlay"
+      onClick={handleClose}
+      style={{
+        position: 'fixed',
+        top: '0',
+        left: '0',
+        right: '0',
+        bottom: '0',
+        width: '100vw',
+        height: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '20px',
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        backdropFilter: 'blur(8px)',
+        zIndex: 999999,
+        overflowY: 'auto'
+      }}
+    >
+      <div 
+        className="modal-container" 
+        onClick={(e) => e.stopPropagation()}
+        style={{ 
+          maxWidth: '600px', 
+          width: '100%',
+          maxHeight: '90vh',
+          overflowY: 'auto',
+          margin: 'auto',
+          boxSizing: 'border-box'
+        }}
+      >
         {/* Header */}
-        <div className="modal-header">
-          <h2 className="modal-title">📝 Đăng ký tài khoản</h2>
+        <div className="modal-header" style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          position: 'relative',
+          marginBottom: 8,
+          paddingBottom: 0,
+          borderBottom: 'none'
+        }}>
+          <h2 className="modal-title" style={{ 
+            margin: 0,
+            fontSize: 32, 
+            fontWeight: 800, 
+            background: 'linear-gradient(135deg, #10b981, #34d399)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            letterSpacing: '-0.5px',
+            flex: 1,
+            textAlign: 'center'
+          }}>Đăng ký tài khoản</h2>
           <button
             onClick={handleClose}
             disabled={isLoading}
             className="modal-close-btn"
+            style={{
+              position: 'absolute',
+              right: 0,
+              width: 36,
+              height: 36,
+              borderRadius: '10px',
+              border: '1px solid rgba(148, 163, 184, 0.2)',
+              background: 'rgba(148, 163, 184, 0.1)',
+              color: '#94a3b8',
+              fontSize: 24,
+              cursor: isLoading ? 'not-allowed' : 'pointer',
+              transition: 'all 0.2s ease',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            onMouseEnter={(e) => {
+              if (!isLoading) {
+                e.target.style.background = 'rgba(239, 68, 68, 0.2)';
+                e.target.style.color = '#ef4444';
+                e.target.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = 'rgba(148, 163, 184, 0.1)';
+              e.target.style.color = '#94a3b8';
+              e.target.style.borderColor = 'rgba(148, 163, 184, 0.2)';
+            }}
           >
             ×
           </button>
@@ -349,7 +465,7 @@ const RegisterModal = () => {
               disabled={isLoading}
               className="modal-btn modal-btn-cancel"
             >
-              Đã có tài khoản? Đăng nhập
+              Đã có tài khoản? Đăng nhập ngay
             </button>
             <button
               type="submit"
@@ -363,7 +479,7 @@ const RegisterModal = () => {
                 </>
               ) : (
                 <>
-                  🚀 Đăng ký
+                   Đăng ký
                 </>
               )}
             </button>
