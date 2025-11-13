@@ -25,11 +25,15 @@ const StaffIssues = () => {
               <th style={{ padding: '15px 20px' }}>Trạng thái</th>
               <th style={{ padding: '15px 20px' }}>Người báo cáo</th>
               <th style={{ padding: '15px 20px' }}>Thời gian</th>
-              <th style={{ padding: '15px 20px' }}>Hành động</th>
             </tr>
           </thead>
           <tbody>
-            {issues.map(issue => <IssueRow key={issue.id || issue.issueId} issue={issue} />)}
+            {issues.map(issue => (
+              <IssueRow 
+                key={issue.id || issue.issueId} 
+                issue={issue}
+              />
+            ))}
           </tbody>
         </table>
       </div>
@@ -50,9 +54,6 @@ const StaffIssues = () => {
             <option value="in_progress">Đang xử lý</option>
             <option value="resolved">Đã giải quyết</option>
           </select>
-          <button style={{ background: '#10b981', color: 'white', border: 'none', padding: '10px 15px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
-            + Tạo báo cáo mới
-          </button>
         </div>
       </div>
       {renderContent()}

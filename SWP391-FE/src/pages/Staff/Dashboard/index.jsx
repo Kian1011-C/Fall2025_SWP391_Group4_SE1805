@@ -3,12 +3,6 @@ import { useDashboardData } from './hooks/useDashboardData';
 import StatCard from './components/StatCard';
 import '../../../assets/css/StaffDashboard.css';
 
-const mockActivities = [
-    { time: '10:15 AM', text: 'Tài xế Nguyễn Văn A báo cáo sự cố hộc pin kẹt.' },
-    { time: '09:45 AM', text: 'Hoàn tất đổi pin cho yêu cầu #REQ001.' },
-    { time: '09:30 AM', text: 'Pin BAT007 đã được sạc đầy và sẵn sàng.' },
-];
-
 const StaffDashboard = () => {
   const { stats, isLoading, error, refetch } = useDashboardData();
 
@@ -77,24 +71,6 @@ const StaffDashboard = () => {
               icon="✅" 
               color="#10b981" 
             />
-          </div>
-        </div>
-
-        {/* Hoạt động gần đây */}
-        <div className="staff-dashboard-activities">
-          <h2 className="staff-dashboard-activities-title">
-            🕐 Hoạt động gần đây
-          </h2>
-          <div>
-            {mockActivities.map((activity, index) => (
-              <div key={index} className="staff-dashboard-activity-item">
-                <div className="staff-dashboard-activity-time">{activity.time}</div>
-                <div className="staff-dashboard-activity-text">{activity.text}</div>
-              </div>
-            ))}
-          </div>
-          <div className="staff-dashboard-notice">
-            ℹ️ Dữ liệu hoạt động thời gian thực sẽ được cập nhật khi có API
           </div>
         </div>
       </>

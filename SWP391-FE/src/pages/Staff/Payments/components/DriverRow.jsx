@@ -111,7 +111,7 @@ const DriverRow = ({ driver, onViewHistory }) => { // ✅ Xóa onGenerateInvoice
       
       <td style={{ padding: '16px' }}>
         <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-          {/* ✅ Staff chỉ có nút xem lịch sử, không có nút xuất hóa đơn */}
+          {/*  Staff chỉ có nút xem lịch sử, không có nút xuất hóa đơn */}
           <button
             onClick={() => onViewHistory(driver)}
             style={{
@@ -131,7 +131,7 @@ const DriverRow = ({ driver, onViewHistory }) => { // ✅ Xóa onGenerateInvoice
             onMouseEnter={(e) => e.target.style.backgroundColor = '#2563eb'}
             onMouseLeave={(e) => e.target.style.backgroundColor = '#3b82f6'}
           >
-            <span>�</span>
+        
             Xem lịch sử
           </button>
         </div>

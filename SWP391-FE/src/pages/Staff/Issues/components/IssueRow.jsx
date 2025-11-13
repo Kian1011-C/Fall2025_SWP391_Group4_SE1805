@@ -41,22 +41,6 @@ const IssueRow = ({ issue }) => {
       <td style={{ padding: '15px 20px', color: '#cbd5e1' }}>
         {new Date(time).toLocaleString('vi-VN')}
       </td>
-      <td style={{ padding: '15px 20px' }}>
-        <button style={{ 
-          background: '#334155', 
-          color: 'white', 
-          border: 'none', 
-          padding: '8px 12px', 
-          borderRadius: '6px', 
-          cursor: 'pointer',
-          transition: 'background 0.2s'
-        }}
-        onMouseEnter={(e) => e.target.style.background = '#475569'}
-        onMouseLeave={(e) => e.target.style.background = '#334155'}
-        >
-          Xem chi tiết
-        </button>
-      </td>
     </tr>
   );
 };

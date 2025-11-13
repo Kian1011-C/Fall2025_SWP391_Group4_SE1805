@@ -59,7 +59,7 @@ const TransactionRow = ({ transaction, onViewDetails }) => (
     </td>
     <td style={styles.cellAction}>
       <button onClick={() => onViewDetails(transaction)} style={styles.detailBtn}>
-        📋 Chi tiết
+         Chi tiết
       </button>
     </td>
   </tr>

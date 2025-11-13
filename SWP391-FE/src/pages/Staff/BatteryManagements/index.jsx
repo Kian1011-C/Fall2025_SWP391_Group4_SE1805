@@ -334,14 +334,14 @@ const BatteryManagement = () => {
                       className="admin-battery-action-btn view"
                       title="Xem chi tiết"
                     >
-                      👁️ Chi tiết
+                       Chi tiết
                     </button>
                     <button 
                       onClick={() => handleOpenEditModal(battery)} 
                       className="admin-battery-action-btn edit"
                       title="Chỉnh sửa"
                     >
-                      ✏️ Sửa
+                       Sửa
                     </button>
                   </div>
                 </td>
