@@ -53,11 +53,6 @@ const AdminSwapHistory = () => {
     setDateRange(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleExport = () => {
-    console.log('📥 Xuất dữ liệu:', transactions);
-    alert('Chức năng xuất dữ liệu đang được phát triển');
-  };
-
   const renderStats = () => (
     <div style={styles.statsGrid}>
       <div style={styles.statCard}>
@@ -145,10 +140,6 @@ const AdminSwapHistory = () => {
 
         <button onClick={refetch} style={styles.refreshBtn} title="Tải lại">
           🔄
-        </button>
-
-        <button onClick={handleExport} style={styles.exportBtn}>
-          📥 Xuất Excel
         </button>
       </div>
 
