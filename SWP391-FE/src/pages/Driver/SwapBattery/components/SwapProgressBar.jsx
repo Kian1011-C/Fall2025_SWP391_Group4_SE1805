@@ -66,7 +66,7 @@ const SwapProgressBar = () => {
                             )}
                             <div className="progress-step">
                                 <div className={circleClass}>
-                                    {isCompleted ? '✔' : index + 1}
+                                    {isCompleted ? '' : index + 1}
                                 </div>
                                 <span className={labelClass}>
                                     {stepLabels[step]}

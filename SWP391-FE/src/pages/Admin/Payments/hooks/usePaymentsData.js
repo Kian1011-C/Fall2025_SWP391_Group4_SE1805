@@ -10,13 +10,13 @@ export const usePaymentsData = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // ✅ Fetch danh sách drivers với thông tin contract và payment
+  //  Fetch danh sách drivers với thông tin contract và payment
   const fetchDrivers = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       
-      // ✅ Bước 1: Lấy tất cả contracts
+      //  Bước 1: Lấy tất cả contracts
       const contractsResult = await contractService.getAllContracts();
       
       if (!contractsResult.success) {
@@ -27,7 +27,7 @@ export const usePaymentsData = () => {
       
       console.log('Loaded contracts:', contracts);
 
-      // ✅ Bước 2: Lấy tất cả payments
+      //  Bước 2: Lấy tất cả payments
       const paymentsResult = await paymentService.adminGetAllPayments();
       
       if (!paymentsResult.success) {
@@ -38,7 +38,7 @@ export const usePaymentsData = () => {
       
       console.log('Loaded payments:', payments);
 
-      // ✅ Bước 3: Group payments by contractId (KHÔNG phải userId!)
+      //  Bước 3: Group payments by contractId (KHÔNG phải userId!)
       // Vì 1 user có thể có nhiều contracts
       const paymentsByContract = {};
       payments.forEach(payment => {
@@ -51,18 +51,18 @@ export const usePaymentsData = () => {
         }
       });
 
-      console.log('📊 [Admin Payments] Payments grouped by contract:', paymentsByContract);
+      console.log(' [Admin Payments] Payments grouped by contract:', paymentsByContract);
 
-      // ✅ Bước 4: Tạo danh sách drivers từ contracts (đã có đủ thông tin user)
+      //  Bước 4: Tạo danh sách drivers từ contracts (đã có đủ thông tin user)
       const driversData = contracts
         .filter(contract => contract.status === 'active') // Chỉ lấy contract active
         .map(contract => {
-          // ✅ Contract đã có firstName, lastName, email, phone, userId
+          //  Contract đã có firstName, lastName, email, phone, userId
           const fullName = `${contract.firstName || ''} ${contract.lastName || ''}`.trim() || 
                           contract.contractNumber || 
                           `Khách hàng #${contract.contractId}`;
           
-          // ✅ Lấy payments của CONTRACT này (không phải tất cả payments của user)
+          //  Lấy payments của CONTRACT này (không phải tất cả payments của user)
           const userId = contract.userId || contract.email || `contract_${contract.contractId}`;
           const contractPayments = paymentsByContract[contract.contractId] || [];
 
@@ -86,7 +86,7 @@ export const usePaymentsData = () => {
             .filter(p => p.status?.toLowerCase() === 'in_progress')
             .length;
 
-          // ✅ Kiểm tra xem có hóa đơn đã xuất (trạng thái in_progress) không
+          //  Kiểm tra xem có hóa đơn đã xuất (trạng thái in_progress) không
           const hasGeneratedInvoice = unpaidBills > 0;
 
           // Lấy ngày thanh toán gần nhất (CHỈ của contract này)
@@ -102,8 +102,8 @@ export const usePaymentsData = () => {
             : null;
 
           return {
-            id: `${userId}_${contract.contractId}`, // ✅ Unique key: userId + contractId
-            userId: userId, // ✅ userId để gọi API
+            id: `${userId}_${contract.contractId}`, //  Unique key: userId + contractId
+            userId: userId, //  userId để gọi API
             name: fullName,
             email: contract.email || 'N/A',
             phone: contract.phone || 'N/A',
@@ -113,10 +113,10 @@ export const usePaymentsData = () => {
             totalPaid: totalPaid,
             lastPaymentDate: lastPaymentDate,
             unpaidBills: unpaidBills,
-            hasGeneratedInvoice: hasGeneratedInvoice, // ✅ Đã xuất hóa đơn = có payment in_progress
+            hasGeneratedInvoice: hasGeneratedInvoice, //  Đã xuất hóa đơn = có payment in_progress
             startDate: contract.startDate,
             endDate: contract.endDate,
-            // ✅ Thêm các thông tin cần thiết cho việc xuất hóa đơn
+            //  Thêm các thông tin cần thiết cho việc xuất hóa đơn
             plateNumber: contract.plateNumber,
             vehicleModel: contract.vehicleModel,
             monthlyDistance: contract.monthlyDistance,

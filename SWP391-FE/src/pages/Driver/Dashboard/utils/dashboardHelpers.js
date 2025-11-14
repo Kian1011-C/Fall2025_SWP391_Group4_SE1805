@@ -84,14 +84,14 @@ export const updateVehiclesFromSession = (processedVehicles) => {
 
   try {
     const updatedVehicle = JSON.parse(updatedVehicleStr);
-    console.log('🔄 Found updated vehicle in session:', updatedVehicle);
+    console.log(' Found updated vehicle in session:', updatedVehicle);
     
     return processedVehicles.map(vehicle => {
       const idMatch = vehicle.id === updatedVehicle.id;
       const plateMatch = vehicle.plateNumber === updatedVehicle.plateNumber;
       
       if (idMatch || plateMatch) {
-        console.log('✅ MATCH! Updating vehicle battery:', vehicle.plateNumber, 
+        console.log(' MATCH! Updating vehicle battery:', vehicle.plateNumber, 
                    'from', vehicle.batteryLevel, 'to', updatedVehicle.batteryLevel);
         return {
           ...vehicle,
@@ -102,7 +102,7 @@ export const updateVehiclesFromSession = (processedVehicles) => {
       return vehicle;
     });
   } catch (err) {
-    console.warn('⚠️ Failed to parse updated vehicle:', err);
+    console.warn(' Failed to parse updated vehicle:', err);
     return processedVehicles;
   }
 };
@@ -154,7 +154,7 @@ export const getUpdatedVehicleFromSession = () => {
       return JSON.parse(updatedVehicleStr);
     }
   } catch (err) {
-    console.warn('⚠️ Failed to get updated vehicle from session:', err);
+    console.warn(' Failed to get updated vehicle from session:', err);
   }
   return null;
 };
@@ -165,10 +165,10 @@ export const getUpdatedVehicleFromSession = () => {
 export const saveSelectedVehicleToSession = (vehicle) => {
   if (vehicle) {
     sessionStorage.setItem('selectedVehicle', JSON.stringify(vehicle));
-    console.log('💾 Saved selected vehicle to session:', vehicle);
+    console.log(' Saved selected vehicle to session:', vehicle);
   } else {
     sessionStorage.removeItem('selectedVehicle');
-    console.log('🗑️ Removed selected vehicle from session');
+    console.log(' Removed selected vehicle from session');
   }
 };
 
@@ -194,7 +194,7 @@ export const getAutoSelectedVehicle = (vehicles, currentSelected, sessionVehicle
         currentSelected.plateNumber === sessionVehicle.plateNumber) {
       const updatedVehicle = findVehicle(vehicles, sessionVehicle);
       if (updatedVehicle) {
-        console.log('🔄 Updating selected vehicle with new battery:', updatedVehicle);
+        console.log(' Updating selected vehicle with new battery:', updatedVehicle);
         return updatedVehicle;
       }
     }

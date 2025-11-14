@@ -56,7 +56,7 @@ const AdminSwapHistory = () => {
   const renderStats = () => (
     <div style={styles.statsGrid}>
       <div style={styles.statCard}>
-        <div style={styles.statIcon}>📊</div>
+        <div style={styles.statIcon}></div>
         <div style={styles.statContent}>
           <div style={styles.statValue}>{stats.total}</div>
           <div style={styles.statLabel}>Tổng giao dịch</div>
@@ -64,7 +64,7 @@ const AdminSwapHistory = () => {
       </div>
 
       <div style={styles.statCard}>
-        <div style={{ ...styles.statIcon, background: 'rgba(25, 195, 125, 0.2)' }}>✅</div>
+        <div style={{ ...styles.statIcon, background: 'rgba(25, 195, 125, 0.2)' }}></div>
         <div style={styles.statContent}>
           <div style={{ ...styles.statValue, color: '#19c37d' }}>{stats.completed}</div>
           <div style={styles.statLabel}>Hoàn thành</div>
@@ -80,7 +80,7 @@ const AdminSwapHistory = () => {
       </div>
 
       <div style={styles.statCard}>
-        <div style={{ ...styles.statIcon, background: 'rgba(239, 68, 68, 0.2)' }}>❌</div>
+        <div style={{ ...styles.statIcon, background: 'rgba(239, 68, 68, 0.2)' }}></div>
         <div style={styles.statContent}>
           <div style={{ ...styles.statValue, color: '#ef4444' }}>{stats.cancelled + stats.failed}</div>
           <div style={styles.statLabel}>Thất bại/Hủy</div>
@@ -88,7 +88,7 @@ const AdminSwapHistory = () => {
       </div>
 
       <div style={styles.statCard}>
-        <div style={{ ...styles.statIcon, background: 'rgba(245, 158, 11, 0.2)' }}>📈</div>
+        <div style={{ ...styles.statIcon, background: 'rgba(245, 158, 11, 0.2)' }}></div>
         <div style={styles.statContent}>
           <div style={{ ...styles.statValue, color: '#f59e0b' }}>{stats.successRate}%</div>
           <div style={styles.statLabel}>Tỷ lệ thành công</div>
@@ -102,7 +102,7 @@ const AdminSwapHistory = () => {
       <div style={styles.filterRow}>
         <input 
           type="text"
-          placeholder="🔍 Tìm kiếm theo mã GD, User ID, Trạm ID..."
+          placeholder=" Tìm kiếm theo mã GD, User ID, Trạm ID..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           style={styles.searchInput}
@@ -113,11 +113,11 @@ const AdminSwapHistory = () => {
           onChange={(e) => setFilterStatus(e.target.value)} 
           style={styles.filterSelect}
         >
-          <option value="">📋 Tất cả trạng thái</option>
-          <option value="COMPLETED">✅ Hoàn thành</option>
+          <option value=""> Tất cả trạng thái</option>
+          <option value="COMPLETED"> Hoàn thành</option>
           <option value="INITIATED">⏳ Đang xử lý</option>
-          <option value="CANCELLED">🚫 Đã hủy</option>
-          <option value="FAILED">❌ Thất bại</option>
+          <option value="CANCELLED"> Đã hủy</option>
+          <option value="FAILED"> Thất bại</option>
         </select>
 
         <input 
@@ -139,7 +139,7 @@ const AdminSwapHistory = () => {
         />
 
         <button onClick={refetch} style={styles.refreshBtn} title="Tải lại">
-          🔄
+          
         </button>
       </div>
 
@@ -151,7 +151,7 @@ const AdminSwapHistory = () => {
             background: viewMode === 'table' ? '#3b82f6' : 'transparent'
           }}
         >
-          📊 Bảng
+           Bảng
         </button>
         <button 
           onClick={() => setViewMode('cards')}
@@ -160,7 +160,7 @@ const AdminSwapHistory = () => {
             background: viewMode === 'cards' ? '#3b82f6' : 'transparent'
           }}
         >
-          🗂️ Thẻ
+           Thẻ
         </button>
       </div>
     </div>
@@ -204,15 +204,15 @@ const AdminSwapHistory = () => {
           
           <div style={styles.cardBody}>
             <div style={styles.cardRow}>
-              <span style={styles.cardLabel}>👤 Tài xế:</span>
+              <span style={styles.cardLabel}> Tài xế:</span>
               <span style={styles.cardValue}>User #{tx.userId}</span>
             </div>
             <div style={styles.cardRow}>
-              <span style={styles.cardLabel}>🏢 Trạm:</span>
+              <span style={styles.cardLabel}> Trạm:</span>
               <span style={styles.cardValue}>Station #{tx.stationId}</span>
             </div>
             <div style={styles.cardRow}>
-              <span style={styles.cardLabel}>🔋 Pin:</span>
+              <span style={styles.cardLabel}> Pin:</span>
               <span style={styles.cardValue}>#{tx.oldBatteryId} → #{tx.newBatteryId}</span>
             </div>
             <div style={styles.cardRow}>
@@ -240,10 +240,10 @@ const AdminSwapHistory = () => {
     if (error) {
       return (
         <div style={styles.errorContainer}>
-          <div style={styles.errorIcon}>⚠️</div>
+          <div style={styles.errorIcon}></div>
           <h3 style={styles.errorTitle}>Lỗi tải dữ liệu</h3>
           <p style={styles.errorMessage}>{error}</p>
-          <button onClick={refetch} style={styles.retryBtn}>🔄 Thử lại</button>
+          <button onClick={refetch} style={styles.retryBtn}> Thử lại</button>
         </div>
       );
     }
@@ -251,7 +251,7 @@ const AdminSwapHistory = () => {
     if (transactions.length === 0) {
       return (
         <div style={styles.emptyContainer}>
-          <div style={styles.emptyIcon}>📭</div>
+          <div style={styles.emptyIcon}></div>
           <h3 style={styles.emptyTitle}>Không có giao dịch</h3>
           <p style={styles.emptyMessage}>
             Chưa có lịch sử đổi pin nào trong hệ thống
@@ -268,7 +268,7 @@ const AdminSwapHistory = () => {
       {/* Header */}
       <div style={styles.header}>
         <div>
-          <h1 style={styles.title}>🔄 Lịch sử đổi Pin</h1>
+          <h1 style={styles.title}> Lịch sử đổi Pin</h1>
           <p style={styles.subtitle}>
             Quản lý và theo dõi toàn bộ giao dịch đổi pin trong hệ thống
           </p>

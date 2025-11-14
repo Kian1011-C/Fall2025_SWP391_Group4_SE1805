@@ -25,7 +25,7 @@ const TowerListView = ({ towers, onSelectTower }) => {
   if (!towers || towers.length === 0) {
     return (
       <div className="station-empty">
-        <div className="station-empty-icon">🏗️</div>
+        <div className="station-empty-icon"></div>
         <div className="station-empty-text">Không có trụ sạc nào</div>
         <div className="station-empty-subtext">Trạm này chưa có trụ sạc nào</div>
       </div>

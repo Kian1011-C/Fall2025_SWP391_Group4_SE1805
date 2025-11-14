@@ -93,7 +93,7 @@ const PlanCard = ({ plan, index, isPopular, onSubscribe, loading }) => {
               fontSize: '0.9rem',
               fontWeight: '700'
             }}>
-              ✓
+              
             </div>
             <span>{feature}</span>
           </div>

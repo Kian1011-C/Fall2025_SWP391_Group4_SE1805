@@ -23,7 +23,7 @@ const iconStyle = {
 const EmptyPayments = () => {
   return (
     <div style={emptyStyle}>
-      <div style={iconStyle}>📂</div>
+      <div style={iconStyle}></div>
       <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: '#e5e7eb' }}>
         Chưa có giao dịch
       </h4>

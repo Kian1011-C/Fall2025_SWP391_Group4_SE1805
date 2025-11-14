@@ -29,7 +29,7 @@ export const ProfileFormActions = ({ onSave, onCancel, isSaving }) => {
           opacity: isSaving ? 0.5 : 1
         }}
       >
-        ✕ Hủy
+         Hủy
       </button>
       
       <button
@@ -53,7 +53,7 @@ export const ProfileFormActions = ({ onSave, onCancel, isSaving }) => {
             : '0 4px 15px rgba(25, 195, 125, 0.3)'
         }}
       >
-        {isSaving ? '⏳ Đang lưu...' : '💾 Lưu thay đổi'}
+        {isSaving ? '⏳ Đang lưu...' : ' Lưu thay đổi'}
       </button>
     </div>
   );

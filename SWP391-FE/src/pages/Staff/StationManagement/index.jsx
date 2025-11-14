@@ -26,19 +26,19 @@ const Header = ({ title, onBack, icon, onAssignBattery, onRemoveBattery, onRefre
     <div className="station-actions">
       {onAssignBattery && (
         <button onClick={onAssignBattery} className="station-add-btn" style={{ background: 'linear-gradient(135deg, #10b981 0%, #34d399 100%)' }} title="Thêm pin vào hộc">
-          <span>🔋</span>
+          <span></span>
           <span>Thêm Pin vào Hộc</span>
         </button>
       )}
       {onRemoveBattery && (
         <button onClick={onRemoveBattery} className="station-add-btn" style={{ background: 'linear-gradient(135deg, #ef4444 0%, #f87171 100%)' }} title="Tháo pin khỏi hộc">
-          <span>🔌</span>
+          <span></span>
           <span>Tháo Pin</span>
         </button>
       )}
       {onRefresh && (
         <button onClick={onRefresh} className="station-refresh-btn" title="Làm mới">
-          <span>🔄</span>
+          <span></span>
           <span>Làm mới</span>
         </button>
       )}
@@ -95,7 +95,7 @@ const StaffStationManagement = () => {
 
   const handleAssignBattery = async (data) => {
     try {
-      console.log('🔋 Assigning battery to slot:', data);
+      console.log(' Assigning battery to slot:', data);
       const response = await batteryService.assignBatteryToSlot(data.batteryId, data.slotId);
       console.log('Assign battery response:', response);
       
@@ -118,7 +118,7 @@ const StaffStationManagement = () => {
 
   const handleRemoveBattery = async (data) => {
     try {
-      console.log('🔌 Removing battery from slot:', data);
+      console.log(' Removing battery from slot:', data);
       const response = await batteryService.removeBatteryFromSlot(data.batteryId);
       console.log('Remove battery response:', response);
       
@@ -148,7 +148,7 @@ const StaffStationManagement = () => {
     if (error) {
       return (
         <div className="station-error">
-          <span className="station-error-icon">⚠️</span>
+          <span className="station-error-icon"></span>
           <span>Lỗi: {error}</span>
         </div>
       );
@@ -170,9 +170,9 @@ const StaffStationManagement = () => {
   };
 
   const getIcon = () => {
-    if (view === 'slots') return '🔋';
-    if (view === 'towers') return '🏗️';
-    return '🏢';
+    if (view === 'slots') return '';
+    if (view === 'towers') return '';
+    return '';
   };
 
   const getBackButtonHandler = () => {

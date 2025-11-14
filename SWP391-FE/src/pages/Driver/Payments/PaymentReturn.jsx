@@ -101,7 +101,7 @@ const PaymentReturn = () => {
           gap: '16px'
         }}>
           <div style={{ fontSize: '48px' }}>
-            {isSuccess ? '✅' : '❌'}
+            {isSuccess ? '' : ''}
           </div>
           <div>
             <h1 style={{ 
@@ -209,7 +209,7 @@ const PaymentReturn = () => {
                   marginBottom: '20px'
                 }}>
                   <p style={{ color: '#fca5a5', margin: 0, fontSize: '14px' }}>
-                    ⚠️ Nếu số tiền đã bị trừ nhưng giao dịch thất bại, vui lòng liên hệ bộ phận CSKH 
+                     Nếu số tiền đã bị trừ nhưng giao dịch thất bại, vui lòng liên hệ bộ phận CSKH 
                     để được hỗ trợ. Mã giao dịch: <strong>{result.txnRef}</strong>
                   </p>
                 </div>

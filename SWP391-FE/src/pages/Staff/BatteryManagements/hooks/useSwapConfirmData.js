@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-// ✅ SỬ DỤNG staffSwapService cho Staff
+//  SỬ DỤNG staffSwapService cho Staff
 import staffSwapService from '../../../../assets/js/services/staffSwapService';
 
 export const useSwapConfirmData = () => {
@@ -39,7 +39,7 @@ export const useSwapConfirmData = () => {
   const handleAcceptRequest = async (swapId) => {
     setIsSubmitting(true);
     try {
-      // ✅ Sử dụng staffSwapService.completeSwap() để chấp nhận và hoàn thành swap
+      //  Sử dụng staffSwapService.completeSwap() để chấp nhận và hoàn thành swap
       await staffSwapService.completeSwap(swapId);
       await fetchRequests(); // Tải lại danh sách sau khi cập nhật
     } catch (err) {
@@ -52,7 +52,7 @@ export const useSwapConfirmData = () => {
   const handleDeclineRequest = async (swapId) => {
     setIsSubmitting(true);
     try {
-      // ✅ Sử dụng staffSwapService.cancelSwap() để từ chối
+      //  Sử dụng staffSwapService.cancelSwap() để từ chối
       await staffSwapService.cancelSwap(swapId);
       await fetchRequests();
     } catch (err) {

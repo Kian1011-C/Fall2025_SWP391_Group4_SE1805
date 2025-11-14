@@ -21,7 +21,7 @@ export const ProfileStats = ({ user }) => {
         margin: '0 0 20px 0',
         fontSize: '1.2rem'
       }}>
-        📊 Thống kê tài khoản
+         Thống kê tài khoản
       </h3>
 
       <div style={{ 

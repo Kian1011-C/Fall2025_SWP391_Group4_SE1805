@@ -38,7 +38,7 @@ const DriverDashboard = () => {
   React.useEffect(() => {
     const needsReload = sessionStorage.getItem('vehicleNeedsReload');
     if (needsReload === 'true') {
-      console.log('🔄 Phát hiện flag vehicleNeedsReload, đang reload xe từ API...');
+      console.log(' Phát hiện flag vehicleNeedsReload, đang reload xe từ API...');
       
       // Clear flag ngay để tránh reload lặp lại
       sessionStorage.removeItem('vehicleNeedsReload');
@@ -53,10 +53,10 @@ const DriverDashboard = () => {
           const updatedVehicle = JSON.parse(updatedVehicleStr);
           setSelectedVehicle(updatedVehicle);
           localStorage.setItem('selectedVehicle', updatedVehicleStr);
-          console.log('✅ Đã cập nhật selectedVehicle sau swap:', updatedVehicle);
+          console.log(' Đã cập nhật selectedVehicle sau swap:', updatedVehicle);
         }
       } catch (err) {
-        console.error('❌ Lỗi khi parse updatedVehicle:', err);
+        console.error(' Lỗi khi parse updatedVehicle:', err);
       }
     }
   }, [refetch, setSelectedVehicle]);
@@ -95,7 +95,7 @@ const DriverDashboard = () => {
     return (
       <div className="dashboard-error">
         <div className="error-content">
-          <div className="error-icon">⚠️</div>
+          <div className="error-icon"></div>
           <h3 className="error-title">Lỗi tải dữ liệu</h3>
           <p className="error-message">{error}</p>
           <button className="retry-btn" onClick={refetch}>
@@ -122,7 +122,7 @@ const DriverDashboard = () => {
             textAlign: 'center'
           }}>
             <div style={{ fontSize: '16px', fontWeight: '600', color: '#92400e', marginBottom: '8px' }}>
-              🚗 Chưa có phương tiện
+               Chưa có phương tiện
             </div>
             <div style={{ fontSize: '14px', color: '#92400e', marginBottom: '12px' }}>
               Bạn cần đăng ký phương tiện để sử dụng dịch vụ đổi pin

@@ -15,7 +15,7 @@ const SwapBatteryPage = () => {
     // Trong production, PHẢI đăng nhập và có userId hợp lệ
     const currentStaffId = currentUser?.userId || 'staff001';
     
-    console.log('👤 Staff đang đăng nhập:', {
+    console.log(' Staff đang đăng nhập:', {
         currentUser,
         currentStaffId,
         userId: currentUser?.userId,
@@ -47,16 +47,16 @@ const SwapBatteryPage = () => {
             {/* Hiển thị thông tin nhân viên */}
             <div style={{ marginBottom: '20px', background: '#1e293b', borderRadius: '12px', padding: '16px' }}>
                 <p style={{ margin: 0, color: '#94a3b8' }}>
-                    👤 Nhân viên: <strong style={{ color: 'white' }}>
+                     Nhân viên: <strong style={{ color: 'white' }}>
                         {currentUser?.name || currentUser?.email || currentUser?.userId || 'Chưa đăng nhập'}
                     </strong>
                 </p>
                 <p style={{ margin: '5px 0 0 0', color: '#94a3b8' }}>
-                    🏢 Trạm: <strong style={{ color: 'white' }}>#{MOCK_STATION_ID}</strong>
+                     Trạm: <strong style={{ color: 'white' }}>#{MOCK_STATION_ID}</strong>
                 </p>
                 {!currentStaffId && (
                     <p style={{ margin: '5px 0 0 0', color: '#ef4444', fontSize: '14px' }}>
-                        ⚠️ Cảnh báo: Không tìm thấy Staff ID. Staff ID sẽ để NULL trong giao dịch.
+                         Cảnh báo: Không tìm thấy Staff ID. Staff ID sẽ để NULL trong giao dịch.
                     </p>
                 )}
             </div>

@@ -35,11 +35,11 @@ export const getStatusColor = (status) => {
 // Get battery status icon
 export const getStatusIcon = (status) => {
   switch(status) {
-    case 'Full': return '🔋';
-    case 'Charging': return '⚡';
-    case 'Maintenance': return '🔧';
-    case 'Error': return '⚠️';
-    default: return '❓';
+    case 'Full': return '';
+    case 'Charging': return '';
+    case 'Maintenance': return '';
+    case 'Error': return '';
+    default: return '';
   }
 };
 
@@ -63,10 +63,10 @@ export const getPaymentStatusColor = (status) => {
 // Get payment status icon
 export const getPaymentStatusIcon = (status) => {
   switch(status) {
-    case 'Success': return '✅';
+    case 'Success': return '';
     case 'Pending': return '⏳';
-    case 'Failed': return '❌';
-    default: return '❓';
+    case 'Failed': return '';
+    default: return '';
   }
 };
 
@@ -84,9 +84,9 @@ export const getIssueStatusColor = (status) => {
 export const getIssueStatusIcon = (status) => {
   switch(status) {
     case 'Pending': return '⏳';
-    case 'In Progress': return '🔄';
-    case 'Done': return '✅';
-    default: return '❓';
+    case 'In Progress': return '';
+    case 'Done': return '';
+    default: return '';
   }
 };
 
@@ -104,11 +104,11 @@ export const getPriorityColor = (priority) => {
 // Get priority icon
 export const getPriorityIcon = (priority) => {
   switch(priority) {
-    case 'Critical': return '🚨';
-    case 'High': return '⚠️';
-    case 'Medium': return '📋';
-    case 'Low': return 'ℹ️';
-    default: return '❓';
+    case 'Critical': return '';
+    case 'High': return '';
+    case 'Medium': return '';
+    case 'Low': return '';
+    default: return '';
   }
 };
 

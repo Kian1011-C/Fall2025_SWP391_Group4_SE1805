@@ -22,7 +22,7 @@ const SwapConfirmView = () => {
         ))
       ) : (
         <div style={{ textAlign: 'center', padding: '40px', background: '#1e2b3b', borderRadius: '16px' }}>
-          <div style={{fontSize: '48px'}}>🎉</div>
+          <div style={{fontSize: '48px'}}></div>
           <h3 style={{color: 'white'}}>Không có yêu cầu nào</h3>
           <p style={{color: '#94a3b8'}}>Tất cả các yêu cầu đã được xử lý.</p>
         </div>

@@ -32,7 +32,7 @@ export const useStationsDrilldown = () => {
       const allStations = safeExtractData(response);
       
       // Hiển thị TẤT CẢ các trạm (active, offline, maintenance)
-      console.log('📊 Total stations:', allStations.length);
+      console.log(' Total stations:', allStations.length);
       
       setStations(allStations);
     } catch (err) {

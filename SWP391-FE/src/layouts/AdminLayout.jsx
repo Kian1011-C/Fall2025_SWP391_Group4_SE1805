@@ -8,14 +8,14 @@ const AdminLayout = () => {
 
   // Dựa trên cấu trúc thư mục của bạn
   const navItems = [
-    { path: '/admin/dashboard', name: 'Trang chủ', icon: '🏠' },
-    { path: '/admin/users', name: 'Quản lý Người dùng', icon: '👥' },
-    { path: '/admin/stations', name: 'Quản lý Trạm', icon: '🏢' },
-    { path: '/admin/batteries', name: 'Quản lý Pin', icon: '🔋' },
-    { path: '/admin/contracts', name: 'Quản lý Hợp đồng', icon: '📄' },
-    { path: '/admin/subscriptions', name: 'Quản lý Gói cước', icon: '⭐' },
-    { path: '/admin/payments', name: 'Quản lý Thanh toán', icon: '💳' },
-    { path: '/admin/transactions', name: 'Lịch sử đổi Pin', icon: '🔄' },
+    { path: '/admin/dashboard', name: 'Trang chủ', icon: '' },
+    { path: '/admin/users', name: 'Quản lý Người dùng', icon: '' },
+    { path: '/admin/stations', name: 'Quản lý Trạm', icon: '' },
+    { path: '/admin/batteries', name: 'Quản lý Pin', icon: '' },
+    { path: '/admin/contracts', name: 'Quản lý Hợp đồng', icon: '' },
+    { path: '/admin/subscriptions', name: 'Quản lý Gói cước', icon: '' },
+    { path: '/admin/payments', name: 'Quản lý Thanh toán', icon: '' },
+    { path: '/admin/transactions', name: 'Lịch sử đổi Pin', icon: '' },
   ];
 
   return (

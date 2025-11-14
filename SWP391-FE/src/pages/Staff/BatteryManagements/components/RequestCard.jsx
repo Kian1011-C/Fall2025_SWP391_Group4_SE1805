@@ -8,8 +8,8 @@ const RequestCard = ({ request, onAccept, onDecline, isSubmitting }) => {
       <p><strong style={{ color: '#94a3b8', minWidth: '100px', display: 'inline-block' }}>Trạm ID:</strong> {request.stationId}</p>
       <p><strong style={{ color: '#94a3b8', minWidth: '100px', display: 'inline-block' }}>Thời gian:</strong> {new Date(request.swapDate).toLocaleString('vi-VN')}</p>
       <div style={{ display: 'flex', gap: '15px', marginTop: '20px' }}>
-        <button onClick={() => onAccept(request.swapId)} disabled={isSubmitting} style={{ flex: 1, background: '#10b981', color: 'white', padding: '12px', border: 'none', borderRadius: '8px', cursor: 'pointer', opacity: isSubmitting ? 0.5 : 1 }}>{isSubmitting ? 'Đang xử lý...' : '✅ Chấp nhận'}</button>
-        <button onClick={() => onDecline(request.swapId)} disabled={isSubmitting} style={{ flex: 1, background: '#475569', color: '#e2e8f0', padding: '12px', border: 'none', borderRadius: '8px', cursor: 'pointer', opacity: isSubmitting ? 0.5 : 1 }}>{isSubmitting ? 'Đang xử lý...' : '❌ Từ chối'}</button>
+        <button onClick={() => onAccept(request.swapId)} disabled={isSubmitting} style={{ flex: 1, background: '#10b981', color: 'white', padding: '12px', border: 'none', borderRadius: '8px', cursor: 'pointer', opacity: isSubmitting ? 0.5 : 1 }}>{isSubmitting ? 'Đang xử lý...' : ' Chấp nhận'}</button>
+        <button onClick={() => onDecline(request.swapId)} disabled={isSubmitting} style={{ flex: 1, background: '#475569', color: '#e2e8f0', padding: '12px', border: 'none', borderRadius: '8px', cursor: 'pointer', opacity: isSubmitting ? 0.5 : 1 }}>{isSubmitting ? 'Đang xử lý...' : ' Từ chối'}</button>
       </div>
     </div>
   );

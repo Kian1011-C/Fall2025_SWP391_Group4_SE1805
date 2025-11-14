@@ -14,7 +14,7 @@ const StationsList = ({ stations, onSelect }) => {
         textAlign: 'center',
         border: '1px solid rgba(255, 255, 255, 0.1)'
       }}>
-        <div style={{ fontSize: '3rem', marginBottom: '15px' }}>🏪</div>
+        <div style={{ fontSize: '3rem', marginBottom: '15px' }}></div>
         <h3 style={{ color: '#FFFFFF', marginBottom: '10px' }}>
           Không tìm thấy trạm
         </h3>

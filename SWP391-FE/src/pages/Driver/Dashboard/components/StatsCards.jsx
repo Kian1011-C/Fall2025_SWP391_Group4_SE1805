@@ -4,7 +4,7 @@ import React from 'react';
 const StatsCards = ({ stats }) => {
   const statsConfig = [
     {
-      icon: '🔋',
+      icon: '',
       value: stats.totalSwaps,
       label: 'Tổng lượt đổi pin',
       color: 'rgba(25, 195, 125, 0.3)',
@@ -12,7 +12,7 @@ const StatsCards = ({ stats }) => {
       fontSize: '2rem'
     },
     {
-      icon: '🚗',
+      icon: '',
       value: stats.activeVehicles,
       label: 'Xe đang sử dụng',
       color: 'rgba(255, 165, 0, 0.3)',
@@ -20,7 +20,7 @@ const StatsCards = ({ stats }) => {
       fontSize: '2rem'
     },
     {
-      icon: '📏',
+      icon: '',
       value: `${stats.totalDistance.toLocaleString()} km`,
       label: 'Tổng quãng đường',
       color: 'rgba(34, 197, 94, 0.3)',

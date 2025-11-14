@@ -49,10 +49,10 @@ const BatteryDetailModal = ({ isOpen, onClose, battery }) => {
         {/* Header */}
         <div className="battery-detail-header">
           <div>
-            <h2>🔋 Chi tiết Pin BAT{battery.batteryId}</h2>
+            <h2> Chi tiết Pin BAT{battery.batteryId}</h2>
             <p className="battery-detail-model">{battery.model}</p>
           </div>
-          <button onClick={onClose} className="battery-detail-close">✕</button>
+          <button onClick={onClose} className="battery-detail-close"></button>
         </div>
 
         {isLoading ? (
@@ -65,7 +65,7 @@ const BatteryDetailModal = ({ isOpen, onClose, battery }) => {
             {/* Main Stats */}
             <div className="battery-detail-stats-grid">
               <div className="battery-detail-stat-card">
-                <div className="stat-icon">🔋</div>
+                <div className="stat-icon"></div>
                 <div className="stat-content">
                   <span className="stat-label">Dung lượng hiện tại</span>
                   <h3 className="stat-value" style={{ color: getHealthColor(battery.stateOfHealth) }}>
@@ -84,7 +84,7 @@ const BatteryDetailModal = ({ isOpen, onClose, battery }) => {
               </div>
 
               <div className="battery-detail-stat-card">
-                <div className="stat-icon">🔄</div>
+                <div className="stat-icon"></div>
                 <div className="stat-content">
                   <span className="stat-label">Chu kỳ sạc</span>
                   <h3 className="stat-value">{battery.cycleCount || 0}</h3>
@@ -98,7 +98,7 @@ const BatteryDetailModal = ({ isOpen, onClose, battery }) => {
               </div>
 
               <div className="battery-detail-stat-card">
-                <div className="stat-icon">⚡</div>
+                <div className="stat-icon"></div>
                 <div className="stat-content">
                   <span className="stat-label">Dung lượng tối đa</span>
                   <h3 className="stat-value">
@@ -112,7 +112,7 @@ const BatteryDetailModal = ({ isOpen, onClose, battery }) => {
               </div>
 
               <div className="battery-detail-stat-card">
-                <div className="stat-icon">📊</div>
+                <div className="stat-icon"></div>
                 <div className="stat-content">
                   <span className="stat-label">Trạng thái</span>
                   <h3 className="stat-value">
@@ -127,7 +127,7 @@ const BatteryDetailModal = ({ isOpen, onClose, battery }) => {
             {/* Charging History Data */}
             {chargingHistory && (
               <div className="battery-detail-section">
-                <h3 className="section-title">📈 Thông tin chu kỳ sạc</h3>
+                <h3 className="section-title"> Thông tin chu kỳ sạc</h3>
                 <div className="battery-detail-info-grid">
                   <div className="info-item">
                     <span className="info-label">Tổng chu kỳ sạc:</span>
@@ -190,18 +190,18 @@ const BatteryDetailModal = ({ isOpen, onClose, battery }) => {
 
             {/* Degradation Info */}
             <div className="battery-detail-section degradation-info">
-              <h3 className="section-title">📉 Thông tin độ chai pin</h3>
+              <h3 className="section-title"> Thông tin độ chai pin</h3>
               <p className="degradation-text">
-                🔬 <strong>Cơ chế độ chai:</strong> Mỗi chu kỳ sạc đầy (100%), pin giảm <strong>0.00667%</strong> dung lượng.
+                 <strong>Cơ chế độ chai:</strong> Mỗi chu kỳ sạc đầy (100%), pin giảm <strong>0.00667%</strong> dung lượng.
               </p>
               <p className="degradation-text">
-                📊 <strong>Ước tính:</strong> Sau khoảng <strong>3000 chu kỳ</strong>, pin còn ~80% dung lượng ban đầu.
+                 <strong>Ước tính:</strong> Sau khoảng <strong>3000 chu kỳ</strong>, pin còn ~80% dung lượng ban đầu.
               </p>
               <p className="degradation-text">
                 ⏰ <strong>Chu kỳ sạc:</strong> Được tính tự động mỗi khi pin đạt 100% SOH (State of Health).
               </p>
               <p className="degradation-text">
-                🔄 <strong>Hệ thống tự động:</strong> Service chạy mỗi 6 giây để cập nhật trạng thái sạc và tính toán độ chai.
+                 <strong>Hệ thống tự động:</strong> Service chạy mỗi 6 giây để cập nhật trạng thái sạc và tính toán độ chai.
               </p>
             </div>
           </div>

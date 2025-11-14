@@ -45,7 +45,7 @@ const VehicleCard = ({ vehicle, isSelected, onClick, contracts }) => {
             fontWeight: '600',
             marginBottom: '3px'
           }}>
-            {isSelected ? '⭐ ' : ''}{vehicle.model}
+            {isSelected ? ' ' : ''}{vehicle.model}
           </div>
           <div style={{ 
             color: '#19c37d', 
@@ -72,7 +72,7 @@ const VehicleCard = ({ vehicle, isSelected, onClick, contracts }) => {
         fontSize: '0.8rem',
         marginBottom: '8px'
       }}>
-        <span>📏 Quãng đường:</span>
+        <span> Quãng đường:</span>
         <span>{(vehicle.current_odometer || vehicle.currentOdometer || 0)?.toLocaleString()} km</span>
       </div>
       
@@ -89,7 +89,7 @@ const VehicleCard = ({ vehicle, isSelected, onClick, contracts }) => {
             marginBottom: '5px',
             fontWeight: '600'
           }}>
-            💎 Gói dịch vụ ({vehicleContracts.length})
+             Gói dịch vụ ({vehicleContracts.length})
           </div>
           {vehicleContracts.slice(0, 2).map((contract, contractIndex) => (
             <div key={contract.id || contractIndex} style={{
@@ -115,7 +115,7 @@ const VehicleCard = ({ vehicle, isSelected, onClick, contracts }) => {
                   fontSize: '0.6rem',
                   fontWeight: '600'
                 }}>
-                  {contract.status === 'active' ? '✅' : '⏳'}
+                  {contract.status === 'active' ? '' : '⏳'}
                 </span>
               </div>
               <div style={{ 

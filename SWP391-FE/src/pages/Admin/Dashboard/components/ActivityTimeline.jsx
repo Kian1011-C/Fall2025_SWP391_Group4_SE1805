@@ -6,7 +6,7 @@ import React from 'react';
 const ActivityTimeline = ({ stats }) => {
   const activities = [
     {
-      icon: '👤',
+      icon: '',
       type: 'user',
       title: 'Người dùng mới đăng ký',
       description: 'Nguyễn Văn A đã đăng ký tài khoản',
@@ -14,7 +14,7 @@ const ActivityTimeline = ({ stats }) => {
       color: '#3b82f6'
     },
     {
-      icon: '🔋',
+      icon: '',
       type: 'swap',
       title: 'Đổi pin thành công',
       description: 'Xe 29A-12345 đã đổi pin tại Trạm Cầu Giấy',
@@ -22,7 +22,7 @@ const ActivityTimeline = ({ stats }) => {
       color: '#10b981'
     },
     {
-      icon: '💳',
+      icon: '',
       type: 'payment',
       title: 'Thanh toán thành công',
       description: 'Giao dịch 2,500,000₫ từ Trần Thị B',
@@ -30,7 +30,7 @@ const ActivityTimeline = ({ stats }) => {
       color: '#f59e0b'
     },
     {
-      icon: '⚠️',
+      icon: '',
       type: 'alert',
       title: 'Cảnh báo bảo trì',
       description: 'Pin #125 cần kiểm tra định kỳ',
@@ -38,7 +38,7 @@ const ActivityTimeline = ({ stats }) => {
       color: '#ef4444'
     },
     {
-      icon: '🏢',
+      icon: '',
       type: 'station',
       title: 'Trạm mới kích hoạt',
       description: 'Trạm Thanh Xuân đã bắt đầu hoạt động',
@@ -46,7 +46,7 @@ const ActivityTimeline = ({ stats }) => {
       color: '#8b5cf6'
     },
     {
-      icon: '📊',
+      icon: '',
       type: 'report',
       title: 'Báo cáo đã tạo',
       description: 'Báo cáo doanh thu tháng 11/2025',
@@ -54,7 +54,7 @@ const ActivityTimeline = ({ stats }) => {
       color: '#06b6d4'
     },
     {
-      icon: '👥',
+      icon: '',
       type: 'user',
       title: 'Hợp đồng mới',
       description: 'Lê Văn C đã ký hợp đồng gói Premium',
@@ -62,7 +62,7 @@ const ActivityTimeline = ({ stats }) => {
       color: '#ec4899'
     },
     {
-      icon: '✅',
+      icon: '',
       type: 'system',
       title: 'Cập nhật hệ thống',
       description: 'Phiên bản 2.1.5 đã được cài đặt',

@@ -2,18 +2,18 @@
 import React, { useState, useEffect } from 'react';
 import '/src/assets/css/payment.css';
 import { useNavigate } from 'react-router-dom';
-// ❗️ Đảm bảo bạn import file CSS (nếu cần, ví dụ file CSS chung của dashboard)
+//  Đảm bảo bạn import file CSS (nếu cần, ví dụ file CSS chung của dashboard)
 // import './Payment.css'; // (Hoặc import file CSS của riêng bạn)
 
 // Import các component con
 import PaymentHistorySection from './components/PaymentHistorySection';
 
 // Import service và context
-import paymentService from '/src/assets/js/services/paymentService.js'; // ❗️ Đảm bảo đường dẫn này đúng
-import { useAuth } from '/src/context/AuthContext.jsx'; // 👈 Lấy AuthContext (để lấy userId)
+import paymentService from '/src/assets/js/services/paymentService.js'; //  Đảm bảo đường dẫn này đúng
+import { useAuth } from '/src/context/AuthContext.jsx'; //  Lấy AuthContext (để lấy userId)
 
 // ==========================================================
-// ✨ CÁC HÀM HELPER (Nên chuyển vào file utils) ✨
+//  CÁC HÀM HELPER (Nên chuyển vào file utils) 
 // ==========================================================
 const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -39,7 +39,7 @@ const formatCurrency = (amount) => {
 };
 
 const getStatusStyle = (status) => {
-    // ✅ Dựa trên các giá trị status từ Backend (PaymentController & PaymentDao)
+    //  Dựa trên các giá trị status từ Backend (PaymentController & PaymentDao)
     switch (status?.toLowerCase()) {
         case 'success':
         case 'completed':
@@ -56,7 +56,7 @@ const getStatusStyle = (status) => {
     }
 };
 // ==========================================================
-// ✨ KẾT THÚC HELPER ✨
+//  KẾT THÚC HELPER 
 // ==========================================================
 
 
@@ -67,20 +67,20 @@ const DriverPayments = () => {
 
     // State
     const [paymentHistory, setPaymentHistory] = useState([]);
-    const [pendingInvoices, setPendingInvoices] = useState([]); // ✅ Hóa đơn chưa thanh toán (in_progress)
+    const [pendingInvoices, setPendingInvoices] = useState([]); //  Hóa đơn chưa thanh toán (in_progress)
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     // Fetch dữ liệu khi component mount
     useEffect(() => {
-        console.log('🚀 [Driver Payments] Component mounted');
-        console.log('👤 [Driver Payments] Current User:', currentUser);
+        console.log(' [Driver Payments] Component mounted');
+        console.log(' [Driver Payments] Current User:', currentUser);
         
-        // ✅ Fix: Dùng currentUser.id hoặc currentUser.userId
+        //  Fix: Dùng currentUser.id hoặc currentUser.userId
         const userId = currentUser?.userId || currentUser?.id;
         
         if (!userId) {
-            console.error('❌ [Driver Payments] No userId found!');
+            console.error(' [Driver Payments] No userId found!');
             setLoading(false);
             setError("Vui lòng đăng nhập để xem lịch sử thanh toán.");
             return;
@@ -90,29 +90,29 @@ const DriverPayments = () => {
             setLoading(true);
             setError(null);
             try {
-                console.log('🔍 [Driver Payments] Fetching payments for userId:', userId);
+                console.log(' [Driver Payments] Fetching payments for userId:', userId);
                 
-                // ✅ Lấy danh sách thanh toán từ backend (đã có payment_url)
+                //  Lấy danh sách thanh toán từ backend (đã có payment_url)
                 const historyResult = await paymentService.getUserPayments(userId);
                 
-                console.log('📦 [Driver Payments] API Response:', historyResult);
+                console.log(' [Driver Payments] API Response:', historyResult);
                 
                 if (historyResult.success) {
                     const allPayments = historyResult.data || [];
                     
-                    console.log('✅ [Driver Payments] Total payments:', allPayments.length);
-                    console.log('📋 [Driver Payments] All payments:', allPayments);
+                    console.log(' [Driver Payments] Total payments:', allPayments.length);
+                    console.log(' [Driver Payments] All payments:', allPayments);
                     
-                    // ✅ Tách hóa đơn chưa thanh toán (in_progress) và lịch sử
+                    //  Tách hóa đơn chưa thanh toán (in_progress) và lịch sử
                     const pending = allPayments.filter(p => {
                         const isPending = p.status?.toLowerCase() === 'in_progress';
-                        console.log(`🔍 Payment ${p.paymentId}: status="${p.status}" → isPending=${isPending}`);
+                        console.log(` Payment ${p.paymentId}: status="${p.status}" → isPending=${isPending}`);
                         return isPending;
                     });
                     const history = allPayments.filter(p => p.status?.toLowerCase() !== 'in_progress');
                     
                     console.log('⏳ [Driver Payments] Pending invoices:', pending.length, pending);
-                    console.log('✔️ [Driver Payments] Completed payments:', history.length);
+                    console.log(' [Driver Payments] Completed payments:', history.length);
                     
                     setPendingInvoices(pending);
                     setPaymentHistory(history);
@@ -179,11 +179,11 @@ const DriverPayments = () => {
                         alignItems: 'center',
                         gap: '10px'
                     }}>
-                        💳 Hóa đơn cần thanh toán
+                         Hóa đơn cần thanh toán
                     </h3>
 
                     {pendingInvoices.length === 0 ? (
-                        // ✅ Hiển thị khi chưa có hóa đơn
+                        //  Hiển thị khi chưa có hóa đơn
                         <div style={{
                             padding: '40px 20px',
                             textAlign: 'center',
@@ -191,7 +191,7 @@ const DriverPayments = () => {
                             borderRadius: '12px',
                             border: '2px dashed rgba(255, 255, 255, 0.1)'
                         }}>
-                            <div style={{ fontSize: '64px', marginBottom: '16px' }}>📄</div>
+                            <div style={{ fontSize: '64px', marginBottom: '16px' }}></div>
                             <h4 style={{ 
                                 color: '#d1d5db', 
                                 fontSize: '1.125rem', 
@@ -209,7 +209,7 @@ const DriverPayments = () => {
                             </p>
                         </div>
                     ) : (
-                        // ✅ Hiển thị danh sách hóa đơn chưa thanh toán
+                        //  Hiển thị danh sách hóa đơn chưa thanh toán
                         <div style={{ display: 'grid', gap: '16px' }}>
                             {pendingInvoices.map((invoice) => (
                                 <div 
@@ -242,13 +242,13 @@ const DriverPayments = () => {
                                                 fontSize: '0.9rem',
                                                 marginBottom: '5px'
                                             }}>
-                                                🕒 Ngày tạo: {formatDate(invoice.createdAt)}
+                                                 Ngày tạo: {formatDate(invoice.createdAt)}
                                             </div>
                                             <div style={{ 
                                                 color: '#d1d5db',
                                                 fontSize: '0.85rem'
                                             }}>
-                                                📄 Mã GD: {invoice.transactionRef}
+                                                 Mã GD: {invoice.transactionRef}
                                             </div>
                                         </div>
                                         
@@ -290,7 +290,7 @@ const DriverPayments = () => {
                                                     e.currentTarget.style.boxShadow = '0 4px 15px rgba(59, 130, 246, 0.4)';
                                                 }}
                                             >
-                                                💳 Thanh toán ngay
+                                                 Thanh toán ngay
                                             </button>
                                         </div>
                                     </div>

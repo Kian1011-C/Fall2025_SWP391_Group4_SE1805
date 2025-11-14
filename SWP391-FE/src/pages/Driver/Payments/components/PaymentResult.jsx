@@ -147,7 +147,7 @@ const PaymentResult = () => {
               )}
               {isSuccess && (
                 <p style={{marginTop:'12px',fontSize:'14px',color:'#16a34a',background:'#f0fdf4',padding:'8px',borderRadius:'6px'}}>
-                  ✓ Thanh toán thành công! Cảm ơn bạn.
+                   Thanh toán thành công! Cảm ơn bạn.
                 </p>
               )}
             </div>

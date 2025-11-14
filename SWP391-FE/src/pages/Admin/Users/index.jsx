@@ -16,26 +16,26 @@ const AdminUsers = () => {
   const [editingUser, setEditingUser] = useState(null);
 
   const handleOpenCreateModal = () => {
-    console.log('🔵 AdminUsers: Mở modal tạo người dùng mới');
+    console.log(' AdminUsers: Mở modal tạo người dùng mới');
     setEditingUser(null); // Đảm bảo là tạo mới
     setIsModalOpen(true);
   };
 
   const handleOpenEditModal = (user) => {
-    console.log('🔵 AdminUsers: Mở modal sửa người dùng', user.userId);
+    console.log(' AdminUsers: Mở modal sửa người dùng', user.userId);
     setEditingUser(user); // Đặt user cần sửa
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
-    console.log('🔵 AdminUsers: Đóng modal');
+    console.log(' AdminUsers: Đóng modal');
     setIsModalOpen(false);
     setEditingUser(null);
   };
 
   // Hàm được gọi khi nhấn "Lưu" trên Modal
   const handleSave = async (formData, userId) => {
-    console.log('🔵 AdminUsers: handleSave called', { userId, formData });
+    console.log(' AdminUsers: handleSave called', { userId, formData });
     let response;
     if (userId) {
       // Đây là trường hợp Cập nhật (Update)
@@ -46,29 +46,29 @@ const AdminUsers = () => {
     }
     
     if (response.success) {
-      console.log('✅ Lưu thành công, đóng modal');
+      console.log(' Lưu thành công, đóng modal');
       handleCloseModal();
     } else {
-      console.error('❌ Lưu thất bại:', response.message);
+      console.error(' Lưu thất bại:', response.message);
       alert(response.message); // Hiển thị lỗi nếu có
     }
   };
 
   // Hàm xử lý xóa người dùng
   const handleDeleteUser = async (userId) => {
-    console.log('🔵 AdminUsers: handleDeleteUser called', userId);
+    console.log(' AdminUsers: handleDeleteUser called', userId);
     const confirmed = window.confirm(`Bạn có chắc chắn muốn xóa người dùng ${userId}?`);
     if (!confirmed) {
-      console.log('❌ Hủy xóa người dùng');
+      console.log(' Hủy xóa người dùng');
       return;
     }
 
     const response = await handleDelete(userId);
     if (response.success) {
-      console.log('✅ Xóa người dùng thành công');
+      console.log(' Xóa người dùng thành công');
       alert('Xóa người dùng thành công!');
     } else {
-      console.error('❌ Xóa người dùng thất bại:', response.message);
+      console.error(' Xóa người dùng thất bại:', response.message);
       alert(`Lỗi: ${response.message}`);
     }
   };

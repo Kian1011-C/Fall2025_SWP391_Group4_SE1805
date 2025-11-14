@@ -42,7 +42,7 @@ const SelectedVehicleDisplay = ({ selectedVehicle, contracts }) => {
             fontWeight: '600',
             marginBottom: '5px'
           }}>
-            ⭐ XE ĐANG CHỌN
+             XE ĐANG CHỌN
           </div>
           <div style={{ color: '#FFFFFF', fontSize: '1.3rem', fontWeight: '700' }}>
             {selectedVehicle.model}
@@ -56,11 +56,11 @@ const SelectedVehicleDisplay = ({ selectedVehicle, contracts }) => {
         </div>
         <div style={{ textAlign: 'right' }}>
           <div style={{ color: '#B0B0B0', fontSize: '0.9rem', marginBottom: '5px' }}>
-            📏 {odometer !== null ? `${odometer.toLocaleString()} km` : 'N/A'}
+             {odometer !== null ? `${odometer.toLocaleString()} km` : 'N/A'}
           </div>
           {selectedVehicleContracts.length > 0 && (
             <div style={{ color: '#B0B0B0', fontSize: '0.8rem' }}>
-              💎 {selectedVehicleContracts.length} gói dịch vụ
+               {selectedVehicleContracts.length} gói dịch vụ
             </div>
           )}
         </div>
@@ -72,14 +72,14 @@ const SelectedVehicleDisplay = ({ selectedVehicle, contracts }) => {
       }}>
         <button
           onClick={() => {
-            console.log('🔋 Navigating to SwapBattery with vehicle:', selectedVehicle);
+            console.log(' Navigating to SwapBattery with vehicle:', selectedVehicle);
             
             // LƯU selectedVehicle vào sessionStorage
             try {
               sessionStorage.setItem('selectedVehicle', JSON.stringify(selectedVehicle));
-              console.log('✅ Đã lưu selectedVehicle vào sessionStorage:', selectedVehicle);
+              console.log(' Đã lưu selectedVehicle vào sessionStorage:', selectedVehicle);
             } catch (err) {
-              console.error('❌ Lỗi khi lưu selectedVehicle:', err);
+              console.error(' Lỗi khi lưu selectedVehicle:', err);
             }
             
             navigate('/driver/swap-battery', { state: { selectedVehicle } });
@@ -98,7 +98,7 @@ const SelectedVehicleDisplay = ({ selectedVehicle, contracts }) => {
             gap: '8px'
           }}
         >
-          🔋 Đổi pin xe này
+           Đổi pin xe này
         </button>
         <button
           onClick={() => navigate('/driver/stations-map', { state: { selectedVehicle } })}
@@ -116,7 +116,7 @@ const SelectedVehicleDisplay = ({ selectedVehicle, contracts }) => {
             gap: '8px'
           }}
         >
-          🗺️ Tìm trạm
+           Tìm trạm
         </button>
       </div>
     </div>

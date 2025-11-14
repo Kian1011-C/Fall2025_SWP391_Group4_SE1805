@@ -23,7 +23,7 @@ const SelectVehicleModal = ({ vehicles = [], onSelect, vehicleBatteryInfo = {} }
       >
         <div className="modal-header" style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', padding: '16px 20px' }}>
           <h2 className="modal-title" style={{ color: '#FFFFFF', fontSize: 24, fontWeight: 800 }}>
-            🚗 Chọn phương tiện để tiếp tục
+             Chọn phương tiện để tiếp tục
           </h2>
         </div>
         <div style={{ display: 'grid', gap: '16px', padding: '16px 20px' }}>

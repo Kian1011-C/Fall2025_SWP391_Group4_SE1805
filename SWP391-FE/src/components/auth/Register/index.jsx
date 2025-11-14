@@ -20,7 +20,7 @@ const RegisterPage = () => {
 
   // Debug: Log when component mounts
   React.useEffect(() => {
-    console.log('📝 RegisterPage: Component mounted successfully');
+    console.log(' RegisterPage: Component mounted successfully');
   }, []);
 
   const handleInputChange = (e) => {
@@ -106,7 +106,7 @@ const RegisterPage = () => {
 
     setIsLoading(true);
     try {
-      console.log('🚀 RegisterPage: Submitting registration form', formData);
+      console.log(' RegisterPage: Submitting registration form', formData);
       
       const response = await authService.register({
         firstName: formData.firstName.trim(),
@@ -117,14 +117,14 @@ const RegisterPage = () => {
         cccd: formData.cccd.trim()
       });
 
-      console.log('📧 RegisterPage: Registration response:', response);
+      console.log(' RegisterPage: Registration response:', response);
 
       if (response.success) {
         showToast(response.message || 'Đăng ký thành công! Vui lòng kiểm tra email để nhập OTP.', 'success');
         
         // Use redirect field from API response
         const redirectPath = response.redirect || '/verify-otp';
-        console.log('🎯 RegisterPage: Redirecting to:', redirectPath);
+        console.log(' RegisterPage: Redirecting to:', redirectPath);
         
         // Navigate to OTP verification page
         navigate(redirectPath, { 
@@ -138,7 +138,7 @@ const RegisterPage = () => {
         showToast(response.message || 'Đăng ký thất bại!', 'error');
       }
     } catch (error) {
-      console.error('❌ RegisterPage: Registration error:', error);
+      console.error(' RegisterPage: Registration error:', error);
       showToast('Có lỗi xảy ra khi đăng ký!', 'error');
     } finally {
       setIsLoading(false);
@@ -155,7 +155,7 @@ const RegisterPage = () => {
         {/* Header */}
         <div className="register-header">
           <h2 className="register-title">
-            📝 Đăng ký tài khoản
+             Đăng ký tài khoản
           </h2>
           <button
             onClick={handleBackToLogin}
@@ -169,7 +169,7 @@ const RegisterPage = () => {
         {/* Info Box */}
         <div className="register-info">
           <h4 className="register-info-title">
-            📋 Thông tin cần thiết
+             Thông tin cần thiết
           </h4>
           <div className="register-info-content">
             <div>• Tất cả thông tin đều bắt buộc</div>
@@ -214,7 +214,7 @@ const RegisterPage = () => {
                   fontSize: '12px',
                   marginTop: '4px'
                 }}>
-                  ⚠️ {errors.firstName}
+                   {errors.firstName}
                 </div>
               )}
             </div>
@@ -251,7 +251,7 @@ const RegisterPage = () => {
                   fontSize: '12px',
                   marginTop: '4px'
                 }}>
-                  ⚠️ {errors.lastName}
+                   {errors.lastName}
                 </div>
               )}
             </div>
@@ -291,7 +291,7 @@ const RegisterPage = () => {
                 fontSize: '12px',
                 marginTop: '4px'
               }}>
-                ⚠️ {errors.email}
+                 {errors.email}
               </div>
             )}
           </div>
@@ -330,7 +330,7 @@ const RegisterPage = () => {
                 fontSize: '12px',
                 marginTop: '4px'
               }}>
-                ⚠️ {errors.phone}
+                 {errors.phone}
               </div>
             )}
           </div>
@@ -370,7 +370,7 @@ const RegisterPage = () => {
                   fontSize: '12px',
                   marginTop: '4px'
                 }}>
-                  ⚠️ {errors.password}
+                   {errors.password}
                 </div>
               )}
             </div>
@@ -407,7 +407,7 @@ const RegisterPage = () => {
                   fontSize: '12px',
                   marginTop: '4px'
                 }}>
-                  ⚠️ {errors.confirmPassword}
+                   {errors.confirmPassword}
                 </div>
               )}
             </div>
@@ -447,7 +447,7 @@ const RegisterPage = () => {
                 fontSize: '12px',
                 marginTop: '4px'
               }}>
-                ⚠️ {errors.cccd}
+                 {errors.cccd}
               </div>
             )}
           </div>
@@ -474,7 +474,7 @@ const RegisterPage = () => {
                 </>
               ) : (
                 <>
-                  <span style={{ marginRight: 8 }}>🚀</span>
+                  <span style={{ marginRight: 8 }}></span>
                   Đăng ký
                 </>
               )}

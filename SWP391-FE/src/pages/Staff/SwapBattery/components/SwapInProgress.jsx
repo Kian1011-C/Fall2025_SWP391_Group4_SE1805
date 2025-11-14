@@ -5,7 +5,7 @@ const SwapInProgress = ({ swapDetails, isSubmitting, onConfirmSwap, onCancel }) 
 
     return (
         <div style={styles.container}>
-            <div style={styles.badge}>✅ GIAO DỊCH #{swapDetails.swapId || swapDetails.id}</div>
+            <div style={styles.badge}> GIAO DỊCH #{swapDetails.swapId || swapDetails.id}</div>
             <h2 style={styles.title}>Khởi tạo đổi pin thành công!</h2>
             <p style={styles.text}>Pin mới đã được chọn từ kho (trạng thái IN_STOCK):</p>
             <div style={styles.infoBox}>

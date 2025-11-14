@@ -15,7 +15,7 @@ const IssueReportGrid = ({ onIssueClick }) => {
       border: '1px solid rgba(255, 255, 255, 0.1)'
     }}>
       <h3 style={{ color: '#FFFFFF', marginBottom: '25px', fontSize: '1.3rem' }}>
-        🐛 Báo cáo vấn đề
+         Báo cáo vấn đề
       </h3>
       <div style={{ display: 'grid', gap: '15px' }}>
         {issueTypes.map((issue, index) => (

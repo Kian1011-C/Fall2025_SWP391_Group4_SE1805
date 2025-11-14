@@ -4,7 +4,7 @@ import { apiUtils } from '../config/api.js';
 
 const staffSwapService = {
     /**
-     * 🎯 STAFF - Tạo giao dịch đổi pin thủ công
+     *  STAFF - Tạo giao dịch đổi pin thủ công
      * Endpoint: POST /api/swaps
      * 
      * Staff nhập đầy đủ thông tin:
@@ -17,7 +17,7 @@ const staffSwapService = {
      * - stationId: Trạm đổi pin (mặc định = 1)
      * - swapStatus: "INITIATED"
      * 
-     * ⚠️ LƯU Ý:
+     *  LƯU Ý:
      * - KHÔNG cần towerId/slotId vì lấy pin từ kho (không qua tower)
      * - Pin mới PHẢI có status = 'in_stock'
      * - Backend sẽ tự động validate và tạo swap record
@@ -25,7 +25,7 @@ const staffSwapService = {
     createManualSwap: async (swapData) => {
         try {
             console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-            console.log("📤 [STAFF] GỌI API TẠO MANUAL SWAP (POST /api/swaps)");
+            console.log(" [STAFF] GỌI API TẠO MANUAL SWAP (POST /api/swaps)");
             console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
             console.log("Input data từ form:", swapData);
 
@@ -34,7 +34,7 @@ const staffSwapService = {
             const missingFields = requiredFields.filter(field => !swapData[field]);
             
             if (missingFields.length > 0) {
-                const errorMsg = `❌ Thiếu dữ liệu bắt buộc: ${missingFields.join(', ')}`;
+                const errorMsg = ` Thiếu dữ liệu bắt buộc: ${missingFields.join(', ')}`;
                 console.error(errorMsg);
                 throw new Error(errorMsg);
             }
@@ -78,19 +78,19 @@ const staffSwapService = {
             const response = await apiUtils.post('/api/swaps', requestBody);
 
             console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-            console.log("📥 [STAFF] NHẬN RESPONSE TỪ POST /api/swaps");
+            console.log(" [STAFF] NHẬN RESPONSE TỪ POST /api/swaps");
             console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
             console.log("Response:", JSON.stringify(response, null, 2));
 
             // Xử lý lỗi nếu backend trả về success: false
             if (response?.success === false) {
-                console.error("❌ LỖI TỪ BACKEND:", response?.message);
+                console.error(" LỖI TỪ BACKEND:", response?.message);
                 throw new Error(response?.message || "Backend không thể tạo swap");
             }
 
             // Validate response structure
             if (!response?.success || !response?.data) {
-                console.error("❌ LỖI: Response không hợp lệ:", response);
+                console.error(" LỖI: Response không hợp lệ:", response);
                 throw new Error("Backend không trả về dữ liệu hợp lệ");
             }
 
@@ -113,7 +113,7 @@ const staffSwapService = {
             };
 
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.log('✅ [STAFF] TẠO SWAP THÀNH CÔNG:');
+            console.log(' [STAFF] TẠO SWAP THÀNH CÔNG:');
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             console.log('  ├─ swapId:', normalizedData.swapId, '(QUAN TRỌNG - LƯU VÀO CONTEXT)');
             console.log('  ├─ userId:', normalizedData.userId);
@@ -127,7 +127,7 @@ const staffSwapService = {
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
             if (!normalizedData.swapId) {
-                console.error('❌ KHÔNG TÌM THẤY swapId trong response!');
+                console.error(' KHÔNG TÌM THẤY swapId trong response!');
                 console.error('Full response:', response);
                 throw new Error('Backend không trả về swapId. Kiểm tra API response.');
             }
@@ -136,7 +136,7 @@ const staffSwapService = {
 
         } catch (error) {
             console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.error('❌ [STAFF] LỖI KHI TẠO MANUAL SWAP:');
+            console.error(' [STAFF] LỖI KHI TẠO MANUAL SWAP:');
             console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             console.error('Error message:', error.message);
             console.error('Error stack:', error.stack);
@@ -146,7 +146,7 @@ const staffSwapService = {
     },
 
     /**
-     * 🎯 STAFF - Xác nhận hoàn thành đổi pin thủ công
+     *  STAFF - Xác nhận hoàn thành đổi pin thủ công
      * Endpoint: POST /api/swaps/{swapId}/confirm
      * 
      * Staff gọi API này sau khi đổi pin xong để:
@@ -159,38 +159,38 @@ const staffSwapService = {
     completeSwap: async (swapId) => {
         try {
             console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-            console.log(`📤 [STAFF] GỌI API HOÀN THÀNH SWAP (POST /api/swaps/${swapId}/confirm)`);
+            console.log(` [STAFF] GỌI API HOÀN THÀNH SWAP (POST /api/swaps/${swapId}/confirm)`);
             console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
             console.log("swapId:", swapId);
 
             if (!swapId) {
-                throw new Error("❌ Thiếu swapId để hoàn thành swap");
+                throw new Error(" Thiếu swapId để hoàn thành swap");
             }
 
-            // ✅ ĐÚNG endpoint: /confirm (không phải /complete)
+            //  ĐÚNG endpoint: /confirm (không phải /complete)
             const response = await apiUtils.post(`/api/swaps/${swapId}/confirm`);
 
             console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-            console.log("📥 [STAFF] NHẬN RESPONSE TỪ COMPLETE SWAP");
+            console.log(" [STAFF] NHẬN RESPONSE TỪ COMPLETE SWAP");
             console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
             console.log("Response:", JSON.stringify(response, null, 2));
 
             if (response?.success === false) {
-                console.error("❌ LỖI TỪ BACKEND:", response?.message);
+                console.error(" LỖI TỪ BACKEND:", response?.message);
                 throw new Error(response?.message || "Backend không thể hoàn thành swap");
             }
 
-            console.log("✅ [STAFF] HOÀN THÀNH SWAP THÀNH CÔNG");
+            console.log(" [STAFF] HOÀN THÀNH SWAP THÀNH CÔNG");
             return response;
 
         } catch (error) {
-            console.error('❌ [STAFF] LỖI KHI HOÀN THÀNH SWAP:', error);
+            console.error(' [STAFF] LỖI KHI HOÀN THÀNH SWAP:', error);
             throw error;
         }
     },
 
     /**
-     * 🎯 STAFF - Hủy giao dịch đổi pin
+     *  STAFF - Hủy giao dịch đổi pin
      * Endpoint: PUT /api/swaps/{swapId}/cancel
      * 
      * Staff gọi API này nếu cần hủy giao dịch:
@@ -200,50 +200,50 @@ const staffSwapService = {
     cancelSwap: async (swapId) => {
         try {
             console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-            console.log(`📤 [STAFF] GỌI API HỦY SWAP (PUT /api/swaps/${swapId}/cancel)`);
+            console.log(` [STAFF] GỌI API HỦY SWAP (PUT /api/swaps/${swapId}/cancel)`);
             console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
             console.log("swapId:", swapId);
 
             if (!swapId) {
-                throw new Error("❌ Thiếu swapId để hủy swap");
+                throw new Error(" Thiếu swapId để hủy swap");
             }
 
             const response = await apiUtils.put(`/api/swaps/${swapId}/cancel`);
 
             console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-            console.log("📥 [STAFF] NHẬN RESPONSE TỪ CANCEL SWAP");
+            console.log(" [STAFF] NHẬN RESPONSE TỪ CANCEL SWAP");
             console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
             console.log("Response:", JSON.stringify(response, null, 2));
 
             if (response?.success === false) {
-                console.error("❌ LỖI TỪ BACKEND:", response?.message);
+                console.error(" LỖI TỪ BACKEND:", response?.message);
                 throw new Error(response?.message || "Backend không thể hủy swap");
             }
 
-            console.log("✅ [STAFF] HỦY SWAP THÀNH CÔNG");
+            console.log(" [STAFF] HỦY SWAP THÀNH CÔNG");
             return response;
 
         } catch (error) {
-            console.error('❌ [STAFF] LỖI KHI HỦY SWAP:', error);
+            console.error(' [STAFF] LỖI KHI HỦY SWAP:', error);
             throw error;
         }
     },
 
     /**
-     * 🎯 STAFF - Lấy thông tin chi tiết 1 giao dịch swap
+     *  STAFF - Lấy thông tin chi tiết 1 giao dịch swap
      * Endpoint: GET /api/swaps/{swapId}
      */
     getSwapDetails: async (swapId) => {
         try {
-            console.log(`📤 [STAFF] GỌI API LẤY CHI TIẾT SWAP (GET /api/swaps/${swapId})`);
+            console.log(` [STAFF] GỌI API LẤY CHI TIẾT SWAP (GET /api/swaps/${swapId})`);
             
             if (!swapId) {
-                throw new Error("❌ Thiếu swapId");
+                throw new Error(" Thiếu swapId");
             }
 
             const response = await apiUtils.get(`/api/swaps/${swapId}`);
 
-            console.log("📥 [STAFF] NHẬN RESPONSE:", response);
+            console.log(" [STAFF] NHẬN RESPONSE:", response);
 
             if (response?.success === false || !response?.data) {
                 throw new Error(response?.message || "Không tìm thấy thông tin swap");
@@ -252,20 +252,20 @@ const staffSwapService = {
             return response.data;
 
         } catch (error) {
-            console.error('❌ [STAFF] LỖI KHI LẤY CHI TIẾT SWAP:', error);
+            console.error(' [STAFF] LỖI KHI LẤY CHI TIẾT SWAP:', error);
             throw error;
         }
     },
 
     /**
-     * 🎯 STAFF - Lấy danh sách tất cả giao dịch swap
+     *  STAFF - Lấy danh sách tất cả giao dịch swap
      * Endpoint: GET /api/swaps
      * 
      * Có thể filter theo: status, userId, staffId, stationId, ...
      */
     getAllSwaps: async (filters = {}) => {
         try {
-            console.log("📤 [STAFF] GỌI API LẤY DANH SÁCH SWAP (GET /api/swaps)");
+            console.log(" [STAFF] GỌI API LẤY DANH SÁCH SWAP (GET /api/swaps)");
             console.log("Filters:", filters);
 
             // Build query params từ filters
@@ -282,7 +282,7 @@ const staffSwapService = {
 
             const response = await apiUtils.get(endpoint);
 
-            console.log("📥 [STAFF] NHẬN RESPONSE:", response);
+            console.log(" [STAFF] NHẬN RESPONSE:", response);
 
             if (response?.success === false) {
                 throw new Error(response?.message || "Không thể lấy danh sách swap");
@@ -291,7 +291,7 @@ const staffSwapService = {
             return response?.data || [];
 
         } catch (error) {
-            console.error('❌ [STAFF] LỖI KHI LẤY DANH SÁCH SWAP:', error);
+            console.error(' [STAFF] LỖI KHI LẤY DANH SÁCH SWAP:', error);
             throw error;
         }
     }

@@ -98,7 +98,7 @@ const VehiclesContainer = () => {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              console.log('🔵 Button clicked - opening modal');
+              console.log(' Button clicked - opening modal');
               openAddModal();
             }}
             style={{ cursor: 'pointer', zIndex: 10 }}

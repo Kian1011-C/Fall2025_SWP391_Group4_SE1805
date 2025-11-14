@@ -6,25 +6,25 @@ import PropTypes from 'prop-types';
 const StationsStats = ({ stats }) => {
   const statsCards = [
     {
-      icon: '🏪',
+      icon: '',
       label: 'Tổng số trạm',
       value: stats.total,
       color: '#9c88ff'
     },
     {
-      icon: '✅',
+      icon: '',
       label: 'Đang hoạt động',
       value: stats.active,
       color: '#19c37d'
     },
     {
-      icon: '🔌',
+      icon: '',
       label: 'Slot khả dụng',
       value: stats.availableSlots,
       color: '#6ab7ff'
     },
     {
-      icon: '📊',
+      icon: '',
       label: 'Tỷ lệ sử dụng',
       value: `${stats.occupancyRate}%`,
       color: '#ffa500'

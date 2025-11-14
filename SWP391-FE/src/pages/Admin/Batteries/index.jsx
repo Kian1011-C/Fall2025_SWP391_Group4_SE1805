@@ -33,72 +33,72 @@ const AdminBatteries = () => {
   }, [batteries]);
 
   const handleOpenCreateModal = () => {
-    console.log('🟢 AdminBatteries: Opening CREATE modal');
+    console.log(' AdminBatteries: Opening CREATE modal');
     setEditingBattery(null);
     setIsModalOpen(true);
   };
 
   const handleOpenEditModal = (battery) => {
-    console.log('🟢 AdminBatteries: Opening EDIT modal for battery:', battery);
+    console.log(' AdminBatteries: Opening EDIT modal for battery:', battery);
     setEditingBattery(battery);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
-    console.log('🟢 AdminBatteries: Closing modal');
+    console.log(' AdminBatteries: Closing modal');
     setIsModalOpen(false);
     setEditingBattery(null);
   };
 
   const handleViewDetail = (battery) => {
-    console.log('🟢 AdminBatteries: Opening detail modal for battery:', battery);
+    console.log(' AdminBatteries: Opening detail modal for battery:', battery);
     setSelectedBattery(battery);
     setIsDetailModalOpen(true);
   };
 
   const handleCloseDetailModal = () => {
-    console.log('🟢 AdminBatteries: Closing detail modal');
+    console.log(' AdminBatteries: Closing detail modal');
     setIsDetailModalOpen(false);
     setSelectedBattery(null);
   };
 
   const handleSave = async (formData, batteryId) => {
-    console.log('🟢 AdminBatteries: handleSave called');
+    console.log(' AdminBatteries: handleSave called');
     console.log('  ├─ batteryId:', batteryId);
     console.log('  └─ formData:', formData);
     
     let response;
     if (batteryId) {
-      console.log('🔄 Calling handleUpdate...');
+      console.log(' Calling handleUpdate...');
       response = await handleUpdate(batteryId, formData);
     } else {
-      console.log('➕ Calling handleCreate...');
+      console.log(' Calling handleCreate...');
       response = await handleCreate(formData);
     }
     
-    console.log('📬 Response:', response);
+    console.log(' Response:', response);
     
     if (response.success) {
       handleCloseModal();
-      alert('✅ ' + response.message);
+      alert(' ' + response.message);
     } else {
-      alert('❌ Lỗi: ' + response.message);
+      alert(' Lỗi: ' + response.message);
       console.error("Lỗi khi lưu:", response.message);
     }
   };
 
   const handleDeleteBattery = async (battery) => {
     const confirmed = window.confirm(
-      `⚠️ Bạn có chắc chắn muốn xóa pin BAT${battery.batteryId} (${battery.model})?\n\nHành động này không thể hoàn tác!`
+      ` Bạn có chắc chắn muốn xóa pin BAT${battery.batteryId} (${battery.model})?\n\nHành động này không thể hoàn tác!`
     );
     
     if (!confirmed) return;
 
     const response = await handleDelete(battery.batteryId);
     if (response.success) {
-      alert('✅ ' + response.message);
+      alert(' ' + response.message);
     } else {
-      alert('❌ Lỗi: ' + response.message);
+      alert(' Lỗi: ' + response.message);
       console.error("Lỗi khi xóa:", response.message);
     }
 };
@@ -129,11 +129,11 @@ if (isLoading) {
     return (
       <div className="admin-battery-container">
         <div className="admin-battery-error">
-          <div className="admin-battery-error-icon">⚠️</div>
+          <div className="admin-battery-error-icon"></div>
           <h3 className="admin-battery-error-title">Lỗi tải dữ liệu</h3>
           <p className="admin-battery-error-message">{error}</p>
           <button onClick={refetch} className="admin-battery-error-btn">
-            🔄 Thử lại
+             Thử lại
           </button>
         </div>
       </div>
@@ -146,16 +146,16 @@ if (isLoading) {
       <div className="admin-battery-container">
         <div className="admin-battery-header">
           <div className="admin-battery-header-content">
-            <h1>⚡ Quản lý Pin</h1>
+            <h1> Quản lý Pin</h1>
             <p>Thêm, sửa và theo dõi tất cả các viên pin trong hệ thống</p>
           </div>
           <button onClick={handleOpenCreateModal} className="admin-battery-add-btn">
-            <span>➕</span> Thêm Pin Mới
+            <span></span> Thêm Pin Mới
           </button>
         </div>
         
         <div className="admin-battery-empty">
-          <div className="admin-battery-empty-icon">🔋</div>
+          <div className="admin-battery-empty-icon"></div>
           <h3 className="admin-battery-empty-title">Chưa có pin nào</h3>
           <p className="admin-battery-empty-message">
             Hãy thêm pin đầu tiên vào hệ thống bằng cách nhấn nút "Thêm Pin Mới"
@@ -177,18 +177,18 @@ if (isLoading) {
       {/* Header */}
       <div className="admin-battery-header">
         <div className="admin-battery-header-content">
-          <h1>⚡ Quản lý Pin</h1>
+          <h1> Quản lý Pin</h1>
           <p>Thêm, sửa và theo dõi tất cả các viên pin trong hệ thống</p>
         </div>
         <button onClick={handleOpenCreateModal} className="admin-battery-add-btn">
-          <span>➕</span> Thêm Pin Mới
+          <span></span> Thêm Pin Mới
         </button>
       </div>
 
       {/* Stats Dashboard */}
       <div className="admin-battery-stats">
         <div className="admin-battery-stat-card">
-          <div className="admin-battery-stat-icon">🔋</div>
+          <div className="admin-battery-stat-icon"></div>
           <div className="admin-battery-stat-content">
             <span className="admin-battery-stat-label">Tổng số pin</span>
             <h2 className="admin-battery-stat-value">{stats.total}</h2>
@@ -196,7 +196,7 @@ if (isLoading) {
         </div>
 
         <div className="admin-battery-stat-card">
-          <div className="admin-battery-stat-icon">✅</div>
+          <div className="admin-battery-stat-icon"></div>
           <div className="admin-battery-stat-content">
             <span className="admin-battery-stat-label">Sẵn sàng</span>
             <h2 className="admin-battery-stat-value">{stats.available}</h2>
@@ -204,7 +204,7 @@ if (isLoading) {
         </div>
 
         <div className="admin-battery-stat-card">
-          <div className="admin-battery-stat-icon">📦</div>
+          <div className="admin-battery-stat-icon"></div>
           <div className="admin-battery-stat-content">
             <span className="admin-battery-stat-label">Trong kho</span>
             <h2 className="admin-battery-stat-value">{stats.inStock}</h2>
@@ -212,7 +212,7 @@ if (isLoading) {
         </div>
 
         <div className="admin-battery-stat-card">
-          <div className="admin-battery-stat-icon">⚡</div>
+          <div className="admin-battery-stat-icon"></div>
           <div className="admin-battery-stat-content">
             <span className="admin-battery-stat-label">Đang sạc</span>
             <h2 className="admin-battery-stat-value">{stats.charging}</h2>
@@ -220,7 +220,7 @@ if (isLoading) {
         </div>
 
         <div className="admin-battery-stat-card">
-          <div className="admin-battery-stat-icon">🔧</div>
+          <div className="admin-battery-stat-icon"></div>
           <div className="admin-battery-stat-content">
             <span className="admin-battery-stat-label">Bảo trì</span>
             <h2 className="admin-battery-stat-value">{stats.maintenance}</h2>
@@ -228,7 +228,7 @@ if (isLoading) {
         </div>
 
         <div className="admin-battery-stat-card">
-          <div className="admin-battery-stat-icon">🚗</div>
+          <div className="admin-battery-stat-icon"></div>
           <div className="admin-battery-stat-content">
             <span className="admin-battery-stat-label">Đang sử dụng</span>
             <h2 className="admin-battery-stat-value">{stats.inUse}</h2>
@@ -241,7 +241,7 @@ if (isLoading) {
         <div className="admin-battery-filter-row">
           <input 
             type="text" 
-            placeholder="🔍 Tìm theo Mã pin hoặc Mẫu pin..." 
+            placeholder=" Tìm theo Mã pin hoặc Mẫu pin..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="admin-battery-search"
@@ -252,16 +252,16 @@ if (isLoading) {
             onChange={(e) => setFilterStatus(e.target.value)}
             className="admin-battery-filter-select"
           >
-            <option value="">📊 Tất cả trạng thái</option>
-            <option value="available">✅ Sẵn sàng</option>
-            <option value="in_stock">✅ Trong kho</option>
-            <option value="charging">⚡ Đang sạc</option>
-            <option value="faulty">🔧 Bảo trì</option>
-            <option value="in_use">🚗 Đang sử dụng</option>
+            <option value=""> Tất cả trạng thái</option>
+            <option value="available"> Sẵn sàng</option>
+            <option value="in_stock"> Trong kho</option>
+            <option value="charging"> Đang sạc</option>
+            <option value="faulty"> Bảo trì</option>
+            <option value="in_use"> Đang sử dụng</option>
           </select>
 
           <button onClick={refetch} className="admin-battery-refresh-btn">
-            <span>🔄</span> Làm mới
+            <span></span> Làm mới
           </button>
         </div>
       </div>

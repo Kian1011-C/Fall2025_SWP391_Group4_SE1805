@@ -23,7 +23,7 @@ const iconStyle = {
 const ErrorDisplay = ({ error }) => {
   return (
     <div style={errorStyle}>
-      <div style={iconStyle}>⚠️</div>
+      <div style={iconStyle}></div>
       <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: '#f87171' }}>
         Đã xảy ra lỗi
       </h4>

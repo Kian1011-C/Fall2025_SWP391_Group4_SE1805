@@ -15,7 +15,7 @@ export const useProfileUpdate = (onSuccess) => {
       await new Promise(resolve => setTimeout(resolve, 500));
       
       console.log('Profile update:', { userId, formData });
-      alert('⚠️ Backend cần implement API PUT /api/users/:id để cập nhật profile');
+      alert(' Backend cần implement API PUT /api/users/:id để cập nhật profile');
       
       if (onSuccess) {
         onSuccess(formData);

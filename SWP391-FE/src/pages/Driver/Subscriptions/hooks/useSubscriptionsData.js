@@ -18,7 +18,7 @@ export const useSubscriptionsData = (currentUser) => {
       setLoading(true);
       setError(null);
       
-      console.log('🔄 Fetching subscription data for user:', currentUser?.email);
+      console.log(' Fetching subscription data for user:', currentUser?.email);
       
       if (!currentUser) {
         setError('Không thể tải thông tin người dùng. Vui lòng đăng nhập lại.');
@@ -28,23 +28,23 @@ export const useSubscriptionsData = (currentUser) => {
       const userId = validateUser(currentUser);
 
       // Get available contract plans from API
-      console.log('📝 Fetching available contract plans...');
+      console.log(' Fetching available contract plans...');
       try {
         const plansResult = await contractService.getContractPlans();
-        console.log('📝 Plans API response:', plansResult);
+        console.log(' Plans API response:', plansResult);
         if (plansResult.success && plansResult.data) {
           setPlans(plansResult.data || []);
         } else {
-          console.warn('⚠️ No plans found from API');
+          console.warn(' No plans found from API');
           setPlans([]);
         }
       } catch (planError) {
-        console.warn('⚠️ Plans API failed:', planError);
+        console.warn(' Plans API failed:', planError);
         setPlans([]);
       }
 
       // Get current user contracts via dedicated API
-      console.log('📋 Fetching user contracts for userId:', userId);
+      console.log(' Fetching user contracts for userId:', userId);
       const contractsResponse = await contractService.getUserContracts(userId);
       if (contractsResponse.success && contractsResponse.data) {
         const userContracts = contractsResponse.data;
@@ -67,7 +67,7 @@ export const useSubscriptionsData = (currentUser) => {
       } catch {}
 
     } catch (err) {
-      console.error('❌ Error fetching subscription data:', err);
+      console.error(' Error fetching subscription data:', err);
       setError('Lỗi khi tải dữ liệu gói dịch vụ: ' + err.message);
       setPlans([]);
       setUserContracts([]);

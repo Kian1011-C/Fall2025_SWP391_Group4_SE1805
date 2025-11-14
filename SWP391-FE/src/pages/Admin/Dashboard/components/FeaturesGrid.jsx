@@ -21,7 +21,7 @@ export const FeaturesGrid = ({ features, onFeatureClick }) => {
         gap: '10px',
         fontSize: '1.3rem'
       }}>
-        ⚡ Chức năng quản trị
+         Chức năng quản trị
       </h3>
       <div style={{ 
         display: 'grid', 

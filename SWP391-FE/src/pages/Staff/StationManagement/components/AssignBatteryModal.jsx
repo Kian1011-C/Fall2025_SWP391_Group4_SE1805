@@ -29,8 +29,8 @@ const AssignBatteryModal = ({ isOpen, onClose, onSave, slots, towerName, station
       // Lấy TẤT CẢ pin để kiểm tra
       const response = await batteryService.getAllBatteries();
       
-      console.log('🔍 All batteries response:', response);
-      console.log('🔍 Battery data:', response.data);
+      console.log(' All batteries response:', response);
+      console.log(' Battery data:', response.data);
       
       if (response.success && Array.isArray(response.data)) {
         // Log ra status của từng pin để debug
@@ -46,7 +46,7 @@ const AssignBatteryModal = ({ isOpen, onClose, onSave, slots, towerName, station
                  status === 'trong kho';
         });
         
-        console.log('🔍 Filtered warehouse batteries:', warehouseBatteries);
+        console.log(' Filtered warehouse batteries:', warehouseBatteries);
         setAvailableBatteries(warehouseBatteries);
       } else {
         throw new Error(response.message || 'Không thể tải danh sách pin');
@@ -91,7 +91,7 @@ const AssignBatteryModal = ({ isOpen, onClose, onSave, slots, towerName, station
       <div className="subscription-modal" style={{ maxWidth: '600px' }} onClick={e => e.stopPropagation()}>
         <form onSubmit={handleSubmit}>
           <div className="subscription-modal-header">
-            <h2>🔋 Thêm Pin vào Hộc</h2>
+            <h2> Thêm Pin vào Hộc</h2>
             <p style={{ margin: '8px 0 0 0', fontSize: '14px', color: '#94a3b8' }}>
               {stationName} - {towerName}
             </p>
@@ -109,7 +109,7 @@ const AssignBatteryModal = ({ isOpen, onClose, onSave, slots, towerName, station
                   borderRadius: '8px',
                   color: '#fca5a5'
                 }}>
-                  ⚠️ Không có hộc trống trong trụ này
+                   Không có hộc trống trong trụ này
                 </div>
               ) : (
                 <select
@@ -143,7 +143,7 @@ const AssignBatteryModal = ({ isOpen, onClose, onSave, slots, towerName, station
                   borderRadius: '8px',
                   color: '#fca5a5'
                 }}>
-                  ⚠️ {error}
+                   {error}
                   <button 
                     type="button"
                     onClick={fetchAvailableBatteries}
@@ -157,7 +157,7 @@ const AssignBatteryModal = ({ isOpen, onClose, onSave, slots, towerName, station
                       cursor: 'pointer'
                     }}
                   >
-                    🔄 Thử lại
+                     Thử lại
                   </button>
                 </div>
               ) : availableBatteries.length === 0 ? (
@@ -168,7 +168,7 @@ const AssignBatteryModal = ({ isOpen, onClose, onSave, slots, towerName, station
                   borderRadius: '8px',
                   color: '#fde047'
                 }}>
-                  📦 Không có pin nào trong kho
+                   Không có pin nào trong kho
                 </div>
               ) : (
                 <select
@@ -197,7 +197,7 @@ const AssignBatteryModal = ({ isOpen, onClose, onSave, slots, towerName, station
                 borderRadius: '10px'
               }}>
                 <div style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px', color: '#10b981' }}>
-                  ✅ Xác nhận thao tác:
+                   Xác nhận thao tác:
                 </div>
                 <div style={{ fontSize: '13px', color: '#cbd5e1', lineHeight: '1.6' }}>
                   • Hộc: <strong>Hộc {emptySlots.find(s => String(s.slotId || s.id) === String(selectedSlotId))?.slotNumber}</strong><br/>
@@ -221,7 +221,7 @@ const AssignBatteryModal = ({ isOpen, onClose, onSave, slots, towerName, station
               className="subscription-modal-btn subscription-modal-btn-save"
               disabled={emptySlots.length === 0 || availableBatteries.length === 0 || isLoadingBatteries}
             >
-              ✅ Xác nhận thêm
+               Xác nhận thêm
             </button>
           </div>
         </form>

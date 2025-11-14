@@ -30,7 +30,7 @@ const TransactionRow = ({ transaction, onSelect }) => {
       
       <td style={styles.cell}>
         <div style={styles.userInfo}>
-          <div style={styles.userIcon}>👤</div>
+          <div style={styles.userIcon}></div>
           <div>
             <div style={styles.userId}>User #{transaction.userId}</div>
             <div style={styles.userName}>{transaction.userName || 'N/A'}</div>
@@ -40,7 +40,7 @@ const TransactionRow = ({ transaction, onSelect }) => {
       
       <td style={styles.cell}>
         <div style={styles.stationInfo}>
-          <div style={styles.stationIcon}>🏢</div>
+          <div style={styles.stationIcon}></div>
           <div>
             <div style={styles.stationId}>Station #{transaction.stationId}</div>
             <div style={styles.stationName}>{transaction.stationName || 'N/A'}</div>
@@ -50,9 +50,9 @@ const TransactionRow = ({ transaction, onSelect }) => {
       
       <td style={styles.cell}>
         <div style={styles.batterySwap}>
-          <span style={styles.batteryOld}>🔋 #{transaction.oldBatteryId}</span>
+          <span style={styles.batteryOld}> #{transaction.oldBatteryId}</span>
           <span style={styles.arrow}>→</span>
-          <span style={styles.batteryNew}>🔋 #{transaction.newBatteryId}</span>
+          <span style={styles.batteryNew}> #{transaction.newBatteryId}</span>
         </div>
       </td>
       
@@ -80,7 +80,7 @@ const TransactionRow = ({ transaction, onSelect }) => {
           onMouseEnter={(e) => e.target.style.background = '#475569'}
           onMouseLeave={(e) => e.target.style.background = '#334155'}
         >
-          📋 Chi tiết
+           Chi tiết
         </button>
       </td>
     </tr>

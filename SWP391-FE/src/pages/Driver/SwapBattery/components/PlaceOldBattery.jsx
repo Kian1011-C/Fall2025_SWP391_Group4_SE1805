@@ -64,7 +64,7 @@ const PlaceOldBattery = () => {
                     batteryCode = String(enhancedVehicle.battery_code);
                     console.log('Sử dụng battery_code:', batteryCode);
                 } else {
-                    console.error('❌ Không tìm thấy mã pin trong dữ liệu xe');
+                    console.error(' Không tìm thấy mã pin trong dữ liệu xe');
                     console.error('Dữ liệu xe:', enhancedVehicle);
                     throw new Error('Không tìm thấy mã pin của xe. Vui lòng kiểm tra dữ liệu API.');
                 }
@@ -94,25 +94,25 @@ const PlaceOldBattery = () => {
         const fetchOldBatteryLevel = async () => {
             if (!isPercentGenerated && code && code !== 'N/A') {
                 try {
-                    console.log('🔋 Lấy thông tin pin cũ từ API cho batteryId:', code);
-                    console.log('🔍 API endpoint sẽ gọi: GET /api/batteries/' + code);
+                    console.log(' Lấy thông tin pin cũ từ API cho batteryId:', code);
+                    console.log(' API endpoint sẽ gọi: GET /api/batteries/' + code);
                     
                     // Lấy thông tin pin cũ từ API
                     const batteryResponse = await batteryService.getBatteryById(code);
                     
-                    console.log('🔍 API response cho pin cũ:', batteryResponse);
-                    console.log('🔍 batteryResponse.success:', batteryResponse.success);
-                    console.log('🔍 batteryResponse.data:', batteryResponse.data);
+                    console.log(' API response cho pin cũ:', batteryResponse);
+                    console.log(' batteryResponse.success:', batteryResponse.success);
+                    console.log(' batteryResponse.data:', batteryResponse.data);
                     
                     if (batteryResponse.success && batteryResponse.data) {
                         const batteryData = batteryResponse.data;
-                        console.log('🔍 batteryData chi tiết:', batteryData);
+                        console.log(' batteryData chi tiết:', batteryData);
                         
                         const batteryLevel = batteryData.stateOfHealth || batteryData.state_of_health || 
                                           batteryData.batteryLevel || batteryData.battery_level || 0;
                         
-                        console.log('✅ Dung lượng pin cũ từ API:', batteryLevel);
-                        console.log('🔍 Các trường có sẵn:', {
+                        console.log(' Dung lượng pin cũ từ API:', batteryLevel);
+                        console.log(' Các trường có sẵn:', {
                             stateOfHealth: batteryData.stateOfHealth,
                             state_of_health: batteryData.state_of_health,
                             batteryLevel: batteryData.batteryLevel,
@@ -120,41 +120,41 @@ const PlaceOldBattery = () => {
                         });
                         
                         // Không kiểm tra - chỉ set giá trị
-                        console.log('✅ Dung lượng pin cũ:', batteryLevel);
+                        console.log(' Dung lượng pin cũ:', batteryLevel);
                         setPercent(batteryLevel);
                     } else {
-                        console.warn('⚠️ Không lấy được thông tin pin cũ từ API');
-                        console.log('🔍 Kiểm tra dữ liệu từ xe đã chọn...');
-                        console.log('🔍 selectedVehicle:', selectedVehicle);
+                        console.warn(' Không lấy được thông tin pin cũ từ API');
+                        console.log(' Kiểm tra dữ liệu từ xe đã chọn...');
+                        console.log(' selectedVehicle:', selectedVehicle);
                         
                         // Sử dụng dữ liệu từ xe đã chọn
                         const vehicleBatteryLevel = selectedVehicle?.batteryLevel || selectedVehicle?.battery_level || 0;
-                        console.log('🔍 vehicleBatteryLevel từ xe:', vehicleBatteryLevel);
+                        console.log(' vehicleBatteryLevel từ xe:', vehicleBatteryLevel);
                         
                         if (vehicleBatteryLevel > 0) {
-                            console.log('⚠️ CẢNH BÁO: Sử dụng dữ liệu từ xe có thể không chính xác!');
-                            console.log('⚠️ Dữ liệu từ xe có thể là pin mới, không phải pin cũ!');
-                            console.log('⚠️ vehicleBatteryLevel từ xe:', vehicleBatteryLevel);
+                            console.log(' CẢNH BÁO: Sử dụng dữ liệu từ xe có thể không chính xác!');
+                            console.log(' Dữ liệu từ xe có thể là pin mới, không phải pin cũ!');
+                            console.log(' vehicleBatteryLevel từ xe:', vehicleBatteryLevel);
                             
                             // Kiểm tra nếu dữ liệu từ xe có vẻ không hợp lý cho pin cũ
                             if (vehicleBatteryLevel > 80) {
-                                console.log('❌ Dữ liệu từ xe quá cao cho pin cũ, sử dụng random thấp hơn');
+                                console.log(' Dữ liệu từ xe quá cao cho pin cũ, sử dụng random thấp hơn');
                                 const randomPercent = Math.floor(Math.random() * 25) + 5; // 5-29%
                                 setPercent(randomPercent);
-                                console.log('✅ Sử dụng random percentage cho pin cũ:', randomPercent);
+                                console.log(' Sử dụng random percentage cho pin cũ:', randomPercent);
                             } else {
                                 setPercent(vehicleBatteryLevel);
-                                console.log('✅ Sử dụng dung lượng pin từ xe:', vehicleBatteryLevel);
+                                console.log(' Sử dụng dung lượng pin từ xe:', vehicleBatteryLevel);
                             }
                         } else {
-                            console.log('⚠️ Không có dữ liệu từ xe, sử dụng random');
+                            console.log(' Không có dữ liệu từ xe, sử dụng random');
                             // Fallback: Random percentage thấp hơn 30%
                             const randomPercent = Math.floor(Math.random() * 25) + 5; // 5-29%
                             setPercent(randomPercent);
                         }
                     }
                 } catch (error) {
-                    console.error('❌ Lỗi khi lấy thông tin pin cũ:', error);
+                    console.error(' Lỗi khi lấy thông tin pin cũ:', error);
                     // Fallback: Random percentage thấp hơn 30%
                     const randomPercent = Math.floor(Math.random() * 25) + 5; // 5-29%
                     setPercent(randomPercent);
@@ -175,30 +175,30 @@ const PlaceOldBattery = () => {
         try {
             // Lưu thông tin pin cũ vào sessionStorage
             sessionStorage.setItem('oldBatteryLevel', String(percent));
-            console.log('✅ Đã lưu dung lượng pin cũ:', percent);
+            console.log(' Đã lưu dung lượng pin cũ:', percent);
             
             // Lưu emptySlotNumber (slot trống nơi đặt pin cũ) vào sessionStorage
             // Để dùng cho SwapSuccess hiển thị "Slot trống" cho pin cũ
             if (emptySlotNumber && emptySlotNumber !== 'undefined' && emptySlotNumber !== 'null') {
                 sessionStorage.setItem('emptySlotNumber', String(emptySlotNumber));
-                console.log('✅ Đã lưu emptySlotNumber vào sessionStorage:', emptySlotNumber);
+                console.log(' Đã lưu emptySlotNumber vào sessionStorage:', emptySlotNumber);
             }
             
             // CHỈ GHI NHẬN - KHÔNG GỌI API
             // Tất cả cập nhật database sẽ được xử lý ở bước cuối cùng (confirmSwap)
-            console.log('✅ Đã ghi nhận thông tin pin cũ:', {
+            console.log(' Đã ghi nhận thông tin pin cũ:', {
                 batteryId: code,
                 level: percent,
                 emptySlot: emptySlotNumber
             });
             
             // LẤY PIN MỚI TỪ TRỤ VÀ LƯU VÀO SESSION
-            console.log('🔋 Đang lấy pin mới từ trụ...');
+            console.log(' Đang lấy pin mới từ trụ...');
             try {
                 const newBatteryInfo = await selectNewBatteryFromTower();
-                console.log('✅ Đã lấy pin mới thành công:', newBatteryInfo);
+                console.log(' Đã lấy pin mới thành công:', newBatteryInfo);
             } catch (batteryError) {
-                console.error('❌ Lỗi khi lấy pin mới:', batteryError);
+                console.error(' Lỗi khi lấy pin mới:', batteryError);
                 alert('Có lỗi khi lấy pin mới từ trụ. Vui lòng thử lại.');
                 return; // Không chuyển bước nếu lỗi
             }
@@ -208,7 +208,7 @@ const PlaceOldBattery = () => {
             console.log('Đã đặt pin cũ và lấy pin mới, chuyển sang bước lấy pin mới.');
             
         } catch (error) {
-            console.error('❌ Lỗi khi xử lý pin cũ:', error);
+            console.error(' Lỗi khi xử lý pin cũ:', error);
             alert('Có lỗi xảy ra khi xử lý pin cũ. Vui lòng thử lại.');
         }
     };
@@ -218,11 +218,11 @@ const PlaceOldBattery = () => {
     const emptySlotNumber = transaction?.emptySlot || emptySlotFromSession || '1';
     
     // Debug logging
-    console.log('🔍 PlaceOldBattery - transaction:', transaction);
-    console.log('🔍 PlaceOldBattery - emptySlot:', transaction?.emptySlot);
-    console.log('🔍 PlaceOldBattery - emptySlotFromSession:', emptySlotFromSession);
-    console.log('🔍 PlaceOldBattery - emptySlotNumber:', emptySlotNumber);
-    console.log('🔍 PlaceOldBattery - isLoading:', isLoading);
+    console.log(' PlaceOldBattery - transaction:', transaction);
+    console.log(' PlaceOldBattery - emptySlot:', transaction?.emptySlot);
+    console.log(' PlaceOldBattery - emptySlotFromSession:', emptySlotFromSession);
+    console.log(' PlaceOldBattery - emptySlotNumber:', emptySlotNumber);
+    console.log(' PlaceOldBattery - isLoading:', isLoading);
 
     return (
         <div className="station-selector-container">

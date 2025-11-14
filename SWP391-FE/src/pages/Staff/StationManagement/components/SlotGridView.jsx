@@ -10,12 +10,12 @@ const getSlotStatus = (slot) => {
 
 const getStatusIcon = (status) => {
   switch(status) {
-    case 'empty': return '⚪';
+    case 'empty': return '';
     case 'available':
-    case 'full': return '🟢';
-    case 'charging': return '⚡';
-    case 'maintenance': return '🔴';
-    default: return '⚫';
+    case 'full': return '';
+    case 'charging': return '';
+    case 'maintenance': return '';
+    default: return '';
   }
 };
 
@@ -75,7 +75,7 @@ const SlotGridView = ({ slots }) => {
   if (!slots || slots.length === 0) {
     return (
       <div className="station-empty">
-        <div className="station-empty-icon">🔋</div>
+        <div className="station-empty-icon"></div>
         <div className="station-empty-text">Không có hộc sạc nào</div>
         <div className="station-empty-subtext">Trụ này chưa có hộc sạc nào</div>
       </div>

@@ -66,19 +66,19 @@ export const useVehicleForm = (onSuccess) => {
         return false;
       }
 
-      console.log('🚗 Registering vehicle:', { userId, plateNumber, model, vinNumber });
+      console.log(' Registering vehicle:', { userId, plateNumber, model, vinNumber });
 
       // Gọi API đăng ký xe (theo logic của BE)
       // API: POST /api/users/{userId}/vehicles với params: plateNumber, model, vinNumber
       const response = await vehicleService.registerVehicleForUser(userId, plateNumber, model, vinNumber);
-      console.log('✅ Vehicle registered:', response);
+      console.log(' Vehicle registered:', response);
 
       if (response.success) {
         resetForm();
         
         // BE trả về danh sách xe mới nhất trong response.data
         if (response.data && Array.isArray(response.data) && response.data.length > 0) {
-          console.log('✅ Danh sách xe sau khi đăng ký:', response.data);
+          console.log(' Danh sách xe sau khi đăng ký:', response.data);
         }
         
         if (onSuccess) {
@@ -92,7 +92,7 @@ export const useVehicleForm = (onSuccess) => {
         return false;
       }
     } catch (err) {
-      console.error('❌ Error registering vehicle:', err);
+      console.error(' Error registering vehicle:', err);
       const errorMessage = err.message || 'Lỗi hệ thống. Vui lòng thử lại sau.';
       setFormErrors({ submit: errorMessage });
       return false;

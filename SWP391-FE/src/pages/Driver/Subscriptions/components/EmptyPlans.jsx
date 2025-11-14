@@ -14,7 +14,7 @@ const EmptyPlans = ({ onRetry }) => {
       border: '1px solid rgba(255, 255, 255, 0.1)',
       marginBottom: '30px'
     }}>
-      <div style={{ fontSize: '4rem', marginBottom: '20px' }}>📦</div>
+      <div style={{ fontSize: '4rem', marginBottom: '20px' }}></div>
       <div style={{ fontSize: '1.3rem', marginBottom: '10px', color: '#FFFFFF' }}>
         Hiện chưa có gói dịch vụ nào
       </div>
@@ -42,7 +42,7 @@ const EmptyPlans = ({ onRetry }) => {
           e.currentTarget.style.transform = 'translateY(0)';
         }}
       >
-        🔄 Tải lại
+         Tải lại
       </button>
     </div>
   );

@@ -9,13 +9,13 @@ export const usePaymentsData = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // ✅ Fetch danh sách drivers với thông tin contract và payment (GIỐNG ADMIN)
+  //  Fetch danh sách drivers với thông tin contract và payment (GIỐNG ADMIN)
   const fetchDrivers = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       
-      // ✅ Bước 1: Lấy tất cả contracts
+      //  Bước 1: Lấy tất cả contracts
       const contractsResult = await contractService.getAllContracts();
       
       if (!contractsResult.success) {
@@ -26,7 +26,7 @@ export const usePaymentsData = () => {
       
       console.log('[Staff Payments] Loaded contracts:', contracts);
 
-      // ✅ Bước 2: Lấy tất cả payments
+      //  Bước 2: Lấy tất cả payments
       const paymentsResult = await paymentService.adminGetAllPayments();
       
       if (!paymentsResult.success) {
@@ -37,7 +37,7 @@ export const usePaymentsData = () => {
       
       console.log('[Staff Payments] Loaded payments:', payments);
 
-      // ✅ Bước 3: Group payments by contractId
+      //  Bước 3: Group payments by contractId
       const paymentsByContract = {};
       payments.forEach(payment => {
         const contractId = payment.contractId;
@@ -51,7 +51,7 @@ export const usePaymentsData = () => {
 
       console.log('[Staff Payments] Payments grouped by contract:', paymentsByContract);
 
-      // ✅ Bước 4: Tạo danh sách drivers từ contracts
+      //  Bước 4: Tạo danh sách drivers từ contracts
       const driversData = contracts
         .filter(contract => contract.status === 'active')
         .map(contract => {

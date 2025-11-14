@@ -27,7 +27,7 @@ const VehicleManagement = ({
         alignItems: 'center',
         gap: '10px'
       }}>
-        🚗 Xe và Gói dịch vụ
+         Xe và Gói dịch vụ
       </h3>
 
       {/* Selected Vehicle Display */}

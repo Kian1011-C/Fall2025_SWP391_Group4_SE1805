@@ -6,42 +6,42 @@ const QuickActions = () => {
 
   const actions = [
     {
-      icon: '👥',
+      icon: '',
       title: 'Quản lý Người dùng',
       description: 'Xem và quản lý tài khoản',
       color: '#3b82f6',
       path: '/admin/users'
     },
     {
-      icon: '🏢',
+      icon: '',
       title: 'Quản lý Trạm',
       description: 'Quản lý trạm đổi pin',
       color: '#10b981',
       path: '/admin/stations'
     },
     {
-      icon: '🔋',
+      icon: '',
       title: 'Quản lý Pin',
       description: 'Theo dõi tình trạng pin',
       color: '#f59e0b',
       path: '/admin/batteries'
     },
     {
-      icon: '📊',
+      icon: '',
       title: 'Báo cáo',
       description: 'Xem báo cáo chi tiết',
       color: '#8b5cf6',
       path: '/admin/reports'
     },
     {
-      icon: '💳',
+      icon: '',
       title: 'Giao dịch',
       description: 'Quản lý thanh toán',
       color: '#ec4899',
       path: '/admin/payments'
     },
     {
-      icon: '📄',
+      icon: '',
       title: 'Hợp đồng',
       description: 'Quản lý hợp đồng thuê pin',
       color: '#14b8a6',

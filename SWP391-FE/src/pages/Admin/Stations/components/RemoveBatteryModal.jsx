@@ -37,7 +37,7 @@ const RemoveBatteryModal = ({ isOpen, onClose, onSave, slots, towerName, station
       <div className="subscription-modal" style={{ maxWidth: '600px' }} onClick={e => e.stopPropagation()}>
         <form onSubmit={handleSubmit}>
           <div className="subscription-modal-header">
-            <h2>🔌 Tháo Pin khỏi Hộc</h2>
+            <h2> Tháo Pin khỏi Hộc</h2>
             <p style={{ margin: '8px 0 0 0', fontSize: '14px', color: '#94a3b8' }}>
               {stationName} - {towerName}
             </p>
@@ -55,7 +55,7 @@ const RemoveBatteryModal = ({ isOpen, onClose, onSave, slots, towerName, station
                   borderRadius: '8px',
                   color: '#fde047'
                 }}>
-                  ⚠️ Không có hộc nào chứa pin trong trụ này
+                   Không có hộc nào chứa pin trong trụ này
                 </div>
               ) : (
                 <select
@@ -84,7 +84,7 @@ const RemoveBatteryModal = ({ isOpen, onClose, onSave, slots, towerName, station
                 borderRadius: '10px'
               }}>
                 <div style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px', color: '#ef4444' }}>
-                  ⚠️ Xác nhận thao tác:
+                   Xác nhận thao tác:
                 </div>
                 <div style={{ fontSize: '13px', color: '#cbd5e1', lineHeight: '1.6' }}>
                   {(() => {
@@ -116,7 +116,7 @@ const RemoveBatteryModal = ({ isOpen, onClose, onSave, slots, towerName, station
               style={{ background: 'linear-gradient(135deg, #ef4444 0%, #f87171 100%)' }}
               disabled={slotsWithBattery.length === 0}
             >
-              🔌 Xác nhận tháo
+               Xác nhận tháo
             </button>
           </div>
         </form>

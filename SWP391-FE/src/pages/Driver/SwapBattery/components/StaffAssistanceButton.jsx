@@ -25,7 +25,7 @@ const StaffAssistanceButton = ({ selectedStation, onRequestAssistance, position 
           marginBottom: '8px'
         }}
       >
-        <span style={{ fontSize: '24px' }}>🤝</span>
+        <span style={{ fontSize: '24px' }}></span>
         <span
           style={{
             fontSize: '14px',
@@ -63,7 +63,7 @@ const StaffAssistanceButton = ({ selectedStation, onRequestAssistance, position 
           e.target.style.boxShadow = '0 2px 8px rgba(255, 152, 0, 0.3)';
         }}
       >
-        <span style={{ fontSize: '16px' }}>🙋‍♂️</span>
+        <span style={{ fontSize: '16px' }}>‍</span>
         <span>Yêu cầu hỗ trợ</span>
       </button>
     </div>

@@ -37,12 +37,12 @@ const NewBatterySelector = ({
   return (
     <div>
       <h3 style={{ marginBottom: '24px', fontSize: '20px', fontWeight: '600', color: '#333' }}>
-        🔋 Chọn pin mới
+         Chọn pin mới
       </h3>
 
       <div style={{ marginBottom: '20px', padding: '12px', background: '#e3f2fd', borderRadius: '8px' }}>
         <p style={{ margin: 0, fontSize: '14px', color: '#1976d2' }}>
-          📍 Trạm: {selectedStation?.name} - 🔌 Trụ {selectedTower?.towerNumber}
+           Trạm: {selectedStation?.name} -  Trụ {selectedTower?.towerNumber}
         </p>
       </div>
 
@@ -73,14 +73,14 @@ const NewBatterySelector = ({
               transition: 'all 0.2s'
             }}
           >
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔋</div>
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}></div>
             <div style={{ fontSize: '16px', fontWeight: '600', color: '#333', marginBottom: '8px' }}>
               Slot {slot.slotNumber}
             </div>
             <div
               style={{ fontSize: '14px', color: '#19c37d', fontWeight: '600', marginBottom: '8px' }}
             >
-              {slot.batteryLevel ? `⚡ ${slot.batteryLevel}% pin` : '⚡ Pin có sẵn'}
+              {slot.batteryLevel ? ` ${slot.batteryLevel}% pin` : ' Pin có sẵn'}
             </div>
             <div style={{ fontSize: '12px', color: '#666' }}>Trạng thái: {slot.status}</div>
           </div>

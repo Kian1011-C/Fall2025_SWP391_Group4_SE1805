@@ -40,7 +40,7 @@ class PaymentService {
     try {
       console.log('PaymentService: Get payment history for user', userId);
       
-      // ✅ Sử dụng endpoint backend thực tế: /payment/user/{userId}
+      //  Sử dụng endpoint backend thực tế: /payment/user/{userId}
       const response = await apiUtils.get(API_CONFIG.ENDPOINTS.PAYMENTS.USER_PAYMENTS(userId));
       
       if (response.success) {
@@ -177,11 +177,11 @@ class PaymentService {
   // Helper methods
   getDefaultPaymentMethods() {
     return [
-      { id: 'credit_card', name: 'Thẻ tín dụng', icon: '💳', enabled: true },
-      { id: 'debit_card', name: 'Thẻ ghi nợ', icon: '💳', enabled: true },
-      { id: 'bank_transfer', name: 'Chuyển khoản', icon: '🏦', enabled: true },
-      { id: 'e_wallet', name: 'Ví điện tử', icon: '📱', enabled: true },
-      { id: 'cash', name: 'Tiền mặt', icon: '💵', enabled: false }
+      { id: 'credit_card', name: 'Thẻ tín dụng', icon: '', enabled: true },
+      { id: 'debit_card', name: 'Thẻ ghi nợ', icon: '', enabled: true },
+      { id: 'bank_transfer', name: 'Chuyển khoản', icon: '', enabled: true },
+      { id: 'e_wallet', name: 'Ví điện tử', icon: '', enabled: true },
+      { id: 'cash', name: 'Tiền mặt', icon: '', enabled: false }
     ];
   }
 
@@ -221,7 +221,7 @@ class PaymentService {
   // VNPay Integration Methods
   
   /**
-   * ✅ LẤY DANH SÁCH THANH TOÁN CỦA USER (Đã có payment_url từ backend)
+   *  LẤY DANH SÁCH THANH TOÁN CỦA USER (Đã có payment_url từ backend)
    * Driver chỉ cần lấy payment_url có sẵn để thanh toán
    * @param {string} userId - ID người dùng
    * @returns {Promise<{success: boolean, data?: array, total?: number, message: string}>}
@@ -254,7 +254,7 @@ class PaymentService {
   }
 
   /**
-   * ✅ ADMIN: Lấy tất cả thanh toán (có payment_url)
+   *  ADMIN: Lấy tất cả thanh toán (có payment_url)
    * @returns {Promise<{success: boolean, data?: array, total?: number, message: string}>}
    */
   async getAllPayments() {
@@ -285,11 +285,11 @@ class PaymentService {
   }
 
   /**
-   * ⚠️ DEPRECATED: Không cần dùng vì payment_url đã có sẵn từ backend
+   *  DEPRECATED: Không cần dùng vì payment_url đã có sẵn từ backend
    * Giữ lại để tương thích với code cũ
    */
   async createVNPayPayment(userId, contractId, amount) {
-    console.warn('⚠️ createVNPayPayment is deprecated. Use payment_url from getUserPayments() instead.');
+    console.warn(' createVNPayPayment is deprecated. Use payment_url from getUserPayments() instead.');
     try {
       console.log('PaymentService: Create VNPay payment', { userId, contractId, amount });
       
@@ -449,7 +449,7 @@ class PaymentService {
      ============================================================= */
 
   /**
-   * ✅ ADMIN: Xuất hóa đơn tháng cho driver (Tạo payment với payment_url)
+   *  ADMIN: Xuất hóa đơn tháng cho driver (Tạo payment với payment_url)
    * Backend sẽ tự động tính toán và tạo payment với status 'in_progress'
    * @param {string} userId - ID người dùng
    * @param {number} contractId - ID hợp đồng
@@ -468,7 +468,7 @@ class PaymentService {
         month: month.toString()
       });
 
-      // ✅ Gọi API backend /payment/pay-monthly (Admin xuất hóa đơn)
+      //  Gọi API backend /payment/pay-monthly (Admin xuất hóa đơn)
       const response = await apiUtils.get(
         `${API_CONFIG.ENDPOINTS.PAYMENTS.PAY_MONTHLY}?${params.toString()}`
       );
@@ -495,7 +495,7 @@ class PaymentService {
   }
 
   /**
-   * ✅ ADMIN: Lấy tất cả payments trong hệ thống
+   *  ADMIN: Lấy tất cả payments trong hệ thống
    * @returns {Promise<{success: boolean, data?: array, total?: number, message: string}>}
    */
   async adminGetAllPayments() {
@@ -503,7 +503,7 @@ class PaymentService {
   }
 
   /**
-   * ✅ ADMIN/STAFF: Lấy danh sách payments của 1 user cụ thể
+   *  ADMIN/STAFF: Lấy danh sách payments của 1 user cụ thể
    * @param {string} userId - ID người dùng
    * @returns {Promise<{success: boolean, data?: array, total?: number, message: string}>}
    */
@@ -512,7 +512,7 @@ class PaymentService {
   }
 
   /**
-   * ✅ ADMIN: Lấy danh sách users và thông tin thanh toán
+   *  ADMIN: Lấy danh sách users và thông tin thanh toán
    * Note: Backend cần có API riêng để lấy list users với payment summary
    * Tạm thời sử dụng getAllPayments và group by user
    * @returns {Promise<{success: boolean, data?: array, message: string}>}
@@ -521,7 +521,7 @@ class PaymentService {
     try {
       console.log('PaymentService: Get users with payment summary');
       
-      // ✅ TODO: Backend cần tạo API /payment/admin/users-summary
+      //  TODO: Backend cần tạo API /payment/admin/users-summary
       // Tạm thời lấy all payments và group by user
       const paymentsResult = await this.getAllPayments();
       

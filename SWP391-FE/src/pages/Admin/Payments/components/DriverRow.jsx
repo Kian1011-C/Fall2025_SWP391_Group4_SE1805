@@ -135,7 +135,7 @@ const DriverRow = ({ driver, onGenerateInvoice, onViewHistory, activeTab }) => {
               {driver.unpaidBills}
             </span>
           ) : (
-            <span style={{ color: '#10b981', fontWeight: '500' }}>✓</span>
+            <span style={{ color: '#10b981', fontWeight: '500' }}></span>
           )}
         </td>
       )}
@@ -163,7 +163,7 @@ const DriverRow = ({ driver, onGenerateInvoice, onViewHistory, activeTab }) => {
                 onMouseEnter={(e) => e.target.style.backgroundColor = '#2563eb'}
                 onMouseLeave={(e) => e.target.style.backgroundColor = '#3b82f6'}
               >
-                <span>📄</span>
+                <span></span>
                 Xuất hóa đơn
               </button>
             )}

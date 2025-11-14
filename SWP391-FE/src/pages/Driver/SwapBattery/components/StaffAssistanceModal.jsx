@@ -84,7 +84,7 @@ const StaffAssistanceModal = ({
         {success ? (
           // Success state
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '64px', marginBottom: '24px' }}>✅</div>
+            <div style={{ fontSize: '64px', marginBottom: '24px' }}></div>
             <h3
               style={{
                 margin: '0 0 16px 0',
@@ -122,17 +122,17 @@ const StaffAssistanceModal = ({
                   color: '#2e7d32'
                 }}
               >
-                📋 Thông tin yêu cầu:
+                 Thông tin yêu cầu:
               </h4>
               <div style={{ fontSize: '14px', color: '#2e7d32', textAlign: 'left' }}>
                 <p style={{ margin: '4px 0' }}>
-                  🚗 <strong>Xe:</strong> {vehiclePlate}
+                   <strong>Xe:</strong> {vehiclePlate}
                 </p>
                 <p style={{ margin: '4px 0' }}>
-                  🔋 <strong>Pin hiện tại:</strong> {batteryLevel}%
+                   <strong>Pin hiện tại:</strong> {batteryLevel}%
                 </p>
                 <p style={{ margin: '4px 0' }}>
-                  📍 <strong>Trạm:</strong> {selectedStation?.name}
+                   <strong>Trạm:</strong> {selectedStation?.name}
                 </p>
                 <p style={{ margin: '4px 0' }}>
                   ⏰ <strong>Thời gian:</strong> {new Date().toLocaleString('vi-VN')}
@@ -156,7 +156,7 @@ const StaffAssistanceModal = ({
                   fontWeight: '600'
                 }}
               >
-                ⏱️ Thời gian chờ ước tính: 5-10 phút
+                ⏱ Thời gian chờ ước tính: 5-10 phút
               </p>
             </div>
 
@@ -211,7 +211,7 @@ const StaffAssistanceModal = ({
         ) : (
           // Confirmation state
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '64px', marginBottom: '24px' }}>🤝</div>
+            <div style={{ fontSize: '64px', marginBottom: '24px' }}></div>
             <h3
               style={{
                 margin: '0 0 16px 0',
@@ -249,20 +249,20 @@ const StaffAssistanceModal = ({
                   color: '#333'
                 }}
               >
-                📋 Thông tin sẽ được gửi:
+                 Thông tin sẽ được gửi:
               </h4>
               <div style={{ fontSize: '14px', color: '#666', textAlign: 'left' }}>
                 <p style={{ margin: '4px 0' }}>
-                  🚗 <strong>Xe:</strong> {vehiclePlate}
+                   <strong>Xe:</strong> {vehiclePlate}
                 </p>
                 <p style={{ margin: '4px 0' }}>
-                  🔋 <strong>Pin hiện tại:</strong> {batteryLevel}%
+                   <strong>Pin hiện tại:</strong> {batteryLevel}%
                 </p>
                 <p style={{ margin: '4px 0' }}>
-                  📍 <strong>Trạm:</strong> {selectedStation?.name}
+                   <strong>Trạm:</strong> {selectedStation?.name}
                 </p>
                 <p style={{ margin: '4px 0' }}>
-                  🏆 <strong>Độ ưu tiên:</strong> {priorityLabel}
+                   <strong>Độ ưu tiên:</strong> {priorityLabel}
                 </p>
               </div>
             </div>
@@ -318,7 +318,7 @@ const StaffAssistanceModal = ({
                   e.target.style.transform = 'translateY(0)';
                 }}
               >
-                ✅ Gửi yêu cầu
+                 Gửi yêu cầu
               </button>
             </div>
           </div>

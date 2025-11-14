@@ -38,15 +38,15 @@ const EmptySlotSelector = ({
   return (
     <div>
       <h3 style={{ marginBottom: '24px', fontSize: '20px', fontWeight: '600', color: '#333' }}>
-        📦 Chọn slot trống
+         Chọn slot trống
       </h3>
 
       <div style={{ marginBottom: '20px', padding: '12px', background: '#e3f2fd', borderRadius: '8px' }}>
         <p style={{ margin: 0, fontSize: '14px', color: '#1976d2' }}>
-          📍 Trạm: {selectedStation?.name} - 🔌 Trụ {selectedTower?.towerNumber}
+           Trạm: {selectedStation?.name} -  Trụ {selectedTower?.towerNumber}
         </p>
         <p style={{ margin: '5px 0 0 0', fontSize: '14px', color: '#1976d2' }}>
-          🔋 Pin mới đã chọn: Slot {selectedNewBatterySlot?.slotNumber}
+           Pin mới đã chọn: Slot {selectedNewBatterySlot?.slotNumber}
         </p>
       </div>
 
@@ -76,14 +76,14 @@ const EmptySlotSelector = ({
               transition: 'all 0.2s'
             }}
           >
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>📦</div>
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}></div>
             <div style={{ fontSize: '16px', fontWeight: '600', color: '#333', marginBottom: '8px' }}>
               Slot {slot.slotNumber}
             </div>
             <div
               style={{ fontSize: '14px', color: '#ff9800', fontWeight: '600', marginBottom: '8px' }}
             >
-              📭 Slot trống
+               Slot trống
             </div>
             <div style={{ fontSize: '12px', color: '#666' }}>Sẵn sàng để đặt pin cũ</div>
           </div>

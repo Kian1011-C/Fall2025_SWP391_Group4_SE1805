@@ -51,7 +51,7 @@ const Subscriptions = () => {
     return (
       <DashboardLayout role="driver">
         <div style={{ padding: '20px', textAlign: 'center' }}>
-          <div style={{ color: '#ff6b6b', fontSize: '1.2rem' }}>⚠️ {error}</div>
+          <div style={{ color: '#ff6b6b', fontSize: '1.2rem' }}> {error}</div>
           <button 
             onClick={refetch}
             style={{

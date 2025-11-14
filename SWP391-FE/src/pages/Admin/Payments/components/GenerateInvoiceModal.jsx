@@ -10,7 +10,7 @@ const GenerateInvoiceModal = ({ driver, onClose, onSuccess }) => {
   const [success, setSuccess] = useState(null);
   const [billPreview, setBillPreview] = useState(null);
 
-  // ✅ Tính toán và xem trước hóa đơn
+  //  Tính toán và xem trước hóa đơn
   const handleCalculateBill = async () => {
     console.log('Generate invoice for driver:', driver);
     
@@ -29,7 +29,7 @@ const GenerateInvoiceModal = ({ driver, onClose, onSuccess }) => {
     setSuccess(null);
 
     try {
-      console.log('✅ [Admin] Xuất hóa đơn:', {
+      console.log(' [Admin] Xuất hóa đơn:', {
         userId: driver.userId,
         contractId: driver.contractId,
         planName: driver.subscriptionType,
@@ -37,15 +37,15 @@ const GenerateInvoiceModal = ({ driver, onClose, onSuccess }) => {
         month
       });
 
-      // ✅ Gọi API backend để xuất hóa đơn (tạo payment pending)
+      //  Gọi API backend để xuất hóa đơn (tạo payment pending)
       const result = await paymentService.adminGenerateMonthlyInvoice(
-        driver.userId, // ✅ Dùng driver.userId thay vì driver.id
+        driver.userId, //  Dùng driver.userId thay vì driver.id
         driver.contractId,
         year,
         month
       );
 
-      console.log('✅ [Admin] Kết quả xuất hóa đơn:', result);
+      console.log(' [Admin] Kết quả xuất hóa đơn:', result);
 
       if (result.success && result.billInfo) {
         setBillPreview(result.billInfo);
@@ -61,7 +61,7 @@ const GenerateInvoiceModal = ({ driver, onClose, onSuccess }) => {
     }
   };
 
-  // ✅ Xác nhận và đóng modal
+  //  Xác nhận và đóng modal
   const handleConfirm = () => {
     if (billPreview) {
       onSuccess(); // Refresh data
@@ -264,7 +264,7 @@ const GenerateInvoiceModal = ({ driver, onClose, onSuccess }) => {
               fontSize: '14px',
               marginBottom: '16px'
             }}>
-              ⚠️ {error}
+               {error}
             </div>
           )}
 
@@ -278,7 +278,7 @@ const GenerateInvoiceModal = ({ driver, onClose, onSuccess }) => {
               fontSize: '14px',
               marginBottom: '16px'
             }}>
-              ✅ {success}
+               {success}
             </div>
           )}
 

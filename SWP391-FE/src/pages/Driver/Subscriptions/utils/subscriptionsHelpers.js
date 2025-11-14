@@ -29,13 +29,13 @@ export const getPlanColor = (planName) => {
  */
 export const getPlanIcon = (index, planName) => {
   const name = (planName || '').toLowerCase();
-  if (name.includes('basic')) return '⚡';
-  if (name.includes('plus')) return '💎';
-  if (name.includes('premium')) return '👑';
+  if (name.includes('basic')) return '';
+  if (name.includes('plus')) return '';
+  if (name.includes('premium')) return '';
   
   // Fallback to index-based icons
-  const icons = ['⚡', '💎', '👑'];
-  return icons[index] || '📦';
+  const icons = ['', '', ''];
+  return icons[index] || '';
 };
 
 /**

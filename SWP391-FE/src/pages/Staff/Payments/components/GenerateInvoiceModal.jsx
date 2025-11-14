@@ -227,7 +227,7 @@ const GenerateInvoiceModal = ({ driver, onClose, onSuccess }) => {
               fontSize: '14px',
               marginBottom: '16px'
             }}>
-              ⚠️ {error}
+               {error}
             </div>
           )}
 

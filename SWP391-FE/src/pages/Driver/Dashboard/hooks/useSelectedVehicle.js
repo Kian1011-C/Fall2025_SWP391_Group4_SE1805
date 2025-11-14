@@ -21,7 +21,7 @@ export const useSelectedVehicle = (vehicles) => {
   // Check for updated vehicle from swap battery flow
   useEffect(() => {
     if (location.state?.updatedVehicle) {
-      console.log('🔄 Received updated vehicle from swap:', location.state.updatedVehicle);
+      console.log(' Received updated vehicle from swap:', location.state.updatedVehicle);
       sessionStorage.setItem('selectedVehicle', JSON.stringify(location.state.updatedVehicle));
       window.history.replaceState({}, document.title);
     }

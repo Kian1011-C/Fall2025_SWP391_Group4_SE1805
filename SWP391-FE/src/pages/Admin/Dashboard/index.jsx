@@ -21,10 +21,10 @@ const AdminDashboard = () => {
     if (error) {
       return (
         <div className="error-container">
-          <div className="error-icon">⚠️</div>
+          <div className="error-icon"></div>
           <p className="error-message">Lỗi: {error}</p>
           <button onClick={refetch} className="retry-button">
-            🔄 Thử lại
+             Thử lại
           </button>
         </div>
       );
@@ -77,12 +77,12 @@ const AdminDashboard = () => {
                 </>
               ) : (
                 <>
-                  🔄 Tải lại
+                   Tải lại
                 </>
               )}
             </button>
             <button className="export-button">
-              📊 Xuất báo cáo
+               Xuất báo cáo
             </button>
           </div>
         </div>

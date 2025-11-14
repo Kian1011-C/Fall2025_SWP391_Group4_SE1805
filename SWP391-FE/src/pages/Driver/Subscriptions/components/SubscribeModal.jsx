@@ -175,7 +175,7 @@ const SubscribeModal = ({
         overflowY: 'auto'
       }}>
         <h2 style={{ color: '#FFFFFF', marginBottom: '25px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          📝 Đăng ký gói dịch vụ
+           Đăng ký gói dịch vụ
         </h2>
 
         {plan && (
@@ -204,7 +204,7 @@ const SubscribeModal = ({
               <div style={{ color: '#9CA3AF', padding: '10px' }}>Đang tải danh sách xe...</div>
             ) : vehicles.length === 0 ? (
               <div style={{ color: '#fecaca', padding: '10px', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '8px' }}>
-                ⚠️ Bạn chưa có xe nào. Vui lòng thêm xe trước khi đăng ký.
+                 Bạn chưa có xe nào. Vui lòng thêm xe trước khi đăng ký.
               </div>
             ) : (
               <select

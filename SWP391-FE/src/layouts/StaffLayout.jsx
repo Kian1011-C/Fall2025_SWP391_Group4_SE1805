@@ -7,13 +7,13 @@ const StaffLayout = () => {
   const { handleLogout } = useAuth();
 
   const navItems = [
-    { path: '/staff/dashboard', name: 'Trang chủ', icon: '🏠' },
-    { path: '/staff/battery-management', name: 'Quản lý Pin', icon: '🔋' }, 
-    { path: '/staff/station-management', name: 'Quản lý trạm', icon: '🏢' },
-    { path: '/staff/transaction-management', name: 'Lịch sử đổi Pin', icon: '🔄' },
-    { path: '/staff/payments', name: 'Quản lý Thanh toán', icon: '💳' },
-    { path: '/staff/issues', name: 'Sự cố', icon: '🔧' },
-    { path: '/staff/swap-battery', name: 'Đổi Pin', icon: '⚡' },
+    { path: '/staff/dashboard', name: 'Trang chủ', icon: '' },
+    { path: '/staff/battery-management', name: 'Quản lý Pin', icon: '' }, 
+    { path: '/staff/station-management', name: 'Quản lý trạm', icon: '' },
+    { path: '/staff/transaction-management', name: 'Lịch sử đổi Pin', icon: '' },
+    { path: '/staff/payments', name: 'Quản lý Thanh toán', icon: '' },
+    { path: '/staff/issues', name: 'Sự cố', icon: '' },
+    { path: '/staff/swap-battery', name: 'Đổi Pin', icon: '' },
   ];
 
   return (

@@ -31,19 +31,19 @@ export const useSubscribe = (currentUser, onSuccess) => {
         throw new Error('Không tìm thấy User ID. Vui lòng đăng nhập lại.');
       }
 
-      console.log('📝 Creating contract for plan:', selectedPlan);
-      console.log('👤 User ID:', userId);
-      console.log('🚗 Contract info:', contractInfo);
+      console.log(' Creating contract for plan:', selectedPlan);
+      console.log(' User ID:', userId);
+      console.log(' Contract info:', contractInfo);
       
       // Create subscription request với đầy đủ thông tin (theo logic của BE)
       const requestData = createSubscriptionRequest(selectedPlan, userId, contractInfo);
       
-      console.log('📝 Request data:', requestData);
+      console.log(' Request data:', requestData);
       
       // Create contract via API
       const result = await contractService.createContract(requestData);
 
-      console.log('📝 Contract creation result:', result);
+      console.log(' Contract creation result:', result);
 
       if (result.success) {
         const successMessage = getSubscriptionSuccessMessage(selectedPlan);
@@ -57,7 +57,7 @@ export const useSubscribe = (currentUser, onSuccess) => {
         alert(result.message || 'Đăng ký thất bại. Vui lòng thử lại.');
       }
     } catch (err) {
-      console.error('❌ Error subscribing:', err);
+      console.error(' Error subscribing:', err);
       alert('Có lỗi xảy ra khi đăng ký: ' + (err.message || 'Lỗi không xác định'));
     } finally {
       setSubscribing(false);

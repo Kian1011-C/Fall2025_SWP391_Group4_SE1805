@@ -14,14 +14,14 @@ const PaymentHistoryModal = ({ driver, onClose }) => {
         setLoading(true);
         setError(null);
         
-        // ✅ Gọi API thực để lấy lịch sử thanh toán của user
+        //  Gọi API thực để lấy lịch sử thanh toán của user
         const result = await paymentService.adminGetUserPayments(driver.userId);
         
         if (result.success) {
           // Map dữ liệu từ backend sang format hiển thị
           const mappedHistory = (result.data || []).map(payment => ({
             id: payment.paymentId,
-            // ✅ Chỉ có ngày thanh toán khi đã thanh toán thành công
+            //  Chỉ có ngày thanh toán khi đã thanh toán thành công
             date: payment.status?.toLowerCase() === 'success' ? payment.vnpPayDate : null,
             month: extractMonthYear(payment.vnpOrderInfo || payment.createdAt),
             amount: payment.amount,
@@ -50,7 +50,7 @@ const PaymentHistoryModal = ({ driver, onClose }) => {
     fetchHistory();
   }, [driver.userId]);
 
-  // ✅ Helper: Trích xuất tháng/năm từ orderInfo hoặc date
+  //  Helper: Trích xuất tháng/năm từ orderInfo hoặc date
   const extractMonthYear = (text) => {
     if (!text) return 'N/A';
     // Nếu có text như "Thanh toan hop dong 1" thì lấy từ date
@@ -61,7 +61,7 @@ const PaymentHistoryModal = ({ driver, onClose }) => {
     return 'N/A';
   };
 
-  // ✅ Map status từ backend
+  //  Map status từ backend
   const mapStatus = (status) => {
     const s = status?.toLowerCase();
     if (s === 'success') return 'paid';

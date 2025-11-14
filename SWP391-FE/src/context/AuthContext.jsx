@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
     setIsLoggingIn(true);
     try {
       const response = await authService.login({ email, password });
-      console.log('🔐 AuthContext: Login response:', response);
+      console.log(' AuthContext: Login response:', response);
       
       if (response.success) {
         const userData = response.user;
@@ -68,12 +68,12 @@ export const AuthProvider = ({ children }) => {
           console.warn('Could not clear vehicle selection:', err);
         }
         
-        console.log('🚀 AuthContext: Navigating to:', redirectPath, 'for role:', normalizedRole, 'redirect from API:', response.redirect);
+        console.log(' AuthContext: Navigating to:', redirectPath, 'for role:', normalizedRole, 'redirect from API:', response.redirect);
         showToast(`Chào mừng ${userData.name}! Đang chuyển đến ${normalizedRole.toUpperCase()} Dashboard...`, 'success');
         
         // Small delay to show the toast before navigating
         setTimeout(() => {
-          console.log('🎯 AuthContext: Executing navigation to:', redirectPath);
+          console.log(' AuthContext: Executing navigation to:', redirectPath);
           navigate(redirectPath);
         }, 500);
         

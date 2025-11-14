@@ -78,11 +78,11 @@ export const getUpdatedVehicleFromSession = () => {
     const updatedVehicleStr = sessionStorage.getItem('selectedVehicle');
     if (updatedVehicleStr) {
       const updatedVehicle = JSON.parse(updatedVehicleStr);
-      console.log('🔄 Found updated vehicle in session:', updatedVehicle);
+      console.log(' Found updated vehicle in session:', updatedVehicle);
       return updatedVehicle;
     }
   } catch (err) {
-    console.warn('⚠️ Failed to parse updated vehicle from session:', err);
+    console.warn(' Failed to parse updated vehicle from session:', err);
   }
   return null;
 };
@@ -95,7 +95,7 @@ export const updateVehicleBatteryLevel = (vehicle, updatedVehicle) => {
 
   if (vehicle.id === updatedVehicle.id || 
       vehicle.plateNumber === updatedVehicle.plateNumber) {
-    console.log('✅ Updating vehicle battery:', vehicle.plateNumber, 
+    console.log(' Updating vehicle battery:', vehicle.plateNumber, 
                'from', vehicle.batteryLevel, 'to', updatedVehicle.batteryLevel);
     return {
       ...vehicle,

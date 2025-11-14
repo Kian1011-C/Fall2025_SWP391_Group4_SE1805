@@ -14,7 +14,7 @@ const FAQList = () => {
       border: '1px solid rgba(255, 255, 255, 0.1)'
     }}>
       <h3 style={{ color: '#FFFFFF', marginBottom: '25px', fontSize: '1.3rem' }}>
-        ❓ Câu hỏi thường gặp
+         Câu hỏi thường gặp
       </h3>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         {faqItems.map((item, index) => (

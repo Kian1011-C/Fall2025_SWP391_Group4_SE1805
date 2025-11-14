@@ -18,7 +18,7 @@ const SwapConfirmation = ({
   // Get new battery level from selected slot
   const newBatteryLevel = selectedNewBatterySlot?.batteryLevel || 100;
   
-  console.log('🔋 SwapConfirmation DEBUG:');
+  console.log(' SwapConfirmation DEBUG:');
   console.log('  - selectedVehicle:', selectedVehicle);
   console.log('  - vehicle.health:', selectedVehicle?.health);
   console.log('  - vehicle.batteryLevel:', selectedVehicle?.batteryLevel);
@@ -38,7 +38,7 @@ const SwapConfirmation = ({
           textAlign: 'center'
         }}
       >
-        🔋 Xác nhận đổi pin
+         Xác nhận đổi pin
       </h3>
 
       <div style={{ marginBottom: '32px', padding: '16px', background: '#f8f9fa', borderRadius: '12px' }}>
@@ -78,14 +78,14 @@ const SwapConfirmation = ({
             border: '1px solid #f44336'
           }}
         >
-          <p style={{ margin: 0, color: '#f44336', fontSize: '14px' }}>⚠️ {error}</p>
+          <p style={{ margin: 0, color: '#f44336', fontSize: '14px' }}> {error}</p>
         </div>
       )}
 
       <div className="battery-comparison">
         {/* Pin cũ */}
         <div className="battery-display">
-          <div className="battery-icon-large battery-old">🔋</div>
+          <div className="battery-icon-large battery-old"></div>
           <div className="battery-label">Pin hiện tại</div>
           <div className="battery-percentage" style={{ 
             color: batteryLevel < 50 ? '#f44336' : batteryLevel < 80 ? '#ff9800' : '#4caf50'
@@ -96,7 +96,7 @@ const SwapConfirmation = ({
             fontSize: '14px', 
             color: batteryLevel < 50 ? '#f44336' : batteryLevel < 80 ? '#ff9800' : '#4caf50'
           }}>
-            {batteryLevel < 50 ? '⚠️ Pin yếu' : batteryLevel < 80 ? '⚡ Pin trung bình' : '✅ Pin tốt'}
+            {batteryLevel < 50 ? ' Pin yếu' : batteryLevel < 80 ? ' Pin trung bình' : ' Pin tốt'}
           </span>
         </div>
 
@@ -105,13 +105,13 @@ const SwapConfirmation = ({
 
         {/* Pin mới */}
         <div className="battery-display">
-          <div className="battery-icon-large battery-new">🔋</div>
+          <div className="battery-icon-large battery-new"></div>
           <div className="battery-label">Pin mới</div>
           <div className="battery-percentage" style={{ color: '#4caf50' }}>
             {newBatteryLevel}%
           </div>
           <span style={{ fontSize: '14px', color: '#4caf50' }}>
-            {newBatteryLevel >= 95 ? '✅ Pin đầy' : '✅ Pin tốt'}
+            {newBatteryLevel >= 95 ? ' Pin đầy' : ' Pin tốt'}
           </span>
         </div>
       </div>
@@ -126,7 +126,7 @@ const SwapConfirmation = ({
         }}
       >
         <p style={{ margin: 0, fontSize: '14px', color: '#f57c00', textAlign: 'center' }}>
-          ⚡ Thời gian ước tính: 2-3 phút
+           Thời gian ước tính: 2-3 phút
         </p>
       </div>
 

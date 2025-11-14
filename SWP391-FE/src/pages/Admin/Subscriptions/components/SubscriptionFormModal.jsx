@@ -76,7 +76,7 @@ const SubscriptionFormModal = ({ isOpen, onClose, onSave, plan }) => {
       <div className="subscription-modal" onClick={e => e.stopPropagation()}>
         <form onSubmit={handleSubmit}>
           <div className="subscription-modal-header">
-            <h2>{isEditing ? '✏️ Chỉnh sửa Gói cước' : '➕ Tạo Gói cước Mới'}</h2>
+            <h2>{isEditing ? ' Chỉnh sửa Gói cước' : ' Tạo Gói cước Mới'}</h2>
           </div>
           
           <div className="subscription-modal-body">
@@ -161,7 +161,7 @@ const SubscriptionFormModal = ({ isOpen, onClose, onSave, plan }) => {
                   className="subscription-form-checkbox"
                 />
                 <label htmlFor="isUnlimited" className="subscription-form-checkbox-label">
-                  ♾️ Không giới hạn quãng đường
+                   Không giới hạn quãng đường
                 </label>
               </div>
             </div>
@@ -179,7 +179,7 @@ const SubscriptionFormModal = ({ isOpen, onClose, onSave, plan }) => {
               type="submit" 
               className="subscription-modal-btn subscription-modal-btn-save"
             >
-              {isEditing ? '💾 Cập nhật' : '➕ Tạo mới'}
+              {isEditing ? ' Cập nhật' : ' Tạo mới'}
             </button>
           </div>
         </form>

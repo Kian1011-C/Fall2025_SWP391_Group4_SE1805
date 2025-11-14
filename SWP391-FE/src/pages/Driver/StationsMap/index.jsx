@@ -21,22 +21,22 @@ const StationsMap = () => {
   const [showTowers, setShowTowers] = React.useState(false);
 
   const handleSelect = async (station) => {
-    console.log('🔍 Selecting station:', station);
+    console.log(' Selecting station:', station);
     selectStation(station);
     try {
-      console.log('📡 Calling GET /api/stations/' + station.id + ' for station details...');
+      console.log(' Calling GET /api/stations/' + station.id + ' for station details...');
       
       // Sử dụng API mới GET /api/stations/{id} để lấy chi tiết trạm
       const stationDetail = await stationService.getStationById(station.id);
-      console.log('📡 Station detail API Response:', stationDetail);
+      console.log(' Station detail API Response:', stationDetail);
       
       if (stationDetail.success && stationDetail.data) {
         const towers = stationDetail.data.towers || stationDetail.data.cabinets || [];
         setTowers(towers);
-        console.log('✅ Towers set from station detail:', towers);
+        console.log(' Towers set from station detail:', towers);
         
         // Log thông tin chi tiết trạm
-        console.log('🏢 Station details:', {
+        console.log(' Station details:', {
           id: stationDetail.data.id,
           name: stationDetail.data.name,
           address: stationDetail.data.address,
@@ -46,12 +46,12 @@ const StationsMap = () => {
           towers: towers.length
         });
       } else {
-        console.log('❌ Station detail API failed:', stationDetail.message);
+        console.log(' Station detail API failed:', stationDetail.message);
         setTowers([]);
       }
       setShowTowers(true);
     } catch (error) {
-      console.error('💥 Station detail API Error:', error);
+      console.error(' Station detail API Error:', error);
       setTowers([]);
       setShowTowers(true);
     }
@@ -74,7 +74,7 @@ const StationsMap = () => {
             marginBottom: '15px',
             animation: 'pulse 1.5s ease-in-out infinite'
           }}>
-            🗺️
+            
           </div>
           <p style={{ fontSize: '1.125rem' }}>Đang tải bản đồ trạm...</p>
           <style>
@@ -106,7 +106,7 @@ const StationsMap = () => {
             maxWidth: '500px',
             margin: '0 auto'
           }}>
-            <div style={{ fontSize: '3rem', marginBottom: '15px' }}>⚠️</div>
+            <div style={{ fontSize: '3rem', marginBottom: '15px' }}></div>
             <h3 style={{ color: '#ff6b6b', marginBottom: '10px' }}>
               Lỗi tải dữ liệu
             </h3>
@@ -151,7 +151,7 @@ const StationsMap = () => {
         {/* Danh sách trạm dạng thẻ (bên dưới map) */}
         <div style={{ marginTop: '20px' }}>
           <h3 style={{ color: '#FFFFFF', marginBottom: '15px' }}>
-            📋 Danh sách Trạm
+             Danh sách Trạm
           </h3>
           <StationsList
             stations={stations}
@@ -170,7 +170,7 @@ const StationsMap = () => {
             color: '#ffa500',
             fontSize: '0.875rem'
           }}>
-            <strong>🔧 Selected Station:</strong> {selectedStation.name}
+            <strong> Selected Station:</strong> {selectedStation.name}
           </div>
         )}
 

@@ -76,7 +76,7 @@ const StationCard = ({ station, onSelect }) => {
         margin: '0 0 12px 0',
         fontSize: '0.95rem'
       }}>
-        📍 {station.address || 'Địa chỉ không rõ'}
+         {station.address || 'Địa chỉ không rõ'}
       </p>
 
       {/* Availability */}
@@ -144,7 +144,7 @@ const StationCard = ({ station, onSelect }) => {
           fontSize: '0.875rem',
           fontWeight: '600'
         }}>
-          ✅ Sẵn sàng đổi pin
+           Sẵn sàng đổi pin
         </div>
       )}
     </div>

@@ -11,15 +11,15 @@ const DriverLayout = () => {
   const { currentUser, handleLogout } = useAuth();
 
   const menuItems = [
-    { path: '/driver/dashboard', icon: '🏠', label: 'Trang chủ' },
-    { path: '/driver/swap-battery', icon: '🔋', label: 'Đổi pin' },
-    { path: '/driver/stations-map', icon: '🗺️', label: 'Bản đồ trạm' },
-    { path: '/driver/vehicles', icon: '🚗', label: 'Xe của tôi' },
-    { path: '/driver/subscriptions', icon: '💎', label: 'Gói dịch vụ' },
-    { path: '/driver/contracts', icon: '📋', label: 'Hợp đồng' },
-    { path: '/driver/payments', icon: '💳', label: 'Thanh toán' },
-    { path: '/driver/support', icon: '❓', label: 'Hỗ trợ' },
-    { path: '/driver/profile', icon: '⚙️', label: 'Cài đặt' }
+    { path: '/driver/dashboard', icon: '', label: 'Trang chủ' },
+    { path: '/driver/swap-battery', icon: '', label: 'Đổi pin' },
+    { path: '/driver/stations-map', icon: '', label: 'Bản đồ trạm' },
+    { path: '/driver/vehicles', icon: '', label: 'Xe của tôi' },
+    { path: '/driver/subscriptions', icon: '', label: 'Gói dịch vụ' },
+    { path: '/driver/contracts', icon: '', label: 'Hợp đồng' },
+    { path: '/driver/payments', icon: '', label: 'Thanh toán' },
+    { path: '/driver/support', icon: '', label: 'Hỗ trợ' },
+    { path: '/driver/profile', icon: '', label: 'Cài đặt' }
   ];
 
   // use handleLogout từ AuthContext

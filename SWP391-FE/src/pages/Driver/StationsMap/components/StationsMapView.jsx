@@ -84,7 +84,7 @@ const createStationIcon = (available) => {
         justify-content: center;
         font-size: 20px;
       ">
-        ⚡
+        
       </div>
     `,
     iconSize: [40, 40],
@@ -100,15 +100,15 @@ const StationsMapView = ({ stations = [], onStationSelect }) => {
 
   // Sử dụng stations từ backend, nếu không có thì dùng mock data
   const stationsData = useMemo(() => {
-    console.log('🗺️ StationsMapView - Raw stations từ props:', stations);
-    console.log('📊 Stations length:', stations?.length);
+    console.log(' StationsMapView - Raw stations từ props:', stations);
+    console.log(' Stations length:', stations?.length);
     
     if (stations && stations.length > 0) {
       // Log structure của station đầu tiên
       const firstStation = stations[0];
-      console.log('🔍 First station FULL object:', firstStation);
-      console.log('🔍 First station KEYS:', Object.keys(firstStation));
-      console.log('🔍 Checking lat/lng fields:', {
+      console.log(' First station FULL object:', firstStation);
+      console.log(' First station KEYS:', Object.keys(firstStation));
+      console.log(' Checking lat/lng fields:', {
         latitude: firstStation.latitude,
         longitude: firstStation.longitude,
         lat: firstStation.lat,
@@ -128,30 +128,30 @@ const StationsMapView = ({ stations = [], onStationSelect }) => {
           availableSlots: station.availableSlots,
           totalSlots: station.totalSlots
         };
-        console.log('🔄 Mapping station:', station.name, '→', result);
+        console.log(' Mapping station:', station.name, '→', result);
         return result;
       }).filter(s => {
         const hasCoords = !!(s.lat && s.lng);
         if (!hasCoords) {
-          console.log('❌ Filtered out (no coords):', s.name, 'lat:', s.lat, 'lng:', s.lng);
+          console.log(' Filtered out (no coords):', s.name, 'lat:', s.lat, 'lng:', s.lng);
         }
         return hasCoords;
       });
       
-      console.log('✅ Mapped stations with coords:', mapped);
+      console.log(' Mapped stations with coords:', mapped);
       return mapped;
     }
     
-    console.log('⚠️ Không có backend data, sử dụng MOCK_STATIONS');
+    console.log(' Không có backend data, sử dụng MOCK_STATIONS');
     return MOCK_STATIONS;
   }, [stations]);
 
-  console.log('📍 Final stationsData:', stationsData);
-  console.log('📍 Số lượng trạm sẽ render:', stationsData.length);
+  console.log(' Final stationsData:', stationsData);
+  console.log(' Số lượng trạm sẽ render:', stationsData.length);
   
   // Log chi tiết từng trạm
   stationsData.forEach((station, index) => {
-    console.log(`🏢 Station ${index + 1}/${stationsData.length}:`, {
+    console.log(` Station ${index + 1}/${stationsData.length}:`, {
       id: station.id,
       name: station.name,
       lat: station.lat,
@@ -183,7 +183,7 @@ const StationsMapView = ({ stations = [], onStationSelect }) => {
         setMyLocation({ lat: latitude, lng: longitude, accuracy: pos.coords.accuracy });
       },
       (err) => {
-        console.warn('⚠️ Không thể lấy vị trí:', err);
+        console.warn(' Không thể lấy vị trí:', err);
         setLocError(err.message || 'Không thể lấy vị trí');
       },
       { enableHighAccuracy: true, maximumAge: 10000, timeout: 10000 }
@@ -235,7 +235,7 @@ const StationsMapView = ({ stations = [], onStationSelect }) => {
 
         {/* Markers cho các trạm */}
         {stationsData.map((station) => {
-          console.log(`📍 Rendering marker ${station.id}:`, station.name, `[${station.lat}, ${station.lng}]`);
+          console.log(` Rendering marker ${station.id}:`, station.name, `[${station.lat}, ${station.lng}]`);
           
           return (
             <Marker
@@ -246,7 +246,7 @@ const StationsMapView = ({ stations = [], onStationSelect }) => {
             <Popup maxWidth={300}>
               <div style={styles.popup}>
                 <h3 style={styles.popupTitle}>{station.name}</h3>
-                <p style={styles.popupAddress}>📍 {station.address}</p>
+                <p style={styles.popupAddress}> {station.address}</p>
                 
                 <div style={styles.popupStats}>
                   <span style={{
@@ -256,7 +256,7 @@ const StationsMapView = ({ stations = [], onStationSelect }) => {
                     color: station.availableSlots > 5 ? '#065f46' : 
                            station.availableSlots > 0 ? '#92400e' : '#991b1b'
                   }}>
-                    🔋 Còn: <strong>{station.availableSlots}/{station.totalSlots}</strong> slot
+                     Còn: <strong>{station.availableSlots}/{station.totalSlots}</strong> slot
                   </span>
                 </div>
 
@@ -265,7 +265,7 @@ const StationsMapView = ({ stations = [], onStationSelect }) => {
                     onClick={() => handleGetDirections(station)}
                     style={styles.directionsBtn}
                   >
-                    🗺️ Chỉ đường
+                     Chỉ đường
                   </button>
                   <button
                     onClick={() => handleSwapBattery(station)}
@@ -276,7 +276,7 @@ const StationsMapView = ({ stations = [], onStationSelect }) => {
                     }}
                     disabled={station.availableSlots === 0}
                   >
-                    ⚡ Sẵn sàng Đổi Pin
+                     Sẵn sàng Đổi Pin
                   </button>
                 </div>
               </div>
@@ -295,20 +295,20 @@ const StationsMapView = ({ stations = [], onStationSelect }) => {
         style={styles.locateBtn}
         title={locError || 'Về vị trí của tôi'}
       >
-        📍 Vị trí của tôi
+         Vị trí của tôi
       </button>
       
       {/* Debug Info Overlay */}
       <div style={styles.debugOverlay}>
-        <div style={styles.debugTitle}>🗺️ Map Debug Info</div>
+        <div style={styles.debugTitle}> Map Debug Info</div>
         <div style={styles.debugItem}>
-          📍 Center: [{mapCenter[0].toFixed(4)}, {mapCenter[1].toFixed(4)}]
+           Center: [{mapCenter[0].toFixed(4)}, {mapCenter[1].toFixed(4)}]
         </div>
         <div style={styles.debugItem}>
-          🏢 Stations: {stationsData.length}
+           Stations: {stationsData.length}
         </div>
         <div style={styles.debugItem}>
-          📊 Data source: {stations.length > 0 ? 'Backend API' : 'MOCK_STATIONS'}
+           Data source: {stations.length > 0 ? 'Backend API' : 'MOCK_STATIONS'}
         </div>
         {stationsData.slice(0, 3).map((s, i) => (
           <div key={s.id} style={styles.debugItem}>

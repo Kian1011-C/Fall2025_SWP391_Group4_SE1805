@@ -20,7 +20,7 @@ const ContactForm = ({ formData, onFieldChange, onSubmit, loading, errors }) => 
       border: '1px solid rgba(255, 255, 255, 0.1)'
     }}>
       <h3 style={{ color: '#FFFFFF', marginBottom: '20px', fontSize: '1.3rem' }}>
-        📧 Gửi yêu cầu hỗ trợ
+         Gửi yêu cầu hỗ trợ
       </h3>
       <form onSubmit={handleSubmit}>
         {/* Station ID Field (optional) */}

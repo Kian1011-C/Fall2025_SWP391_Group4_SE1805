@@ -13,9 +13,9 @@ const StaffDashboard = () => {
     if (error) {
       return (
         <div className="staff-dashboard-error">
-          <p>❌ Lỗi: {error}</p>
+          <p> Lỗi: {error}</p>
           <button onClick={refetch} className="staff-dashboard-error-btn">
-            🔄 Thử lại
+             Thử lại
           </button>
         </div>
       );
@@ -29,25 +29,25 @@ const StaffDashboard = () => {
         {/* Thống kê tổng quan */}
         <div className="staff-dashboard-section">
           <h2 className="staff-dashboard-section-title">
-            📊 Thống kê hệ thống
+             Thống kê hệ thống
           </h2>
           <div className="staff-dashboard-grid">
             <StatCard 
               label="Tổng lượt đổi pin" 
               value={stats.totalSwaps} 
-              icon="🔄" 
+              icon="" 
               color="#3b82f6" 
             />
             <StatCard 
               label="Tổng số trạm" 
               value={stats.totalStations} 
-              icon="🏢" 
+              icon="" 
               color="#8b5cf6" 
             />
             <StatCard 
               label="Người dùng hoạt động" 
               value={stats.activeUsers} 
-              icon="👥" 
+              icon="" 
               color="#06b6d4" 
             />
           </div>
@@ -56,19 +56,19 @@ const StaffDashboard = () => {
         {/* Thống kê pin */}
         <div className="staff-dashboard-section">
           <h2 className="staff-dashboard-section-title">
-            🔋 Quản lý pin
+             Quản lý pin
           </h2>
           <div className="staff-dashboard-grid">
             <StatCard 
               label="Tổng số pin" 
               value={stats.totalBatteries} 
-              icon="🔋" 
+              icon="" 
               color="#f59e0b" 
             />
             <StatCard 
               label="Pin sẵn sàng" 
               value={stats.activeBatteries} 
-              icon="✅" 
+              icon="" 
               color="#10b981" 
             />
           </div>
@@ -81,7 +81,7 @@ const StaffDashboard = () => {
     <div className="staff-dashboard">
       <div className="staff-dashboard-header">
         <div>
-          <h1 className="staff-dashboard-title">📍 Tổng quan Trạm</h1>
+          <h1 className="staff-dashboard-title"> Tổng quan Trạm</h1>
           <p className="staff-dashboard-subtitle">Thống kê và quản lý hệ thống đổi pin</p>
         </div>
         <button 
@@ -89,7 +89,7 @@ const StaffDashboard = () => {
           disabled={isLoading} 
           className="staff-dashboard-refresh-btn"
         >
-          🔄 {isLoading ? 'Đang tải...' : 'Tải lại'}
+           {isLoading ? 'Đang tải...' : 'Tải lại'}
         </button>
       </div>
       {renderContent()}

@@ -37,7 +37,7 @@ const AddVehicleModal = ({
         overflowY: 'auto'
       }}>
         <h2 style={{ color: '#FFFFFF', marginBottom: '25px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          🚗 Thêm phương tiện mới
+           Thêm phương tiện mới
         </h2>
         
         {/* Hiển thị lỗi submit nếu có */}
@@ -51,7 +51,7 @@ const AddVehicleModal = ({
             marginBottom: '20px',
             fontSize: '0.9rem'
           }}>
-            ⚠️ {formErrors.submit}
+             {formErrors.submit}
           </div>
         )}
         
@@ -175,7 +175,7 @@ const AddVehicleModal = ({
             marginBottom: '20px'
           }}>
             <div style={{ color: '#22c55e', fontSize: '0.9rem' }}>
-              ✅ <strong>Thông tin:</strong> Xe sẽ được đăng ký ngay sau khi bạn nhấn "Đăng ký xe".
+               <strong>Thông tin:</strong> Xe sẽ được đăng ký ngay sau khi bạn nhấn "Đăng ký xe".
             </div>
           </div>
 
@@ -211,7 +211,7 @@ const AddVehicleModal = ({
                 fontWeight: '600'
               }}
             >
-              {submitting ? 'Đang đăng ký...' : '➕ Đăng ký xe'}
+              {submitting ? 'Đang đăng ký...' : ' Đăng ký xe'}
             </button>
           </div>
         </form>

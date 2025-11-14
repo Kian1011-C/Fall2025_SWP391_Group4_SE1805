@@ -18,7 +18,7 @@ const FAQSection = () => {
         marginBottom: '20px',
         fontSize: '1.3rem'
       }}>
-        ❓ Câu hỏi thường gặp
+         Câu hỏi thường gặp
       </h3>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         {faqItems.map((item, index) => (

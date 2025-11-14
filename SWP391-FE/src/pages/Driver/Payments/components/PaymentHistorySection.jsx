@@ -1,8 +1,8 @@
 // src/pages/Driver/Payments/components/PaymentHistorySection.jsx
 import React from 'react';
-import PaymentList from './PaymentList'; // 👈 Component này sẽ hiển thị danh sách
-import EmptyPayments from './EmptyPayments'; // 👈 Component hiển thị khi không có dữ liệu
-import ErrorDisplay from './ErrorDisplay'; // 👈 Component hiển thị khi có lỗi
+import PaymentList from './PaymentList'; //  Component này sẽ hiển thị danh sách
+import EmptyPayments from './EmptyPayments'; //  Component hiển thị khi không có dữ liệu
+import ErrorDisplay from './ErrorDisplay'; //  Component hiển thị khi có lỗi
 
 // --- CSS (Bạn có thể tách ra file CSS riêng) ---
 const sectionStyle = {
@@ -66,7 +66,7 @@ const PaymentHistorySection = ({
   return (
     <div style={sectionStyle}>
       <h3 style={headerStyle}>
-        📜 Lịch sử thanh toán
+         Lịch sử thanh toán
       </h3>
       {renderContent()}
     </div>

@@ -14,7 +14,7 @@ export const useSupportSubmit = () => {
       
       const requestData = createSupportRequest(formData, userId);
       
-      console.log('📝 Submitting support ticket:', requestData);
+      console.log(' Submitting support ticket:', requestData);
       const priorityMap = { low: 'Low', normal: 'Normal', high: 'High', urgent: 'Urgent' };
       const response = await supportService.createIssue({
         userId: requestData.userId,
@@ -29,7 +29,7 @@ export const useSupportSubmit = () => {
       }
       throw new Error(response.message || 'Gửi yêu cầu thất bại');
     } catch (err) {
-      console.error('❌ Error submitting ticket:', err);
+      console.error(' Error submitting ticket:', err);
       alert('Có lỗi xảy ra: ' + err.message);
       return { success: false, error: err.message };
     } finally {

@@ -44,7 +44,7 @@ export const HeroSection = ({ currentTime, stats }) => {
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text'
             }}>
-              ⚙️ Dashboard Quản trị
+               Dashboard Quản trị
             </h1>
             <p style={{ 
               margin: '10px 0 0 0', 

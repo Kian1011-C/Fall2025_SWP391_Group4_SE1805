@@ -56,7 +56,7 @@ const VehicleDetailModal = ({
           paddingBottom: '15px'
         }}>
           <h2 style={{ color: '#FFFFFF', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-            🚗 Chi tiết phương tiện
+             Chi tiết phương tiện
           </h2>
           <button
             onClick={onClose}
@@ -69,12 +69,12 @@ const VehicleDetailModal = ({
               padding: '5px 10px'
             }}
           >
-            ✕
+            
           </button>
         </div>
 
         {/* Vehicle Icon & Name */}
-        <div style={{ fontSize: '4rem', textAlign: 'center', marginBottom: '20px' }}>🚗</div>
+        <div style={{ fontSize: '4rem', textAlign: 'center', marginBottom: '20px' }}></div>
         
         <h3 style={{ 
           color: '#FFFFFF', 
@@ -95,7 +95,7 @@ const VehicleDetailModal = ({
           padding: '20px',
           marginBottom: '20px'
         }}>
-          <h4 style={{ color: '#19c37d', marginBottom: '15px' }}>📦 Gói dịch vụ</h4>
+          <h4 style={{ color: '#19c37d', marginBottom: '15px' }}> Gói dịch vụ</h4>
           <ContractSection vehicleContract={vehicleContract} onClose={onClose} />
         </div>
         
@@ -144,7 +144,7 @@ const VehicleDetailModal = ({
               boxShadow: '0 4px 15px rgba(25, 195, 125, 0.3)'
             }}
           >
-            🔋 Đổi pin ngay
+             Đổi pin ngay
           </button>
         </div>
       </div>

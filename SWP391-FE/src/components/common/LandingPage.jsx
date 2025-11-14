@@ -175,7 +175,7 @@ const LandingPage = () => {
         <div className="hero">
           <div className="container">
             <div className="eyebrow">
-              ⚡ Hệ thống đổi pin thông minh
+               Hệ thống đổi pin thông minh
             </div>
             <h1 className="title">
               Đổi pin xe điện <strong>nhanh chóng</strong><br/>
@@ -208,17 +208,17 @@ const LandingPage = () => {
             <h2>Tính năng nổi bật</h2>
             <div className="grid">
               <div className="card">
-                <div className="icon">⚡</div>
+                <div className="icon"></div>
                 <h3>Đổi pin siêu nhanh</h3>
                 <p className="muted">Chỉ 3 phút để đổi pin, nhanh hơn việc đổ xăng truyền thống</p>
               </div>
               <div className="card">
-                <div className="icon">📍</div>
+                <div className="icon"></div>
                 <h3>Mạng lưới rộng khắp</h3>
                 <p className="muted">Hơn 50 trạm đổi pin trên toàn thành phố</p>
               </div>
               <div className="card featured">
-                <div className="icon">📱</div>
+                <div className="icon"></div>
                 <h3>Ứng dụng thông minh</h3>
                 <p className="muted">Theo dõi pin, tìm trạm, thanh toán tự động</p>
               </div>
@@ -267,19 +267,19 @@ const LandingPage = () => {
                 </div>
                 <ul style={{listStyle: 'none', padding: '0', marginBottom: '32px', textAlign: 'left'}}>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#10b981', marginRight: '12px', fontSize: '18px'}}>✓</span>
+                    <span style={{color: '#10b981', marginRight: '12px', fontSize: '18px'}}></span>
                     200 km/tháng
                   </li>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#10b981', marginRight: '12px', fontSize: '18px'}}>✓</span>
+                    <span style={{color: '#10b981', marginRight: '12px', fontSize: '18px'}}></span>
                     Ứng dụng cơ bản
                   </li>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#10b981', marginRight: '12px', fontSize: '18px'}}>✓</span>
+                    <span style={{color: '#10b981', marginRight: '12px', fontSize: '18px'}}></span>
                     Hỗ trợ 24/7
                   </li>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#ef4444', marginRight: '12px', fontSize: '18px'}}>⚠</span>
+                    <span style={{color: '#ef4444', marginRight: '12px', fontSize: '18px'}}></span>
                     Phí vượt km nếu {'>'}200km
                   </li>
                 </ul>
@@ -329,23 +329,23 @@ const LandingPage = () => {
                 </div>
                 <ul style={{listStyle: 'none', padding: '0', marginBottom: '32px', textAlign: 'left'}}>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#3b82f6', marginRight: '12px', fontSize: '18px'}}>✓</span>
+                    <span style={{color: '#3b82f6', marginRight: '12px', fontSize: '18px'}}></span>
                     400 km/tháng
                   </li>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#3b82f6', marginRight: '12px', fontSize: '18px'}}>✓</span>
+                    <span style={{color: '#3b82f6', marginRight: '12px', fontSize: '18px'}}></span>
                     Ứng dụng đầy đủ
                   </li>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#3b82f6', marginRight: '12px', fontSize: '18px'}}>✓</span>
+                    <span style={{color: '#3b82f6', marginRight: '12px', fontSize: '18px'}}></span>
                     Ưu tiên đổi pin
                   </li>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#3b82f6', marginRight: '12px', fontSize: '18px'}}>✓</span>
+                    <span style={{color: '#3b82f6', marginRight: '12px', fontSize: '18px'}}></span>
                     Hỗ trợ ưu tiên
                   </li>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#ef4444', marginRight: '12px', fontSize: '18px'}}>⚠</span>
+                    <span style={{color: '#ef4444', marginRight: '12px', fontSize: '18px'}}></span>
                     Phí vượt km nếu {'>'}400km
                   </li>
                 </ul>
@@ -410,27 +410,27 @@ const LandingPage = () => {
                 </div>
                 <ul style={{listStyle: 'none', padding: '0', marginBottom: '32px', textAlign: 'left'}}>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#a855f7', marginRight: '12px', fontSize: '18px'}}>✓</span>
+                    <span style={{color: '#a855f7', marginRight: '12px', fontSize: '18px'}}></span>
                     600 km/tháng
                   </li>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#a855f7', marginRight: '12px', fontSize: '18px'}}>✓</span>
+                    <span style={{color: '#a855f7', marginRight: '12px', fontSize: '18px'}}></span>
                     Ứng dụng đầy đủ
                   </li>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#a855f7', marginRight: '12px', fontSize: '18px'}}>✓</span>
+                    <span style={{color: '#a855f7', marginRight: '12px', fontSize: '18px'}}></span>
                     Ưu tiên đổi pin
                   </li>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#a855f7', marginRight: '12px', fontSize: '18px'}}>✓</span>
+                    <span style={{color: '#a855f7', marginRight: '12px', fontSize: '18px'}}></span>
                     Thông báo real-time
                   </li>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#a855f7', marginRight: '12px', fontSize: '18px'}}>✓</span>
+                    <span style={{color: '#a855f7', marginRight: '12px', fontSize: '18px'}}></span>
                     Đặt trước trạm
                   </li>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#ef4444', marginRight: '12px', fontSize: '18px'}}>⚠</span>
+                    <span style={{color: '#ef4444', marginRight: '12px', fontSize: '18px'}}></span>
                     Phí vượt km nếu {'>'}600km
                   </li>
                 </ul>
@@ -495,27 +495,27 @@ const LandingPage = () => {
                 </div>
                 <ul style={{listStyle: 'none', padding: '0', marginBottom: '32px', textAlign: 'left'}}>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#eab308', marginRight: '12px', fontSize: '18px'}}>✓</span>
+                    <span style={{color: '#eab308', marginRight: '12px', fontSize: '18px'}}></span>
                     Không giới hạn km
                   </li>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#eab308', marginRight: '12px', fontSize: '18px'}}>✓</span>
+                    <span style={{color: '#eab308', marginRight: '12px', fontSize: '18px'}}></span>
                     Tính năng cao cấp
                   </li>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#eab308', marginRight: '12px', fontSize: '18px'}}>✓</span>
+                    <span style={{color: '#eab308', marginRight: '12px', fontSize: '18px'}}></span>
                     Đặt trước trạm đổi
                   </li>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#eab308', marginRight: '12px', fontSize: '18px'}}>✓</span>
+                    <span style={{color: '#eab308', marginRight: '12px', fontSize: '18px'}}></span>
                     Hỗ trợ VIP 24/7
                   </li>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#eab308', marginRight: '12px', fontSize: '18px'}}>✓</span>
+                    <span style={{color: '#eab308', marginRight: '12px', fontSize: '18px'}}></span>
                     Xe thay thế khẩn cấp
                   </li>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#eab308', marginRight: '12px', fontSize: '18px'}}>✓</span>
+                    <span style={{color: '#eab308', marginRight: '12px', fontSize: '18px'}}></span>
                     Không phí vượt km
                   </li>
                 </ul>
@@ -575,7 +575,7 @@ const LandingPage = () => {
                 overflow: 'hidden'
               }}>
                 <div style={{textAlign: 'center', zIndex: 2}}>
-                  <div style={{fontSize: '64px', marginBottom: '20px'}}>🗺️</div>
+                  <div style={{fontSize: '64px', marginBottom: '20px'}}></div>
                   <h3 style={{color: 'white', marginBottom: '16px'}}>Bản đồ tương tác</h3>
                   <p style={{color: 'rgba(255,255,255,0.6)', marginBottom: '24px'}}>
                     Tìm trạm đổi pin gần nhất với công nghệ GPS chính xác
@@ -749,7 +749,7 @@ const LandingPage = () => {
                   e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
                   e.currentTarget.style.transform = 'translateY(0)';
                 }}>
-                  <span style={{ fontSize: '18px' }}>📘</span>
+                  <span style={{ fontSize: '18px' }}></span>
                 </a>
                 <a href="#" style={{
                   width: '36px',
@@ -769,7 +769,7 @@ const LandingPage = () => {
                   e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
                   e.currentTarget.style.transform = 'translateY(0)';
                 }}>
-                  <span style={{ fontSize: '18px' }}>📷</span>
+                  <span style={{ fontSize: '18px' }}></span>
                 </a>
                 <a href="#" style={{
                   width: '36px',
@@ -789,7 +789,7 @@ const LandingPage = () => {
                   e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
                   e.currentTarget.style.transform = 'translateY(0)';
                 }}>
-                  <span style={{ fontSize: '18px' }}>🐦</span>
+                  <span style={{ fontSize: '18px' }}></span>
                 </a>
               </div>
             </div>
@@ -869,7 +869,7 @@ const LandingPage = () => {
                   alignItems: 'flex-start',
                   gap: '10px'
                 }}>
-                  <span style={{ fontSize: '16px', marginTop: '2px' }}>📍</span>
+                  <span style={{ fontSize: '16px', marginTop: '2px' }}></span>
                   <span style={{
                     color: 'rgba(255, 255, 255, 0.6)',
                     fontSize: '14px',
@@ -884,7 +884,7 @@ const LandingPage = () => {
                   alignItems: 'center',
                   gap: '10px'
                 }}>
-                  <span style={{ fontSize: '16px' }}>📞</span>
+                  <span style={{ fontSize: '16px' }}></span>
                   <a href="tel:+84901234567" style={{
                     color: 'rgba(255, 255, 255, 0.6)',
                     textDecoration: 'none',
@@ -900,7 +900,7 @@ const LandingPage = () => {
                   alignItems: 'center',
                   gap: '10px'
                 }}>
-                  <span style={{ fontSize: '16px' }}>✉️</span>
+                  <span style={{ fontSize: '16px' }}></span>
                   <a href="mailto:evdriversystem@gmail.com" style={{
                     color: 'rgba(255, 255, 255, 0.6)',
                     textDecoration: 'none',

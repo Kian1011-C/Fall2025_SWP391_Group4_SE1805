@@ -28,28 +28,28 @@ export const getFAQItems = () => [
  */
 export const getIssueTypes = () => [
   { 
-    icon: '🔋', 
+    icon: '', 
     title: 'Lỗi pin', 
     desc: 'Pin không hoạt động đúng', 
     color: '#19c37d',
     type: 'battery'
   },
   { 
-    icon: '🏪', 
+    icon: '', 
     title: 'Lỗi trạm', 
     desc: 'Trạm đổi pin có vấn đề', 
     color: '#6ab7ff',
     type: 'station'
   },
   { 
-    icon: '💳', 
+    icon: '', 
     title: 'Lỗi thanh toán', 
     desc: 'Vấn đề với thanh toán', 
     color: '#ffa500',
     type: 'payment'
   },
   { 
-    icon: '📱', 
+    icon: '', 
     title: 'Lỗi ứng dụng', 
     desc: 'App không hoạt động', 
     color: '#9c88ff',
@@ -62,14 +62,14 @@ export const getIssueTypes = () => [
  */
 export const getContactInfo = () => [
   {
-    icon: '📞',
+    icon: '',
     label: 'Hotline',
     value: '1900-xxxx',
     color: '#19c37d',
     type: 'phone'
   },
   {
-    icon: '📧',
+    icon: '',
     label: 'Email',
     value: 'evdriversystem@gmail.com',
     color: '#6ab7ff',
@@ -88,7 +88,7 @@ export const getContactInfo = () => [
  * Get tabs configuration
  */
 export const getTabs = () => [
-  { id: 'contact', label: '📞 Liên hệ', icon: '📞' }
+  { id: 'contact', label: ' Liên hệ', icon: '' }
 ];
 
 /**

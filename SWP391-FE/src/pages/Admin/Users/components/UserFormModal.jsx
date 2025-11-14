@@ -4,35 +4,37 @@ import './UserFormModal.css';
 
 const UserFormModal = ({ isOpen, onClose, onSave, user }) => {
   const [formData, setFormData] = useState({
+    userId: '',
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
     cccd: '',
     password: '',
-    role: 'driver',
+    role: 'EV Driver',
     status: 'active',
   });
   const isEditing = !!user;
 
   useEffect(() => {
-    console.log('🔵 UserFormModal: useEffect triggered', { isOpen, user });
+    console.log(' UserFormModal: useEffect triggered', { isOpen, user });
     if (isEditing) {
       setFormData({
+        userId: user.userId || '',
         firstName: user.firstName || '',
         lastName: user.lastName || '',
         email: user.email || '',
         phone: user.phone || '',
         cccd: user.cccd || '',
         password: '', // Không tải mật khẩu cũ
-        role: user.role?.toLowerCase() || 'driver', // Normalize role
+        role: user.role || 'EV Driver',
         status: user.status?.toLowerCase() || 'active',
       });
     } else {
       // Reset form khi mở modal để "Tạo mới"
       setFormData({
-        firstName: '', lastName: '', email: '', phone: '', cccd: '',
-        password: '', role: 'driver', status: 'active',
+        userId: '', firstName: '', lastName: '', email: '', phone: '', cccd: '',
+        password: '', role: 'EV Driver', status: 'active',
       });
     }
   }, [user, isEditing, isOpen]);
@@ -44,16 +46,23 @@ const UserFormModal = ({ isOpen, onClose, onSave, user }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('🔵 UserFormModal: Submit form', formData);
-    onSave(formData, user?.userId);
+    console.log(' UserFormModal: Submit form', formData);
+    
+    // Nếu đang chỉnh sửa và mật khẩu trống, loại bỏ password khỏi data gửi đi
+    const dataToSend = { ...formData };
+    if (isEditing && (!formData.password || formData.password.trim() === '')) {
+      delete dataToSend.password;
+    }
+    
+    onSave(dataToSend, user?.userId);
   };
 
   if (!isOpen) {
-    console.log('🔵 UserFormModal: Modal is CLOSED, not rendering');
+    console.log(' UserFormModal: Modal is CLOSED, not rendering');
     return null;
   }
 
-  console.log('🔵 UserFormModal: Modal is OPEN, rendering with Portal...');
+  console.log(' UserFormModal: Modal is OPEN, rendering with Portal...');
 
   const modalContent = (
     <div className="user-modal-overlay" onClick={onClose}>
@@ -77,12 +86,16 @@ const UserFormModal = ({ isOpen, onClose, onSave, user }) => {
               <label className="user-form-label">Email</label>
               <input type="email" name="email" value={formData.email} onChange={handleChange} className="user-form-input" required />
             </div>
-            {!isEditing && ( // Chỉ yêu cầu mật khẩu khi tạo mới
+            {!isEditing && (
               <div className="user-form-group">
-                <label className="user-form-label">Mật khẩu</label>
-                <input type="password" name="password" value={formData.password} onChange={handleChange} className="user-form-input" required />
+                <label className="user-form-label">User ID</label>
+                <input type="text" name="userId" value={formData.userId} onChange={handleChange} className="user-form-input" placeholder="Để trống để sử dụng email" />
               </div>
             )}
+            <div className="user-form-group">
+              <label className="user-form-label">Mật khẩu {isEditing && '(Để trống nếu không muốn đổi)'}</label>
+              <input type="password" name="password" value={formData.password} onChange={handleChange} className="user-form-input" required={!isEditing} placeholder={isEditing ? 'Nhập mật khẩu mới nếu muốn thay đổi' : ''} />
+            </div>
             <div className="user-form-row">
               <div className="user-form-group">
                 <label className="user-form-label">Số điện thoại</label>
@@ -96,10 +109,10 @@ const UserFormModal = ({ isOpen, onClose, onSave, user }) => {
             <div className="user-form-row">
               <div className="user-form-group">
                 <label className="user-form-label">Vai trò</label>
-                <select name="role" value={formData.role} onChange={handleChange} className="user-form-select">
-                  <option value="driver">Driver</option>
-                  <option value="staff">Staff</option>
-                  <option value="admin">Admin</option>
+                <select name="role" value={formData.role} onChange={handleChange} className="user-form-select" disabled={isEditing}>
+                  <option value="EV Driver">EV Driver</option>
+                  <option value="Staff">Staff</option>
+                  <option value="Admin">Admin</option>
                 </select>
               </div>
               <div className="user-form-group">

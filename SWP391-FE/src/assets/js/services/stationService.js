@@ -11,15 +11,15 @@ const stationService = {
      */
     getAllStations: async (filters = {}) => {
         try {
-            console.log("🔍 StationService: Lấy danh sách trạm từ GET /api/stations", filters);
+            console.log(" StationService: Lấy danh sách trạm từ GET /api/stations", filters);
             
             // Gọi API GET /api/stations
             const response = await apiUtils.get('/api/stations', filters);
             
-            console.log("📊 GET /api/stations response:", response);
+            console.log(" GET /api/stations response:", response);
             
             if (response.success) {
-                console.log('✅ Danh sách trạm loaded:', response.data?.length || 0);
+                console.log(' Danh sách trạm loaded:', response.data?.length || 0);
                 return {
                     success: true,
                     data: response.data || [],
@@ -29,7 +29,7 @@ const stationService = {
                 throw new Error(response.message || 'Không thể lấy danh sách trạm');
             }
         } catch (error) {
-            console.error('❌ Lỗi khi lấy danh sách trạm:', error);
+            console.error(' Lỗi khi lấy danh sách trạm:', error);
             const errorInfo = apiUtils.handleError ? apiUtils.handleError(error) : { message: error.message };
             return {
                 success: false,
@@ -45,15 +45,15 @@ const stationService = {
      */
     getStationById: async (stationId) => {
         try {
-            console.log("🔍 StationService: Lấy chi tiết trạm từ GET /api/stations/" + stationId);
+            console.log(" StationService: Lấy chi tiết trạm từ GET /api/stations/" + stationId);
             
             // Gọi API GET /api/stations/{id}
             const response = await apiUtils.get(`/api/stations/${stationId}`);
             
-            console.log("📊 GET /api/stations/" + stationId + " response:", response);
+            console.log(" GET /api/stations/" + stationId + " response:", response);
             
             if (response.success) {
-                console.log('✅ Chi tiết trạm loaded:', response.data);
+                console.log(' Chi tiết trạm loaded:', response.data);
                 return {
                     success: true,
                     data: response.data,
@@ -63,7 +63,7 @@ const stationService = {
                 throw new Error(response.message || 'Không thể lấy chi tiết trạm');
             }
         } catch (error) {
-            console.error('❌ Lỗi khi lấy chi tiết trạm:', error);
+            console.error(' Lỗi khi lấy chi tiết trạm:', error);
             const errorInfo = apiUtils.handleError ? apiUtils.handleError(error) : { message: error.message };
             return {
                 success: false,
@@ -83,13 +83,13 @@ const stationService = {
             const response = await apiUtils.get('/api/stations/stats');
             
             if (response.success) {
-                console.log('✅ API stats trả về dữ liệu:', response.data);
+                console.log(' API stats trả về dữ liệu:', response.data);
                 return { success: true, data: response.data, message: 'Lấy thống kê trạm thành công' };
             } else {
                 throw new Error(response.message || 'Không thể lấy thống kê trạm');
             }
         } catch (error) {
-            console.error('❌ Lỗi khi lấy thống kê trạm:', error);
+            console.error(' Lỗi khi lấy thống kê trạm:', error);
             const errorInfo = apiUtils.handleError(error);
             return { success: false, message: errorInfo.message || 'Lỗi API', error: errorInfo };
         }
@@ -101,14 +101,14 @@ const stationService = {
      */
     getTowersByStation: async (stationId) => {
         try {
-            console.log("🔍 StationService: Lấy towers của trạm", stationId);
+            console.log(" StationService: Lấy towers của trạm", stationId);
             
             // Sử dụng API getStationById để lấy thông tin chi tiết
             const stationDetail = await stationService.getStationById(stationId);
             
             if (stationDetail.success && stationDetail.data) {
                 const towers = stationDetail.data.towers || stationDetail.data.cabinets || [];
-                console.log('✅ Towers loaded:', towers.length);
+                console.log(' Towers loaded:', towers.length);
                 return {
                     success: true,
                     data: towers,
@@ -118,7 +118,7 @@ const stationService = {
                 throw new Error(stationDetail.message || 'Không thể lấy thông tin towers');
             }
         } catch (error) {
-            console.error('❌ Lỗi khi lấy danh sách towers:', error);
+            console.error(' Lỗi khi lấy danh sách towers:', error);
             return {
                 success: false,
                 message: error.message || 'Lỗi khi lấy danh sách towers',
@@ -132,7 +132,7 @@ const stationService = {
      * @deprecated Sử dụng getTowersByStation thay thế
      */
     getCabinetsByStation: async (stationId) => {
-        console.warn('⚠️ getCabinetsByStation is deprecated, use getTowersByStation instead');
+        console.warn(' getCabinetsByStation is deprecated, use getTowersByStation instead');
         
         try {
             // Sử dụng API mới getTowersByStation
@@ -150,7 +150,7 @@ const stationService = {
             }
             return []; 
         } catch (error) {
-            console.error('❌ Lỗi khi lấy danh sách trụ:', error);
+            console.error(' Lỗi khi lấy danh sách trụ:', error);
             throw error;
         }
     },
@@ -175,10 +175,10 @@ const stationService = {
             // BE trả về { success: true, data: [...] }
             const response = await apiUtils.get(endpoint, params);
             
-            console.log('🔍 getSlotsByTower response:', response);
-            console.log('🔍 response.success:', response?.success);
-            console.log('🔍 response.data:', response?.data);
-            console.log('🔍 response.data length:', response?.data?.length);
+            console.log(' getSlotsByTower response:', response);
+            console.log(' response.success:', response?.success);
+            console.log(' response.data:', response?.data);
+            console.log(' response.data length:', response?.data?.length);
             
             // Trả về toàn bộ response để useSwapData xử lý (check success, data)
             return response;

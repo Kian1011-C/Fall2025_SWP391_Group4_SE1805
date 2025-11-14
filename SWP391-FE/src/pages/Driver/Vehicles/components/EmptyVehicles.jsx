@@ -10,7 +10,7 @@ const EmptyVehicles = ({ onAddVehicle }) => {
       textAlign: 'center',
       border: '1px solid rgba(255, 255, 255, 0.1)'
     }}>
-      <div style={{ fontSize: '5rem', marginBottom: '20px' }}>🚙</div>
+      <div style={{ fontSize: '5rem', marginBottom: '20px' }}></div>
       <h3 style={{ color: '#FFFFFF', marginBottom: '10px' }}>Chưa có phương tiện nào</h3>
       <p style={{ color: '#B0B0B0', marginBottom: '25px' }}>
         Thêm phương tiện để bắt đầu sử dụng dịch vụ đổi pin
@@ -32,7 +32,7 @@ const EmptyVehicles = ({ onAddVehicle }) => {
           gap: '8px'
         }}
       >
-        ➕ Thêm phương tiện đầu tiên
+         Thêm phương tiện đầu tiên
       </button>
     </div>
   );

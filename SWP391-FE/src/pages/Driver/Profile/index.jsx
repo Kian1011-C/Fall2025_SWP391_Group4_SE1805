@@ -97,7 +97,7 @@ const DriverProfile = () => {
             textAlign: 'center',
             maxWidth: '500px'
           }}>
-            <div style={{ fontSize: '3rem', marginBottom: '15px' }}>⚠️</div>
+            <div style={{ fontSize: '3rem', marginBottom: '15px' }}></div>
             <h3 style={{ color: '#EF4444', marginBottom: '10px' }}>
               Lỗi tải dữ liệu
             </h3>

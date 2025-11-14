@@ -29,19 +29,19 @@ const TransactionRow = ({ transaction, onViewDetails }) => (
     </td>
     <td style={styles.cell}>
       <div style={styles.infoBlock}>
-        👤 <span style={styles.label}>User #{transaction.userId}</span>
+         <span style={styles.label}>User #{transaction.userId}</span>
       </div>
     </td>
     <td style={styles.cell}>
       <div style={styles.infoBlock}>
-        🏢 <span style={styles.label}>Station #{transaction.stationId}</span>
+         <span style={styles.label}>Station #{transaction.stationId}</span>
       </div>
     </td>
     <td style={styles.cell}>
       <div style={styles.batteryInfo}>
-        <span style={{ color: '#ef4444' }}>🔋 #{transaction.oldBatteryId}</span>
+        <span style={{ color: '#ef4444' }}> #{transaction.oldBatteryId}</span>
         <span style={{ color: '#64748b', margin: '0 8px' }}>→</span>
-        <span style={{ color: '#10b981' }}>🔋 #{transaction.newBatteryId}</span>
+        <span style={{ color: '#10b981' }}> #{transaction.newBatteryId}</span>
       </div>
     </td>
     <td style={styles.cell}>
@@ -109,7 +109,7 @@ const StaffSwapHistory = () => {
   const renderStats = () => (
     <div style={styles.statsGrid}>
       <div style={styles.statCard}>
-        <div style={styles.statIcon}>📊</div>
+        <div style={styles.statIcon}></div>
         <div>
           <div style={styles.statValue}>{stats.total}</div>
           <div style={styles.statLabel}>Tổng giao dịch</div>
@@ -117,7 +117,7 @@ const StaffSwapHistory = () => {
       </div>
 
       <div style={styles.statCard}>
-        <div style={{ ...styles.statIcon, background: 'rgba(16, 185, 129, 0.2)' }}>✅</div>
+        <div style={{ ...styles.statIcon, background: 'rgba(16, 185, 129, 0.2)' }}></div>
         <div>
           <div style={{ ...styles.statValue, color: '#10b981' }}>{stats.completed}</div>
           <div style={styles.statLabel}>Hoàn thành</div>
@@ -133,7 +133,7 @@ const StaffSwapHistory = () => {
       </div>
 
       <div style={styles.statCard}>
-        <div style={{ ...styles.statIcon, background: 'rgba(245, 158, 11, 0.2)' }}>📈</div>
+        <div style={{ ...styles.statIcon, background: 'rgba(245, 158, 11, 0.2)' }}></div>
         <div>
           <div style={{ ...styles.statValue, color: '#f59e0b' }}>{stats.successRate}%</div>
           <div style={styles.statLabel}>Tỷ lệ thành công</div>
@@ -146,7 +146,7 @@ const StaffSwapHistory = () => {
     <div style={styles.filterContainer}>
       <input 
         type="text"
-        placeholder="🔍 Tìm kiếm theo mã GD, User ID, Station ID..."
+        placeholder=" Tìm kiếm theo mã GD, User ID, Station ID..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         style={styles.searchInput}
@@ -157,11 +157,11 @@ const StaffSwapHistory = () => {
         onChange={(e) => setFilterStatus(e.target.value)} 
         style={styles.filterSelect}
       >
-        <option value="">📋 Tất cả trạng thái</option>
-        <option value="COMPLETED">✅ Hoàn thành</option>
+        <option value=""> Tất cả trạng thái</option>
+        <option value="COMPLETED"> Hoàn thành</option>
         <option value="INITIATED">⏳ Đang xử lý</option>
-        <option value="CANCELLED">🚫 Đã hủy</option>
-        <option value="FAILED">❌ Thất bại</option>
+        <option value="CANCELLED"> Đã hủy</option>
+        <option value="FAILED"> Thất bại</option>
       </select>
 
       <input 
@@ -172,7 +172,7 @@ const StaffSwapHistory = () => {
       />
 
       <button onClick={refetch} style={styles.refreshBtn}>
-        🔄 Tải lại
+         Tải lại
       </button>
     </div>
   );
@@ -199,10 +199,10 @@ const StaffSwapHistory = () => {
     if (error) {
       return (
         <div style={styles.errorContainer}>
-          <div style={styles.errorIcon}>⚠️</div>
+          <div style={styles.errorIcon}></div>
           <h3 style={styles.errorTitle}>Lỗi tải dữ liệu</h3>
           <p style={styles.errorMessage}>{error}</p>
-          <button onClick={refetch} style={styles.retryBtn}>🔄 Thử lại</button>
+          <button onClick={refetch} style={styles.retryBtn}> Thử lại</button>
         </div>
       );
     }
@@ -210,7 +210,7 @@ const StaffSwapHistory = () => {
     if (filteredTransactions.length === 0) {
       return (
         <div style={styles.emptyContainer}>
-          <div style={styles.emptyIcon}>📭</div>
+          <div style={styles.emptyIcon}></div>
           <h3 style={styles.emptyTitle}>Không tìm thấy giao dịch</h3>
           <p style={styles.emptyMessage}>
             {searchQuery ? 'Thử thay đổi từ khóa tìm kiếm' : 'Chưa có giao dịch nào'}
@@ -284,7 +284,7 @@ const StaffSwapHistory = () => {
       {/* Header */}
       <div style={styles.header}>
         <div>
-          <h1 style={styles.title}>🔄 Lịch sử đổi Pin</h1>
+          <h1 style={styles.title}> Lịch sử đổi Pin</h1>
           <p style={styles.subtitle}>
             Theo dõi và quản lý lịch sử giao dịch đổi pin của khách hàng
           </p>

@@ -20,7 +20,7 @@ const PaymentHistory = ({ payments }) => {
         alignItems: 'center',
         gap: '10px'
       }}>
-        💳 Lịch sử thanh toán gần đây
+         Lịch sử thanh toán gần đây
       </h3>
       
       {payments.length > 0 ? (
@@ -40,7 +40,7 @@ const PaymentHistory = ({ payments }) => {
             >
               <div>
                 <div style={{ color: '#FFFFFF', fontSize: '1rem', marginBottom: '5px' }}>
-                  💳 Thanh toán {payment.method || 'N/A'}
+                   Thanh toán {payment.method || 'N/A'}
                 </div>
                 <div style={{ color: '#B0B0B0', fontSize: '0.8rem' }}>
                   {payment.processedAt ? new Date(payment.processedAt).toLocaleString('vi-VN') : 'N/A'}
@@ -61,8 +61,8 @@ const PaymentHistory = ({ payments }) => {
                   fontWeight: '600',
                   marginBottom: '5px'
                 }}>
-                  {payment.status === 'success' ? '✅ Thành công' : 
-                   payment.status === 'pending' ? '⏳ Đang xử lý' : '❌ Thất bại'}
+                  {payment.status === 'success' ? ' Thành công' : 
+                   payment.status === 'pending' ? '⏳ Đang xử lý' : ' Thất bại'}
                 </div>
                 <div style={{ color: '#19c37d', fontSize: '0.9rem', fontWeight: '600' }}>
                   {payment.amount ? `${payment.amount.toLocaleString()} ${payment.currency || 'VND'}` : 'N/A'}
@@ -86,7 +86,7 @@ const PaymentHistory = ({ payments }) => {
               marginTop: '10px'
             }}
           >
-            📊 Xem tất cả lịch sử
+             Xem tất cả lịch sử
           </button>
         </div>
       ) : (
@@ -98,7 +98,7 @@ const PaymentHistory = ({ payments }) => {
           padding: '40px',
           color: '#B0B0B0'
         }}>
-          <div style={{ fontSize: '3rem' }}>📭</div>
+          <div style={{ fontSize: '3rem' }}></div>
           <div>Chưa có lịch sử thanh toán nào</div>
           <button
             onClick={() => navigate('/driver/subscriptions')}
@@ -113,7 +113,7 @@ const PaymentHistory = ({ payments }) => {
               marginTop: '10px'
             }}
           >
-            💎 Xem gói dịch vụ
+             Xem gói dịch vụ
           </button>
         </div>
       )}

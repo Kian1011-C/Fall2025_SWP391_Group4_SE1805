@@ -18,7 +18,7 @@ const EmptyContracts = () => {
         fontSize: '4rem',
         marginBottom: '1.5rem'
       }}>
-        📋
+        
       </div>
       <h3 style={{
         fontSize: '1.5rem',

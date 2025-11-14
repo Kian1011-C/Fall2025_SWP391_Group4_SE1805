@@ -30,7 +30,7 @@ const SwapBatteryPage = () => {
                 
                 // Nếu chưa có selectedVehicle, tự động lấy xe đầu tiên của user
                 if (!selectedVehicleStr) {
-                    console.warn('⚠️ Chưa chọn xe, đang tự động lấy xe đầu tiên...');
+                    console.warn(' Chưa chọn xe, đang tự động lấy xe đầu tiên...');
                     
                     try {
                         // Import vehicleService để lấy danh sách xe
@@ -41,7 +41,7 @@ const SwapBatteryPage = () => {
                         
                         if (response && response.success && response.data && response.data.length > 0) {
                             const firstVehicle = response.data[0];
-                            console.log('✅ Tự động chọn xe đầu tiên:', firstVehicle);
+                            console.log(' Tự động chọn xe đầu tiên:', firstVehicle);
                             
                             // Lưu vào sessionStorage
                             sessionStorage.setItem('selectedVehicle', JSON.stringify(firstVehicle));
@@ -53,7 +53,7 @@ const SwapBatteryPage = () => {
                                              firstVehicle?.battery?.id;
                             
                             if (!batteryId) {
-                                console.warn('⚠️ Xe đầu tiên chưa có pin');
+                                console.warn(' Xe đầu tiên chưa có pin');
                                 alert('Xe của bạn chưa được gắn pin.\nVui lòng kiểm tra lại thông tin xe.');
                                 navigate('/driver/dashboard');
                                 return;
@@ -61,16 +61,16 @@ const SwapBatteryPage = () => {
                             
                             // Lưu batteryId
                             sessionStorage.setItem('old_battery_id', String(batteryId));
-                            console.log('✅ Đã tự động chọn xe có pin, batteryId:', batteryId);
+                            console.log(' Đã tự động chọn xe có pin, batteryId:', batteryId);
                             return; // OK, tiếp tục flow
                         } else {
-                            console.error('❌ Không tìm thấy xe nào');
+                            console.error(' Không tìm thấy xe nào');
                             alert('Bạn chưa có xe nào.\nVui lòng thêm xe trước khi đổi pin.');
                             navigate('/driver/dashboard');
                             return;
                         }
                     } catch (apiError) {
-                        console.error('❌ Lỗi khi lấy danh sách xe:', apiError);
+                        console.error(' Lỗi khi lấy danh sách xe:', apiError);
                         alert('Không thể tải thông tin xe.\nVui lòng thử lại.');
                         navigate('/driver/dashboard');
                         return;
@@ -85,17 +85,17 @@ const SwapBatteryPage = () => {
                                  selectedVehicle?.battery?.id;
                 
                 if (!batteryId) {
-                    console.warn('⚠️ Xe chưa có pin (batteryId null), redirect về Dashboard');
+                    console.warn(' Xe chưa có pin (batteryId null), redirect về Dashboard');
                     alert('Xe của bạn chưa được gắn pin.\nVui lòng kiểm tra lại thông tin xe.');
                     navigate('/driver/dashboard');
                     return;
                 }
                 
-                console.log('✅ selectedVehicle hợp lệ, batteryId:', batteryId);
+                console.log(' selectedVehicle hợp lệ, batteryId:', batteryId);
                 // Lưu batteryId vào session để useSwapData dùng
                 sessionStorage.setItem('old_battery_id', String(batteryId));
             } catch (err) {
-                console.error('❌ Lỗi khi kiểm tra selectedVehicle:', err);
+                console.error(' Lỗi khi kiểm tra selectedVehicle:', err);
                 alert('Có lỗi xảy ra. Vui lòng thử lại.');
                 navigate('/driver/dashboard');
             }
@@ -159,9 +159,9 @@ const SwapBatteryPage = () => {
                 sessionStorage.setItem('vehicleNeedsReload', vehicleNeedsReloadBackup);
             }
             
-            console.log('✅ Đã xóa swap session, giữ lại selectedVehicle và vehicleNeedsReload');
+            console.log(' Đã xóa swap session, giữ lại selectedVehicle và vehicleNeedsReload');
         } catch (error) {
-            console.error('❌ Lỗi khi xóa sessionStorage:', error);
+            console.error(' Lỗi khi xóa sessionStorage:', error);
         }
         
         // Điều hướng về dashboard

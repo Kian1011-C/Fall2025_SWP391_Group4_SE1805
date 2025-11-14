@@ -25,7 +25,7 @@ export const useProfileData = () => {
       } else {
         // Fallback: lấy từ sessionStorage
         userId = sessionStorage.getItem('userId') || sessionStorage.getItem('UserID');
-        console.log('⚠️ Không có currentUser, sử dụng userId từ sessionStorage:', userId);
+        console.log(' Không có currentUser, sử dụng userId từ sessionStorage:', userId);
       }
       
       if (!userId) {
@@ -33,17 +33,17 @@ export const useProfileData = () => {
         return;
       }
       
-      console.log('🔍 Current user:', currentUser);
-      console.log('🔍 User ID:', userId);
+      console.log(' Current user:', currentUser);
+      console.log(' User ID:', userId);
       
       // Sử dụng API profile mới để lấy thông tin chi tiết
       const profileResult = await userService.getUserProfile(userId);
       
       if (profileResult.success) {
-        console.log('✅ Profile data loaded:', profileResult.data);
+        console.log(' Profile data loaded:', profileResult.data);
         setUser(profileResult.data);
       } else {
-        console.warn('⚠️ API profile failed, using fallback data');
+        console.warn(' API profile failed, using fallback data');
         
         // Fallback: sử dụng currentUser hoặc demo data
         const fallbackUser = currentUser || {
@@ -57,7 +57,7 @@ export const useProfileData = () => {
           address: 'Hà Nội, Việt Nam'
         };
         
-        console.log('🔄 Using fallback user data:', fallbackUser);
+        console.log(' Using fallback user data:', fallbackUser);
         setUser(fallbackUser);
       }
     } catch (err) {

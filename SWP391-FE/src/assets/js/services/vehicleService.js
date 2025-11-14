@@ -283,10 +283,10 @@ class VehicleService {
   // Get vehicle types for dropdown
   getVehicleTypes() {
     return [
-      { id: 'motorcycle', name: 'Xe máy điện', icon: '🏍️' },
-      { id: 'scooter', name: 'Xe scooter điện', icon: '🛵' },
-      { id: 'bicycle', name: 'Xe đạp điện', icon: '🚲' },
-      { id: 'car', name: 'Ô tô điện', icon: '🚗' }
+      { id: 'motorcycle', name: 'Xe máy điện', icon: '' },
+      { id: 'scooter', name: 'Xe scooter điện', icon: '' },
+      { id: 'bicycle', name: 'Xe đạp điện', icon: '' },
+      { id: 'car', name: 'Ô tô điện', icon: '' }
     ];
   }
 

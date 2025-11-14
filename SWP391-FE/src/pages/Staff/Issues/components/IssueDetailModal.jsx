@@ -404,7 +404,7 @@ const IssueDetailModal = ({ issue, onClose, onUpdate }) => {
                     Đang cập nhật...
                   </>
                 ) : (
-                  '💾 Cập nhật trạng thái'
+                  ' Cập nhật trạng thái'
                 )}
               </button>
             </div>

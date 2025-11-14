@@ -68,7 +68,7 @@ const APITestComponent = () => {
       border: '1px solid rgba(255, 255, 255, 0.1)',
       margin: '20px'
     }}>
-      <h2 style={{ color: '#FFFFFF', marginBottom: '20px' }}>🧪 API Integration Test</h2>
+      <h2 style={{ color: '#FFFFFF', marginBottom: '20px' }}> API Integration Test</h2>
       
       <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
         <button
@@ -150,7 +150,7 @@ const APITestComponent = () => {
                 <strong style={{ 
                   color: result.result.success ? '#19c37d' : '#ff6b6b' 
                 }}>
-                  {result.result.success ? '✅' : '❌'} {result.test}
+                  {result.result.success ? '' : ''} {result.test}
                 </strong>
                 <span style={{ color: '#B0B0B0', fontSize: '12px' }}>
                   {result.timestamp}
@@ -182,7 +182,7 @@ const APITestComponent = () => {
         border: '1px solid rgba(106, 183, 255, 0.2)',
         borderRadius: '8px'
       }}>
-        <h4 style={{ color: '#6ab7ff', margin: '0 0 10px 0' }}>📋 API Configuration</h4>
+        <h4 style={{ color: '#6ab7ff', margin: '0 0 10px 0' }}> API Configuration</h4>
         <p style={{ color: '#E0E0E0', fontSize: '14px', margin: '5px 0' }}>
           <strong>Base URL:</strong> http://localhost:8080
         </p>
@@ -190,7 +190,7 @@ const APITestComponent = () => {
           <strong>Status:</strong> {isLoading ? 'Testing...' : 'Ready'}
         </p>
         <p style={{ color: '#B0B0B0', fontSize: '12px', margin: '10px 0 0 0' }}>
-          💡 Backend API server configured for localhost:8080. Mock data available as fallback.
+           Backend API server configured for localhost:8080. Mock data available as fallback.
         </p>
       </div>
     </div>

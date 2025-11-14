@@ -33,12 +33,12 @@ const StationSelector = () => {
             setLoading(true);
             setError(null);
             try {
-                console.log('📤 Gọi API /api/stations');
+                console.log(' Gọi API /api/stations');
                 
                 // Gọi API thật (backend trả về tất cả trạm)
                 const data = await stationService.getAllStations();
                 
-                console.log('📥 Response từ API:', data);
+                console.log(' Response từ API:', data);
                 
                 // Backend trả về { success: true, data: [...] }
                 if (data && data.success && Array.isArray(data.data)) {
@@ -57,7 +57,7 @@ const StationSelector = () => {
                         return isActive && hasAvailableBatteries;
                     });
                     
-                    console.log(`✅ Đã lọc ${activeStations.length}/${data.data.length} trạm (hoạt động + có pin)`);
+                    console.log(` Đã lọc ${activeStations.length}/${data.data.length} trạm (hoạt động + có pin)`);
                     setStations(activeStations);
                 } else if (Array.isArray(data)) {
                     // Nếu trả về mảng trực tiếp
@@ -70,7 +70,7 @@ const StationSelector = () => {
                                                      station.availableBatteries > 0;
                         return isActive && hasAvailableBatteries;
                     });
-                    console.log(`✅ Đã lọc ${activeStations.length}/${data.length} trạm`);
+                    console.log(` Đã lọc ${activeStations.length}/${data.length} trạm`);
                     setStations(activeStations);
                 } else {
                     console.warn("Dữ liệu trạm không đúng định dạng:", data);
@@ -78,7 +78,7 @@ const StationSelector = () => {
                 }
 
             } catch (err) {
-                console.error("❌ Lỗi khi tải danh sách trạm:", err);
+                console.error(" Lỗi khi tải danh sách trạm:", err);
                 setError(err.message || "Không thể tải danh sách trạm.");
             } finally {
                 setLoading(false);
@@ -96,13 +96,13 @@ const StationSelector = () => {
                         station.status === 'ACTIVE';
         
         if (!isActive) {
-            console.warn('⚠️ Không thể chọn trạm đang bảo trì:', station.name);
+            console.warn(' Không thể chọn trạm đang bảo trì:', station.name);
             return; // Không cho chọn trạm bảo trì
         }
         
         // Kiểm tra số pin khả dụng (backend trả về availableBatteries)
         if (!station.availableBatteries || station.availableBatteries <= 0) {
-            console.warn('⚠️ Trạm không có pin khả dụng:', station.name);
+            console.warn(' Trạm không có pin khả dụng:', station.name);
             alert('Trạm này hiện không có pin khả dụng. Vui lòng chọn trạm khác.');
             return;
         }
@@ -110,9 +110,9 @@ const StationSelector = () => {
         // 4. LƯU TRẠM VÀO SESSION STORAGE
         try {
             sessionStorage.setItem('selectedStation', JSON.stringify(station));
-            console.log('✅ Đã lưu trạm vào sessionStorage:', station);
+            console.log(' Đã lưu trạm vào sessionStorage:', station);
         } catch (error) {
-            console.error('❌ Lỗi khi lưu trạm vào sessionStorage:', error);
+            console.error(' Lỗi khi lưu trạm vào sessionStorage:', error);
         }
         
         setSelectedStation(station);    

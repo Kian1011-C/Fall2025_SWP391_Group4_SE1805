@@ -50,7 +50,7 @@ const TowerSelector = () => {
                         const towerId = cabinet.id || cabinet.cabinetId;
                         if (towerId) {
                             try {
-                                console.log('🔋 Lấy thông tin slot và pin cho trụ:', towerId);
+                                console.log(' Lấy thông tin slot và pin cho trụ:', towerId);
                                 const slotsResponse = await stationService.getSlotsByTower(towerId);
                                 if (slotsResponse.success && Array.isArray(slotsResponse.data)) {
                                     const slots = slotsResponse.data;
@@ -71,10 +71,10 @@ const TowerSelector = () => {
                                         emptySlots,
                                         totalSlots: slots.length
                                     };
-                                    console.log('✅ Thông tin trụ', towerId, ':', slotInfoMap[towerId]);
+                                    console.log(' Thông tin trụ', towerId, ':', slotInfoMap[towerId]);
                                 }
                             } catch (err) {
-                                console.warn('⚠️ Không thể lấy thông tin slot cho trụ', towerId, ':', err);
+                                console.warn(' Không thể lấy thông tin slot cho trụ', towerId, ':', err);
                                 slotInfoMap[towerId] = {
                                     availableBatteries: 0,
                                     emptySlots: 0,
@@ -103,7 +103,7 @@ const TowerSelector = () => {
         if (selectedCabinet) {
             // ===== DEBUG LOG =====
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.log('🔘 NHẤN NÚT "BẮT ĐẦU ĐỔI PIN"');
+            console.log(' NHẤN NÚT "BẮT ĐẦU ĐỔI PIN"');
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             console.log('selectedCabinet object:', selectedCabinet);
             console.log('selectedCabinet.id:', selectedCabinet.id);
@@ -123,13 +123,13 @@ const TowerSelector = () => {
             // LƯU TRỤ VÀO SESSION STORAGE
             try {
                 sessionStorage.setItem('selectedCabinet', JSON.stringify(selectedCabinet));
-                console.log('✅ Đã lưu trụ vào sessionStorage:', selectedCabinet);
+                console.log(' Đã lưu trụ vào sessionStorage:', selectedCabinet);
             } catch (error) {
-                console.error('❌ Lỗi khi lưu trụ vào sessionStorage:', error);
+                console.error(' Lỗi khi lưu trụ vào sessionStorage:', error);
             }
             
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.log('🚀 GỌI initiateSwap với cabinet:', selectedCabinet);
+            console.log(' GỌI initiateSwap với cabinet:', selectedCabinet);
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             
             initiateSwap(selectedCabinet);

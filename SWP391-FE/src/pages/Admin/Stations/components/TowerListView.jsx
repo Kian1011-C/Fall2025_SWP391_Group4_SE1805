@@ -38,7 +38,7 @@ const TowerRow = ({ tower, onSelect, onEdit, onDelete }) => (
           }}
           title="Sửa"
         >
-          ✏️ Sửa
+           Sửa
         </button>
         <button
           onClick={(e) => {
@@ -56,7 +56,7 @@ const TowerRow = ({ tower, onSelect, onEdit, onDelete }) => (
           }}
           title="Xóa"
         >
-          🗑️ Xóa
+           Xóa
         </button>
       </div>
     </td>
@@ -67,7 +67,7 @@ const TowerListView = ({ towers, onSelectTower, onEditTower, onDeleteTower }) =>
   if (!towers || towers.length === 0) {
     return (
       <div className="station-empty">
-        <div className="station-empty-icon">🏗️</div>
+        <div className="station-empty-icon"></div>
         <div className="station-empty-text">Không có trụ sạc nào</div>
         <div className="station-empty-subtext">Trạm này chưa có trụ sạc nào</div>
       </div>

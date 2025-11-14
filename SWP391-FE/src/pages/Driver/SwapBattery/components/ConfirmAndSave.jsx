@@ -37,7 +37,7 @@ const ConfirmAndSave = ({
           || userContract?.contract_id 
           || userContract?.id;
         
-        console.warn('� DEBUG - Contract ID resolution:');
+        DEBUG - Contract ID resolution:');
         console.warn('  selectedVehicle.contractId:', selectedVehicle?.contractId);
         console.warn('  selectedVehicle.contract_id:', selectedVehicle?.contract_id);
         console.warn('  userContract.contractId:', userContract?.contractId);
@@ -47,7 +47,7 @@ const ConfirmAndSave = ({
         console.warn('  >>> TYPE:', typeof contractId);
         
         if (!contractId) {
-          console.error('❌ No contract ID found!');
+          console.error(' No contract ID found!');
           console.error('userContract:', userContract);
           console.error('selectedVehicle:', selectedVehicle);
           throw new Error('Không tìm thấy hợp đồng. Vui lòng đăng ký gói dịch vụ trước khi đổi pin.');
@@ -72,7 +72,7 @@ const ConfirmAndSave = ({
           swapData.current_battery_id = selectedVehicle.battery_id; // Also send snake_case
         }
 
-        console.warn('📤 FULL SWAP DATA being sent:');
+        console.warn(' FULL SWAP DATA being sent:');
         console.warn('  userId:', swapData.userId);
         console.warn('  vehicleId:', swapData.vehicleId);
         console.warn('  stationId:', swapData.stationId);
@@ -85,7 +85,7 @@ const ConfirmAndSave = ({
         console.warn('  oldBatteryLevel:', swapData.oldBatteryLevel);
         console.warn('  newBatteryLevel:', swapData.newBatteryLevel);
 
-        console.log('🔄 Initiating battery swap:', swapData);
+        console.log(' Initiating battery swap:', swapData);
         const initiateResult = await batteryService.initiateBatterySwap(swapData);
         
         if (!initiateResult.success) {
@@ -93,7 +93,7 @@ const ConfirmAndSave = ({
         }
 
         const swapId = initiateResult.data?.swapId || initiateResult.data?.id;
-        console.log('✅ Swap initiated successfully, swapId:', swapId);
+        console.log(' Swap initiated successfully, swapId:', swapId);
 
         // Step 2: Update slot status (40%)
         setProgress(40);
@@ -105,20 +105,20 @@ const ConfirmAndSave = ({
         if (swapId) {
           const confirmResult = await batteryService.confirmBatterySwap(swapId);
           if (!confirmResult.success) {
-            console.warn('⚠️ Confirm failed but continuing:', confirmResult.message);
+            console.warn(' Confirm failed but continuing:', confirmResult.message);
           }
         }
 
         // Step 4: Update vehicle battery level (80%)
         setProgress(80);
         
-        console.log('🔄 Updating vehicle battery level to:', newBatteryLevel);
+        console.log(' Updating vehicle battery level to:', newBatteryLevel);
         const updateResult = await vehicleService.updateVehicleBattery(vehicleId, newBatteryLevel);
         
         if (!updateResult.success) {
-          console.warn('⚠️ Battery update failed but continuing:', updateResult.message);
+          console.warn(' Battery update failed but continuing:', updateResult.message);
         } else {
-          console.log('✅ Vehicle battery updated successfully');
+          console.log(' Vehicle battery updated successfully');
         }
 
         // Step 5: Complete (100%)
@@ -135,7 +135,7 @@ const ConfirmAndSave = ({
         }, 2000);
 
       } catch (error) {
-        console.error('❌ Error during swap:', error);
+        console.error(' Error during swap:', error);
         setSaving(false);
         setSaveSuccess(false);
         if (onError) {
@@ -215,26 +215,26 @@ const ConfirmAndSave = ({
             }}
           >
             <p style={{ margin: '8px 0', fontSize: '14px', color: '#666' }}>
-              {progress >= 20 ? '✅' : '⏳'} Xác nhận thông tin xe và pin...
+              {progress >= 20 ? '' : '⏳'} Xác nhận thông tin xe và pin...
             </p>
             <p style={{ margin: '8px 0', fontSize: '14px', color: '#666' }}>
-              {progress >= 40 ? '✅' : '⏳'} Cập nhật trạng thái slot...
+              {progress >= 40 ? '' : '⏳'} Cập nhật trạng thái slot...
             </p>
             <p style={{ margin: '8px 0', fontSize: '14px', color: '#666' }}>
-              {progress >= 60 ? '✅' : '⏳'} Lưu thông tin giao dịch...
+              {progress >= 60 ? '' : '⏳'} Lưu thông tin giao dịch...
             </p>
             <p style={{ margin: '8px 0', fontSize: '14px', color: '#666' }}>
-              {progress >= 80 ? '✅' : '⏳'} Cập nhật lịch sử đổi pin...
+              {progress >= 80 ? '' : '⏳'} Cập nhật lịch sử đổi pin...
             </p>
             <p style={{ margin: '8px 0', fontSize: '14px', color: '#666' }}>
-              {progress >= 100 ? '✅' : '⏳'} Hoàn tất!
+              {progress >= 100 ? '' : '⏳'} Hoàn tất!
             </p>
           </div>
         </>
       ) : saveSuccess ? (
         // Success state
         <>
-          <div style={{ fontSize: '80px', marginBottom: '24px' }}>✅</div>
+          <div style={{ fontSize: '80px', marginBottom: '24px' }}></div>
           
           <h3
             style={{
@@ -264,20 +264,20 @@ const ConfirmAndSave = ({
             }}
           >
             <h4 style={{ margin: '0 0 16px 0', fontSize: '16px', color: '#2e7d32' }}>
-              📋 Thông tin giao dịch:
+               Thông tin giao dịch:
             </h4>
             <div style={{ textAlign: 'left', fontSize: '14px', color: '#2e7d32' }}>
               <p style={{ margin: '8px 0' }}>
-                📍 <strong>Trạm:</strong> {selectedStation?.name}
+                 <strong>Trạm:</strong> {selectedStation?.name}
               </p>
               <p style={{ margin: '8px 0' }}>
-                🔌 <strong>Trụ:</strong> Trụ {selectedTower?.towerNumber}
+                 <strong>Trụ:</strong> Trụ {selectedTower?.towerNumber}
               </p>
               <p style={{ margin: '8px 0' }}>
-                🔋 <strong>Pin cũ:</strong> {currentBatteryLevel}% → Slot {selectedEmptySlot?.slotNumber}
+                 <strong>Pin cũ:</strong> {currentBatteryLevel}% → Slot {selectedEmptySlot?.slotNumber}
               </p>
               <p style={{ margin: '8px 0' }}>
-                ⚡ <strong>Pin mới:</strong> {newBatteryLevel}% ← Slot {selectedNewBatterySlot?.slotNumber}
+                 <strong>Pin mới:</strong> {newBatteryLevel}% ← Slot {selectedNewBatterySlot?.slotNumber}
               </p>
               <p style={{ margin: '8px 0' }}>
                 ⏰ <strong>Thời gian:</strong> {new Date().toLocaleString('vi-VN')}
@@ -292,7 +292,7 @@ const ConfirmAndSave = ({
       ) : hasError ? (
         // Error state
         <>
-          <div style={{ fontSize: '80px', marginBottom: '24px' }}>❌</div>
+          <div style={{ fontSize: '80px', marginBottom: '24px' }}></div>
           
           <h3
             style={{
@@ -321,7 +321,7 @@ const ConfirmAndSave = ({
             }}
           >
             <p style={{ margin: 0, fontSize: '14px', color: '#f44336' }}>
-              💡 <strong>Gợi ý:</strong> Kiểm tra kết nối mạng hoặc liên hệ nhân viên hỗ trợ
+               <strong>Gợi ý:</strong> Kiểm tra kết nối mạng hoặc liên hệ nhân viên hỗ trợ
             </p>
           </div>
 
@@ -338,7 +338,7 @@ const ConfirmAndSave = ({
               cursor: 'pointer'
             }}
           >
-            🔄 Thử lại
+             Thử lại
           </button>
         </>
       ) : null}

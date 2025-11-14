@@ -58,7 +58,7 @@ const Sidebar = ({ role = 'driver' }) => {
             justifyContent: 'center',
             fontSize: '20px'
           }}>
-            🔋
+            
           </div>
           <div>
             <div style={{ fontWeight: '700', fontSize: '18px' }}>SWP201</div>
@@ -133,7 +133,7 @@ const Sidebar = ({ role = 'driver' }) => {
             justifyContent: 'center',
             fontSize: '18px'
           }}>
-            👤
+            
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: '14px', fontWeight: '600' }}>
@@ -164,7 +164,7 @@ const Sidebar = ({ role = 'driver' }) => {
             transition: 'all 0.2s'
           }}
         >
-          🚪 Đăng xuất
+           Đăng xuất
         </button>
       </div>
     </div>

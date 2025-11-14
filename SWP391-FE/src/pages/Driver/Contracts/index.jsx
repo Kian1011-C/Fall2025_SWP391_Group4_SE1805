@@ -35,7 +35,7 @@ const Contracts = () => {
               marginBottom: '1rem',
               animation: 'spin 1s linear infinite'
             }}>
-              ⚡
+              
             </div>
             <p style={{
               fontSize: '1.125rem',
@@ -64,7 +64,7 @@ const Contracts = () => {
             fontSize: '3rem',
             marginBottom: '1rem'
           }}>
-            ⚠️
+            
           </div>
           <h3 style={{
             fontSize: '1.5rem',

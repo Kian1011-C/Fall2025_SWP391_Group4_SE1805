@@ -6,7 +6,7 @@ const DebugInfo = ({ currentUser, vehicles, contracts, error }) => {
   if (import.meta.env.VITE_ENABLE_DEBUG !== 'true') return null;
 
   const handleLogout = () => {
-    console.log('🚪 Debug logout clicked');
+    console.log(' Debug logout clicked');
     // This would need to be passed as a prop or use context
     alert('Logout functionality needs to be connected');
   };
@@ -21,13 +21,13 @@ const DebugInfo = ({ currentUser, vehicles, contracts, error }) => {
       fontSize: '0.9rem',
       color: '#ffa500'
     }}>
-      <strong>🔧 Debug Info:</strong><br/>
+      <strong> Debug Info:</strong><br/>
       API Base URL: {import.meta.env.VITE_API_BASE_URL}<br/>
       Current User ID: {currentUser?.id || currentUser?.user_id || currentUser?.userId}<br/>
       Vehicles Count: {vehicles.length}<br/>
       Contracts Count: {contracts.length}<br/>
       Data Source: {error ? 'API FAILED - No Data' : vehicles.length > 0 ? 'API SUCCESS' : 'NO DATA'}<br/>
-      API Status: {error ? '❌ Error' : vehicles.length > 0 ? '✅ Connected' : '⏳ No Response'}<br/>
+      API Status: {error ? ' Error' : vehicles.length > 0 ? ' Connected' : '⏳ No Response'}<br/>
       Error: {error || 'None'}<br/>
       <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
         <button 
@@ -56,7 +56,7 @@ const DebugInfo = ({ currentUser, vehicles, contracts, error }) => {
             fontSize: '0.8rem'
           }}
         >
-          🚪 Debug Logout
+           Debug Logout
         </button>
       </div>
     </div>

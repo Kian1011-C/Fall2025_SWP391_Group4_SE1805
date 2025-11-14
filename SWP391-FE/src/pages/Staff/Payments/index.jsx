@@ -9,13 +9,13 @@ const Payments = () => {
   const [selectedDriver, setSelectedDriver] = useState(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
 
-  // ✅ Staff chỉ xem lịch sử, không xuất hóa đơn
+  //  Staff chỉ xem lịch sử, không xuất hóa đơn
   const handleViewHistory = (driver) => {
     setSelectedDriver(driver);
     setShowHistoryModal(true);
   };
 
-  // ✅ Gộp users có cùng email (giống tab "Lịch sử" của Admin)
+  //  Gộp users có cùng email (giống tab "Lịch sử" của Admin)
   const consolidatedDrivers = useMemo(() => {
     const userMap = new Map();
     drivers.forEach(driver => {
@@ -88,7 +88,7 @@ const Payments = () => {
               justifyContent: 'center',
               fontSize: '24px'
             }}>
-              👥
+              
             </div>
             <div>
               <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '4px' }}>
@@ -119,7 +119,7 @@ const Payments = () => {
               justifyContent: 'center',
               fontSize: '24px'
             }}>
-              ✓
+              
             </div>
             <div>
               <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '4px' }}>
@@ -150,7 +150,7 @@ const Payments = () => {
               justifyContent: 'center',
               fontSize: '24px'
             }}>
-              ⚠️
+              
             </div>
             <div>
               <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '4px' }}>
@@ -179,7 +179,7 @@ const Payments = () => {
         <div style={{ flex: 1, minWidth: '250px' }}>
           <input
             type="text"
-            placeholder="🔍 Tìm kiếm khách hàng (tên, email, SĐT)..."
+            placeholder=" Tìm kiếm khách hàng (tên, email, SĐT)..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{
@@ -209,7 +209,7 @@ const Payments = () => {
             gap: '8px'
           }}
         >
-          🔄 Làm mới
+           Làm mới
         </button>
       </div>
 
@@ -227,7 +227,7 @@ const Payments = () => {
           </div>
         ) : error ? (
           <div style={{ padding: '60px', textAlign: 'center', color: '#ef4444' }}>
-            ⚠️ {error}
+             {error}
           </div>
         ) : drivers.length === 0 ? (
           <div style={{ padding: '60px', textAlign: 'center', color: '#6b7280' }}>

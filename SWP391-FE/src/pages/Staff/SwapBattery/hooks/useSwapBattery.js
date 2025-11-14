@@ -1,7 +1,7 @@
 // src/hooks/useSwapBattery.js (hoặc đường dẫn của bạn)
 
 import { useState, useCallback } from 'react';
-// ✅ SỬ DỤNG staffSwapService cho Staff Manual Swap
+//  SỬ DỤNG staffSwapService cho Staff Manual Swap
 import staffSwapService from '../../../../assets/js/services/staffSwapService'; 
 
 export const useSwapBattery = (userId, staffId, defaultStationId) => {
@@ -55,7 +55,7 @@ export const useSwapBattery = (userId, staffId, defaultStationId) => {
     }, []);
 
     // 3. Lấy danh sách pin có sẵn ở kho (in_stock)
-    // ⚠️ Staff lấy pin từ KHO (status = 'in_stock'), không phải từ tower
+    //  Staff lấy pin từ KHO (status = 'in_stock'), không phải từ tower
     const fetchAvailableBatteries = useCallback(async (stationId) => {
         setIsLoading(true);
         setError(null);
@@ -92,11 +92,11 @@ export const useSwapBattery = (userId, staffId, defaultStationId) => {
         setIsSubmitting(true);
         setError(null);
         try {
-            // ✅ Gọi staffSwapService.createManualSwap() thay vì swapService.initiateSwap()
+            //  Gọi staffSwapService.createManualSwap() thay vì swapService.initiateSwap()
             const response = await staffSwapService.createManualSwap(formData);
             
             if (response && response.swapId) {
-                console.log('✅ [useSwapBattery - STAFF] Tạo swap thành công:', response);
+                console.log(' [useSwapBattery - STAFF] Tạo swap thành công:', response);
                 setSwapDetails(response);
                 setStep('in_progress');
             } else {
@@ -118,7 +118,7 @@ export const useSwapBattery = (userId, staffId, defaultStationId) => {
         try {
             console.log('[useSwapBattery - STAFF] Xác nhận hoàn thành swap:', swapDetails.swapId);
             
-            // ✅ Gọi staffSwapService.completeSwap() thay vì swapService.confirmSwap()
+            //  Gọi staffSwapService.completeSwap() thay vì swapService.confirmSwap()
             const response = await staffSwapService.completeSwap(swapDetails.swapId);
             
             if (response && response.success) {

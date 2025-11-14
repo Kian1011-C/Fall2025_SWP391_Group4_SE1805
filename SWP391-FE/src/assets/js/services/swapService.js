@@ -13,7 +13,7 @@ const swapService = {
         // realSwapData: { userId, stationId, towerId, vehicleId }
         try {
             console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-            console.log("📤 GỌI API INITIATE SWAP (POST /api/batteries/swap/initiate)");
+            console.log(" GỌI API INITIATE SWAP (POST /api/batteries/swap/initiate)");
             console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
             console.log("Input data:", realSwapData);
 
@@ -56,7 +56,7 @@ const swapService = {
             const responseData = await apiUtils.post('/api/batteries/swap/initiate', swapDataForBE);
 
             console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-            console.log("📥 NHẬN RESPONSE TỪ POST /api/batteries/swap/initiate");
+            console.log(" NHẬN RESPONSE TỪ POST /api/batteries/swap/initiate");
             console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
             console.log("Response:", JSON.stringify(responseData, null, 2));
             console.log("Response keys:", Object.keys(responseData || {}));
@@ -64,14 +64,14 @@ const swapService = {
             
             // Xử lý lỗi nếu backend trả về success: false
             if (responseData?.success === false) {
-                console.error("❌ LỖI TỪ BACKEND:", responseData?.message);
+                console.error(" LỖI TỪ BACKEND:", responseData?.message);
                 // Ném lỗi với thông báo từ backend (ví dụ: "No available batteries at this tower")
                 throw new Error(responseData?.message || "Backend could not initiate swap");
             }
             
             // Kiểm tra response structure
             if (!responseData?.success || !responseData?.data) {
-                console.error("❌ LỖI: Response không hợp lệ:", responseData);
+                console.error(" LỖI: Response không hợp lệ:", responseData);
                 throw new Error("No valid response data received from backend");
             }
 
@@ -115,7 +115,7 @@ const swapService = {
             };
 
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.log('✅ THÔNG TIN TỪ RESPONSE:');
+            console.log(' THÔNG TIN TỪ RESPONSE:');
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             console.log('  ├─ swapId:', normalizedData.swapId, '(QUAN TRỌNG - PHẢI LƯU)');
             console.log('  ├─ contractId:', normalizedData.contractId);
@@ -128,7 +128,7 @@ const swapService = {
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             
             if (!normalizedData.swapId) {
-                console.error('❌ KHÔNG TÌM THẤY SWAP ID trong response.data!');
+                console.error(' KHÔNG TÌM THẤY SWAP ID trong response.data!');
                 console.error('Full response object:', responseData);
                 throw new Error('Backend không trả về swapId. Kiểm tra API response structure.');
             }
@@ -150,7 +150,7 @@ const swapService = {
     confirmSwap: async (swapId) => {
         try {
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.log('📤 BƯỚC 2: CONFIRM BATTERY SWAP');
+            console.log(' BƯỚC 2: CONFIRM BATTERY SWAP');
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             console.log(`Endpoint: POST /api/batteries/swap/${swapId}/confirm`);
             console.log(`SwapID: ${swapId}`);
@@ -166,7 +166,7 @@ const swapService = {
             const response = await apiUtils.post(endpoint, {});
 
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.log('📥 NHẬN RESPONSE TỪ POST /api/batteries/swap/{swapId}/confirm');
+            console.log(' NHẬN RESPONSE TỪ POST /api/batteries/swap/{swapId}/confirm');
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             console.log('Full response:', JSON.stringify(response, null, 2));
             console.log('  ├─ response.success:', response.success);
@@ -176,13 +176,13 @@ const swapService = {
 
             // Xử lý lỗi nếu backend trả về success: false
             if (response.success === false) {
-                console.error('❌ Lỗi từ backend:', response.message);
+                console.error(' Lỗi từ backend:', response.message);
                 throw new Error(response.message || 'Error confirming swap');
             }
 
             // Kiểm tra response structure
             if (!response.success || !response.data) {
-                console.error('❌ Response không hợp lệ:', response);
+                console.error(' Response không hợp lệ:', response);
                 throw new Error('Invalid response from backend');
             }
 
@@ -221,7 +221,7 @@ const swapService = {
                 contractId: swapData.contractId || swapData.contract_id,
             };
             
-            console.log('✅ Đổi pin hoàn tất thành công!');
+            console.log(' Đổi pin hoàn tất thành công!');
             console.log('  ├─ swapId:', normalizedSwapData.swapId);
             console.log('  ├─ status:', normalizedSwapData.status);
             console.log('  ├─ oldBatteryId:', normalizedSwapData.oldBatteryId);
@@ -233,7 +233,7 @@ const swapService = {
             // Trả về data đã normalize (bao gồm oldSlotNumber nếu có từ BE)
             return normalizedSwapData;
         } catch (error) {
-            console.error('❌ LỖI KHI GỌI API CONFIRM:', error);
+            console.error(' LỖI KHI GỌI API CONFIRM:', error);
             throw error;
         }
     },
@@ -245,7 +245,7 @@ const swapService = {
             const response = await apiUtils.get(endpoint);
             return response;
         } catch (error) {
-            console.error('❌ LỖI KHI GỌI API GET USER SWAP HISTORY:', error);
+            console.error(' LỖI KHI GỌI API GET USER SWAP HISTORY:', error);
             throw error;
         }
     },
@@ -257,7 +257,7 @@ const swapService = {
             const response = await apiUtils.get(endpoint);
             return response;
         } catch (error) {
-            console.error('❌ LỖI KHI GỌI API GET ALL SWAPS:', error);
+            console.error(' LỖI KHI GỌI API GET ALL SWAPS:', error);
             throw error;
         }
     },
@@ -271,12 +271,12 @@ const swapService = {
     // Lấy chi tiết 1 swap (sau khi confirm để lấy thông tin slot numbers)
     getSwapDetails: async (swapId) => {
         try {
-            console.log('📡 Gọi API GET swap details:', swapId);
+            console.log(' Gọi API GET swap details:', swapId);
             // Endpoint: GET /api/swaps/{swapId}
             const endpoint = `/api/swaps/${swapId}`;
             const response = await apiUtils.get(endpoint);
             
-            console.log('📥 Response từ GET swap details:', response);
+            console.log(' Response từ GET swap details:', response);
             
             if (response.success && response.data) {
                 const swapData = response.data;
@@ -310,7 +310,7 @@ const swapService = {
                     towerId: swapData.towerId || swapData.tower_id,
                 };
                 
-                console.log('✅ Normalized swap details:');
+                console.log(' Normalized swap details:');
                 console.log('  ├─ oldSlotNumber:', normalizedSwapData.oldSlotNumber);
                 console.log('  ├─ newSlotNumber:', normalizedSwapData.newSlotNumber);
                 console.log('  └─ Full data:', normalizedSwapData);
@@ -320,7 +320,7 @@ const swapService = {
                 throw new Error(response.message || 'Error fetching swap details');
             }
         } catch (error) {
-            console.error('❌ LỖI KHI GỌI API GET SWAP DETAILS:', error);
+            console.error(' LỖI KHI GỌI API GET SWAP DETAILS:', error);
             throw error;
         }
     },
@@ -332,7 +332,7 @@ const swapService = {
             const url = ENDPOINTS.BATTERIES.BY_STATION(stationId);
             return apiUtils.get(url);
         } catch (error) {
-            console.error('❌ LỖI KHI GỌI API GET BATTERIES BY STATION:', error);
+            console.error(' LỖI KHI GỌI API GET BATTERIES BY STATION:', error);
             throw error;
         }
     }

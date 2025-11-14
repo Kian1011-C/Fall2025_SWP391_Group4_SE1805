@@ -9,7 +9,7 @@ const StationsMapHeader = () => {
         margin: '0 0 10px 0',
         fontSize: '2rem'
       }}>
-        🗺️ Bản đồ trạm
+         Bản đồ trạm
       </h1>
       <p style={{ color: '#E0E0E0', margin: 0 }}>
         Tìm trạm gần bạn và đặt chỗ

@@ -27,7 +27,7 @@ export const getDateRange = () => {
 export const getAdminFeatures = () => [
   {
     id: 1,
-    icon: '👥',
+    icon: '',
     title: 'Quản lý người dùng',
     description: 'Quản lý tài khoản và phân quyền người dùng',
     route: '/admin/users',
@@ -35,7 +35,7 @@ export const getAdminFeatures = () => [
   },
   {
     id: 2,
-    icon: '🔋',
+    icon: '',
     title: 'Quản lý pin',
     description: 'Theo dõi và quản lý kho pin EV',
     route: '/admin/batteries',
@@ -43,7 +43,7 @@ export const getAdminFeatures = () => [
   },
   {
     id: 3,
-    icon: '🏪',
+    icon: '',
     title: 'Quản lý trạm',
     description: 'Quản lý các trạm đổi pin',
     route: '/admin/stations',
@@ -51,7 +51,7 @@ export const getAdminFeatures = () => [
   },
   {
     id: 4,
-    icon: '📊',
+    icon: '',
     title: 'Báo cáo & Thống kê',
     description: 'Xem báo cáo và phân tích dữ liệu',
     route: '/admin/reports',
@@ -59,7 +59,7 @@ export const getAdminFeatures = () => [
   },
   {
     id: 5,
-    icon: '📋',
+    icon: '',
     title: 'Quản lý hợp đồng',
     description: 'Quản lý hợp đồng và giao dịch',
     route: '/admin/contracts',
@@ -67,7 +67,7 @@ export const getAdminFeatures = () => [
   },
   {
     id: 6,
-    icon: '💎',
+    icon: '',
     title: 'Gói dịch vụ',
     description: 'Quản lý các gói subscription',
     route: '/admin/subscriptions',
@@ -76,9 +76,9 @@ export const getAdminFeatures = () => [
 ];
 
 export const getRecentActivities = () => [
-  { icon: '👤', text: 'Người dùng mới đăng ký tài khoản', time: '2 phút trước', color: '#19c37d' },
-  { icon: '🔋', text: 'Đổi pin tại trạm thành công', time: '5 phút trước', color: '#6ab7ff' },
-  { icon: '💳', text: 'Thanh toán hoàn tất', time: '8 phút trước', color: '#ffa500' },
-  { icon: '👨‍💼', text: 'Nhân viên đăng nhập hệ thống', time: '12 phút trước', color: '#9c88ff' },
-  { icon: '🔧', text: 'Bảo trì pin được lên lịch', time: '15 phút trước', color: '#ff6b6b' }
+  { icon: '', text: 'Người dùng mới đăng ký tài khoản', time: '2 phút trước', color: '#19c37d' },
+  { icon: '', text: 'Đổi pin tại trạm thành công', time: '5 phút trước', color: '#6ab7ff' },
+  { icon: '', text: 'Thanh toán hoàn tất', time: '8 phút trước', color: '#ffa500' },
+  { icon: '‍', text: 'Nhân viên đăng nhập hệ thống', time: '12 phút trước', color: '#9c88ff' },
+  { icon: '', text: 'Bảo trì pin được lên lịch', time: '15 phút trước', color: '#ff6b6b' }
 ];

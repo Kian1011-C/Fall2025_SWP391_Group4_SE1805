@@ -30,7 +30,7 @@ const ContractSection = ({ vehicleContract, onClose }) => {
             borderRadius: '12px',
             fontSize: '0.85rem'
           }}>
-            {vehicleContract.status === 'active' ? '✓ Đang hoạt động' : '⏸ Tạm dừng'}
+            {vehicleContract.status === 'active' ? ' Đang hoạt động' : '⏸ Tạm dừng'}
           </span>
         </div>
         {vehicleContract.monthlyFee && (
@@ -83,7 +83,7 @@ const ContractSection = ({ vehicleContract, onClose }) => {
             fontWeight: '600'
           }}
         >
-          📋 Xem chi tiết hợp đồng
+           Xem chi tiết hợp đồng
         </button>
       </div>
     );
@@ -97,7 +97,7 @@ const ContractSection = ({ vehicleContract, onClose }) => {
       borderRadius: '8px',
       border: '1px dashed rgba(255, 165, 0, 0.3)'
     }}>
-      <div style={{ fontSize: '2rem', marginBottom: '10px' }}>⚠️</div>
+      <div style={{ fontSize: '2rem', marginBottom: '10px' }}></div>
       <div style={{ color: '#ffa500', fontSize: '0.9rem', marginBottom: '8px' }}>
         Chưa có gói dịch vụ nào
       </div>
@@ -122,7 +122,7 @@ const ContractSection = ({ vehicleContract, onClose }) => {
           boxShadow: '0 4px 15px rgba(25, 195, 125, 0.3)'
         }}
       >
-        📦 Đăng ký gói ngay
+         Đăng ký gói ngay
       </button>
     </div>
   );

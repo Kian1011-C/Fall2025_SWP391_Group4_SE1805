@@ -27,12 +27,12 @@ const UserRow = ({ user, onEdit, onDelete }) => {
         <button 
           onClick={() => onEdit(user)} 
           style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer' }}>
-          ✏️ Sửa
+           Sửa
         </button>
         <button 
           onClick={() => onDelete(user.userId)} 
           style={{ background: '#ef4444', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer' }}>
-          🗑️ Xóa
+           Xóa
         </button>
       </td>
     </tr>

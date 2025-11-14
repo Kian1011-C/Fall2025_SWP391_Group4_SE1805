@@ -278,7 +278,7 @@ const LoginModal = () => {
             alignItems: 'flex-start',
             gap: '12px'
           }}>
-            <span style={{ fontSize: '20px', flexShrink: 0 }}>⚠️</span>
+            <span style={{ fontSize: '20px', flexShrink: 0 }}></span>
             <div style={{ flex: 1 }}>
               <p style={{
                 margin: 0,
@@ -357,7 +357,7 @@ const LoginModal = () => {
                 alignItems: 'center',
                 gap: 6
               }}>
-                ⚠️ {errors.email}
+                 {errors.email}
               </div>
             )}
           </div>
@@ -414,7 +414,7 @@ const LoginModal = () => {
                 alignItems: 'center',
                 gap: 6
               }}>
-                ⚠️ {errors.password}
+                 {errors.password}
               </div>
             )}
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 12, marginBottom: 24 }}>

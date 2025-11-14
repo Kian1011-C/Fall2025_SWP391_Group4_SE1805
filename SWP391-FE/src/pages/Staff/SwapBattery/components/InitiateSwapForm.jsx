@@ -46,8 +46,8 @@ const InitiateSwapForm = ({
                 contractService.getUserContracts(userId)
             ]);
             
-            console.log('📦 Dữ liệu xe nhận được:', vehiclesResponse.data);
-            console.log('📄 Dữ liệu hợp đồng nhận được:', contractsResponse);
+            console.log(' Dữ liệu xe nhận được:', vehiclesResponse.data);
+            console.log(' Dữ liệu hợp đồng nhận được:', contractsResponse);
             
             if (vehiclesResponse.data.success && vehiclesResponse.data.data && vehiclesResponse.data.data.length > 0) {
                 setUserVehicles(vehiclesResponse.data.data);
@@ -74,7 +74,7 @@ const InitiateSwapForm = ({
     // Xử lý khi chọn xe - SỬA LẠI
     const handleVehicleSelect = (e) => {
         const vehicleIdStr = e.target.value;
-        console.log('🚗 Đã chọn vehicleId (string):', vehicleIdStr);
+        console.log(' Đã chọn vehicleId (string):', vehicleIdStr);
         
         if (!vehicleIdStr || vehicleIdStr === '') {
             // Reset nếu chọn "-- Chọn xe --"
@@ -87,11 +87,11 @@ const InitiateSwapForm = ({
         
         // Convert sang số để so sánh
         const vehicleIdNum = parseInt(vehicleIdStr, 10);
-        console.log('🚗 vehicleId (number):', vehicleIdNum);
-        console.log('🚗 Danh sách xe:', userVehicles);
+        console.log(' vehicleId (number):', vehicleIdNum);
+        console.log(' Danh sách xe:', userVehicles);
         
         const vehicle = userVehicles.find(v => v.vehicleId === vehicleIdNum);
-        console.log('🚗 Xe tìm thấy:', vehicle);
+        console.log(' Xe tìm thấy:', vehicle);
         
         if (vehicle) {
             setSelectedVehicleId(vehicleIdStr); // Lưu string để hiển thị trong dropdown
@@ -113,22 +113,22 @@ const InitiateSwapForm = ({
                 );
                 if (contract) {
                     foundContractId = String(contract.id || contract.contractId || contract.contract_id || '');
-                    console.log('📄 Tìm thấy contract cho xe:', contract);
+                    console.log(' Tìm thấy contract cho xe:', contract);
                 } else {
-                    console.log('⚠️ Không tìm thấy contract cho xe này');
+                    console.log(' Không tìm thấy contract cho xe này');
                 }
             }
             
             setContractId(foundContractId);
             
-            console.log('✅ Đã set vehicle:', {
+            console.log(' Đã set vehicle:', {
                 vehicleId: vehicle.vehicleId,
                 plateNumber: vehicle.plateNumber,
                 batteryId: vehicle.batteryId,
                 contractId: foundContractId
             });
         } else {
-            console.error('❌ Không tìm thấy xe với vehicleId:', vehicleIdNum);
+            console.error(' Không tìm thấy xe với vehicleId:', vehicleIdNum);
         }
     };
 
@@ -155,7 +155,7 @@ const InitiateSwapForm = ({
             staffId: currentStaffId || null // Gửi staffId hoặc null nếu không có
         };
 
-        console.log('📤 [InitiateSwapForm] Dữ liệu gửi đi:', swapData);
+        console.log(' [InitiateSwapForm] Dữ liệu gửi đi:', swapData);
         console.log('  ├─ userId:', swapData.userId, `(type: ${typeof swapData.userId})`);
         console.log('  ├─ vehicleId:', swapData.vehicleId, `(type: ${typeof swapData.vehicleId})`);
         console.log('  ├─ oldBatteryId:', swapData.oldBatteryId, `(type: ${typeof swapData.oldBatteryId})`);
@@ -165,7 +165,7 @@ const InitiateSwapForm = ({
         
         // Cảnh báo nếu không có staffId
         if (!currentStaffId) {
-            console.warn('⚠️ CẢNH BÁO: currentStaffId là NULL. Staff ID sẽ không được ghi nhận trong giao dịch.');
+            console.warn(' CẢNH BÁO: currentStaffId là NULL. Staff ID sẽ không được ghi nhận trong giao dịch.');
         }
 
         onInitiateSwap(swapData);
@@ -250,16 +250,16 @@ const InitiateSwapForm = ({
                     {selectedVehicle && (
                         <div style={styles.vehicleInfo}>
                             <h4 style={styles.subtitle}>Thông tin xe:</h4>
-                            <p>🚗 Biển số: <strong>{selectedVehicle.plateNumber}</strong></p>
-                            <p>📦 Model: <strong>{selectedVehicle.vehicleModel || selectedVehicle.model || 'N/A'}</strong></p>
-                            <p>🔋 Pin hiện tại: <strong>{selectedVehicle.batteryId || 'Không có'}</strong></p>
-                            <p>📄 Hợp đồng: <strong>{selectedVehicle.contractId || 'Không có'}</strong></p>
+                            <p> Biển số: <strong>{selectedVehicle.plateNumber}</strong></p>
+                            <p> Model: <strong>{selectedVehicle.vehicleModel || selectedVehicle.model || 'N/A'}</strong></p>
+                            <p> Pin hiện tại: <strong>{selectedVehicle.batteryId || 'Không có'}</strong></p>
+                            <p> Hợp đồng: <strong>{selectedVehicle.contractId || 'Không có'}</strong></p>
                         </div>
                     )}
 
                     {/* Contract ID (tự động lấy) */}
                     <div style={styles.group}>
-                        <label style={styles.label}>Contract ID (Tự động) {contractId && '✅'}</label>
+                        <label style={styles.label}>Contract ID (Tự động) {contractId && ''}</label>
                         <input 
                             type="text" 
                             value={contractId || 'Chưa có dữ liệu'} 
@@ -276,7 +276,7 @@ const InitiateSwapForm = ({
 
                     {/* Pin cũ (tự động lấy) */}
                     <div style={styles.group}>
-                        <label style={styles.label}>Pin cũ ID (Tự động) {oldBatteryId && '✅'}</label>
+                        <label style={styles.label}>Pin cũ ID (Tự động) {oldBatteryId && ''}</label>
                         <input 
                             type="text" 
                             value={oldBatteryId || 'Chưa có dữ liệu'} 

@@ -19,7 +19,7 @@ const SubscriptionRow = ({ plan, onEdit, onDelete }) => {
       <td className="subscription-price">{price.toLocaleString('vi-VN')} ₫</td>
       <td>
         <span className={`subscription-distance ${isUnlimited ? 'unlimited' : ''}`}>
-          {isUnlimited ? '♾️ Không giới hạn' : `🛣️ ${distance} km`}
+          {isUnlimited ? ' Không giới hạn' : ` ${distance} km`}
         </span>
       </td>
       <td className="subscription-description">{plan.description || 'Không có mô tả'}</td>
@@ -30,7 +30,7 @@ const SubscriptionRow = ({ plan, onEdit, onDelete }) => {
             className="subscription-btn subscription-btn-edit"
             title="Chỉnh sửa gói cước"
           >
-            <span>✏️</span>
+            <span></span>
             <span>Sửa</span>
           </button>
           <button 
@@ -38,7 +38,7 @@ const SubscriptionRow = ({ plan, onEdit, onDelete }) => {
             className="subscription-btn subscription-btn-delete"
             title="Xóa gói cước"
           >
-            <span>🗑️</span>
+            <span></span>
             <span>Xóa</span>
           </button>
         </div>

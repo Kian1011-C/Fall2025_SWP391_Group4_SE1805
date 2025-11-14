@@ -96,11 +96,11 @@ const BatteryStockView = () => {
     if (error) {
         return (
             <div className="staff-battery-error">
-                <div className="staff-battery-error-icon">⚠️</div>
+                <div className="staff-battery-error-icon"></div>
                 <h3 className="staff-battery-error-title">Lỗi tải dữ liệu</h3>
                 <p className="staff-battery-error-message">{error}</p>
                 <button onClick={refetch} className="staff-battery-error-btn">
-                    🔄 Thử lại
+                     Thử lại
                 </button>
             </div>
         );
@@ -110,7 +110,7 @@ const BatteryStockView = () => {
     if (batteries.length === 0) {
         return (
             <div className="staff-battery-empty">
-                <div className="staff-battery-empty-icon">🔋</div>
+                <div className="staff-battery-empty-icon"></div>
                 <h3 className="staff-battery-empty-title">Không có pin nào</h3>
                 <p className="staff-battery-empty-message">Kho pin hiện đang trống</p>
             </div>
@@ -122,7 +122,7 @@ const BatteryStockView = () => {
             {/* Stats Dashboard */}
             <div className="staff-battery-stats">
                 <div className="staff-battery-stat-card">
-                    <div className="staff-battery-stat-icon">🔋</div>
+                    <div className="staff-battery-stat-icon"></div>
                     <div className="staff-battery-stat-content">
                         <span className="staff-battery-stat-label">Tổng số pin</span>
                         <h2 className="staff-battery-stat-value">{stats.total}</h2>
@@ -130,7 +130,7 @@ const BatteryStockView = () => {
                 </div>
 
                 <div className="staff-battery-stat-card">
-                    <div className="staff-battery-stat-icon">✅</div>
+                    <div className="staff-battery-stat-icon"></div>
                     <div className="staff-battery-stat-content">
                         <span className="staff-battery-stat-label">Sẵn sàng</span>
                         <h2 className="staff-battery-stat-value">{stats.available}</h2>
@@ -138,7 +138,7 @@ const BatteryStockView = () => {
                 </div>
 
                 <div className="staff-battery-stat-card">
-                    <div className="staff-battery-stat-icon">⚡</div>
+                    <div className="staff-battery-stat-icon"></div>
                     <div className="staff-battery-stat-content">
                         <span className="staff-battery-stat-label">Đang sạc</span>
                         <h2 className="staff-battery-stat-value">{stats.charging}</h2>
@@ -146,7 +146,7 @@ const BatteryStockView = () => {
                 </div>
 
                 <div className="staff-battery-stat-card">
-                    <div className="staff-battery-stat-icon">🔧</div>
+                    <div className="staff-battery-stat-icon"></div>
                     <div className="staff-battery-stat-content">
                         <span className="staff-battery-stat-label">Bảo trì</span>
                         <h2 className="staff-battery-stat-value">{stats.maintenance}</h2>
@@ -159,7 +159,7 @@ const BatteryStockView = () => {
                 <div className="staff-battery-filter-row">
                     <input 
                         type="text" 
-                        placeholder="🔍 Tìm theo Mã pin..." 
+                        placeholder=" Tìm theo Mã pin..." 
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="staff-battery-search"
@@ -170,16 +170,16 @@ const BatteryStockView = () => {
                         onChange={(e) => setStatusFilter(e.target.value)}
                         className="staff-battery-filter-select"
                     >
-                        <option value="">📊 Tất cả trạng thái</option>
-                        <option value="available">✅ Sẵn sàng</option>
-                        <option value="in_stock">✅ Trong kho</option>
-                        <option value="charging">⚡ Đang sạc</option>
-                        <option value="maintenance">🔧 Bảo trì</option>
-                        <option value="in_use">🚗 Đang sử dụng</option>
+                        <option value=""> Tất cả trạng thái</option>
+                        <option value="available"> Sẵn sàng</option>
+                        <option value="in_stock"> Trong kho</option>
+                        <option value="charging"> Đang sạc</option>
+                        <option value="maintenance"> Bảo trì</option>
+                        <option value="in_use"> Đang sử dụng</option>
                     </select>
 
                     <button onClick={refetch} className="staff-battery-refresh-btn">
-                        <span>🔄</span> Làm mới
+                        <span></span> Làm mới
                     </button>
                 </div>
             </div>
@@ -187,7 +187,7 @@ const BatteryStockView = () => {
             {/* Cards View */}
             {filteredBatteries.length === 0 ? (
                 <div className="staff-battery-empty">
-                    <div className="staff-battery-empty-icon">🔍</div>
+                    <div className="staff-battery-empty-icon"></div>
                     <h3 className="staff-battery-empty-title">Không tìm thấy</h3>
                     <p className="staff-battery-empty-message">
                         Không có pin nào phù hợp với bộ lọc
@@ -221,7 +221,7 @@ const BatteryStockView = () => {
                                         {/* Battery ID */}
                                         <td>
                                             <div className="staff-battery-id">
-                                                <span className="staff-battery-id-icon">🔋</span>
+                                                <span className="staff-battery-id-icon"></span>
                                                 <span className="staff-battery-id-text">BAT{id}</span>
                                             </div>
                                         </td>
@@ -254,7 +254,7 @@ const BatteryStockView = () => {
                                         {/* Cycles */}
                                         <td>
                                             <div className="staff-battery-cycles">
-                                                <span className="staff-battery-cycles-icon">🔄</span>
+                                                <span className="staff-battery-cycles-icon"></span>
                                                 <span className="staff-battery-cycles-text">{cycles}</span>
                                             </div>
                                         </td>
@@ -270,7 +270,7 @@ const BatteryStockView = () => {
                                                 onClick={() => handleViewDetails(bat)}
                                                 className="staff-battery-view-btn"
                                             >
-                                                👁️ Chi tiết
+                                                 Chi tiết
                                             </button>
                                         </td>
                                     </tr>

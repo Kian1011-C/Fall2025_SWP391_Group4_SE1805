@@ -201,14 +201,14 @@ class NotificationService {
   // Get notification types
   getNotificationTypes() {
     return [
-      { id: 'battery_low', name: 'Pin yếu', icon: '🔋', color: '#ff6b6b' },
-      { id: 'swap_complete', name: 'Đổi pin thành công', icon: '✅', color: '#19c37d' },
-      { id: 'payment_due', name: 'Thanh toán', icon: '💳', color: '#ffa726' },
-      { id: 'maintenance', name: 'Bảo trì', icon: '🔧', color: '#42a5f5' },
-      { id: 'system', name: 'Hệ thống', icon: '⚙️', color: '#ab47bc' },
-      { id: 'promotion', name: 'Khuyến mãi', icon: '🎉', color: '#26a69a' },
-      { id: 'contract', name: 'Hợp đồng', icon: '📄', color: '#5c6bc0' },
-      { id: 'emergency', name: 'Khẩn cấp', icon: '🚨', color: '#f44336' }
+      { id: 'battery_low', name: 'Pin yếu', icon: '', color: '#ff6b6b' },
+      { id: 'swap_complete', name: 'Đổi pin thành công', icon: '', color: '#19c37d' },
+      { id: 'payment_due', name: 'Thanh toán', icon: '', color: '#ffa726' },
+      { id: 'maintenance', name: 'Bảo trì', icon: '', color: '#42a5f5' },
+      { id: 'system', name: 'Hệ thống', icon: '', color: '#ab47bc' },
+      { id: 'promotion', name: 'Khuyến mãi', icon: '', color: '#26a69a' },
+      { id: 'contract', name: 'Hợp đồng', icon: '', color: '#5c6bc0' },
+      { id: 'emergency', name: 'Khẩn cấp', icon: '', color: '#f44336' }
     ];
   }
 
@@ -223,7 +223,7 @@ class NotificationService {
         timestamp: new Date().toISOString(),
         read: false,
         priority: 'normal',
-        icon: '👋'
+        icon: ''
       },
       {
         id: 'setup_1',
@@ -233,7 +233,7 @@ class NotificationService {
         timestamp: new Date(Date.now() - 3600000).toISOString(),
         read: false,
         priority: 'high',
-        icon: '⚙️'
+        icon: ''
       }
     ];
   }
@@ -272,7 +272,7 @@ class NotificationService {
   // Format notification for display
   formatNotification(notification) {
     const typeInfo = this.getNotificationTypes().find(t => t.id === notification.type) || 
-                     { icon: '📢', color: '#666666' };
+                     { icon: '', color: '#666666' };
     
     return {
       ...notification,

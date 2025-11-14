@@ -80,9 +80,9 @@ const BatteryManagement = () => {
       const response = await handleUpdate(batteryId, formData);
       if (response.success) {
         handleCloseEditModal();
-        alert('✅ ' + response.message);
+        alert(' ' + response.message);
       } else {
-        alert('❌ Lỗi: ' + response.message);
+        alert(' Lỗi: ' + response.message);
       }
     }
   };
@@ -137,11 +137,11 @@ const BatteryManagement = () => {
     return (
       <div className="admin-battery-container">
         <div className="admin-battery-error">
-          <div className="admin-battery-error-icon">⚠️</div>
+          <div className="admin-battery-error-icon"></div>
           <h3 className="admin-battery-error-title">Lỗi tải dữ liệu</h3>
           <p className="admin-battery-error-message">{error}</p>
           <button onClick={refetch} className="admin-battery-error-btn">
-            🔄 Thử lại
+             Thử lại
           </button>
         </div>
       </div>
@@ -154,13 +154,13 @@ const BatteryManagement = () => {
       <div className="admin-battery-container">
         <div className="admin-battery-header">
           <div className="admin-battery-header-content">
-            <h1>⚡ Quản lý Pin</h1>
+            <h1> Quản lý Pin</h1>
             <p>Theo dõi tình trạng và kho pin trong hệ thống</p>
           </div>
         </div>
         
         <div className="admin-battery-empty">
-          <div className="admin-battery-empty-icon">🔋</div>
+          <div className="admin-battery-empty-icon"></div>
           <h3 className="admin-battery-empty-title">Chưa có pin nào</h3>
           <p className="admin-battery-empty-message">
             Kho pin hiện đang trống
@@ -175,7 +175,7 @@ const BatteryManagement = () => {
       {/* Header */}
       <div className="admin-battery-header">
         <div className="admin-battery-header-content">
-          <h1>⚡ Quản lý Pin</h1>
+          <h1> Quản lý Pin</h1>
           <p>Theo dõi tình trạng và kho pin trong hệ thống</p>
         </div>
       </div>
@@ -183,7 +183,7 @@ const BatteryManagement = () => {
       {/* Stats Dashboard */}
       <div className="admin-battery-stats">
         <div className="admin-battery-stat-card">
-          <div className="admin-battery-stat-icon">🔋</div>
+          <div className="admin-battery-stat-icon"></div>
           <div className="admin-battery-stat-content">
             <span className="admin-battery-stat-label">Tổng số pin</span>
             <h2 className="admin-battery-stat-value">{stats.total}</h2>
@@ -191,7 +191,7 @@ const BatteryManagement = () => {
         </div>
 
         <div className="admin-battery-stat-card">
-          <div className="admin-battery-stat-icon">✅</div>
+          <div className="admin-battery-stat-icon"></div>
           <div className="admin-battery-stat-content">
             <span className="admin-battery-stat-label">Sẵn sàng</span>
             <h2 className="admin-battery-stat-value">{stats.available}</h2>
@@ -199,7 +199,7 @@ const BatteryManagement = () => {
         </div>
 
         <div className="admin-battery-stat-card">
-          <div className="admin-battery-stat-icon">📦</div>
+          <div className="admin-battery-stat-icon"></div>
           <div className="admin-battery-stat-content">
             <span className="admin-battery-stat-label">Trong kho</span>
             <h2 className="admin-battery-stat-value">{stats.inStock}</h2>
@@ -207,7 +207,7 @@ const BatteryManagement = () => {
         </div>
 
         <div className="admin-battery-stat-card">
-          <div className="admin-battery-stat-icon">⚡</div>
+          <div className="admin-battery-stat-icon"></div>
           <div className="admin-battery-stat-content">
             <span className="admin-battery-stat-label">Đang sạc</span>
             <h2 className="admin-battery-stat-value">{stats.charging}</h2>
@@ -215,7 +215,7 @@ const BatteryManagement = () => {
         </div>
 
         <div className="admin-battery-stat-card">
-          <div className="admin-battery-stat-icon">🔧</div>
+          <div className="admin-battery-stat-icon"></div>
           <div className="admin-battery-stat-content">
             <span className="admin-battery-stat-label">Bảo trì</span>
             <h2 className="admin-battery-stat-value">{stats.maintenance}</h2>
@@ -223,7 +223,7 @@ const BatteryManagement = () => {
         </div>
 
         <div className="admin-battery-stat-card">
-          <div className="admin-battery-stat-icon">🚗</div>
+          <div className="admin-battery-stat-icon"></div>
           <div className="admin-battery-stat-content">
             <span className="admin-battery-stat-label">Đang sử dụng</span>
             <h2 className="admin-battery-stat-value">{stats.inUse}</h2>
@@ -236,7 +236,7 @@ const BatteryManagement = () => {
         <div className="admin-battery-filter-row">
           <input 
             type="text" 
-            placeholder="🔍 Tìm theo Mã pin hoặc Mẫu pin..." 
+            placeholder=" Tìm theo Mã pin hoặc Mẫu pin..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="admin-battery-search"
@@ -247,16 +247,16 @@ const BatteryManagement = () => {
             onChange={(e) => setFilterStatus(e.target.value)}
             className="admin-battery-filter-select"
           >
-            <option value="">📊 Tất cả trạng thái</option>
-            <option value="available">✅ Sẵn sàng</option>
-            <option value="in_stock">✅ Trong kho</option>
-            <option value="charging">⚡ Đang sạc</option>
-            <option value="faulty">🔧 Bảo trì</option>
-            <option value="in_use">🚗 Đang sử dụng</option>
+            <option value=""> Tất cả trạng thái</option>
+            <option value="available"> Sẵn sàng</option>
+            <option value="in_stock"> Trong kho</option>
+            <option value="charging"> Đang sạc</option>
+            <option value="faulty"> Bảo trì</option>
+            <option value="in_use"> Đang sử dụng</option>
           </select>
 
           <button onClick={refetch} className="admin-battery-refresh-btn">
-            <span>🔄</span> Làm mới
+            <span></span> Làm mới
           </button>
         </div>
       </div>
@@ -280,7 +280,7 @@ const BatteryManagement = () => {
                 {/* Battery ID */}
                 <td>
                   <div className="admin-battery-id">
-                    <span className="admin-battery-id-icon">🔋</span>
+                    <span className="admin-battery-id-icon"></span>
                     <span className="admin-battery-id-text">BAT{battery.batteryId}</span>
                   </div>
                 </td>
@@ -313,14 +313,14 @@ const BatteryManagement = () => {
                 {/* Cycles */}
                 <td>
                   <div className="admin-battery-cycles">
-                    <span className="admin-battery-cycles-icon">🔄</span>
+                    <span className="admin-battery-cycles-icon"></span>
                     <div className="admin-battery-cycles-info">
                       <span className="admin-battery-cycles-text">{battery.cycleCount || 0}</span>
                       {battery.cycleCount > 2000 && (
-                        <span className="admin-battery-cycles-warning" title="Pin đã qua nhiều chu kỳ sạc">⚠️</span>
+                        <span className="admin-battery-cycles-warning" title="Pin đã qua nhiều chu kỳ sạc"></span>
                       )}
                       {battery.cycleCount > 2500 && (
-                        <span className="admin-battery-cycles-critical" title="Nên thay pin sớm">🔴</span>
+                        <span className="admin-battery-cycles-critical" title="Nên thay pin sớm"></span>
                       )}
                     </div>
                   </div>

@@ -43,18 +43,18 @@ class UserService {
   async updateUser(userId, userData) {
     try {
       // Sử dụng API thống nhất /api/admin/users/{userId} thay vì tách drivers/staff
-      console.log(`🔵 UserService: Cập nhật người dùng ${userId} tại /api/admin/users/${userId}`, userData);
+      console.log(` UserService: Cập nhật người dùng ${userId} tại /api/admin/users/${userId}`, userData);
       const response = await apiUtils.put(`/api/admin/users/${userId}`, userData);
       
       if (response.success) {
-        console.log('✅ UserService: Cập nhật người dùng thành công', response.data);
+        console.log('UserService: Cập nhật người dùng thành công', response.data);
         return { success: true, data: response.data, message: 'Cập nhật người dùng thành công' };
       } else {
         throw new Error(response.message || 'Không thể cập nhật người dùng');
       }
     } catch (error) {
-      console.error('❌ Lỗi khi cập nhật người dùng:', error);
-      const errorInfo = apiUtils.handleError(error);
+      console.error(' Lỗi khi cập nhật người dùng:', error);
+      const errorInfo = apiUtils.handleError(error);  
       return { success: false, message: errorInfo.message || 'Lỗi khi cập nhật người dùng', error: errorInfo };
     }
   }
@@ -65,17 +65,17 @@ class UserService {
    */
   async deleteUser(userId) {
     try {
-      console.log(`🔵 UserService: Xóa người dùng ${userId} tại /api/admin/users/${userId}`);
+      console.log(` UserService: Xóa người dùng ${userId} tại /api/admin/users/${userId}`);
       const response = await apiUtils.delete(`/api/admin/users/${userId}`);
       
       if (response.success) {
-        console.log('✅ UserService: Xóa người dùng thành công');
+        console.log(' UserService: Xóa người dùng thành công');
         return { success: true, message: 'Xóa người dùng thành công' };
       } else {
         throw new Error(response.message || 'Không thể xóa người dùng');
       }
     } catch (error) {
-      console.error('❌ Lỗi khi xóa người dùng:', error);
+      console.error(' Lỗi khi xóa người dùng:', error);
       const errorInfo = apiUtils.handleError(error);
       return { success: false, message: errorInfo.message || 'Lỗi khi xóa người dùng', error: errorInfo };
     }
@@ -88,17 +88,17 @@ class UserService {
   async createUser(userData) {
     try {
       // Sử dụng API thống nhất /api/admin/users thay vì tách drivers/staff
-      console.log('🔵 UserService: Tạo người dùng mới tại /api/admin/users', userData);
+      console.log(' UserService: Tạo người dùng mới tại /api/admin/users', userData);
       const response = await apiUtils.post('/api/admin/users', userData);
       
       if (response.success) {
-        console.log('✅ UserService: Tạo người dùng thành công', response.data);
+        console.log(' UserService: Tạo người dùng thành công', response.data);
         return { success: true, data: response.data, message: 'Tạo người dùng thành công' };
       } else {
         throw new Error(response.message || 'Không thể tạo người dùng');
       }
     } catch (error) {
-      console.error('❌ Lỗi khi tạo người dùng:', error);
+      console.error(' Lỗi khi tạo người dùng:', error);
       const errorInfo = apiUtils.handleError(error);
       return { success: false, message: errorInfo.message || 'Lỗi khi tạo người dùng', error: errorInfo };
     }
@@ -115,7 +115,7 @@ class UserService {
       const response = await apiUtils.get(`/api/users/${userId}/profile`);
       
       if (response.success) {
-        console.log('✅ API profile trả về dữ liệu:', response);
+        console.log(' API profile trả về dữ liệu:', response);
         return { success: true, data: response.data, message: 'Lấy thông tin profile thành công' };
       } else {
         throw new Error(response.message || 'Không thể lấy thông tin profile');
@@ -139,14 +139,14 @@ class UserService {
       const response = await apiUtils.get(`/api/users/${userId}`);
       
       if (response.success) {
-        console.log('✅ API mới trả về dữ liệu:', response);
+        console.log(' API mới trả về dữ liệu:', response);
         
         // Xử lý dữ liệu từ API mới - DỮ LIỆU Ở ROOT LEVEL
         const user = response.user || {};
         const dashboard = response.dashboard || {};
         const vehicles = response.vehicles || [];
         
-        console.log('🔍 Dữ liệu từ backend:');
+        console.log(' Dữ liệu từ backend:');
         console.log('- user:', user);
         console.log('- dashboard:', dashboard);
         console.log('- vehicles:', vehicles);
@@ -179,13 +179,13 @@ class UserService {
           }
         };
         
-        console.log('✅ Dashboard data được tạo:', dashboardData);
+        console.log(' Dashboard data được tạo:', dashboardData);
         return { success: true, data: dashboardData, message: 'Lấy dashboard thành công từ API mới' };
       } else {
         throw new Error(response.message || 'Không thể lấy dashboard từ API mới');
       }
     } catch (error) {
-      console.error('❌ Lỗi khi lấy dashboard từ API mới:', error);
+      console.error(' Lỗi khi lấy dashboard từ API mới:', error);
       const errorInfo = apiUtils.handleError(error);
       return { success: false, message: errorInfo.message || 'Lỗi khi lấy dashboard', error: errorInfo };
     }

@@ -63,8 +63,8 @@ const AdminSubscriptions = () => {
     if (error) {
       return (
         <div className="subscriptions-error">
-          <p>⚠️ Lỗi: {error}</p>
-          <button onClick={refetch}>🔄 Thử lại</button>
+          <p> Lỗi: {error}</p>
+          <button onClick={refetch}> Thử lại</button>
         </div>
       );
     }
@@ -72,7 +72,7 @@ const AdminSubscriptions = () => {
     if (plans.length === 0) {
       return (
         <div className="subscriptions-empty">
-          <div className="subscriptions-empty-icon">📦</div>
+          <div className="subscriptions-empty-icon"></div>
           <p>Không tìm thấy gói cước nào</p>
         </div>
       );
@@ -110,11 +110,11 @@ const AdminSubscriptions = () => {
     <div className="subscriptions-container">
       <div className="subscriptions-header">
         <div className="subscriptions-header-left">
-          <h1>⚡ Quản lý Gói cước</h1>
+          <h1> Quản lý Gói cước</h1>
           <p>Tạo, sửa và quản lý các gói cước dịch vụ cho khách hàng</p>
         </div>
         <button onClick={handleOpenCreateModal} className="subscriptions-add-btn">
-          ➕ Thêm Gói cước
+           Thêm Gói cước
         </button>
       </div>
       

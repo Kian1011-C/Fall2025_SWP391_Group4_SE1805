@@ -20,7 +20,7 @@ const DebugInfo = ({ currentUser, plans, userContracts, currentSubscription, err
       fontSize: '0.9rem',
       color: '#ffa500'
     }}>
-      <strong>🔧 Subscriptions Debug Info:</strong><br/>
+      <strong> Subscriptions Debug Info:</strong><br/>
       User ID: {getUserId(currentUser) || 'N/A'}<br/>
       Available Plans: {plans.length}<br/>
       User Contracts: {userContracts.length}<br/>

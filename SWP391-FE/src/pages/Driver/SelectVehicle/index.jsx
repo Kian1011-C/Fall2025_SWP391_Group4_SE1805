@@ -31,14 +31,14 @@ const SelectVehiclePage = () => {
             const vehicleId = vehicle.id || vehicle.vehicle_id || vehicle.vehicleId;
             if (vehicleId && !vehicle.batteryId && !vehicle.battery_id && !vehicle.currentBatteryId && !vehicle.current_battery_id) {
               try {
-                console.log('🔋 Lấy thông tin pin cho xe:', vehicleId);
+                console.log(' Lấy thông tin pin cho xe:', vehicleId);
                 const batteryResponse = await vehicleService.getVehicleBatteryInfo(vehicleId);
                 if (batteryResponse.success && batteryResponse.data) {
                   batteryInfoMap[vehicleId] = batteryResponse.data.batteryId || batteryResponse.data.id;
-                  console.log('✅ Lấy được batteryId cho xe', vehicleId, ':', batteryInfoMap[vehicleId]);
+                  console.log(' Lấy được batteryId cho xe', vehicleId, ':', batteryInfoMap[vehicleId]);
                 }
               } catch (err) {
-                console.warn('⚠️ Không thể lấy thông tin pin cho xe', vehicleId, ':', err);
+                console.warn(' Không thể lấy thông tin pin cho xe', vehicleId, ':', err);
               }
             }
           }
@@ -66,13 +66,13 @@ const SelectVehiclePage = () => {
       const contractId = v.contractId || v.contract_id || v.activeContractId;
       
       // Debug dữ liệu xe
-      console.log('🔍 Dữ liệu xe được chọn:', v);
-      console.log('🔍 vehicleId:', vehicleId);
-      console.log('🔍 batteryId:', batteryId);
-      console.log('🔍 batteryId type:', typeof batteryId);
-      console.log('🔍 batteryId is null:', batteryId === null);
-      console.log('🔍 batteryId is undefined:', batteryId === undefined);
-      console.log('🔍 contractId:', contractId);
+      console.log(' Dữ liệu xe được chọn:', v);
+      console.log(' vehicleId:', vehicleId);
+      console.log(' batteryId:', batteryId);
+      console.log(' batteryId type:', typeof batteryId);
+      console.log(' batteryId is null:', batteryId === null);
+      console.log(' batteryId is undefined:', batteryId === undefined);
+      console.log(' contractId:', contractId);
       
       // Lưu vehicleId
       if (vehicleId) {
@@ -81,31 +81,31 @@ const SelectVehiclePage = () => {
       
       // Lưu old_battery_id (pin hiện tại trên xe) - SỬ DỤNG DỮ LIỆU THẬT TỪ API
       try {
-        console.log('🔋 Gọi API lấy pin cũ cho xe:', vehicleId);
+        console.log(' Gọi API lấy pin cũ cho xe:', vehicleId);
         const batteryResponse = await vehicleService.getVehicleBatteryInfo(vehicleId);
-        console.log('🔋 API response pin cũ:', batteryResponse);
+        console.log(' API response pin cũ:', batteryResponse);
         
         if (batteryResponse.success && batteryResponse.data) {
           const realOldBatteryId = batteryResponse.data.batteryId || batteryResponse.data.id || batteryId;
-          console.log('🔍 realOldBatteryId:', realOldBatteryId);
-          console.log('🔍 batteryResponse.data:', batteryResponse.data);
+          console.log(' realOldBatteryId:', realOldBatteryId);
+          console.log(' batteryResponse.data:', batteryResponse.data);
           
           if (realOldBatteryId) {
             sessionStorage.setItem('old_battery_id', String(realOldBatteryId));
-            console.log('✅ Đã lưu old_battery_id từ API backend:', realOldBatteryId);
+            console.log(' Đã lưu old_battery_id từ API backend:', realOldBatteryId);
           } else if (batteryId) {
             sessionStorage.setItem('old_battery_id', String(batteryId));
-            console.log('✅ Sử dụng batteryId từ xe đã chọn:', batteryId);
+            console.log(' Sử dụng batteryId từ xe đã chọn:', batteryId);
           }
         } else if (batteryId) {
           sessionStorage.setItem('old_battery_id', String(batteryId));
-          console.log('⚠️ API response không thành công, sử dụng dữ liệu từ xe đã chọn');
+          console.log(' API response không thành công, sử dụng dữ liệu từ xe đã chọn');
         }
       } catch (error) {
-        console.error('❌ Lỗi khi lấy pin cũ từ API:', error);
+        console.error(' Lỗi khi lấy pin cũ từ API:', error);
         if (batteryId) {
           sessionStorage.setItem('old_battery_id', String(batteryId));
-          console.log('⚠️ Sử dụng batteryId từ xe đã chọn');
+          console.log(' Sử dụng batteryId từ xe đã chọn');
         }
       }
       

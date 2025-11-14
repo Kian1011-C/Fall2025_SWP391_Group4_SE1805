@@ -29,25 +29,25 @@ const Header = ({ title, onBack, onRefresh, icon, onAdd, onAssignBattery, onRemo
     <div className="station-actions">
       {onAdd && (
         <button onClick={onAdd.action} className="station-add-btn" title={onAdd.title}>
-          <span>➕</span>
+          <span></span>
           <span>{onAdd.text}</span>
         </button>
       )}
       {onAssignBattery && (
         <button onClick={onAssignBattery} className="station-add-btn" style={{ background: 'linear-gradient(135deg, #10b981 0%, #34d399 100%)' }} title="Thêm pin vào hộc">
-          <span>🔋</span>
+          <span></span>
           <span>Thêm Pin vào Hộc</span>
         </button>
       )}
       {onRemoveBattery && (
         <button onClick={onRemoveBattery} className="station-add-btn" style={{ background: 'linear-gradient(135deg, #ef4444 0%, #f87171 100%)' }} title="Tháo pin khỏi hộc">
-          <span>🔌</span>
+          <span></span>
           <span>Tháo Pin</span>
         </button>
       )}
       {onRefresh && (
         <button onClick={onRefresh} className="station-refresh-btn" title="Làm mới">
-          <span>🔄</span>
+          <span></span>
           <span>Làm mới</span>
         </button>
       )}
@@ -129,7 +129,7 @@ const AdminStations = () => {
     }
 
     try {
-      console.log('🗑️ Deleting tower:', towerId);
+      console.log(' Deleting tower:', towerId);
       const response = await stationService.deleteTower(towerId);
       console.log('Delete tower response:', response);
       
@@ -147,7 +147,7 @@ const AdminStations = () => {
 
   const handleAddBatteryToSlot = (slot) => {
     // TODO: Implement thêm pin vào slot
-    console.log('🔋 Add battery to slot:', slot);
+    console.log(' Add battery to slot:', slot);
     alert(`Chức năng thêm pin vào Hộc ${slot.slotNumber} đang được phát triển!\n\nSlot ID: ${slot.slotId || slot.id}\nTower: ${selectedTower?.towerNumber}\nStation: ${selectedStation?.name}`);
     // Sau này sẽ mở modal để chọn pin từ danh sách pin có sẵn
   };
@@ -156,7 +156,7 @@ const AdminStations = () => {
     try {
       if (towerId) {
         // Edit existing tower - only update status
-        console.log('✏️ Updating tower:', { towerId, formData });
+        console.log(' Updating tower:', { towerId, formData });
         const response = await stationService.updateTower(towerId, formData.status);
         
         console.log('Update tower response:', response);
@@ -171,7 +171,7 @@ const AdminStations = () => {
         }
       } else {
         // Create new tower
-        console.log('💾 Creating tower:', { formData });
+        console.log(' Creating tower:', { formData });
         const stationId = selectedStation.stationId || selectedStation.id;
         const response = await stationService.addTowerToStation(
           stationId, 
@@ -201,7 +201,7 @@ const AdminStations = () => {
     }
 
     try {
-      console.log('🗑️ Deleting station:', stationId);
+      console.log(' Deleting station:', stationId);
       const response = await stationService.deleteStation(stationId);
       console.log('Delete response:', response);
       
@@ -223,7 +223,7 @@ const AdminStations = () => {
 
   const handleAssignBattery = async (data) => {
     try {
-      console.log('🔋 Assigning battery to slot:', data);
+      console.log(' Assigning battery to slot:', data);
       const response = await batteryService.assignBatteryToSlot(data.batteryId, data.slotId);
       console.log('Assign battery response:', response);
       
@@ -247,7 +247,7 @@ const AdminStations = () => {
 
   const handleRemoveBattery = async (data) => {
     try {
-      console.log('🔌 Removing battery from slot:', data);
+      console.log(' Removing battery from slot:', data);
       const response = await batteryService.removeBatteryFromSlot(data.batteryId);
       console.log('Remove battery response:', response);
       
@@ -267,7 +267,7 @@ const AdminStations = () => {
 
   const handleSaveStation = async (formData, stationId) => {
     try {
-      console.log('💾 Saving station:', { formData, stationId });
+      console.log(' Saving station:', { formData, stationId });
       let response;
       if (stationId) {
         // Update existing station
@@ -308,7 +308,7 @@ const AdminStations = () => {
     if (error) {
       return (
         <div className="station-error">
-          <span className="station-error-icon">⚠️</span>
+          <span className="station-error-icon"></span>
           <span>Lỗi: {error}</span>
         </div>
       );
@@ -343,9 +343,9 @@ const AdminStations = () => {
   };
 
   const getIcon = () => {
-    if (view === 'slots') return '🔋';
-    if (view === 'towers') return '🏗️';
-    return '🏢';
+    if (view === 'slots') return '';
+    if (view === 'towers') return '';
+    return '';
   };
 
   const getAddButton = () => {

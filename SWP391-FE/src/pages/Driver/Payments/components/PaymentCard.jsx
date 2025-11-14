@@ -4,7 +4,7 @@ import React from 'react';
 const PaymentCard = ({ payment, onViewDetails, formatDate, formatCurrency, getStatusStyle }) => {
   const statusStyle = getStatusStyle(payment.status);
   
-  // ✅ Kiểm tra xem có payment_url và status = 'in_progress' hay không
+  //  Kiểm tra xem có payment_url và status = 'in_progress' hay không
   const canPay = payment.paymentUrl && payment.status === 'in_progress';
 
   const handlePaymentClick = (e) => {
@@ -56,21 +56,21 @@ const PaymentCard = ({ payment, onViewDetails, formatDate, formatCurrency, getSt
             fontSize: '0.9rem',
             marginBottom: '5px'
           }}>
-            🕒 {formatDate(payment.createdAt || payment.date || payment.paymentDate)}
+             {formatDate(payment.createdAt || payment.date || payment.paymentDate)}
           </div>
           <div style={{ 
             color: '#B0B0B0',
             fontSize: '0.85rem',
             marginBottom: '5px'
           }}>
-            📄 Mã GD: {payment.transactionRef || 'N/A'}
+             Mã GD: {payment.transactionRef || 'N/A'}
           </div>
           {payment.method && (
             <div style={{ 
               color: '#B0B0B0',
               fontSize: '0.9rem'
             }}>
-              💳 {payment.method === 'QR' ? 'QR Code / VNPay' : payment.method}
+               {payment.method === 'QR' ? 'QR Code / VNPay' : payment.method}
             </div>
           )}
         </div>
@@ -97,7 +97,7 @@ const PaymentCard = ({ payment, onViewDetails, formatDate, formatCurrency, getSt
             {statusStyle.text}
           </span>
           
-          {/* ✅ Nút thanh toán nếu chưa thanh toán */}
+          {/*  Nút thanh toán nếu chưa thanh toán */}
           {canPay && (
             <button
               onClick={handlePaymentClick}
@@ -122,7 +122,7 @@ const PaymentCard = ({ payment, onViewDetails, formatDate, formatCurrency, getSt
                 e.currentTarget.style.transform = 'scale(1)';
               }}
             >
-              💳 Thanh toán ngay
+               Thanh toán ngay
             </button>
           )}
         </div>

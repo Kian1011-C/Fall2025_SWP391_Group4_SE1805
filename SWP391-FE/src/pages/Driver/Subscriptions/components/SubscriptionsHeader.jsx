@@ -13,7 +13,7 @@ const SubscriptionsHeader = () => {
         WebkitTextFillColor: 'transparent',
         backgroundClip: 'text'
       }}>
-        💎 Gói dịch vụ
+         Gói dịch vụ
       </h1>
       <p style={{ color: '#B0B0B0', margin: 0, fontSize: '1.1rem' }}>
         Chọn gói phù hợp với nhu cầu của bạn

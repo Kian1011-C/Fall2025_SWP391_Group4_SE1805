@@ -23,9 +23,9 @@ const VerifyOTPPage = () => {
   
   // Debug: Log component mount and data
   React.useEffect(() => {
-    console.log('📧 VerifyOTPPage: Component mounted');
-    console.log('📧 VerifyOTPPage: userId:', userId);
-    console.log('📧 VerifyOTPPage: email:', email);
+    console.log(' VerifyOTPPage: Component mounted');
+    console.log(' VerifyOTPPage: userId:', userId);
+    console.log(' VerifyOTPPage: email:', email);
   }, [userId, email]);
 
   useEffect(() => {
@@ -154,18 +154,18 @@ const VerifyOTPPage = () => {
 
     setIsLoading(true);
     try {
-      console.log('🔐 VerifyOTPPage: Verifying OTP', { userId, otp: otpString });
+      console.log(' VerifyOTPPage: Verifying OTP', { userId, otp: otpString });
       
       const response = await authService.verifyOTP(userId, otpString);
       
-      console.log('✅ VerifyOTPPage: OTP verification response:', response);
+      console.log(' VerifyOTPPage: OTP verification response:', response);
 
       if (response.success) {
         showToast(response.message || 'Xác thực thành công!', 'success');
         
         // Use redirect field from API response
         const redirectPath = response.redirect || '/driver/dashboard';
-        console.log('🎯 VerifyOTPPage: Redirecting to:', redirectPath);
+        console.log(' VerifyOTPPage: Redirecting to:', redirectPath);
         
         // Navigate to dashboard or login page
         navigate(redirectPath, { 
@@ -179,7 +179,7 @@ const VerifyOTPPage = () => {
         showToast(response.message || 'Mã OTP không đúng!', 'error');
       }
     } catch (error) {
-      console.error('❌ VerifyOTPPage: OTP verification error:', error);
+      console.error(' VerifyOTPPage: OTP verification error:', error);
       showToast('Có lỗi xảy ra khi xác thực OTP!', 'error');
     } finally {
       setIsLoading(false);
@@ -191,7 +191,7 @@ const VerifyOTPPage = () => {
 
     setIsResending(true);
     try {
-      console.log('📧 VerifyOTPPage: Resending OTP', { userId });
+      console.log(' VerifyOTPPage: Resending OTP', { userId });
       
       const response = await authService.resendOTP(userId);
       
@@ -215,7 +215,7 @@ const VerifyOTPPage = () => {
         showToast(response.message || 'Không thể gửi lại mã OTP!', 'error');
       }
     } catch (error) {
-      console.error('❌ VerifyOTPPage: Resend OTP error:', error);
+      console.error(' VerifyOTPPage: Resend OTP error:', error);
       showToast('Có lỗi xảy ra khi gửi lại mã OTP!', 'error');
     } finally {
       setIsResending(false);
@@ -237,7 +237,7 @@ const VerifyOTPPage = () => {
         {/* Header */}
         <div className="otp-header">
           <div className="otp-icon">
-            🔒
+            
           </div>
           <h2 className="otp-title">
             Xác thực OTP
@@ -251,7 +251,7 @@ const VerifyOTPPage = () => {
         <div className="otp-info">
           <div className="otp-info-dot" />
           <div className="otp-info-email">
-            📧 {email || 'Email đã được gửi'}
+             {email || 'Email đã được gửi'}
           </div>
           <div className="otp-info-note">
             Vui lòng kiểm tra hộp thư và nhập mã OTP 6 chữ số
@@ -323,7 +323,7 @@ const VerifyOTPPage = () => {
                   e.target.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)';
                 }}
               >
-                {isResending ? '⏳ Đang gửi lại...' : '🔄 Gửi lại mã OTP'}
+                {isResending ? '⏳ Đang gửi lại...' : ' Gửi lại mã OTP'}
               </button>
             )}
           </div>
@@ -372,7 +372,7 @@ const VerifyOTPPage = () => {
                 </>
               ) : (
                 <>
-                  ✅ Xác thực
+                   Xác thực
                 </>
               )}
             </button>
@@ -382,7 +382,7 @@ const VerifyOTPPage = () => {
         {/* Help Text */}
         <div className="otp-help-box">
           <div className="otp-help-text">
-            💡 Không nhận được email? Kiểm tra thư mục spam hoặc nhấn "Gửi lại mã OTP"
+             Không nhận được email? Kiểm tra thư mục spam hoặc nhấn "Gửi lại mã OTP"
           </div>
         </div>
       </div>

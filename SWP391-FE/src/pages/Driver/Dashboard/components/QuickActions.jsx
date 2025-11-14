@@ -9,28 +9,28 @@ const QuickActions = ({ selectedVehicle, vehicles = [] }) => {
   const getQuickActions = () => {
     const baseActions = [
       {
-        icon: '🚗',
+        icon: '',
         title: 'Quản lý phương tiện',
         description: 'Xem và quản lý tất cả xe của bạn',
         color: '#22c55e',
         route: '/driver/vehicles'
       },
       {
-        icon: '🗺️',
+        icon: '',
         title: 'Bản đồ trạm',
         description: 'Xem các trạm gần bạn',
         color: '#6ab7ff',
         route: '/driver/stations-map'
       },
       {
-        icon: '💳',
+        icon: '',
         title: 'Thanh toán',
         description: 'Quản lý thanh toán',
         color: '#ffa500',
         route: '/driver/payments'
       },
       {
-        icon: '💎',
+        icon: '',
         title: 'Gói dịch vụ',
         description: 'Nâng cấp gói của bạn',
         color: '#9c88ff',
@@ -41,7 +41,7 @@ const QuickActions = ({ selectedVehicle, vehicles = [] }) => {
     // Only add battery swap action if user has vehicles
     if (vehicles && vehicles.length > 0) {
       baseActions.unshift({
-        icon: '🔋',
+        icon: '',
         title: 'Đổi pin',
         description: selectedVehicle ? `Đổi pin cho ${selectedVehicle.plateNumber}` : 'Tìm trạm và đổi pin ngay',
         color: '#19c37d',
@@ -70,7 +70,7 @@ const QuickActions = ({ selectedVehicle, vehicles = [] }) => {
         alignItems: 'center',
         gap: '10px'
       }}>
-        ⚡ Thao tác nhanh
+         Thao tác nhanh
       </h3>
       <div style={{
         display: 'grid',

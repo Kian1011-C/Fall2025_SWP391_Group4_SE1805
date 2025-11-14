@@ -15,7 +15,7 @@ const TakeNewBattery = () => {
     useEffect(() => {
         const fetchNewBatteryInfo = async () => {
             try {
-                console.log('✅ TakeNewBattery: Lấy thông tin pin mới từ API');
+                console.log(' TakeNewBattery: Lấy thông tin pin mới từ API');
                 
                 // Bước 1: Lấy batteryId từ sessionStorage
                 const newBatteryIdFromStorage = sessionStorage.getItem('new_battery_id');
@@ -25,7 +25,7 @@ const TakeNewBattery = () => {
                 console.log('  - newBatterySlot từ sessionStorage:', newBatterySlotFromStorage);
                 
                 if (!newBatteryIdFromStorage) {
-                    console.error('❌ Không tìm thấy new_battery_id trong sessionStorage');
+                    console.error(' Không tìm thấy new_battery_id trong sessionStorage');
                     setError('Không tìm thấy thông tin pin mới');
                     setLoadingBattery(false);
                     return;
@@ -35,11 +35,11 @@ const TakeNewBattery = () => {
                 setNewBatterySlot(newBatterySlotFromStorage);
 
                 // Bước 2: Gọi API để lấy thông tin chi tiết pin (CHỈ NẾU ID là số hợp lệ)
-                // ⚠️ Kiểm tra: Battery ID phải là số, không được là string như "BAT-SLOT-1"
+                //  Kiểm tra: Battery ID phải là số, không được là string như "BAT-SLOT-1"
                 const isValidBatteryId = !isNaN(newBatteryIdFromStorage) && newBatteryIdFromStorage !== null;
                 
                 if (isValidBatteryId) {
-                    console.log('🔋 Gọi API getBatteryById để lấy thông tin pin mới:', newBatteryIdFromStorage);
+                    console.log(' Gọi API getBatteryById để lấy thông tin pin mới:', newBatteryIdFromStorage);
                     const batteryResponse = await batteryService.getBatteryById(newBatteryIdFromStorage);
                     
                     if (batteryResponse.success && batteryResponse.data) {
@@ -53,7 +53,7 @@ const TakeNewBattery = () => {
                                            batteryData.health ||
                                            batteryData.capacity || 100;
                         
-                        console.log('✅ Đã lấy thông tin pin mới từ API:');
+                        console.log(' Đã lấy thông tin pin mới từ API:');
                         console.log('  - Battery ID:', newBatteryIdFromStorage);
                         console.log('  - Battery Level (THẬT từ API):', batteryLevel + '%');
                         console.log('  - Full battery data:', batteryData);
@@ -63,13 +63,13 @@ const TakeNewBattery = () => {
                         // Cập nhật sessionStorage với dữ liệu từ API (để đảm bảo đồng bộ)
                         sessionStorage.setItem('newBatteryLevel', String(batteryLevel));
                     } else {
-                        console.warn('⚠️ Không lấy được thông tin pin từ API, dùng dữ liệu từ sessionStorage');
+                        console.warn(' Không lấy được thông tin pin từ API, dùng dữ liệu từ sessionStorage');
                         // Fallback: dùng giá trị từ sessionStorage nếu API không trả về
                         const fallbackLevel = sessionStorage.getItem('newBatteryLevel');
                         setNewBatteryLevel(fallbackLevel ? parseInt(fallbackLevel) : 100);
                     }
                 } else {
-                    console.warn('⚠️ Battery ID không hợp lệ (không phải số):', newBatteryIdFromStorage);
+                    console.warn(' Battery ID không hợp lệ (không phải số):', newBatteryIdFromStorage);
                     console.warn('   Backend cần trả về batteryId thật từ API /api/driver/slots');
                     // Dùng dữ liệu fallback từ sessionStorage
                     const fallbackLevel = sessionStorage.getItem('newBatteryLevel');
@@ -78,7 +78,7 @@ const TakeNewBattery = () => {
                 
                 setLoadingBattery(false);
             } catch (err) {
-                console.error('❌ Lỗi khi lấy thông tin pin mới từ API:', err);
+                console.error(' Lỗi khi lấy thông tin pin mới từ API:', err);
                 
                 // Fallback: dùng dữ liệu từ sessionStorage nếu API lỗi
                 const fallbackLevel = sessionStorage.getItem('newBatteryLevel');
@@ -89,7 +89,7 @@ const TakeNewBattery = () => {
                     setNewBatteryId(fallbackId);
                     setNewBatterySlot(fallbackSlot);
                     setNewBatteryLevel(fallbackLevel ? parseInt(fallbackLevel) : 100);
-                    console.warn('⚠️ Đã dùng dữ liệu fallback từ sessionStorage');
+                    console.warn(' Đã dùng dữ liệu fallback từ sessionStorage');
                 } else {
                     setError('Không thể tải thông tin pin mới. Vui lòng thử lại.');
                 }
@@ -123,7 +123,7 @@ const TakeNewBattery = () => {
             
             {/* Thông báo hệ thống đã chọn */}
             <div className="battery-selection-notice">
-                <div className="notice-icon">🤖</div>
+                <div className="notice-icon"></div>
                 <div className="notice-text">
                     <h3>Hệ thống đã chọn pin sẵn sàng cho bạn</h3>
                     <p>Pin đã được quét và xác nhận trạng thái sẵn sàng</p>
@@ -175,7 +175,7 @@ const TakeNewBattery = () => {
 
             {/* Thông báo xác nhận */}
             <div className="battery-confirmation">
-                <div className="confirmation-icon">✅</div>
+                <div className="confirmation-icon"></div>
                     <div className="confirmation-text">
                         <strong>Pin đã sẵn sàng!</strong>
                         <p>ID: {newBatteryId || 'Đang tải...'} | Slot: {newBatterySlot || 'Đang tải...'} | Dung lượng: {newBatteryLevel !== null ? `${newBatteryLevel}%` : 'Đang tải...'}</p>
@@ -188,7 +188,7 @@ const TakeNewBattery = () => {
                     className="complete-battery-button"
                     onClick={async () => {
                         // GỌI API XÁC NHẬN - MỘT LẦN DUY NHẤT
-                        console.log('🔄 Gọi completeSwap với tất cả dữ liệu...');
+                        console.log(' Gọi completeSwap với tất cả dữ liệu...');
                         await completeSwap();
                         goToStep(STEPS.SUCCESS);
                     }} 
@@ -201,7 +201,7 @@ const TakeNewBattery = () => {
                         </>
                     ) : (
                         <>
-                            <span className="button-icon">🔋</span>
+                            <span className="button-icon"></span>
                             Tôi đã lấy pin mới rồi
                         </>
                     )}

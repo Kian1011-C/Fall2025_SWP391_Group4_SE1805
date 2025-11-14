@@ -49,22 +49,22 @@ const SystemStatus = ({ stats }) => {
         <StatusItem
           label="Pin khả dụng"
           value={batteryUtilization}
-          icon="🔋"
+          icon=""
         />
         <StatusItem
           label="Trạm hoạt động"
           value={stationOperational}
-          icon="🏢"
+          icon=""
         />
         <StatusItem
           label="Uptime hệ thống"
           value={systemUptime}
-          icon="⚡"
+          icon=""
         />
         <StatusItem
           label="Độ hài lòng"
           value={userSatisfaction}
-          icon="⭐"
+          icon=""
         />
       </div>
 
@@ -72,14 +72,14 @@ const SystemStatus = ({ stats }) => {
         <h3>Cảnh báo</h3>
         <div className="alert-list">
           <div className="alert-item alert-warning">
-            <span className="alert-icon">⚠️</span>
+            <span className="alert-icon"></span>
             <div className="alert-content">
               <div className="alert-title">Pin tại Trạm #5 cần bảo trì</div>
               <div className="alert-time">2 giờ trước</div>
             </div>
           </div>
           <div className="alert-item alert-info">
-            <span className="alert-icon">ℹ️</span>
+            <span className="alert-icon"></span>
             <div className="alert-content">
               <div className="alert-title">Cập nhật hệ thống sắp diễn ra</div>
               <div className="alert-time">5 giờ trước</div>

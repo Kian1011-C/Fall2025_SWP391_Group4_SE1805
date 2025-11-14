@@ -13,7 +13,7 @@ const VehicleList = ({ vehicles, selectedVehicle, onSelectVehicle, contracts }) 
         fontSize: '1.1rem',
         fontWeight: '600'
       }}>
-        🚗 Chọn xe ({vehicles.length} xe)
+         Chọn xe ({vehicles.length} xe)
       </h4>
       <div style={{
         display: 'grid',

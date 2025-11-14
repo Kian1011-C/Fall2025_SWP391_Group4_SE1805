@@ -6,10 +6,10 @@ const BatteryFormModal = ({ isOpen, onClose, onSave, battery }) => {
   const [formData, setFormData] = useState({ model: '', capacity: 100, stateOfHealth: 100, cycleCount: 0, status: 'available' });
   const isEditing = !!battery;
 
-  console.log('🔵 BatteryFormModal render:', { isOpen, isEditing, battery, formData });
+  console.log(' BatteryFormModal render:', { isOpen, isEditing, battery, formData });
 
   useEffect(() => {
-    console.log('🔵 BatteryFormModal useEffect triggered:', { isOpen, isEditing, battery });
+    console.log(' BatteryFormModal useEffect triggered:', { isOpen, isEditing, battery });
     if (isEditing) {
       setFormData({
         model: battery.model || '',
@@ -31,7 +31,7 @@ const BatteryFormModal = ({ isOpen, onClose, onSave, battery }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('🔵 BatteryFormModal: Submit form');
+    console.log(' BatteryFormModal: Submit form');
     console.log('  ├─ isEditing:', isEditing);
     console.log('  ├─ batteryId:', battery?.batteryId);
     console.log('  ├─ formData:', formData);
@@ -51,19 +51,19 @@ const BatteryFormModal = ({ isOpen, onClose, onSave, battery }) => {
   };
 
   if (!isOpen) {
-    console.log('🔵 BatteryFormModal: Modal is CLOSED, returning null');
+    console.log(' BatteryFormModal: Modal is CLOSED, returning null');
     return null;
   }
 
-  console.log('🔵 BatteryFormModal: Modal is OPEN, rendering with Portal...');
+  console.log(' BatteryFormModal: Modal is OPEN, rendering with Portal...');
 
   const modalContent = (
     <div className="battery-modal-overlay" onClick={(e) => {
-      console.log('🔵 Clicked on overlay');
+      console.log(' Clicked on overlay');
       onClose();
     }}>
       <div className="battery-modal-content" onClick={(e) => {
-        console.log('🔵 Clicked on modal content (should not close)');
+        console.log(' Clicked on modal content (should not close)');
         e.stopPropagation();
       }}>
         <form onSubmit={handleSubmit}>

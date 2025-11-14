@@ -23,7 +23,7 @@ const WelcomeHeader = ({ currentUser, activeVehicles }) => {
         margin: '0 0 10px 0',
         fontSize: '2rem'
       }}>
-        🚗 Chào mừng {getUserName()}!
+         Chào mừng {getUserName()}!
       </h1>
       <p style={{ color: '#B0B0B0', margin: 0, fontSize: '1.1rem' }}>
         {activeVehicles > 0 

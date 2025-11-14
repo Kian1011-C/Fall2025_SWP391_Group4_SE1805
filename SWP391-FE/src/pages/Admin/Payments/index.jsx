@@ -115,7 +115,7 @@ const Payments = () => {
               justifyContent: 'center',
               fontSize: '24px'
             }}>
-              👥
+              
             </div>
             <div>
               <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '4px' }}>
@@ -146,7 +146,7 @@ const Payments = () => {
               justifyContent: 'center',
               fontSize: '24px'
             }}>
-              ✓
+              
             </div>
             <div>
               <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '4px' }}>
@@ -177,7 +177,7 @@ const Payments = () => {
               justifyContent: 'center',
               fontSize: '24px'
             }}>
-              ⚠️
+              
             </div>
             <div>
               <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '4px' }}>
@@ -206,7 +206,7 @@ const Payments = () => {
         <div style={{ flex: 1, minWidth: '250px' }}>
           <input
             type="text"
-            placeholder="🔍 Tìm kiếm khách hàng (tên, email, SĐT)..."
+            placeholder=" Tìm kiếm khách hàng (tên, email, SĐT)..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{
@@ -236,7 +236,7 @@ const Payments = () => {
             gap: '8px'
           }}
         >
-          🔄 Làm mới
+           Làm mới
         </button>
       </div>
 
@@ -265,7 +265,7 @@ const Payments = () => {
             transition: 'all 0.2s'
           }}
         >
-          📝 Xuất hóa đơn
+           Xuất hóa đơn
         </button>
         <button
           onClick={() => setActiveTab('pending')}
@@ -299,7 +299,7 @@ const Payments = () => {
             transition: 'all 0.2s'
           }}
         >
-          📜 Lịch sử
+           Lịch sử
         </button>
       </div>
 
@@ -317,7 +317,7 @@ const Payments = () => {
           </div>
         ) : error ? (
           <div style={{ padding: '60px', textAlign: 'center', color: '#ef4444' }}>
-            ⚠️ {error}
+             {error}
           </div>
         ) : filteredDrivers.length === 0 ? (
           <div style={{ padding: '60px', textAlign: 'center', color: '#6b7280' }}>

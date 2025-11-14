@@ -35,17 +35,17 @@ const AdminReports = () => {
         {/* Hàng 1: Thống kê Doanh thu */}
         <h2 style={{ color: 'white', borderBottom: '1px solid #374151', paddingBottom: '10px' }}>Báo cáo Doanh thu</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '25px', marginBottom: '30px' }}>
-          <ReportCard label="Tổng Doanh thu" value={revenueData.totalRevenue?.toLocaleString('vi-VN') + ' ₫'} icon="💰" color="#10b981" />
-          <ReportCard label="Giao dịch" value={revenueData.totalTransactions?.toLocaleString()} icon="💳" color="#3b82f6" />
-          <ReportCard label="Doanh thu TB / Giao dịch" value={revenueData.avgRevenuePerTx?.toLocaleString('vi-VN') + ' ₫'} icon="📊" color="#f59e0b" />
+          <ReportCard label="Tổng Doanh thu" value={revenueData.totalRevenue?.toLocaleString('vi-VN') + ' ₫'} icon="" color="#10b981" />
+          <ReportCard label="Giao dịch" value={revenueData.totalTransactions?.toLocaleString()} icon="" color="#3b82f6" />
+          <ReportCard label="Doanh thu TB / Giao dịch" value={revenueData.avgRevenuePerTx?.toLocaleString('vi-VN') + ' ₫'} icon="" color="#f59e0b" />
         </div>
 
         {/* Hàng 2: Thống kê Sử dụng */}
         <h2 style={{ color: 'white', borderBottom: '1px solid #374151', paddingBottom: '10px' }}>Báo cáo Sử dụng</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '25px' }}>
-          <ReportCard label="Tổng lượt đổi pin" value={usageData.totalSwaps?.toLocaleString()} icon="🔄" color="#3b82f6" />
-          <ReportCard label="Trạm Yêu thích" value={usageData.favoriteStation || 'N/A'} icon="🏢" color="#f59e0b" />
-          <ReportCard label="Tài xế Hoạt động" value={usageData.activeUsers?.toLocaleString()} icon="👥" color="#10b981" />
+          <ReportCard label="Tổng lượt đổi pin" value={usageData.totalSwaps?.toLocaleString()} icon="" color="#3b82f6" />
+          <ReportCard label="Trạm Yêu thích" value={usageData.favoriteStation || 'N/A'} icon="" color="#f59e0b" />
+          <ReportCard label="Tài xế Hoạt động" value={usageData.activeUsers?.toLocaleString()} icon="" color="#10b981" />
         </div>
       </>
     );
@@ -63,7 +63,7 @@ const AdminReports = () => {
           <span style={{ color: '#9ca3af' }}>đến</span>
           <input type="date" name="endDate" value={dateRange.endDate} onChange={handleDateChange} style={dateInputStyle} />
           <button onClick={refetch} disabled={isLoading} style={{ background: '#374151', color: 'white', border: 'none', padding: '10px 15px', borderRadius: '8px', cursor: 'pointer' }}>
-            {isLoading ? 'Đang tải...' : '🔄 Lọc'}
+            {isLoading ? 'Đang tải...' : ' Lọc'}
           </button>
         </div>
       </div>

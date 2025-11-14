@@ -25,7 +25,7 @@ const VehicleCard = ({ vehicle, onClick }) => {
         e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
       }}
     >
-      <div style={{ fontSize: '3rem', marginBottom: '15px', textAlign: 'center' }}>🚗</div>
+      <div style={{ fontSize: '3rem', marginBottom: '15px', textAlign: 'center' }}></div>
       
       <h3 style={{ color: '#FFFFFF', margin: '0 0 15px 0', textAlign: 'center' }}>
         {vehicle.vehicleModel || 'Xe điện'}
@@ -82,7 +82,7 @@ const VehicleCard = ({ vehicle, onClick }) => {
         color: '#19c37d',
         fontWeight: '600'
       }}>
-        👁️ Xem chi tiết
+         Xem chi tiết
       </div>
     </div>
   );

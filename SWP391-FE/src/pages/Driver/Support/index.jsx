@@ -54,7 +54,7 @@ const Support = () => {
     const userId = currentUser?.id || currentUser?.user_id || currentUser?.userId;
     const reportData = formatIssueReport(issue.type, userId);
     
-    console.log('📝 Reporting issue:', reportData);
+    console.log(' Reporting issue:', reportData);
     
     // Note: Backend cần API POST /api/support/tickets
     alert(`Báo cáo ${issue.title}\n\nBackend cần implement API POST /api/support/tickets`);
@@ -157,7 +157,7 @@ const Support = () => {
             width: '28px', height: '28px', borderRadius: '8px',
             background: 'rgba(255,255,255,.2)', display: 'grid', placeItems: 'center'
           }}>
-            {toast.type === 'success' ? '✓' : '!'}
+            {toast.type === 'success' ? '' : '!'}
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 700 }}>{toast.title}</div>

@@ -20,21 +20,21 @@ export const useStationsData = () => {
       setLoading(true);
       setError(null);
       
-      console.log('🔍 Fetching stations data using new API...');
+      console.log(' Fetching stations data using new API...');
       
       // Sử dụng API mới GET /api/stations
       const stationsResult = await stationService.getAllStations();
-      console.log('📊 GET /api/stations response:', stationsResult);
+      console.log(' GET /api/stations response:', stationsResult);
       
       // Lấy thống kê trạm
       const statsResult = await stationService.getStationsStats();
-      console.log('📈 GET /api/stations/stats response:', statsResult);
+      console.log(' GET /api/stations/stats response:', statsResult);
       
       if (stationsResult.success) {
         let stationsData = stationsResult.data || [];
-        console.log('✅ Stations loaded:', stationsData.length);
-        console.log('🔍 First station data structure:', stationsData[0]);
-        console.log('🔍 All stations status values:', stationsData.map(s => ({ 
+        console.log(' Stations loaded:', stationsData.length);
+        console.log(' First station data structure:', stationsData[0]);
+        console.log(' All stations status values:', stationsData.map(s => ({ 
           id: s.id, 
           name: s.name, 
           status: s.status, 
@@ -62,7 +62,7 @@ export const useStationsData = () => {
             localStorage.setItem(geocodeCacheKey, JSON.stringify(cache));
             return coords;
           } catch (e) {
-            console.warn('⚠️ Geocode failed for', address, e);
+            console.warn(' Geocode failed for', address, e);
             return null;
           }
         };
@@ -88,14 +88,14 @@ export const useStationsData = () => {
           availableSlots: 0,
           occupancyRate: 0
         });
-        console.log('✅ Stats loaded:', statsResult.data);
+        console.log(' Stats loaded:', statsResult.data);
       } else {
-        console.warn('⚠️ Stats API failed:', statsResult.message);
+        console.warn(' Stats API failed:', statsResult.message);
         // Không set error vì stats không bắt buộc
       }
       
     } catch (err) {
-      console.error('❌ Error fetching stations data:', err);
+      console.error(' Error fetching stations data:', err);
       setError('Không thể tải dữ liệu trạm');
       setStations([]);
     } finally {

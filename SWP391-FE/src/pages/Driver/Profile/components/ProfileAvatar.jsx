@@ -83,7 +83,7 @@ export const ProfileAvatar = ({ user, onEdit, isEditing }) => {
           onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
           onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
         >
-          ✏️ Chỉnh sửa
+           Chỉnh sửa
         </button>
       )}
     </div>

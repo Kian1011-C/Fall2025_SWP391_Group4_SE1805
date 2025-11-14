@@ -124,7 +124,7 @@ const MonthlyBilling = () => {
             borderRadius: '8px',
             marginBottom: '24px'
           }}>
-            ⚠️ {error}
+             {error}
           </div>
         )}
 
@@ -137,7 +137,7 @@ const MonthlyBilling = () => {
             borderRadius: '8px',
             marginBottom: '24px'
           }}>
-            ✓ {success}
+             {success}
           </div>
         )}
 
@@ -251,7 +251,7 @@ const MonthlyBilling = () => {
               transition: 'all 0.3s ease'
             }}
           >
-            {loading ? '⏳ Đang xử lý...' : '💳 Thanh toán qua VNPay'}
+            {loading ? '⏳ Đang xử lý...' : ' Thanh toán qua VNPay'}
           </button>
         </div>
 
@@ -270,7 +270,7 @@ const MonthlyBilling = () => {
               fontWeight: '600',
               marginBottom: '16px'
             }}>
-              📊 Thông tin hóa đơn
+               Thông tin hóa đơn
             </h3>
             
             <div style={{ display: 'grid', gap: '12px' }}>
@@ -361,7 +361,7 @@ const MonthlyBilling = () => {
           marginTop: '24px'
         }}>
           <p style={{ color: '#c7d2fe', margin: 0, fontSize: '0.9rem' }}>
-            ℹ️ <strong>Lưu ý:</strong> Hệ thống sẽ tự động tính toán hóa đơn dựa trên 
+             <strong>Lưu ý:</strong> Hệ thống sẽ tự động tính toán hóa đơn dựa trên 
             quãng đường đã đi trong tháng và tạo link thanh toán VNPay. 
             Sau khi thanh toán thành công, hợp đồng sẽ được cập nhật trạng thái.
           </p>

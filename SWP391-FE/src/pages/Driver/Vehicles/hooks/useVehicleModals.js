@@ -10,9 +10,9 @@ export const useVehicleModals = () => {
   const [selectedVehicle, setSelectedVehicle] = useState(null);
 
   const openAddModal = () => {
-    console.log('🔵 Opening add vehicle modal...');
+    console.log(' Opening add vehicle modal...');
     setShowAddModal(true);
-    console.log('✅ Add vehicle modal should be open');
+    console.log(' Add vehicle modal should be open');
   };
 
   const closeAddModal = () => {

@@ -1,7 +1,7 @@
 // components/DriverRow.jsx (Staff - Read Only)
 import React from 'react';
 
-const DriverRow = ({ driver, onViewHistory }) => { // ✅ Xóa onGenerateInvoice prop
+const DriverRow = ({ driver, onViewHistory }) => { //  Xóa onGenerateInvoice prop
   const getStatusColor = (status) => {
     switch (status) {
       case 'active':

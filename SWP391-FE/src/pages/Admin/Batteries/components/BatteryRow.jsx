@@ -39,7 +39,7 @@ const BatteryRow = ({ battery, onEdit, onDelete, onViewDetail }) => {
       {/* Battery ID */}
       <td>
         <div className="admin-battery-id">
-          <span className="admin-battery-id-icon">🔋</span>
+          <span className="admin-battery-id-icon"></span>
           <span className="admin-battery-id-text">BAT{battery.batteryId}</span>
         </div>
       </td>
@@ -72,14 +72,14 @@ const BatteryRow = ({ battery, onEdit, onDelete, onViewDetail }) => {
       {/* Cycles */}
       <td>
         <div className="admin-battery-cycles">
-          <span className="admin-battery-cycles-icon">🔄</span>
+          <span className="admin-battery-cycles-icon"></span>
           <div className="admin-battery-cycles-info">
             <span className="admin-battery-cycles-text">{battery.cycleCount || 0}</span>
             {battery.cycleCount > 2000 && (
-              <span className="admin-battery-cycles-warning" title="Pin đã qua nhiều chu kỳ sạc">⚠️</span>
+              <span className="admin-battery-cycles-warning" title="Pin đã qua nhiều chu kỳ sạc"></span>
             )}
             {battery.cycleCount > 2500 && (
-              <span className="admin-battery-cycles-critical" title="Nên thay pin sớm">🔴</span>
+              <span className="admin-battery-cycles-critical" title="Nên thay pin sớm"></span>
             )}
           </div>
         </div>
@@ -93,19 +93,19 @@ const BatteryRow = ({ battery, onEdit, onDelete, onViewDetail }) => {
             className="admin-battery-action-btn view"
             title="Xem chi tiết"
           >
-            👁️ Chi tiết
+             Chi tiết
           </button>
           <button 
             onClick={() => onEdit(battery)} 
             className="admin-battery-action-btn edit"
           >
-            ✏️ Sửa
+             Sửa
           </button>
           <button 
             onClick={() => onDelete(battery)} 
             className="admin-battery-action-btn delete"
           >
-            🗑️ Xóa
+             Xóa
           </button>
         </div>
       </td>

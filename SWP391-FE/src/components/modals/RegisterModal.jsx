@@ -142,7 +142,7 @@ const RegisterModal = () => {
 
     setIsLoading(true);
     try {
-      console.log('🚀 RegisterModal: Submitting registration form', formData);
+      console.log(' RegisterModal: Submitting registration form', formData);
       
       const response = await authService.register({
         firstName: formData.firstName.trim(),
@@ -153,7 +153,7 @@ const RegisterModal = () => {
         cccd: formData.cccd.trim()
       });
 
-      console.log('📧 RegisterModal: Registration response:', response);
+      console.log(' RegisterModal: Registration response:', response);
 
       if (response.success) {
         showToast(response.message || 'Đăng ký thành công! Vui lòng kiểm tra email để nhập OTP.', 'success');
@@ -161,7 +161,7 @@ const RegisterModal = () => {
         
         // Use redirect field from API response
         const redirectPath = response.redirect || `/verify-otp?userId=${response.userId}`;
-        console.log('🎯 RegisterModal: Redirecting to:', redirectPath);
+        console.log(' RegisterModal: Redirecting to:', redirectPath);
         
         // Navigate to OTP verification page
         navigate(redirectPath, { 
@@ -175,7 +175,7 @@ const RegisterModal = () => {
         showToast(response.message || 'Đăng ký thất bại!', 'error');
       }
     } catch (error) {
-      console.error('❌ RegisterModal: Registration error:', error);
+      console.error(' RegisterModal: Registration error:', error);
       showToast('Có lỗi xảy ra khi đăng ký!', 'error');
     } finally {
       setIsLoading(false);
@@ -300,7 +300,7 @@ const RegisterModal = () => {
         {/* Info Box */}
         <div className="modal-info-box">
           <h4 className="modal-info-title">
-            📋 Thông tin cần thiết
+             Thông tin cần thiết
           </h4>
           <div className="modal-info-content">
             <div>• Tất cả thông tin đều bắt buộc</div>
@@ -327,7 +327,7 @@ const RegisterModal = () => {
               />
               {errors.firstName && (
                 <div className="modal-error-message">
-                  ⚠️ {errors.firstName}
+                   {errors.firstName}
                 </div>
               )}
             </div>
@@ -346,7 +346,7 @@ const RegisterModal = () => {
               />
               {errors.lastName && (
                 <div className="modal-error-message">
-                  ⚠️ {errors.lastName}
+                   {errors.lastName}
                 </div>
               )}
             </div>
@@ -368,7 +368,7 @@ const RegisterModal = () => {
             />
             {errors.email && (
               <div className="modal-error-message">
-                ⚠️ {errors.email}
+                 {errors.email}
               </div>
             )}
           </div>
@@ -389,7 +389,7 @@ const RegisterModal = () => {
             />
             {errors.phone && (
               <div className="modal-error-message">
-                ⚠️ {errors.phone}
+                 {errors.phone}
               </div>
             )}
           </div>
@@ -411,7 +411,7 @@ const RegisterModal = () => {
               />
               {errors.password && (
                 <div className="modal-error-message">
-                  ⚠️ {errors.password}
+                   {errors.password}
                 </div>
               )}
             </div>
@@ -430,7 +430,7 @@ const RegisterModal = () => {
               />
               {errors.confirmPassword && (
                 <div className="modal-error-message">
-                  ⚠️ {errors.confirmPassword}
+                   {errors.confirmPassword}
                 </div>
               )}
             </div>
@@ -452,7 +452,7 @@ const RegisterModal = () => {
             />
             {errors.cccd && (
               <div className="modal-error-message">
-                ⚠️ {errors.cccd}
+                 {errors.cccd}
               </div>
             )}
           </div>

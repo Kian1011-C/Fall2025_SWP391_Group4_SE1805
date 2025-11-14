@@ -9,7 +9,7 @@ const BatteryInfoSection = ({ vehicle }) => {
       padding: '20px',
       marginBottom: '20px'
     }}>
-      <h4 style={{ color: '#19c37d', marginBottom: '15px' }}>🔋 Thông tin pin</h4>
+      <h4 style={{ color: '#19c37d', marginBottom: '15px' }}> Thông tin pin</h4>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <span style={{ color: '#B0B0B0' }}>Loại pin:</span>

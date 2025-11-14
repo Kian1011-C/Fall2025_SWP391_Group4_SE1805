@@ -36,7 +36,7 @@ export const useSwapData = (goToStep, STEPS) => {
                                    selectedVehicle?.vehicleId || 
                                    selectedVehicle?.vehicle_id;
                         if (vehicleId) {
-                            console.log('✅ Lấy vehicleId từ selectedVehicle:', vehicleId);
+                            console.log(' Lấy vehicleId từ selectedVehicle:', vehicleId);
                             sessionStorage.setItem('vehicleID', String(vehicleId));
                         }
                     }
@@ -47,7 +47,7 @@ export const useSwapData = (goToStep, STEPS) => {
                                     selectedVehicle?.contract_id ||
                                     selectedVehicle?.activeContractId;
                         if (contractId) {
-                            console.log('✅ Lấy contractId từ selectedVehicle:', contractId);
+                            console.log(' Lấy contractId từ selectedVehicle:', contractId);
                             sessionStorage.setItem('contractID', String(contractId));
                         }
                     }
@@ -60,15 +60,15 @@ export const useSwapData = (goToStep, STEPS) => {
                                                    selectedVehicle?.battery?.batteryId;
                     
                     if (selectedVehicleBatteryId) {
-                        console.log('✅ Lấy batteryId từ selectedVehicle:', selectedVehicleBatteryId);
+                        console.log(' Lấy batteryId từ selectedVehicle:', selectedVehicleBatteryId);
                         batteryId = selectedVehicleBatteryId; // Override với giá trị từ selectedVehicle
                         // KHÔNG GHI ĐÈ old_battery_id - Giữ nguyên giá trị cũ (pin cũ thật)
-                        console.log('⚠️ KHÔNG GHI ĐÈ old_battery_id (để giữ pin cũ thật)');
+                        console.log(' KHÔNG GHI ĐÈ old_battery_id (để giữ pin cũ thật)');
                     } else if (!batteryId || batteryId === 'null' || batteryId === 'undefined') {
-                        console.warn('⚠️ Không tìm thấy batteryId trong selectedVehicle');
+                        console.warn(' Không tìm thấy batteryId trong selectedVehicle');
                     }
                 } catch (parseErr) {
-                    console.warn('⚠️ Không parse được selectedVehicle:', parseErr);
+                    console.warn(' Không parse được selectedVehicle:', parseErr);
                 }
             }
             
@@ -76,14 +76,14 @@ export const useSwapData = (goToStep, STEPS) => {
             vehicleId = vehicleId || 1;
             contractId = contractId || 1;
             
-            console.log('🔍 getRealData - sessionStorage values:');
+            console.log(' getRealData - sessionStorage values:');
             console.log('  - userId:', userId);
             console.log('  - vehicleId:', vehicleId);
             console.log('  - contractId:', contractId);
             console.log('  - batteryId (final):', batteryId);
             
             // Debug: Log all battery-related keys
-            console.log('🔍 Debug - All battery keys in sessionStorage:');
+            console.log(' Debug - All battery keys in sessionStorage:');
             console.log('  - batteryId:', sessionStorage.getItem('batteryId'));
             console.log('  - oldBatteryId:', sessionStorage.getItem('oldBatteryId'));
             console.log('  - old_battery_id:', sessionStorage.getItem('old_battery_id'));
@@ -123,7 +123,7 @@ export const useSwapData = (goToStep, STEPS) => {
     const initiateSwap = async (cabinet) => {
         // ===== LOG DEBUG CABINET =====
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        console.log('🎯 INITIATE SWAP - CABINET OBJECT');
+        console.log(' INITIATE SWAP - CABINET OBJECT');
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         console.log('Cabinet parameter:', cabinet);
         console.log('Cabinet.id:', cabinet.id);
@@ -168,7 +168,7 @@ export const useSwapData = (goToStep, STEPS) => {
             }
             
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.log('📤 BƯỚC 1: INITIATE BATTERY SWAP');
+            console.log(' BƯỚC 1: INITIATE BATTERY SWAP');
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             console.log('Data gửi lên API:');
             console.log('  ├─ userId:', realData.userId, '(required - string)');
@@ -184,7 +184,7 @@ export const useSwapData = (goToStep, STEPS) => {
 
             // Kiểm tra nếu swap đã được tạo trước đó
             if (transaction && transaction.swapId) {
-                console.log('✅ Swap đã được tạo trước đó, swapId=', transaction.swapId);
+                console.log(' Swap đã được tạo trước đó, swapId=', transaction.swapId);
                 goToStep(STEPS.PLACE_OLD_BATTERY);
                 setIsLoading(false);
                 return;
@@ -195,7 +195,7 @@ export const useSwapData = (goToStep, STEPS) => {
             const response = await swapService.initiateSwap(realData);
 
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.log('✅ RESPONSE TỪ API INITIATE:');
+            console.log(' RESPONSE TỪ API INITIATE:');
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             console.log('  ├─ swapId:', response.swapId, '(QUAN TRỌNG - ĐÃ LƯU)');
             console.log('  ├─ contractId:', response.contractId, '(BE tự tìm)');
@@ -213,7 +213,7 @@ export const useSwapData = (goToStep, STEPS) => {
             // API initiateSwap chỉ trả về slotNumber của pin mới, không trả về slot trống
             let emptySlotNumber = null;
             try {
-                console.log('📡 Gọi API GET slots để tìm slot trống nơi đặt pin cũ...');
+                console.log(' Gọi API GET slots để tìm slot trống nơi đặt pin cũ...');
                 console.log('  └─ TowerId:', realData.towerId);
                 
                 const slotsResponse = await stationService.getSlotsByTower(realData.towerId);
@@ -230,16 +230,16 @@ export const useSwapData = (goToStep, STEPS) => {
                     
                     if (emptySlots.length > 0) {
                         emptySlotNumber = emptySlots[0].slotNumber || emptySlots[0].slot_number || emptySlots[0].slot_id;
-                        console.log('✅ Tìm thấy slot trống nơi đặt pin cũ:', emptySlotNumber);
+                        console.log(' Tìm thấy slot trống nơi đặt pin cũ:', emptySlotNumber);
                     } else {
-                        console.warn('⚠️ Không tìm thấy slot trống trong trụ');
+                        console.warn(' Không tìm thấy slot trống trong trụ');
                     }
                 } else {
-                    console.warn('⚠️ Response từ getSlotsByTower không hợp lệ:', slotsResponse);
+                    console.warn(' Response từ getSlotsByTower không hợp lệ:', slotsResponse);
                 }
             } catch (slotError) {
-                console.warn('⚠️ Không lấy được slots từ API:', slotError);
-                console.warn('⚠️ Sẽ dùng giá trị mặc định hoặc từ sessionStorage');
+                console.warn(' Không lấy được slots từ API:', slotError);
+                console.warn(' Sẽ dùng giá trị mặc định hoặc từ sessionStorage');
             }
 
             // Lưu transaction với swapId và emptySlotNumber (QUAN TRỌNG - dùng cho các bước sau)
@@ -251,7 +251,7 @@ export const useSwapData = (goToStep, STEPS) => {
             };
             
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.log('📦 TRANSACTION OBJECT (sau khi tìm slot trống):');
+            console.log(' TRANSACTION OBJECT (sau khi tìm slot trống):');
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             console.log('  ├─ swapId:', tx.swapId);
             console.log('  ├─ slotNumber (pin mới):', tx.slotNumber, '(từ API initiateSwap)');
@@ -264,36 +264,36 @@ export const useSwapData = (goToStep, STEPS) => {
                 // Lưu swapId (QUAN TRỌNG NHẤT)
                 if (tx.swapId) {
                     sessionStorage.setItem('swapId', String(tx.swapId));
-                    console.log('✅ Đã lưu swapId vào sessionStorage:', tx.swapId);
+                    console.log(' Đã lưu swapId vào sessionStorage:', tx.swapId);
                 }
                 
                 // Lưu newBatteryId và slotNumber để hiển thị ở bước "Lấy pin mới"
                 if (tx.newBatteryId) {
                     sessionStorage.setItem('new_battery_id', String(tx.newBatteryId));
-                    console.log('✅ Đã lưu newBatteryId vào sessionStorage:', tx.newBatteryId);
+                    console.log(' Đã lưu newBatteryId vào sessionStorage:', tx.newBatteryId);
                 }
                 
                 if (tx.slotNumber) {
                     sessionStorage.setItem('newBatterySlot', String(tx.slotNumber));
-                    console.log('✅ Đã lưu slotNumber vào sessionStorage:', tx.slotNumber);
+                    console.log(' Đã lưu slotNumber vào sessionStorage:', tx.slotNumber);
                 }
                 
                 // Lưu contractId từ response (BE tự tìm và trả về)
                 if (tx.contractId) {
                     sessionStorage.setItem('contractID', String(tx.contractId));
-                    console.log('✅ Đã lưu contractId vào sessionStorage:', tx.contractId);
+                    console.log(' Đã lưu contractId vào sessionStorage:', tx.contractId);
                 }
                 
                 // Lưu oldBatteryId nếu có trong response
                 if (tx.oldBatteryId) {
                     sessionStorage.setItem('old_battery_id', String(tx.oldBatteryId));
-                    console.log('✅ Đã lưu oldBatteryId vào sessionStorage:', tx.oldBatteryId);
+                    console.log(' Đã lưu oldBatteryId vào sessionStorage:', tx.oldBatteryId);
                 }
                 
                 // Lưu emptySlotNumber (slot trống nơi đặt pin cũ) - QUAN TRỌNG
                 if (tx.emptySlotNumber) {
                     sessionStorage.setItem('emptySlotNumber', String(tx.emptySlotNumber));
-                    console.log('✅ Đã lưu emptySlotNumber vào sessionStorage:', tx.emptySlotNumber, '(từ API getSlotsByTower)');
+                    console.log(' Đã lưu emptySlotNumber vào sessionStorage:', tx.emptySlotNumber, '(từ API getSlotsByTower)');
                 }
 
                 // Lưu các thông tin khác
@@ -306,7 +306,7 @@ export const useSwapData = (goToStep, STEPS) => {
                     sessionStorage.setItem('vehicleID', String(realData.vehicleId));
                 }
             } catch (e) {
-                console.error('❌ Lỗi khi lưu vào sessionStorage:', e);
+                console.error(' Lỗi khi lưu vào sessionStorage:', e);
             }
 
             // Lưu transaction vào state
@@ -319,7 +319,7 @@ export const useSwapData = (goToStep, STEPS) => {
             // Xử lý lỗi từ backend
             const apiError = err.response?.data?.message || err.message;
             
-            console.error('❌ Lỗi khi initiate swap:', apiError);
+            console.error(' Lỗi khi initiate swap:', apiError);
             console.error('Full error:', err);
             
             // Xử lý các loại lỗi khác nhau từ BE
@@ -354,7 +354,7 @@ export const useSwapData = (goToStep, STEPS) => {
         
         try {
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.log('🔋 LẤY PIN MỚI TỪ TRỤ');
+            console.log(' LẤY PIN MỚI TỪ TRỤ');
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             
             if (!selectedCabinet) {
@@ -376,7 +376,7 @@ export const useSwapData = (goToStep, STEPS) => {
                 ? slotsResponse.data
                 : Array.isArray(slotsResponse) ? slotsResponse : [];
 
-            console.log('📋 DANH SÁCH SLOTS NHẬN ĐƯỢC TỪ API:', slotsArray.length);
+            console.log(' DANH SÁCH SLOTS NHẬN ĐƯỢC TỪ API:', slotsArray.length);
             
             // Tìm pin mới: ưu tiên pin 'full', sau đó 'available'
             for (const slot of slotsArray) {
@@ -385,14 +385,14 @@ export const useSwapData = (goToStep, STEPS) => {
                     const derivedBatteryId = slot.batteryId || slot.battery_id || slot?.battery?.id;
                     const derivedSlotNumber = slot.slotNumber || slot.slot_number || slot.slot_id;
                     
-                    // ⚠️ CHỈ DÙNG batteryId THẬT (số), KHÔNG tạo ID giả
+                    //  CHỈ DÙNG batteryId THẬT (số), KHÔNG tạo ID giả
                     if (derivedBatteryId) {
                         newBatteryId = derivedBatteryId;
                         newBatterySlot = derivedSlotNumber;
                         newBatteryLevel = slot.stateOfHealth || slot.state_of_health || 
                                          slot.batteryLevel || slot.battery_level || 100;
                         
-                        console.log('✅ ĐÃ CHỌN PIN MỚI:', {
+                        console.log(' ĐÃ CHỌN PIN MỚI:', {
                             batteryId: newBatteryId,
                             slotNumber: newBatterySlot,
                             level: newBatteryLevel,
@@ -400,7 +400,7 @@ export const useSwapData = (goToStep, STEPS) => {
                         });
                         break;
                     } else {
-                        console.warn('⚠️ Slot', derivedSlotNumber, 'có status', status, 'nhưng KHÔNG CÓ batteryId!');
+                        console.warn(' Slot', derivedSlotNumber, 'có status', status, 'nhưng KHÔNG CÓ batteryId!');
                         console.warn('   Backend cần sửa API /api/driver/slots để trả về batteryId.');
                     }
                 }
@@ -416,12 +416,12 @@ export const useSwapData = (goToStep, STEPS) => {
                 sessionStorage.setItem('newBatterySlot', String(newBatterySlot));
                 sessionStorage.setItem('newBatteryLevel', String(newBatteryLevel));
                 
-                console.log('✅ Đã lưu thông tin pin mới vào sessionStorage:');
+                console.log(' Đã lưu thông tin pin mới vào sessionStorage:');
                 console.log('  - new_battery_id:', newBatteryId);
                 console.log('  - newBatterySlot:', newBatterySlot);
                 console.log('  - newBatteryLevel:', newBatteryLevel);
             } catch (sessionError) {
-                console.error('❌ Lỗi khi lưu vào sessionStorage:', sessionError);
+                console.error(' Lỗi khi lưu vào sessionStorage:', sessionError);
             }
 
             return {
@@ -431,7 +431,7 @@ export const useSwapData = (goToStep, STEPS) => {
             };
 
         } catch (err) {
-            console.error('❌ Lỗi khi lấy pin mới từ trụ:', err);
+            console.error(' Lỗi khi lấy pin mới từ trụ:', err);
             const apiError = err.response?.data?.message || err.message;
             setError(apiError || "Lỗi khi lấy pin mới từ trụ");
             throw err;
@@ -449,7 +449,7 @@ export const useSwapData = (goToStep, STEPS) => {
         setError(null);
         try {
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.log('📤 BƯỚC 2: CONFIRM BATTERY SWAP');
+            console.log(' BƯỚC 2: CONFIRM BATTERY SWAP');
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             console.log('SwapId:', swapId);
             
@@ -457,7 +457,7 @@ export const useSwapData = (goToStep, STEPS) => {
             const response = await swapService.confirmSwap(swapId);
             
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.log('✅ RESPONSE TỪ API CONFIRM:');
+            console.log(' RESPONSE TỪ API CONFIRM:');
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             console.log('  ├─ swapId:', response.swapId);
             console.log('  ├─ status:', response.status || response.swapStatus);
@@ -489,7 +489,7 @@ export const useSwapData = (goToStep, STEPS) => {
             };
             
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.log('📦 SUMMARY từ confirm response:');
+            console.log(' SUMMARY từ confirm response:');
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             console.log('  ├─ oldSlotNumber:', enrichedSummary.oldSlotNumber, '(slot trống nơi đặt pin cũ)');
             console.log('  │  └─ Nguồn:', response.oldSlotNumber ? 'confirm response' : 'sessionStorage');
@@ -504,7 +504,7 @@ export const useSwapData = (goToStep, STEPS) => {
             // Chuyển sang Bước 5: Thành công
             goToStep(STEPS.SUCCESS);
         } catch (err) {
-            console.error('❌ Lỗi khi confirm swap:', err);
+            console.error(' Lỗi khi confirm swap:', err);
             const apiError = err.response?.data?.message || err.message;
             
             // Nếu backend trả về "Swap not found" hoặc lỗi tương tự
@@ -529,7 +529,7 @@ export const useSwapData = (goToStep, STEPS) => {
             const swapId = transaction?.swapId || sessionStorage.getItem('swapId');
             
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.log('🔄 HOÀN THÀNH ĐỔI PIN (Complete Swap)');
+            console.log(' HOÀN THÀNH ĐỔI PIN (Complete Swap)');
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             console.log('SwapId từ transaction/sessionStorage:', swapId);
             
@@ -546,30 +546,30 @@ export const useSwapData = (goToStep, STEPS) => {
             // Sử dụng setTimeout để đảm bảo summary đã được cập nhật
             setTimeout(() => {
                 if (summary) {
-                    console.log('🔄 Cập nhật sessionStorage với dữ liệu từ summary:', summary);
+                    console.log(' Cập nhật sessionStorage với dữ liệu từ summary:', summary);
                     
                     // Cập nhật newBatteryId từ summary nếu có
                     if (summary.newBatteryId || summary.newBatteryCode) {
                         const apiNewBatteryId = summary.newBatteryId || summary.newBatteryCode;
                         sessionStorage.setItem('new_battery_id', String(apiNewBatteryId));
-                        console.log('✅ Đã cập nhật new_battery_id từ summary:', apiNewBatteryId);
+                        console.log(' Đã cập nhật new_battery_id từ summary:', apiNewBatteryId);
                     }
                     
                     // Cập nhật newBatteryLevel từ summary nếu có
                     if (summary.newBatteryPercent || summary.newBatteryLevel) {
                         const apiNewBatteryLevel = summary.newBatteryPercent || summary.newBatteryLevel;
                         sessionStorage.setItem('newBatteryLevel', String(apiNewBatteryLevel));
-                        console.log('✅ Đã cập nhật newBatteryLevel từ summary:', apiNewBatteryLevel);
+                        console.log(' Đã cập nhật newBatteryLevel từ summary:', apiNewBatteryLevel);
                     }
                     
                     // Cập nhật newBatterySlot từ summary nếu có
                     if (summary.newSlotNumber || summary.newSlot) {
                         const apiNewBatterySlot = summary.newSlotNumber || summary.newSlot;
                         sessionStorage.setItem('newBatterySlot', String(apiNewBatterySlot));
-                        console.log('✅ Đã cập nhật newBatterySlot từ summary:', apiNewBatterySlot);
+                        console.log(' Đã cập nhật newBatterySlot từ summary:', apiNewBatterySlot);
                     }
                 } else {
-                    console.log('⚠️ Summary chưa được cập nhật, bỏ qua cập nhật sessionStorage');
+                    console.log(' Summary chưa được cập nhật, bỏ qua cập nhật sessionStorage');
                 }
             }, 100);
 
@@ -602,15 +602,15 @@ export const useSwapData = (goToStep, STEPS) => {
                     sessionStorage.setItem('selectedVehicle', JSON.stringify(updatedVehicle));
                     sessionStorage.setItem('vehicleNeedsReload', 'true'); // Flag cho Dashboard
                     
-                    console.log('✅ Đã cập nhật thông tin xe trong sessionStorage:');
+                    console.log(' Đã cập nhật thông tin xe trong sessionStorage:');
                     console.log('  - Old batteryId:', selectedVehicle.batteryId);
                     console.log('  - New batteryId:', updatedVehicle.batteryId);
                     console.log('  - Battery Level:', updatedVehicle.batteryLevel + '%');
                 } catch (parseErr) {
-                    console.warn('⚠️ Không thể parse selectedVehicle từ sessionStorage:', parseErr);
+                    console.warn(' Không thể parse selectedVehicle từ sessionStorage:', parseErr);
                 }
             } else {
-                console.warn('⚠️ Không tìm thấy selectedVehicle trong sessionStorage');
+                console.warn(' Không tìm thấy selectedVehicle trong sessionStorage');
             }
             // ===== HẾT PHẦN CẬP NHẬT THÔNG TIN XE =====
 

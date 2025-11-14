@@ -49,7 +49,7 @@ export const useVehiclesData = () => {
       setContracts(normalizedContracts);
 
     } catch (err) {
-      console.error('❌ Error fetching vehicles:', err);
+      console.error(' Error fetching vehicles:', err);
       setError(err.message);
     } finally {
       setLoading(false);
