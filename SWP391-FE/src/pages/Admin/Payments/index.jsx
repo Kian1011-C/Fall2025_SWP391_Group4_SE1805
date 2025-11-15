@@ -1,5 +1,6 @@
 // Admin Payments Management - index.jsx
 import React, { useState, useMemo } from 'react';
+import { FiUsers, FiFileText, FiClock, FiDollarSign, FiRefreshCw, FiSearch, FiCheckCircle } from 'react-icons/fi';
 import { usePaymentsData } from './hooks/usePaymentsData';
 import DriverRow from './components/DriverRow';
 import GenerateInvoiceModal from './components/GenerateInvoiceModal';
@@ -113,9 +114,10 @@ const Payments = () => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '24px'
+              fontSize: '24px',
+              color: '#3b82f6'
             }}>
-              
+              <FiUsers />
             </div>
             <div>
               <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '4px' }}>
@@ -144,9 +146,10 @@ const Payments = () => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '24px'
+              fontSize: '24px',
+              color: '#10b981'
             }}>
-              
+              <FiCheckCircle />
             </div>
             <div>
               <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '4px' }}>
@@ -175,9 +178,10 @@ const Payments = () => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '24px'
+              fontSize: '24px',
+              color: '#ef4444'
             }}>
-              
+              <FiClock />
             </div>
             <div>
               <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '4px' }}>
@@ -203,15 +207,16 @@ const Payments = () => {
         alignItems: 'center',
         flexWrap: 'wrap'
       }}>
-        <div style={{ flex: 1, minWidth: '250px' }}>
+        <div style={{ flex: 1, minWidth: '250px', position: 'relative' }}>
+          <FiSearch style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', fontSize: '18px' }} />
           <input
             type="text"
-            placeholder=" Tìm kiếm khách hàng (tên, email, SĐT)..."
+            placeholder="Tìm kiếm khách hàng (tên, email, SĐT)..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{
               width: '100%',
-              padding: '12px 16px',
+              padding: '12px 16px 12px 40px',
               border: '1px solid #d1d5db',
               borderRadius: '8px',
               fontSize: '14px',
@@ -236,7 +241,7 @@ const Payments = () => {
             gap: '8px'
           }}
         >
-           Làm mới
+          <FiRefreshCw /> Làm mới
         </button>
       </div>
 
@@ -262,10 +267,14 @@ const Payments = () => {
             fontSize: '14px',
             fontWeight: '600',
             cursor: 'pointer',
-            transition: 'all 0.2s'
+            transition: 'all 0.2s',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px'
           }}
         >
-           Xuất hóa đơn
+          <FiFileText /> Xuất hóa đơn
         </button>
         <button
           onClick={() => setActiveTab('pending')}
@@ -279,10 +288,14 @@ const Payments = () => {
             fontSize: '14px',
             fontWeight: '600',
             cursor: 'pointer',
-            transition: 'all 0.2s'
+            transition: 'all 0.2s',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px'
           }}
         >
-          ⏳ Chờ thanh toán
+          <FiClock /> Chờ thanh toán
         </button>
         <button
           onClick={() => setActiveTab('history')}
@@ -296,10 +309,14 @@ const Payments = () => {
             fontSize: '14px',
             fontWeight: '600',
             cursor: 'pointer',
-            transition: 'all 0.2s'
+            transition: 'all 0.2s',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px'
           }}
         >
-           Lịch sử
+          <FiDollarSign /> Lịch sử
         </button>
       </div>
 

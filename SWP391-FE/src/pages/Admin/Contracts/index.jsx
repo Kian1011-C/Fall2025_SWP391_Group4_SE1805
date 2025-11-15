@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { FiFileText, FiCheckCircle, FiClock, FiXCircle, FiPlus, FiSearch, FiFilter, FiEye } from 'react-icons/fi';
 import { useContractsData } from './hooks/useContractsData';
 import ContractDetailModal from './components/ContractDetailModal';
 import CreateContractModal from './components/CreateContractModal';
@@ -34,8 +35,8 @@ const ContractRow = ({ contract, onViewDetails }) => (
       <div style={{ fontSize: '12px', color: '#9ca3af' }}>đến {new Date(contract.endDate).toLocaleDateString('vi-VN')}</div>
     </td>
     <td style={{ padding: '15px 20px' }}>
-      <button onClick={() => onViewDetails(contract)} style={{ background: '#374151', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer' }}>
-        Chi tiết
+      <button onClick={() => onViewDetails(contract)} style={{ background: '#374151', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <FiEye size={16} /> Chi tiết
       </button>
     </td>
   </tr>
@@ -59,21 +60,33 @@ const AdminContracts = () => {
 
   const renderStats = () => (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '30px' }}>
-      <div style={{ background: '#1f2937', padding: '20px', borderRadius: '12px', border: '1px solid #374151' }}>
-        <div style={{ fontSize: '14px', color: '#9ca3af', marginBottom: '8px' }}>Tổng hợp đồng</div>
-        <div style={{ fontSize: '28px', fontWeight: 'bold', color: 'white' }}>{stats.total}</div>
+      <div style={{ background: '#1f2937', padding: '20px', borderRadius: '12px', border: '1px solid #374151', display: 'flex', alignItems: 'center', gap: '15px' }}>
+        <FiFileText size={32} color="#3b82f6" />
+        <div>
+          <div style={{ fontSize: '14px', color: '#9ca3af', marginBottom: '8px' }}>Tổng hợp đồng</div>
+          <div style={{ fontSize: '28px', fontWeight: 'bold', color: 'white' }}>{stats.total}</div>
+        </div>
       </div>
-      <div style={{ background: '#1f2937', padding: '20px', borderRadius: '12px', border: '1px solid #374151' }}>
-        <div style={{ fontSize: '14px', color: '#9ca3af', marginBottom: '8px' }}>Đang hoạt động</div>
-        <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#86efac' }}>{stats.active}</div>
+      <div style={{ background: '#1f2937', padding: '20px', borderRadius: '12px', border: '1px solid #374151', display: 'flex', alignItems: 'center', gap: '15px' }}>
+        <FiCheckCircle size={32} color="#86efac" />
+        <div>
+          <div style={{ fontSize: '14px', color: '#9ca3af', marginBottom: '8px' }}>Đang hoạt động</div>
+          <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#86efac' }}>{stats.active}</div>
+        </div>
       </div>
-      <div style={{ background: '#1f2937', padding: '20px', borderRadius: '12px', border: '1px solid #374151' }}>
-        <div style={{ fontSize: '14px', color: '#9ca3af', marginBottom: '8px' }}>Đang chờ</div>
-        <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#fdba74' }}>{stats.pending}</div>
+      <div style={{ background: '#1f2937', padding: '20px', borderRadius: '12px', border: '1px solid #374151', display: 'flex', alignItems: 'center', gap: '15px' }}>
+        <FiClock size={32} color="#fdba74" />
+        <div>
+          <div style={{ fontSize: '14px', color: '#9ca3af', marginBottom: '8px' }}>Đang chờ</div>
+          <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#fdba74' }}>{stats.pending}</div>
+        </div>
       </div>
-      <div style={{ background: '#1f2937', padding: '20px', borderRadius: '12px', border: '1px solid #374151' }}>
-        <div style={{ fontSize: '14px', color: '#9ca3af', marginBottom: '8px' }}>Hết hạn</div>
-        <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#fca5a5' }}>{stats.expired}</div>
+      <div style={{ background: '#1f2937', padding: '20px', borderRadius: '12px', border: '1px solid #374151', display: 'flex', alignItems: 'center', gap: '15px' }}>
+        <FiXCircle size={32} color="#fca5a5" />
+        <div>
+          <div style={{ fontSize: '14px', color: '#9ca3af', marginBottom: '8px' }}>Hết hạn</div>
+          <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#fca5a5' }}>{stats.expired}</div>
+        </div>
       </div>
     </div>
   );
@@ -135,7 +148,7 @@ const AdminContracts = () => {
               gap: '8px'
             }}
           >
-            <span style={{ fontSize: '20px' }}>+</span>
+            <FiPlus size={20} />
             Tạo hợp đồng mới
           </button>
         </div>
@@ -143,38 +156,59 @@ const AdminContracts = () => {
         {renderStats()}
 
         <div style={{ display: 'flex', gap: '15px', marginBottom: '20px' }}>
-          <input 
-            type="text"
-            placeholder="Tìm theo số hợp đồng, tên, email, SĐT, biển số..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ 
-              flex: 1,
-              background: '#374151', 
-              color: 'white', 
-              border: '1px solid #4b5563', 
-              padding: '10px 15px', 
-              borderRadius: '8px' 
-            }}
-          />
-          <select 
-            value={filterStatus} 
-            onChange={(e) => setFilterStatus(e.target.value)} 
-            style={{ 
-              background: '#374151', 
-              color: 'white', 
-              border: '1px solid #4b5563', 
-              padding: '10px 15px', 
-              borderRadius: '8px',
-              minWidth: '200px'
-            }}
-          >
+          <div style={{ flex: 1, position: 'relative' }}>
+            <FiSearch style={{
+              position: 'absolute',
+              left: '15px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: '#9ca3af',
+              pointerEvents: 'none'
+            }} size={18} />
+            <input 
+              type="text"
+              placeholder="Tìm theo số hợp đồng, tên, email, SĐT, biển số..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ 
+                width: '100%',
+                background: '#374151', 
+                color: 'white', 
+                border: '1px solid #4b5563', 
+                padding: '10px 15px 10px 45px', 
+                borderRadius: '8px' 
+              }}
+            />
+          </div>
+          <div style={{ position: 'relative', minWidth: '200px' }}>
+            <FiFilter style={{
+              position: 'absolute',
+              left: '15px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: '#9ca3af',
+              pointerEvents: 'none',
+              zIndex: 1
+            }} size={18} />
+            <select 
+              value={filterStatus} 
+              onChange={(e) => setFilterStatus(e.target.value)} 
+              style={{ 
+                width: '100%',
+                background: '#374151', 
+                color: 'white', 
+                border: '1px solid #4b5563', 
+                padding: '10px 15px 10px 45px', 
+                borderRadius: '8px'
+              }}
+            >
             <option value="">Tất cả trạng thái</option>
             <option value="active">Hoạt động</option>
             <option value="pending">Đang chờ</option>
             <option value="expired">Hết hạn</option>
             <option value="terminated">Đã hủy</option>
-          </select>
+            </select>
+          </div>
         </div>
 
         {renderContent()}

@@ -1,4 +1,5 @@
 ﻿import React from 'react';
+import { FiClock, FiAlertCircle, FiRefreshCw, FiZap, FiMapPin, FiUsers, FiBattery, FiPackage, FiActivity } from 'react-icons/fi';
 import { useDashboardData } from './hooks/useDashboardData';
 import StatCard from './components/StatCard';
 import '../../../assets/css/StaffDashboard.css';
@@ -8,14 +9,18 @@ const StaffDashboard = () => {
 
   const renderContent = () => {
     if (isLoading) {
-      return <div className="staff-dashboard-loading">⏳ Đang tải dữ liệu trang chủ...</div>;
+      return <div className="staff-dashboard-loading" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+        <FiClock size={24} /> Đang tải dữ liệu trang chủ...
+      </div>;
     }
     if (error) {
       return (
         <div className="staff-dashboard-error">
-          <p> Lỗi: {error}</p>
-          <button onClick={refetch} className="staff-dashboard-error-btn">
-             Thử lại
+          <p style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
+            <FiAlertCircle size={20} /> Lỗi: {error}
+          </p>
+          <button onClick={refetch} className="staff-dashboard-error-btn" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '0 auto' }}>
+            <FiRefreshCw size={18} /> Thử lại
           </button>
         </div>
       );
@@ -35,19 +40,19 @@ const StaffDashboard = () => {
             <StatCard 
               label="Tổng lượt đổi pin" 
               value={stats.totalSwaps} 
-              icon="" 
+              icon={<FiZap size={28} />} 
               color="#3b82f6" 
             />
             <StatCard 
               label="Tổng số trạm" 
               value={stats.totalStations} 
-              icon="" 
+              icon={<FiMapPin size={28} />} 
               color="#8b5cf6" 
             />
             <StatCard 
               label="Người dùng hoạt động" 
               value={stats.activeUsers} 
-              icon="" 
+              icon={<FiUsers size={28} />} 
               color="#06b6d4" 
             />
           </div>

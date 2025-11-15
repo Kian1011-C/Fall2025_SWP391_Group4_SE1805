@@ -2,6 +2,7 @@
 // Container for Driver Dashboard - orchestrates all components and hooks
 
 import React from 'react';
+import { FiRefreshCw, FiAlertTriangle, FiTruck } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { useDashboardData, useSelectedVehicle } from './hooks';
@@ -98,8 +99,8 @@ const DriverDashboard = () => {
           <div className="error-icon"></div>
           <h3 className="error-title">Lỗi tải dữ liệu</h3>
           <p className="error-message">{error}</p>
-          <button className="retry-btn" onClick={refetch}>
-            Thử lại
+          <button className="retry-btn" onClick={refetch} style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '0 auto' }}>
+            <FiRefreshCw size={18} /> Thử lại
           </button>
         </div>
       </div>
@@ -121,8 +122,8 @@ const DriverDashboard = () => {
             marginBottom: '16px',
             textAlign: 'center'
           }}>
-            <div style={{ fontSize: '16px', fontWeight: '600', color: '#92400e', marginBottom: '8px' }}>
-               Chưa có phương tiện
+            <div style={{ fontSize: '16px', fontWeight: '600', color: '#92400e', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+              <FiAlertTriangle size={20} /> Chưa có phương tiện
             </div>
             <div style={{ fontSize: '14px', color: '#92400e', marginBottom: '12px' }}>
               Bạn cần đăng ký phương tiện để sử dụng dịch vụ đổi pin
@@ -130,9 +131,9 @@ const DriverDashboard = () => {
             <button 
               className="btn btn-primary" 
               onClick={() => navigate('/driver/vehicles')}
-              style={{ background: '#f59e0b', color: 'white' }}
+              style={{ background: '#f59e0b', color: 'white', display: 'flex', alignItems: 'center', gap: '8px', margin: '0 auto' }}
             >
-              Đăng ký phương tiện
+              <FiTruck size={18} /> Đăng ký phương tiện
             </button>
           </div>
         )}

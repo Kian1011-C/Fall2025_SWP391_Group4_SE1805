@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { FiBattery, FiBatteryCharging, FiPackage, FiTool, FiZap, FiActivity, FiRefreshCw, FiSearch, FiFilter, FiPlus } from 'react-icons/fi';
 import { useBatteriesData } from './hooks/useBatteriesData';
 import BatteryRow from './components/BatteryRow';
 import BatteryFormModal from './components/BatteryFormModal';
@@ -177,18 +178,34 @@ if (isLoading) {
       {/* Header */}
       <div className="admin-battery-header">
         <div className="admin-battery-header-content">
-          <h1> Quản lý Pin</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{
+              width: '48px',
+              height: '48px',
+              borderRadius: '12px',
+              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 4px 12px rgba(16, 185, 129, 0.2)'
+            }}>
+              <FiBattery size={24} color="white" />
+            </div>
+            <h1>Quản lý Pin</h1>
+          </div>
           <p>Thêm, sửa và theo dõi tất cả các viên pin trong hệ thống</p>
         </div>
         <button onClick={handleOpenCreateModal} className="admin-battery-add-btn">
-          <span></span> Thêm Pin Mới
+          <FiPlus size={18} /> Thêm Pin Mới
         </button>
       </div>
 
       {/* Stats Dashboard */}
       <div className="admin-battery-stats">
         <div className="admin-battery-stat-card">
-          <div className="admin-battery-stat-icon"></div>
+          <div className="admin-battery-stat-icon">
+            <FiPackage size={24} color="#3b82f6" />
+          </div>
           <div className="admin-battery-stat-content">
             <span className="admin-battery-stat-label">Tổng số pin</span>
             <h2 className="admin-battery-stat-value">{stats.total}</h2>
@@ -196,7 +213,9 @@ if (isLoading) {
         </div>
 
         <div className="admin-battery-stat-card">
-          <div className="admin-battery-stat-icon"></div>
+          <div className="admin-battery-stat-icon">
+            <FiZap size={24} color="#10b981" />
+          </div>
           <div className="admin-battery-stat-content">
             <span className="admin-battery-stat-label">Sẵn sàng</span>
             <h2 className="admin-battery-stat-value">{stats.available}</h2>
@@ -204,7 +223,9 @@ if (isLoading) {
         </div>
 
         <div className="admin-battery-stat-card">
-          <div className="admin-battery-stat-icon"></div>
+          <div className="admin-battery-stat-icon">
+            <FiBattery size={24} color="#6366f1" />
+          </div>
           <div className="admin-battery-stat-content">
             <span className="admin-battery-stat-label">Trong kho</span>
             <h2 className="admin-battery-stat-value">{stats.inStock}</h2>
@@ -212,7 +233,9 @@ if (isLoading) {
         </div>
 
         <div className="admin-battery-stat-card">
-          <div className="admin-battery-stat-icon"></div>
+          <div className="admin-battery-stat-icon">
+            <FiBatteryCharging size={24} color="#f59e0b" />
+          </div>
           <div className="admin-battery-stat-content">
             <span className="admin-battery-stat-label">Đang sạc</span>
             <h2 className="admin-battery-stat-value">{stats.charging}</h2>
@@ -220,7 +243,9 @@ if (isLoading) {
         </div>
 
         <div className="admin-battery-stat-card">
-          <div className="admin-battery-stat-icon"></div>
+          <div className="admin-battery-stat-icon">
+            <FiTool size={24} color="#ef4444" />
+          </div>
           <div className="admin-battery-stat-content">
             <span className="admin-battery-stat-label">Bảo trì</span>
             <h2 className="admin-battery-stat-value">{stats.maintenance}</h2>
@@ -228,7 +253,9 @@ if (isLoading) {
         </div>
 
         <div className="admin-battery-stat-card">
-          <div className="admin-battery-stat-icon"></div>
+          <div className="admin-battery-stat-icon">
+            <FiActivity size={24} color="#8b5cf6" />
+          </div>
           <div className="admin-battery-stat-content">
             <span className="admin-battery-stat-label">Đang sử dụng</span>
             <h2 className="admin-battery-stat-value">{stats.inUse}</h2>
@@ -239,29 +266,52 @@ if (isLoading) {
       {/* Filters */}
       <div className="admin-battery-filters">
         <div className="admin-battery-filter-row">
-          <input 
-            type="text" 
-            placeholder=" Tìm theo Mã pin hoặc Mẫu pin..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="admin-battery-search"
-          />
+          <div style={{ position: 'relative', flex: 1 }}>
+            <FiSearch style={{
+              position: 'absolute',
+              left: '12px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: '#9ca3af',
+              pointerEvents: 'none'
+            }} size={18} />
+            <input 
+              type="text" 
+              placeholder="Tìm theo Mã pin hoặc Mẫu pin..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="admin-battery-search"
+              style={{ paddingLeft: '40px' }}
+            />
+          </div>
           
-          <select 
-            value={filterStatus} 
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="admin-battery-filter-select"
-          >
-            <option value=""> Tất cả trạng thái</option>
+          <div style={{ position: 'relative' }}>
+            <FiFilter style={{
+              position: 'absolute',
+              left: '12px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: '#9ca3af',
+              pointerEvents: 'none',
+              zIndex: 1
+            }} size={18} />
+            <select 
+              value={filterStatus} 
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="admin-battery-filter-select"
+              style={{ paddingLeft: '40px' }}
+            >
+              <option value="">Tất cả trạng thái</option>
             <option value="available"> Sẵn sàng</option>
             <option value="in_stock"> Trong kho</option>
             <option value="charging"> Đang sạc</option>
             <option value="faulty"> Bảo trì</option>
             <option value="in_use"> Đang sử dụng</option>
-          </select>
+            </select>
+          </div>
 
           <button onClick={refetch} className="admin-battery-refresh-btn">
-            <span></span> Làm mới
+            <FiRefreshCw size={18} /> Làm mới
           </button>
         </div>
       </div>

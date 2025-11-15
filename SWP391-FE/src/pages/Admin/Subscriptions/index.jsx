@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { FiPackage, FiPlus, FiRefreshCw } from 'react-icons/fi';
 import { useSubscriptionsData } from './hooks/useSubscriptionsData';
 import SubscriptionRow from './components/SubscriptionRow';
 import SubscriptionFormModal from './components/SubscriptionFormModal';
@@ -63,8 +64,8 @@ const AdminSubscriptions = () => {
     if (error) {
       return (
         <div className="subscriptions-error">
-          <p> Lỗi: {error}</p>
-          <button onClick={refetch}> Thử lại</button>
+          <p>Lỗi: {error}</p>
+          <button onClick={refetch}><FiRefreshCw size={18} /> Thử lại</button>
         </div>
       );
     }
@@ -110,11 +111,27 @@ const AdminSubscriptions = () => {
     <div className="subscriptions-container">
       <div className="subscriptions-header">
         <div className="subscriptions-header-left">
-          <h1> Quản lý Gói cước</h1>
-          <p>Tạo, sửa và quản lý các gói cước dịch vụ cho khách hàng</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{
+              width: '48px',
+              height: '48px',
+              borderRadius: '12px',
+              background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 4px 12px rgba(139, 92, 246, 0.2)'
+            }}>
+              <FiPackage size={24} color="white" />
+            </div>
+            <div>
+              <h1>Quản lý Gói cước</h1>
+              <p>Tạo, sửa và quản lý các gói cước dịch vụ cho khách hàng</p>
+            </div>
+          </div>
         </div>
         <button onClick={handleOpenCreateModal} className="subscriptions-add-btn">
-           Thêm Gói cước
+          <FiPlus size={18} /> Thêm Gói cước
         </button>
       </div>
       

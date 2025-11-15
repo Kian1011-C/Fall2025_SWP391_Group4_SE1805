@@ -1,6 +1,7 @@
 // Driver/SelectVehicle/index.jsx
 // Simple selection screen to choose an active vehicle before entering dashboard
 import React, { useEffect, useState } from 'react';
+import { FiTruck, FiCheckCircle } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import DashboardLayout from '../../../layouts/DashboardLayout';

@@ -1,6 +1,7 @@
 // Driver/Subscriptions/index.jsx
 // Container component for Subscriptions page - orchestrates data and UI
 
+import { FiClock, FiAlertCircle, FiRefreshCw } from 'react-icons/fi';
 import { useAuth } from '../../../context/AuthContext';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import { useSubscriptionsData, useSubscribe } from './hooks';
@@ -40,7 +41,9 @@ const Subscriptions = () => {
     return (
       <DashboardLayout role="driver">
         <div style={{ padding: '20px', textAlign: 'center' }}>
-          <div style={{ color: '#19c37d', fontSize: '1.5rem' }}>⏳ Đang tải...</div>
+          <div style={{ color: '#19c37d', fontSize: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+            <FiClock size={24} /> Đang tải...
+          </div>
         </div>
       </DashboardLayout>
     );
@@ -51,13 +54,19 @@ const Subscriptions = () => {
     return (
       <DashboardLayout role="driver">
         <div style={{ padding: '20px', textAlign: 'center' }}>
-          <div style={{ color: '#ff6b6b', fontSize: '1.2rem' }}> {error}</div>
+          <div style={{ color: '#ff6b6b', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+            <FiAlertCircle size={24} /> {error}
+          </div>
           <button 
             onClick={refetch}
             style={{
               marginTop: '20px',
               padding: '10px 20px',
               background: '#19c37d',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              margin: '20px auto 0',
               color: 'white',
               border: 'none',
               borderRadius: '8px',
@@ -71,7 +80,7 @@ const Subscriptions = () => {
               e.currentTarget.style.background = '#19c37d';
             }}
           >
-            Thử lại
+            <FiRefreshCw size={18} /> Thử lại
           </button>
         </div>
       </DashboardLayout>

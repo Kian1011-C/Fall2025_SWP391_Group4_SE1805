@@ -1,10 +1,12 @@
 // Stats Cards Component
 import React from 'react';
+import { FiZap, FiNavigation } from 'react-icons/fi';
+import { IoCarSportOutline } from 'react-icons/io5';
 
 const StatsCards = ({ stats }) => {
   const statsConfig = [
     {
-      icon: '',
+      icon: <FiZap size={32} color="#19c37d" />,
       value: stats.totalSwaps,
       label: 'Tổng lượt đổi pin',
       color: 'rgba(25, 195, 125, 0.3)',
@@ -12,7 +14,7 @@ const StatsCards = ({ stats }) => {
       fontSize: '2rem'
     },
     {
-      icon: '',
+      icon: <IoCarSportOutline size={32} color="#ffa500" />,
       value: stats.activeVehicles,
       label: 'Xe đang sử dụng',
       color: 'rgba(255, 165, 0, 0.3)',
@@ -20,7 +22,7 @@ const StatsCards = ({ stats }) => {
       fontSize: '2rem'
     },
     {
-      icon: '',
+      icon: <FiNavigation size={32} color="#22c55e" />,
       value: `${stats.totalDistance.toLocaleString()} km`,
       label: 'Tổng quãng đường',
       color: 'rgba(34, 197, 94, 0.3)',

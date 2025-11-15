@@ -1,4 +1,5 @@
 import React from 'react';
+import { FiRefreshCw, FiDownload } from 'react-icons/fi';
 import { useAdminDashboardData } from './hooks/useAdminDashboardData';
 import StatsCards from './components/StatsCards';
 import ActivityTimeline from './components/ActivityTimeline';
@@ -24,7 +25,7 @@ const AdminDashboard = () => {
           <div className="error-icon"></div>
           <p className="error-message">Lỗi: {error}</p>
           <button onClick={refetch} className="retry-button">
-             Thử lại
+            <FiRefreshCw size={18} /> Thử lại
           </button>
         </div>
       );
@@ -77,13 +78,11 @@ const AdminDashboard = () => {
                 </>
               ) : (
                 <>
-                   Tải lại
+                  <FiRefreshCw size={18} /> Tải lại
                 </>
               )}
             </button>
-            <button className="export-button">
-               Xuất báo cáo
-            </button>
+           
           </div>
         </div>
       </div>

@@ -1,6 +1,7 @@
 // Driver/Contracts/index.jsx
 // Container component for Contracts page - orchestrates data and UI
 
+import { FiFileText } from 'react-icons/fi';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import { useContractsData, useContractModal } from './hooks';
 import {
@@ -35,7 +36,7 @@ const Contracts = () => {
               marginBottom: '1rem',
               animation: 'spin 1s linear infinite'
             }}>
-              
+              <FiFileText size={48} color="#19c37d" />
             </div>
             <p style={{
               fontSize: '1.125rem',

@@ -1,5 +1,6 @@
 // src/pages/Driver/Payments/index.jsx
 import React, { useState, useEffect } from 'react';
+import { FiCreditCard, FiDollarSign, FiFileText, FiCheckCircle } from 'react-icons/fi';
 import '/src/assets/css/payment.css';
 import { useNavigate } from 'react-router-dom';
 //  Đảm bảo bạn import file CSS (nếu cần, ví dụ file CSS chung của dashboard)
@@ -158,8 +159,8 @@ const DriverPayments = () => {
         // Sử dụng class CSS chung của layout (ví dụ)
         <div className="driver-dashboard" style={{ padding: '24px' }}>
             {/* Tiêu đề trang */}
-            <h1 style={{ color: 'white', marginBottom: '24px', fontSize: '1.875rem', fontWeight: '700' }}>
-                Thanh toán
+            <h1 style={{ color: 'white', marginBottom: '24px', fontSize: '1.875rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <FiCreditCard size={32} /> Thanh toán
             </h1>
 
             {/* --- PHẦN HÓA ĐƠN CẦN THANH TOÁN --- */}
@@ -179,7 +180,7 @@ const DriverPayments = () => {
                         alignItems: 'center',
                         gap: '10px'
                     }}>
-                         Hóa đơn cần thanh toán
+                        <FiFileText size={24} /> Hóa đơn cần thanh toán
                     </h3>
 
                     {pendingInvoices.length === 0 ? (
@@ -191,7 +192,9 @@ const DriverPayments = () => {
                             borderRadius: '12px',
                             border: '2px dashed rgba(255, 255, 255, 0.1)'
                         }}>
-                            <div style={{ fontSize: '64px', marginBottom: '16px' }}></div>
+                            <div style={{ fontSize: '64px', marginBottom: '16px' }}>
+                                <FiCheckCircle size={64} color="#10b981" />
+                            </div>
                             <h4 style={{ 
                                 color: '#d1d5db', 
                                 fontSize: '1.125rem', 
@@ -278,6 +281,10 @@ const DriverPayments = () => {
                                                     fontSize: '1rem',
                                                     fontWeight: '600',
                                                     cursor: 'pointer',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    gap: '8px',
                                                     transition: 'all 0.3s ease',
                                                     boxShadow: '0 4px 15px rgba(59, 130, 246, 0.4)'
                                                 }}
@@ -290,7 +297,7 @@ const DriverPayments = () => {
                                                     e.currentTarget.style.boxShadow = '0 4px 15px rgba(59, 130, 246, 0.4)';
                                                 }}
                                             >
-                                                 Thanh toán ngay
+                                                <FiDollarSign size={20} /> Thanh toán ngay
                                             </button>
                                         </div>
                                     </div>

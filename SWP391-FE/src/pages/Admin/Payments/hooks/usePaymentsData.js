@@ -55,7 +55,7 @@ export const usePaymentsData = () => {
 
       //  Bước 4: Tạo danh sách drivers từ contracts (đã có đủ thông tin user)
       const driversData = contracts
-        .filter(contract => contract.status === 'active') // Chỉ lấy contract active
+        // Bỏ filter status để hiển thị toàn bộ lịch sử thanh toán của tất cả contracts
         .map(contract => {
           //  Contract đã có firstName, lastName, email, phone, userId
           const fullName = `${contract.firstName || ''} ${contract.lastName || ''}`.trim() || 

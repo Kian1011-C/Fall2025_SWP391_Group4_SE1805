@@ -142,7 +142,7 @@ const AddVehicleModal = ({
 
           <div style={{ marginBottom: '25px' }}>
             <label style={{ color: '#E0E0E0', display: 'block', marginBottom: '8px' }}>
-              Loại pin (Tùy chọn)
+              Loại pin:
             </label>
             <select
               value={formData.batteryType || 'LiFePO4-60kWh'}
@@ -158,9 +158,6 @@ const AddVehicleModal = ({
               }}
             >
               <option value="LiFePO4-60kWh">LiFePO4-60kWh</option>
-              <option value="LiFePO4-70kWh">LiFePO4-70kWh</option>
-              <option value="LiFePO4-50kWh">LiFePO4-50kWh</option>
-              <option value="Li-ion-80kWh">Li-ion-80kWh</option>
             </select>
             <div style={{ color: '#9ca3af', fontSize: '0.85rem', marginTop: '4px' }}>
               ⓘ Loại pin sẽ được cấu hình sau khi đăng ký xe thành công

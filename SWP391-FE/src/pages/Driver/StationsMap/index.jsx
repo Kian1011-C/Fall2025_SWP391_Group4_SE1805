@@ -2,6 +2,7 @@
 // Container component for StationsMap page - orchestrates stations display with Google Maps
 
 import React from 'react';
+import { FiMapPin, FiMap } from 'react-icons/fi';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import { useStationsData, useStationSelection } from './hooks';
 import stationService from '../../../assets/js/services/stationService';
@@ -148,8 +149,8 @@ const StationsMap = () => {
           />
         </div>
 
-        {/* Danh sách trạm dạng thẻ (bên dưới map) */}
-        <div style={{ marginTop: '20px' }}>
+        {/* Danh sách trạm dạng thẻ (bên dưới map) - DISABLED interactions */}
+        <div style={{ marginTop: '20px', pointerEvents: 'none', opacity: 0.6, userSelect: 'none' }}>
           <h3 style={{ color: '#FFFFFF', marginBottom: '15px' }}>
              Danh sách Trạm
           </h3>

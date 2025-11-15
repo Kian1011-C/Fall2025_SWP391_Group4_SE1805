@@ -2,19 +2,6 @@
 import React from 'react';
 
 const DriverRow = ({ driver, onGenerateInvoice, onViewHistory, activeTab }) => {
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'active':
-        return '#10b981';
-      case 'inactive':
-        return '#6b7280';
-      case 'suspended':
-        return '#ef4444';
-      default:
-        return '#6b7280';
-    }
-  };
-
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
@@ -55,17 +42,19 @@ const DriverRow = ({ driver, onGenerateInvoice, onViewHistory, activeTab }) => {
       </td>
       
       <td style={{ padding: '16px', fontSize: '14px', textAlign: 'center' }}>
-        <div style={{ marginBottom: '4px', fontWeight: '500' }}>
+        <div style={{ marginBottom: '4px', fontWeight: '600', color: '#111827' }}>
           #{driver.contractId}
         </div>
         <span style={{
           display: 'inline-block',
-          padding: '2px 8px',
+          padding: '4px 10px',
           borderRadius: '12px',
           fontSize: '12px',
-          fontWeight: '500',
-          backgroundColor: `${getStatusColor(driver.contractStatus)}20`,
-          color: getStatusColor(driver.contractStatus)
+          fontWeight: '600',
+          backgroundColor: driver.contractStatus === 'active' ? '#dcfce7' : 
+                          driver.contractStatus === 'inactive' ? '#f3f4f6' : '#fee2e2',
+          color: driver.contractStatus === 'active' ? '#166534' : 
+                 driver.contractStatus === 'inactive' ? '#374151' : '#991b1b'
         }}>
           {driver.contractStatus === 'active' ? 'Hoạt động' : 
            driver.contractStatus === 'inactive' ? 'Không hoạt động' : 'Tạm ngưng'}
@@ -194,7 +183,6 @@ const DriverRow = ({ driver, onGenerateInvoice, onViewHistory, activeTab }) => {
                   e.target.style.borderColor = '#e5e7eb';
                 }}
               >
-                <span>�</span>
                 Lịch sử
               </button>
             )}

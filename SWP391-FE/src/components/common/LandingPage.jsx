@@ -1,4 +1,5 @@
 import React from 'react';
+import { FiBattery, FiZap, FiMapPin, FiSmartphone, FiCheck, FiX, FiArrowRight } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import { showToast } from '../../assets/js/helpers/helpers';
 
@@ -193,8 +194,8 @@ const LandingPage = () => {
               Chỉ 3 phút để có pin đầy 100%.
             </p>
             <div className="hero-actions">
-              <button className="btn btn-primary" onClick={handleRegisterClick}>
-                Bắt đầu ngay
+              <button className="btn btn-primary" onClick={handleRegisterClick} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                Bắt đầu ngay <FiArrowRight size={18} />
               </button>
               <button className="btn" onClick={handleLoginClick}>
                 Đăng nhập
@@ -208,17 +209,23 @@ const LandingPage = () => {
             <h2>Tính năng nổi bật</h2>
             <div className="grid">
               <div className="card">
-                <div className="icon"></div>
+                <div className="icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <FiZap size={40} color="#a855f7" />
+                </div>
                 <h3>Đổi pin siêu nhanh</h3>
                 <p className="muted">Chỉ 3 phút để đổi pin, nhanh hơn việc đổ xăng truyền thống</p>
               </div>
               <div className="card">
-                <div className="icon"></div>
+                <div className="icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <FiMapPin size={40} color="#3b82f6" />
+                </div>
                 <h3>Mạng lưới rộng khắp</h3>
                 <p className="muted">Hơn 50 trạm đổi pin trên toàn thành phố</p>
               </div>
               <div className="card featured">
-                <div className="icon"></div>
+                <div className="icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <FiSmartphone size={40} color="#10b981" />
+                </div>
                 <h3>Ứng dụng thông minh</h3>
                 <p className="muted">Theo dõi pin, tìm trạm, thanh toán tự động</p>
               </div>
@@ -267,19 +274,19 @@ const LandingPage = () => {
                 </div>
                 <ul style={{listStyle: 'none', padding: '0', marginBottom: '32px', textAlign: 'left'}}>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#10b981', marginRight: '12px', fontSize: '18px'}}></span>
+                    <FiCheck size={18} style={{color: '#10b981', marginRight: '12px'}} />
                     200 km/tháng
                   </li>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#10b981', marginRight: '12px', fontSize: '18px'}}></span>
+                    <FiCheck size={18} style={{color: '#10b981', marginRight: '12px'}} />
                     Ứng dụng cơ bản
                   </li>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#10b981', marginRight: '12px', fontSize: '18px'}}></span>
+                    <FiCheck size={18} style={{color: '#10b981', marginRight: '12px'}} />
                     Hỗ trợ 24/7
                   </li>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#ef4444', marginRight: '12px', fontSize: '18px'}}></span>
+                    <FiX size={18} style={{color: '#ef4444', marginRight: '12px'}} />
                     Phí vượt km nếu {'>'}200km
                   </li>
                 </ul>
@@ -329,23 +336,23 @@ const LandingPage = () => {
                 </div>
                 <ul style={{listStyle: 'none', padding: '0', marginBottom: '32px', textAlign: 'left'}}>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#3b82f6', marginRight: '12px', fontSize: '18px'}}></span>
+                    <FiCheck size={18} style={{color: '#3b82f6', marginRight: '12px'}} />
                     400 km/tháng
                   </li>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#3b82f6', marginRight: '12px', fontSize: '18px'}}></span>
+                    <FiCheck size={18} style={{color: '#3b82f6', marginRight: '12px'}} />
                     Ứng dụng đầy đủ
                   </li>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#3b82f6', marginRight: '12px', fontSize: '18px'}}></span>
+                    <FiCheck size={18} style={{color: '#3b82f6', marginRight: '12px'}} />
                     Ưu tiên đổi pin
                   </li>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#3b82f6', marginRight: '12px', fontSize: '18px'}}></span>
+                    <FiCheck size={18} style={{color: '#3b82f6', marginRight: '12px'}} />
                     Hỗ trợ ưu tiên
                   </li>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#ef4444', marginRight: '12px', fontSize: '18px'}}></span>
+                    <FiX size={18} style={{color: '#ef4444', marginRight: '12px'}} />
                     Phí vượt km nếu {'>'}400km
                   </li>
                 </ul>
@@ -410,27 +417,27 @@ const LandingPage = () => {
                 </div>
                 <ul style={{listStyle: 'none', padding: '0', marginBottom: '32px', textAlign: 'left'}}>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#a855f7', marginRight: '12px', fontSize: '18px'}}></span>
+                    <FiCheck size={18} style={{color: '#a855f7', marginRight: '12px'}} />
                     600 km/tháng
                   </li>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#a855f7', marginRight: '12px', fontSize: '18px'}}></span>
+                    <FiCheck size={18} style={{color: '#a855f7', marginRight: '12px'}} />
                     Ứng dụng đầy đủ
                   </li>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#a855f7', marginRight: '12px', fontSize: '18px'}}></span>
+                    <FiCheck size={18} style={{color: '#a855f7', marginRight: '12px'}} />
                     Ưu tiên đổi pin
                   </li>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#a855f7', marginRight: '12px', fontSize: '18px'}}></span>
+                    <FiCheck size={18} style={{color: '#a855f7', marginRight: '12px'}} />
                     Thông báo real-time
                   </li>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#a855f7', marginRight: '12px', fontSize: '18px'}}></span>
+                    <FiCheck size={18} style={{color: '#a855f7', marginRight: '12px'}} />
                     Đặt trước trạm
                   </li>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#ef4444', marginRight: '12px', fontSize: '18px'}}></span>
+                    <FiX size={18} style={{color: '#ef4444', marginRight: '12px'}} />
                     Phí vượt km nếu {'>'}600km
                   </li>
                 </ul>
@@ -495,27 +502,27 @@ const LandingPage = () => {
                 </div>
                 <ul style={{listStyle: 'none', padding: '0', marginBottom: '32px', textAlign: 'left'}}>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#eab308', marginRight: '12px', fontSize: '18px'}}></span>
+                    <FiCheck size={18} style={{color: '#eab308', marginRight: '12px'}} />
                     Không giới hạn km
                   </li>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#eab308', marginRight: '12px', fontSize: '18px'}}></span>
+                    <FiCheck size={18} style={{color: '#eab308', marginRight: '12px'}} />
                     Tính năng cao cấp
                   </li>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#eab308', marginRight: '12px', fontSize: '18px'}}></span>
+                    <FiCheck size={18} style={{color: '#eab308', marginRight: '12px'}} />
                     Đặt trước trạm đổi
                   </li>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#eab308', marginRight: '12px', fontSize: '18px'}}></span>
+                    <FiCheck size={18} style={{color: '#eab308', marginRight: '12px'}} />
                     Hỗ trợ VIP 24/7
                   </li>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#eab308', marginRight: '12px', fontSize: '18px'}}></span>
+                    <FiCheck size={18} style={{color: '#eab308', marginRight: '12px'}} />
                     Xe thay thế khẩn cấp
                   </li>
                   <li style={{padding: '8px 0', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#eab308', marginRight: '12px', fontSize: '18px'}}></span>
+                    <FiCheck size={18} style={{color: '#eab308', marginRight: '12px'}} />
                     Không phí vượt km
                   </li>
                 </ul>
@@ -575,7 +582,9 @@ const LandingPage = () => {
                 overflow: 'hidden'
               }}>
                 <div style={{textAlign: 'center', zIndex: 2}}>
-                  <div style={{fontSize: '64px', marginBottom: '20px'}}></div>
+                  <div style={{fontSize: '64px', marginBottom: '20px'}}>
+                    <FiMapPin size={64} color="#3b82f6" />
+                  </div>
                   <h3 style={{color: 'white', marginBottom: '16px'}}>Bản đồ tương tác</h3>
                   <p style={{color: 'rgba(255,255,255,0.6)', marginBottom: '24px'}}>
                     Tìm trạm đổi pin gần nhất với công nghệ GPS chính xác

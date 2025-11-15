@@ -2,6 +2,7 @@
 // Container component for Support page - orchestrates tabs and forms
 
 import { useState, useEffect } from 'react';
+import { FiHelpCircle } from 'react-icons/fi';
 import { useAuth } from '../../../context/AuthContext';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import { useSupportForm, useSupportSubmit } from './hooks';

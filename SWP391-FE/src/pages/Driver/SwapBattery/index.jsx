@@ -1,5 +1,6 @@
 // pages/Driver/SwapBattery/index.jsx
 import React, { useEffect } from 'react';
+import { FiBattery } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { useSwapSteps } from './hooks/useSwapSteps'; 
 // BẠN CŨNG CẦN DÒNG NÀY:

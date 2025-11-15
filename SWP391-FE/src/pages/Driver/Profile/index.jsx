@@ -2,6 +2,7 @@
 // Container for Driver Profile page - orchestrates all components and hooks
 
 import React from 'react';
+import { FiAlertCircle, FiRefreshCw } from 'react-icons/fi';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import { useProfileData, useProfileForm, useProfileUpdate } from './hooks';
 import {
@@ -97,7 +98,9 @@ const DriverProfile = () => {
             textAlign: 'center',
             maxWidth: '500px'
           }}>
-            <div style={{ fontSize: '3rem', marginBottom: '15px' }}></div>
+            <div style={{ fontSize: '3rem', marginBottom: '15px' }}>
+              <FiAlertCircle size={48} color="#EF4444" />
+            </div>
             <h3 style={{ color: '#EF4444', marginBottom: '10px' }}>
               Lỗi tải dữ liệu
             </h3>
@@ -111,10 +114,14 @@ const DriverProfile = () => {
                 border: 'none',
                 borderRadius: '8px',
                 cursor: 'pointer',
-                fontWeight: '600'
+                fontWeight: '600',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                margin: '0 auto'
               }}
             >
-              Thử lại
+              <FiRefreshCw size={18} /> Thử lại
             </button>
           </div>
         </div>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { FiMapPin, FiPlus, FiRefreshCw, FiArrowLeft, FiBattery, FiX } from 'react-icons/fi';
 import { useStationsDrilldown } from './hooks/useStationsDrilldown';
 import StationListView from './components/StationListView';
 import TowerListView from './components/TowerListView';
@@ -17,7 +18,7 @@ const Header = ({ title, onBack, onRefresh, icon, onAdd, onAssignBattery, onRemo
     <div className="station-header-left">
       {onBack && (
         <button onClick={onBack} className="station-back-btn">
-          <span>←</span>
+          <FiArrowLeft size={18} />
           <span>Quay lại</span>
         </button>
       )}
@@ -29,25 +30,25 @@ const Header = ({ title, onBack, onRefresh, icon, onAdd, onAssignBattery, onRemo
     <div className="station-actions">
       {onAdd && (
         <button onClick={onAdd.action} className="station-add-btn" title={onAdd.title}>
-          <span></span>
+          <FiPlus size={18} />
           <span>{onAdd.text}</span>
         </button>
       )}
       {onAssignBattery && (
         <button onClick={onAssignBattery} className="station-add-btn" style={{ background: 'linear-gradient(135deg, #10b981 0%, #34d399 100%)' }} title="Thêm pin vào hộc">
-          <span></span>
+          <FiBattery size={18} />
           <span>Thêm Pin vào Hộc</span>
         </button>
       )}
       {onRemoveBattery && (
         <button onClick={onRemoveBattery} className="station-add-btn" style={{ background: 'linear-gradient(135deg, #ef4444 0%, #f87171 100%)' }} title="Tháo pin khỏi hộc">
-          <span></span>
+          <FiX size={18} />
           <span>Tháo Pin</span>
         </button>
       )}
       {onRefresh && (
         <button onClick={onRefresh} className="station-refresh-btn" title="Làm mới">
-          <span></span>
+          <FiRefreshCw size={18} />
           <span>Làm mới</span>
         </button>
       )}

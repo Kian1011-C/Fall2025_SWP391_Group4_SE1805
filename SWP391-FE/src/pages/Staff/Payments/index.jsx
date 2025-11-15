@@ -1,5 +1,6 @@
 // Staff Payments Management - index.jsx (Read Only)
 import React, { useState, useMemo } from 'react';
+import { FiCreditCard, FiSearch, FiRefreshCw, FiUsers } from 'react-icons/fi';
 import { usePaymentsData } from './hooks/usePaymentsData';
 import DriverRow from './components/DriverRow';
 import PaymentHistoryModal from './components/PaymentHistoryModal';
@@ -55,8 +56,8 @@ const Payments = () => {
     <div style={{ padding: '32px', backgroundColor: '#f9fafb', minHeight: '100vh' }}>
       {/* Header */}
       <div style={{ marginBottom: '32px' }}>
-        <h1 style={{ margin: '0 0 8px 0', fontSize: '28px', fontWeight: '700', color: '#111827' }}>
-          Quản lý Thanh toán
+        <h1 style={{ margin: '0 0 8px 0', fontSize: '28px', fontWeight: '700', color: '#111827', display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <FiCreditCard size={32} /> Quản lý Thanh toán
         </h1>
         <p style={{ margin: 0, fontSize: '14px', color: '#6b7280' }}>
           Xem hóa đơn và lịch sử thanh toán của khách hàng
@@ -88,7 +89,7 @@ const Payments = () => {
               justifyContent: 'center',
               fontSize: '24px'
             }}>
-              
+              <FiUsers size={24} color="#2563eb" />
             </div>
             <div>
               <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '4px' }}>

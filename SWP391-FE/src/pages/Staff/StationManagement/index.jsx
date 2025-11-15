@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { FiMapPin, FiPlus, FiMinus, FiRefreshCw, FiBattery } from 'react-icons/fi';
 import { useStationsDrilldown } from './hooks/useStationDrilldown';
 import StationListView from './components/StationListView';
 import TowerListView from './components/TowerListView';
@@ -25,20 +26,20 @@ const Header = ({ title, onBack, icon, onAssignBattery, onRemoveBattery, onRefre
     </div>
     <div className="station-actions">
       {onAssignBattery && (
-        <button onClick={onAssignBattery} className="station-add-btn" style={{ background: 'linear-gradient(135deg, #10b981 0%, #34d399 100%)' }} title="Thêm pin vào hộc">
-          <span></span>
+        <button onClick={onAssignBattery} className="station-add-btn" style={{ background: 'linear-gradient(135deg, #10b981 0%, #34d399 100%)', display: 'flex', alignItems: 'center', gap: '8px' }} title="Thêm pin vào hộc">
+          <FiPlus size={18} />
           <span>Thêm Pin vào Hộc</span>
         </button>
       )}
       {onRemoveBattery && (
-        <button onClick={onRemoveBattery} className="station-add-btn" style={{ background: 'linear-gradient(135deg, #ef4444 0%, #f87171 100%)' }} title="Tháo pin khỏi hộc">
-          <span></span>
+        <button onClick={onRemoveBattery} className="station-add-btn" style={{ background: 'linear-gradient(135deg, #ef4444 0%, #f87171 100%)', display: 'flex', alignItems: 'center', gap: '8px' }} title="Tháo pin khỏi hộc">
+          <FiMinus size={18} />
           <span>Tháo Pin</span>
         </button>
       )}
       {onRefresh && (
-        <button onClick={onRefresh} className="station-refresh-btn" title="Làm mới">
-          <span></span>
+        <button onClick={onRefresh} className="station-refresh-btn" style={{ display: 'flex', alignItems: 'center', gap: '8px' }} title="Làm mới">
+          <FiRefreshCw size={18} />
           <span>Làm mới</span>
         </button>
       )}
@@ -170,9 +171,9 @@ const StaffStationManagement = () => {
   };
 
   const getIcon = () => {
-    if (view === 'slots') return '';
-    if (view === 'towers') return '';
-    return '';
+    if (view === 'slots') return <FiBattery size={28} />;
+    if (view === 'towers') return <FiMapPin size={28} />;
+    return <FiMapPin size={28} />;
   };
 
   const getBackButtonHandler = () => {

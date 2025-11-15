@@ -1,4 +1,5 @@
 import React from 'react';
+import { FiAlertTriangle, FiRefreshCw, FiFilter } from 'react-icons/fi';
 import { useIssueData } from './hooks/useIssueData';
 import IssueRow from './components/IssueRow';
 
@@ -10,7 +11,9 @@ const StaffIssues = () => {
     if (error) return (
       <div style={{ color: '#ef4444', textAlign: 'center' }}>
         <p>Lỗi: {error}</p>
-        <button onClick={() => refetch()}>Thử lại</button>
+        <button onClick={() => refetch()} style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '10px auto' }}>
+          <FiRefreshCw size={18} /> Thử lại
+        </button>
       </div>
     );
     if (issues.length === 0) return <p style={{ color: '#94a3b8', textAlign: 'center' }}>Không có sự cố nào được báo cáo.</p>;
@@ -44,16 +47,21 @@ const StaffIssues = () => {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
         <div>
-            <h1 style={{ margin: 0, fontSize: '28px' }}>Quản lý Sự cố</h1>
+            <h1 style={{ margin: 0, fontSize: '28px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <FiAlertTriangle size={32} /> Quản lý Sự cố
+            </h1>
             <p style={{ margin: '5px 0 0 0', color: '#94a3b8' }}>Theo dõi và xử lý các sự cố được báo cáo từ hệ thống và tài xế.</p>
         </div>
         <div style={{ display: 'flex', gap: '15px' }}>
-          <select onChange={(e) => refetch({ status: e.target.value })} style={{ background: '#334155', color: 'white', border: '1px solid #475569', padding: '10px', borderRadius: '8px' }}>
+          <div style={{ position: 'relative' }}>
+            <FiFilter style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none', zIndex: 1 }} size={18} />
+            <select onChange={(e) => refetch({ status: e.target.value })} style={{ background: '#334155', color: 'white', border: '1px solid #475569', padding: '10px 10px 10px 40px', borderRadius: '8px' }}>
             <option value="">Tất cả trạng thái</option>
             <option value="open">Mới</option>
             <option value="in_progress">Đang xử lý</option>
             <option value="resolved">Đã giải quyết</option>
-          </select>
+            </select>
+          </div>
         </div>
       </div>
       {renderContent()}

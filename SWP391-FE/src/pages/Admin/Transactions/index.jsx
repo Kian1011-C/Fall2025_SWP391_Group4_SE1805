@@ -2,6 +2,7 @@
 // Lịch sử đổi Pin - Giao diện hiện đại với thống kê và filter đầy đủ
 
 import React, { useState, useMemo } from 'react';
+import { FiList, FiCheckCircle, FiClock, FiXCircle, FiTrendingUp, FiSearch, FiFilter, FiRefreshCw, FiGrid, FiTable } from 'react-icons/fi';
 import { useTransactionsData } from './hooks/useTransactionsData';
 import TransactionRow from './components/TransactionRow';
 import TransactionDetailModal from './components/TransactionDetailModal';
@@ -56,7 +57,9 @@ const AdminSwapHistory = () => {
   const renderStats = () => (
     <div style={styles.statsGrid}>
       <div style={styles.statCard}>
-        <div style={styles.statIcon}></div>
+        <div style={styles.statIcon}>
+          <FiList size={24} color="#3b82f6" />
+        </div>
         <div style={styles.statContent}>
           <div style={styles.statValue}>{stats.total}</div>
           <div style={styles.statLabel}>Tổng giao dịch</div>
@@ -64,7 +67,9 @@ const AdminSwapHistory = () => {
       </div>
 
       <div style={styles.statCard}>
-        <div style={{ ...styles.statIcon, background: 'rgba(25, 195, 125, 0.2)' }}></div>
+        <div style={{ ...styles.statIcon, background: 'rgba(25, 195, 125, 0.2)' }}>
+          <FiCheckCircle size={24} color="#19c37d" />
+        </div>
         <div style={styles.statContent}>
           <div style={{ ...styles.statValue, color: '#19c37d' }}>{stats.completed}</div>
           <div style={styles.statLabel}>Hoàn thành</div>
@@ -72,7 +77,9 @@ const AdminSwapHistory = () => {
       </div>
 
       <div style={styles.statCard}>
-        <div style={{ ...styles.statIcon, background: 'rgba(59, 130, 246, 0.2)' }}>⏳</div>
+        <div style={{ ...styles.statIcon, background: 'rgba(59, 130, 246, 0.2)' }}>
+          <FiClock size={24} color="#3b82f6" />
+        </div>
         <div style={styles.statContent}>
           <div style={{ ...styles.statValue, color: '#3b82f6' }}>{stats.initiated}</div>
           <div style={styles.statLabel}>Đang xử lý</div>
@@ -80,7 +87,9 @@ const AdminSwapHistory = () => {
       </div>
 
       <div style={styles.statCard}>
-        <div style={{ ...styles.statIcon, background: 'rgba(239, 68, 68, 0.2)' }}></div>
+        <div style={{ ...styles.statIcon, background: 'rgba(239, 68, 68, 0.2)' }}>
+          <FiXCircle size={24} color="#ef4444" />
+        </div>
         <div style={styles.statContent}>
           <div style={{ ...styles.statValue, color: '#ef4444' }}>{stats.cancelled + stats.failed}</div>
           <div style={styles.statLabel}>Thất bại/Hủy</div>
@@ -88,10 +97,12 @@ const AdminSwapHistory = () => {
       </div>
 
       <div style={styles.statCard}>
-        <div style={{ ...styles.statIcon, background: 'rgba(245, 158, 11, 0.2)' }}></div>
+        <div style={{ ...styles.statIcon, background: 'rgba(245, 158, 11, 0.2)' }}>
+          <FiTrendingUp size={24} color="#f59e0b" />
+        </div>
         <div style={styles.statContent}>
           <div style={{ ...styles.statValue, color: '#f59e0b' }}>{stats.successRate}%</div>
-          <div style={styles.statLabel}>Tỷ lệ thành công</div>
+          <div style={styles.statLabel}>Tỉ lệ thành công</div>
         </div>
       </div>
     </div>
@@ -100,25 +111,46 @@ const AdminSwapHistory = () => {
   const renderFilters = () => (
     <div style={styles.filterContainer}>
       <div style={styles.filterRow}>
-        <input 
-          type="text"
-          placeholder=" Tìm kiếm theo mã GD, User ID, Trạm ID..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          style={styles.searchInput}
-        />
+        <div style={{ position: 'relative', flex: 1 }}>
+          <FiSearch style={{
+            position: 'absolute',
+            left: '12px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            color: '#9ca3af',
+            pointerEvents: 'none'
+          }} size={18} />
+          <input 
+            type="text"
+            placeholder="Tìm kiếm theo mã GD, User ID, Trạm ID..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ ...styles.searchInput, paddingLeft: '40px' }}
+          />
+        </div>
         
-        <select 
-          value={filterStatus} 
-          onChange={(e) => setFilterStatus(e.target.value)} 
-          style={styles.filterSelect}
-        >
-          <option value=""> Tất cả trạng thái</option>
+        <div style={{ position: 'relative' }}>
+          <FiFilter style={{
+            position: 'absolute',
+            left: '12px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            color: '#9ca3af',
+            pointerEvents: 'none',
+            zIndex: 1
+          }} size={18} />
+          <select 
+            value={filterStatus} 
+            onChange={(e) => setFilterStatus(e.target.value)} 
+            style={{ ...styles.filterSelect, paddingLeft: '40px' }}
+          >
+            <option value="">Tất cả trạng thái</option>
           <option value="COMPLETED"> Hoàn thành</option>
           <option value="INITIATED">⏳ Đang xử lý</option>
           <option value="CANCELLED"> Đã hủy</option>
           <option value="FAILED"> Thất bại</option>
-        </select>
+          </select>
+        </div>
 
         <input 
           type="date" 
@@ -139,7 +171,7 @@ const AdminSwapHistory = () => {
         />
 
         <button onClick={refetch} style={styles.refreshBtn} title="Tải lại">
-          
+          <FiRefreshCw size={18} />
         </button>
       </div>
 
@@ -151,7 +183,7 @@ const AdminSwapHistory = () => {
             background: viewMode === 'table' ? '#3b82f6' : 'transparent'
           }}
         >
-           Bảng
+          <FiTable size={18} /> Bảng
         </button>
         <button 
           onClick={() => setViewMode('cards')}
@@ -160,7 +192,7 @@ const AdminSwapHistory = () => {
             background: viewMode === 'cards' ? '#3b82f6' : 'transparent'
           }}
         >
-           Thẻ
+          <FiGrid size={18} /> Thẻ
         </button>
       </div>
     </div>

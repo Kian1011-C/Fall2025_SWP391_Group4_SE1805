@@ -1,6 +1,7 @@
 // Driver/Vehicles/index.jsx
 // Vehicles page (container inlined)
 import React, { useMemo } from 'react';
+import { FiTruck, FiPlus } from 'react-icons/fi';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import { useVehiclesData, useVehicleModals, useVehicleForm } from './hooks';
 import { findVehicleContract } from './utils';
@@ -92,7 +93,9 @@ const VehiclesContainer = () => {
       <div className="vehicles-container">
         {/* Header */}
         <div className="vehicles-header">
-          <h1>Quản lý phương tiện</h1>
+          <h1 style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <FiTruck size={32} /> Quản lý phương tiện
+          </h1>
           <button 
             className="btn btn-primary" 
             onClick={(e) => {
@@ -101,9 +104,9 @@ const VehiclesContainer = () => {
               console.log(' Button clicked - opening modal');
               openAddModal();
             }}
-            style={{ cursor: 'pointer', zIndex: 10 }}
+            style={{ cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', gap: '8px' }}
           >
-            <i className="fas fa-plus"></i>
+            <FiPlus size={20} />
             Thêm phương tiện
           </button>
         </div>
