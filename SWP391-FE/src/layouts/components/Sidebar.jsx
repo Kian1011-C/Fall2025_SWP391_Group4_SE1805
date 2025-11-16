@@ -99,7 +99,11 @@ const Sidebar = ({ role = 'driver' }) => {
                 color: '#FFFFFF'
               }}
             >
-              <span style={{ fontSize: '20px' }}>{item.icon}</span>
+              {item.icon && (
+                <span style={{ fontSize: '20px', display: 'flex', alignItems: 'center' }}>
+                  <item.icon />
+                </span>
+              )}
               <span style={{ 
                 fontSize: '14px', 
                 fontWeight: active ? '600' : '500',

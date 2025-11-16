@@ -55,7 +55,6 @@ const StationFormModal = ({ isOpen, onClose, onSave, station }) => {
               <select name="status" value={formData.status} onChange={handleChange} style={inputStyle}>
                 <option value="active">Hoạt động</option>
                 <option value="maintenance">Bảo trì</option>
-                <option value="offline">Ngoại tuyến</option>
               </select>
             </div>
           </div>

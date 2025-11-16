@@ -8,7 +8,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { useDashboardData, useSelectedVehicle } from './hooks';
 import { formatCurrency } from './utils';
 import SelectVehicleModal from './components/SelectVehicleModal';
-import SelectedVehicleDisplay from './components/SelectedVehicleDisplay';
+
 import {
   WelcomeHeader,
   StatsCards,

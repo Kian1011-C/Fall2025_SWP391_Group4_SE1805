@@ -2,7 +2,6 @@ import React from 'react';
 import { FiRefreshCw, FiDownload } from 'react-icons/fi';
 import { useAdminDashboardData } from './hooks/useAdminDashboardData';
 import StatsCards from './components/StatsCards';
-import ActivityTimeline from './components/ActivityTimeline';
 import QuickActions from './components/QuickActions';
 import '../../../assets/css/AdminDashboard.css';
 
@@ -49,11 +48,6 @@ const AdminDashboard = () => {
           {/* Quick Actions */}
           <div className="quick-actions-section">
             <QuickActions />
-          </div>
-
-          {/* Recent Activity */}
-          <div className="activity-section">
-            <ActivityTimeline stats={stats} />
           </div>
         </div>
       </>

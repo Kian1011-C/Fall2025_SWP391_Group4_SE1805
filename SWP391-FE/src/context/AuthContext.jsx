@@ -69,23 +69,22 @@ export const AuthProvider = ({ children }) => {
         }
         
         console.log(' AuthContext: Navigating to:', redirectPath, 'for role:', normalizedRole, 'redirect from API:', response.redirect);
-        showToast(`Chào mừng ${userData.name}! Đang chuyển đến ${normalizedRole.toUpperCase()} Dashboard...`, 'success');
         
-        // Small delay to show the toast before navigating
+        // Small delay before navigating
         setTimeout(() => {
           console.log(' AuthContext: Executing navigation to:', redirectPath);
           navigate(redirectPath);
-        }, 500);
+        }, 300);
         
         return { success: true };
       } else {
-        showToast(response.message || 'Đăng nhập thất bại!', 'error');
-        return { success: false };
+        // Don't show toast here - let LoginModal handle it
+        return { success: false, message: response.message || 'Email hoặc mật khẩu không đúng!' };
       }
     } catch (error) {
       console.error('Login error:', error);
-      showToast('Có lỗi xảy ra khi đăng nhập!', 'error');
-      return { success: false };
+      // Don't show toast here - let LoginModal handle it
+      return { success: false, message: 'Có lỗi xảy ra khi đăng nhập!' };
     } finally {
       setIsLoggingIn(false);
     }

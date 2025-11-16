@@ -93,7 +93,15 @@ const ContactForm = ({ formData, onFieldChange, onSubmit, loading, errors }) => 
             }}
           >
             {priorityOptions.map(option => (
-              <option key={option.value} value={option.value}>
+              <option 
+                key={option.value} 
+                value={option.value}
+                style={{
+                  background: '#1a202c',
+                  color: '#FFFFFF',
+                  padding: '10px'
+                }}
+              >
                 {option.label}
               </option>
             ))}

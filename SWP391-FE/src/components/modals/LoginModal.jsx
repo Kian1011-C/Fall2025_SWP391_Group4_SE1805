@@ -110,6 +110,12 @@ const LoginModal = () => {
         console.log('LoginModal: Login failed, attempts:', newAttempts);
         setLoginAttempts(newAttempts);
         
+        // Show error toast immediately
+        showToast(
+          result?.message || 'Email hoặc mật khẩu không đúng!', 
+          'error'
+        );
+        
         // Show warning after 3 failed attempts
         if (newAttempts >= 3) {
           setShowWarning(true);
@@ -119,9 +125,11 @@ const LoginModal = () => {
         console.log('LoginModal: Login successful');
         setLoginAttempts(0);
         setShowWarning(false);
+        showToast(`Chào mừng bạn trở lại!`, 'success');
       }
     } catch (error) {
       console.error('LoginModal: Error during login:', error);
+      showToast('Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại!', 'error');
     }
   };
 
