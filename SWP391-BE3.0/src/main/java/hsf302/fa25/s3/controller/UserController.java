@@ -215,7 +215,7 @@ public class UserController {
             userDao.saveResetToken(u.get().getUserId(), token, expire);
 
             // Link reset
-            String link = "http://localhost:8080/reset?token=" + token;
+            String link = "http://localhost:3000/reset?token=" + token;
             emailService.sendResetEmail(u.get().getEmail(), link);
 
             res.put("success", true);
