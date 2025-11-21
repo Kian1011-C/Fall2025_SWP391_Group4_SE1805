@@ -58,18 +58,7 @@ public class ServicePlanController {
     }
 
     // ============== ADD ==============
-    /**
-     * POST /api/admin/serviceplan/add
-     * Body JSON:
-     * {
-     *   "planName": "Cơ bản",
-     *   "basePrice": 350000,
-     *   "baseDistance": 400,     // -1 nếu unlimited
-     *   "depositFee": 500000,
-     *   "description": "Gói tiêu chuẩn",
-     *   "active": true
-     * }
-     */
+
     @PostMapping("/add")
     public ResponseEntity<?> addPlan(@RequestBody Map<String, Object> body) {
 
@@ -117,19 +106,7 @@ public class ServicePlanController {
     }
 
     // ============== UPDATE ==============
-    /**
-     * POST /api/admin/serviceplan/update
-     * Body JSON:
-     * {
-     *   "planId": 3,
-     *   "planName": "...",
-     *   "basePrice": ...,
-     *   "baseDistance": ...,
-     *   "depositFee": ...,
-     *   "description": "...",
-     *   "active": true/false
-     * }
-     */
+
     @PostMapping("/update")
     public ResponseEntity<?> updatePlan(@RequestBody Map<String, Object> body) {
 
@@ -184,11 +161,7 @@ public class ServicePlanController {
     }
 
     // ============== DELETE (soft) ==============
-    /**
-     * POST /api/admin/serviceplan/delete
-     * Body JSON: { "id": 3 }
-     * → Xoá mềm: set is_active = 0
-     */
+
     @PostMapping("/delete")
     public ResponseEntity<?> deletePlan(@RequestBody Map<String, Object> body) {
         try {

@@ -91,7 +91,7 @@ public class VehicleDao {
             ORDER BY v.vehicle_id DESC
         """;
 
-        System.out.println("🔍 VehicleDao: Starting query for userId = " + userId);
+        System.out.println(" VehicleDao: Starting query for userId = " + userId);
         
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -122,7 +122,7 @@ public class VehicleDao {
 
         } catch (SQLException e) {
             e.printStackTrace();
-            System.err.println("❌ VehicleDao.getVehiclesWithBatteryByUser error: " + e.getMessage());
+            System.err.println(" VehicleDao.getVehiclesWithBatteryByUser error: " + e.getMessage());
         }
 
         return list;
@@ -173,7 +173,7 @@ public class VehicleDao {
             }
 
         } catch (SQLException e) {
-            System.err.println("❌ VehicleDao: Error getting all vehicles - " + e.getMessage());
+            System.err.println(" VehicleDao: Error getting all vehicles - " + e.getMessage());
             e.printStackTrace();
         }
 

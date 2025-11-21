@@ -26,7 +26,7 @@ public class PaymentDao {
             ps.setString(5, p.getStatus());   // 'pending' nếu bạn đã thêm vào CHECK; nếu chưa, dùng 'failed' rồi update lại khi có return (không khuyến nghị)
             ps.setString(6, p.getCurrency()); // 'VND'
             ps.setString(7, p.getTransactionRef());
-            ps.setString(8, p.getPaymentUrl()); // ✅ Lưu payment URL
+            ps.setString(8, p.getPaymentUrl()); //  Lưu payment URL
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("insertPending err: " + e.getMessage());
@@ -130,7 +130,7 @@ public class PaymentDao {
         }
     }
 
-    // ✅ Cập nhật invoice_date và payment_due_date khi tạo hóa đơn
+    //  Cập nhật invoice_date và payment_due_date khi tạo hóa đơn
     public boolean updateInvoiceDates(int contractId) {
         String sql = """
             UPDATE Contracts 

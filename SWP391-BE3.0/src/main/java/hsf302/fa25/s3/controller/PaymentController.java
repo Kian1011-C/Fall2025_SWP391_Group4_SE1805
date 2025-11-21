@@ -88,7 +88,7 @@ public class PaymentController {
         return bill;
     }
 
-    /** ✅ Admin: Lấy tất cả thanh toán */
+    /**  Admin: Lấy tất cả thanh toán */
     @GetMapping("/admin/all")
     public Map<String, Object> getAllPayments() {
         List<Payment> payments = paymentService.getAllPayments();
@@ -99,7 +99,7 @@ public class PaymentController {
         return response;
     }
 
-    /** ✅ User: Lấy danh sách thanh toán của user */
+    /**  User: Lấy danh sách thanh toán của user */
     @GetMapping("/user/{userId}")
     public Map<String, Object> getUserPayments(@PathVariable String userId) {
         List<Payment> payments = paymentService.getPaymentsByUserId(userId);

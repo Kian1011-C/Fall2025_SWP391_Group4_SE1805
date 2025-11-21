@@ -39,13 +39,13 @@ public class EmailService {
             msg.setSubject("Mã xác thực tài khoản (OTP)");
             msg.setText("Mã OTP của bạn là: " + otp + "\nMã có hiệu lực trong 5 phút.");
             mailSender.send(msg);
-            System.out.println("✅ Đã gửi OTP tới: " + to);
+            System.out.println(" Đã gửi OTP tới: " + to);
         } catch (Exception e) {
-            System.err.println("❌ Lỗi gửi OTP: " + e.getMessage());
+            System.err.println(" Lỗi gửi OTP: " + e.getMessage());
         }
     }
 
-    // 🔗 Gửi link đặt lại mật khẩu (text)
+    //  Gửi link đặt lại mật khẩu (text)
     public void sendResetEmail(String toEmail, String link) {
         if ("log".equalsIgnoreCase(appMailMode)) {
             System.out.println("🔗 [LOG] Reset link -> " + toEmail + " : " + link);
@@ -59,13 +59,13 @@ public class EmailService {
             msg.setSubject("Đặt lại mật khẩu - EV System");
             msg.setText("Bạn đã yêu cầu đặt lại mật khẩu.\nNhấn vào liên kết sau trong vòng 15 phút:\n" + link);
             mailSender.send(msg);
-            System.out.println("✅ Đã gửi email đặt lại mật khẩu tới: " + toEmail);
+            System.out.println(" Đã gửi email đặt lại mật khẩu tới: " + toEmail);
         } catch (Exception e) {
             System.err.println("❌ Lỗi gửi reset email: " + e.getMessage());
         }
     }
 
-    // 🌈 Gửi email HTML (đẹp, có định dạng)
+    //  Gửi email HTML (đẹp, có định dạng)
     public void sendHtmlEmail(String to, String otp) {
         if ("log".equalsIgnoreCase(appMailMode)) {
             System.out.println("📧 [LOG HTML] OTP -> " + to + " : " + otp);
@@ -78,7 +78,7 @@ public class EmailService {
 
             helper.setFrom(mailFrom);
             helper.setTo(to);
-            helper.setSubject("🔐 Xác thực tài khoản EV System");
+            helper.setSubject(" Xác thực tài khoản EV System");
 
             // Bạn có thể thay URL logo bằng ảnh thật của EV System
             String htmlContent = """
@@ -98,14 +98,14 @@ public class EmailService {
             helper.setText(htmlContent, true);
             mailSender.send(message);
 
-            System.out.println("✅ Đã gửi HTML OTP tới: " + to);
+            System.out.println(" Đã gửi HTML OTP tới: " + to);
         } catch (MessagingException e) {
             System.err.println("❌ Lỗi gửi email HTML: " + e.getMessage());
         }
     }
     @PostConstruct
     public void testMailConfig() {
-        System.out.println("✅ SMTP mail configured successfully.");
+        System.out.println(" SMTP mail configured successfully.");
         System.out.println("Host: smtp.gmail.com");
     }
 }

@@ -288,11 +288,7 @@ public class UserController {
 
     // ==================== API ĐĂNG KÝ XE (CHỈ 3 TRƯỜNG) ====================
 
-    /**
-     * Đăng ký xe cho user (form/x-www-form-urlencoded hoặc form-data).
-     * Endpoint: POST /api/users/{userId}/vehicles
-     * Params: plateNumber, model, vinNumber
-     */
+
     @PostMapping("/{userId}/vehicles")
     public Map<String, Object> registerVehicleForUser(
             @PathVariable String userId,

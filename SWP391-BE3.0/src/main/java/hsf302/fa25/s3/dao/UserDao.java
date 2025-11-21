@@ -41,7 +41,7 @@ public class UserDao {
     }
 
     public User checkLogin(String email, String password) {
-        // ✅ Sửa lại: password (không phải password_hash)
+        // Sửa lại: password (không phải password_hash)
         String sql = "SELECT * FROM Users WHERE email = ? AND password = ?";
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -78,7 +78,7 @@ public class UserDao {
     }
 
     public boolean addUser(User user) {
-        // ✅ Cũng đổi password_hash → password
+        //  Cũng đổi password_hash → password
         // Ensure userId is set (controller normally sets it to email when missing)
         if (user.getUserId() == null || user.getUserId().isEmpty()) {
             user.setUserId(user.getEmail());
@@ -107,7 +107,7 @@ public class UserDao {
     }
 
     public boolean updateUser(User user) {
-        // ✅ password_hash → password
+        //  password_hash → password
         String sql = "UPDATE Users SET first_name=?, last_name=?, email=?, phone=?, password=?, role=?, cccd=?, status=?, updated_at=GETDATE() WHERE user_id=?";
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {

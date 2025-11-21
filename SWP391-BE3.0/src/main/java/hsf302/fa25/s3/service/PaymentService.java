@@ -26,9 +26,7 @@ public class PaymentService {
     private final PaymentDao paymentDao;
     private final VNPayConfig vnpay;
 
-    /* =============================================================
-       1️⃣ TẠO URL THANH TOÁN VNPay
-       ============================================================= */
+    /*    TẠO URL THANH TOÁN VNPay */
     public String createPaymentUrl(String userId, Integer contractId, double amount, String clientIp) {
         String txnRef = vnpay.generateTxnRef();
 
@@ -48,7 +46,7 @@ public class PaymentService {
         params.put("vnp_CurrCode", "VND");
         params.put("vnp_TxnRef", txnRef);
 
-        // ✅ Encode tiếng Việt đúng cách
+        //  Encode tiếng Việt đúng cách
         String orderInfo = "Thanh toan hop dong " + (contractId == null ? "N/A" : contractId);
         params.put("vnp_OrderInfo", orderInfo);
 
@@ -71,16 +69,14 @@ public class PaymentService {
                 .status("in_progress")
                 .currency("VND")
                 .transactionRef(txnRef)
-                .paymentUrl(paymentUrl) // ✅ Lưu URL
+                .paymentUrl(paymentUrl) // Lưu URL
                 .build();
         paymentDao.insertPending(p);
 
         return paymentUrl;
     }
 
-    /* =============================================================
-       2️⃣ XỬ LÝ RETURN URL (VNPay REDIRECT)
-       ============================================================= */
+    /* XỬ LÝ RETURN URL (VNPay REDIRECT) */
     public Payment handleReturn(Map<String, String> params) {
         String txnRef = params.get("vnp_TxnRef");
         if (txnRef == null) throw new RuntimeException("Missing vnp_TxnRef");
@@ -92,7 +88,7 @@ public class PaymentService {
         boolean paid = "00".equals(params.get("vnp_ResponseCode")) && "00".equals(params.get("vnp_TransactionStatus"));
         updateFromReturn(txnRef, params, paid ? "success" : "failed");
 
-        // ✅ Nếu thanh toán thành công → cập nhật hợp đồng sang inactive
+        //  Nếu thanh toán thành công → cập nhật hợp đồng sang inactive
         if (paid && exist.getContractId() != null) {
             paymentDao.updateContractStatusToInactive(exist.getContractId());
         }
@@ -100,9 +96,7 @@ public class PaymentService {
         return paymentDao.findByTxnRef(txnRef);
     }
 
-    /* =============================================================
-       3️⃣ XỬ LÝ IPN (VNPay gọi server-to-server)
-       ============================================================= */
+    /* XỬ LÝ IPN (VNPay gọi server-to-server */
     public Map<String, String> handleIpn(Map<String, String> queryParams, String rawQuery) {
         Map<String, String> res = new HashMap<>();
         try {
@@ -149,9 +143,7 @@ public class PaymentService {
         }
     }
 
-    /* =============================================================
-       4️⃣ QUERYDR PIPE FORMAT (GỌI API VNPay ĐỂ XÁC MINH)
-       ============================================================= */
+    /*       QUERYDR PIPE FORMAT (GỌI API VNPay ĐỂ XÁC MINH) */
     public Map<String, Object> queryDrPipeFormat(String txnRef, String orderInfo,
                                                  String transactionDateYmdHms, String serverIp) throws Exception {
         String requestId = UUID.randomUUID().toString().replace("-", "").substring(0, 32);
@@ -194,21 +186,19 @@ public class PaymentService {
         return result;
     }
 
-    /* =============================================================
-       5️⃣ TÍNH TIỀN THÁNG + TẠO LINK THANH TOÁN VNPay
-       ============================================================= */
+    /*     TÍNH TIỀN THÁNG + TẠO LINK THANH TOÁN VNPay */
     public Map<String, Object> createMonthlyBillUrl(String userId, int contractId, int year, int month, String clientIp) {
         // 1. Tính tiền tháng và cập nhật contract
         Map<String, Object> bill = paymentDao.calculateMonthlyBill(contractId, year, month);
         if (bill == null) throw new RuntimeException("Không tính được hóa đơn");
 
-        // 2. ✅ Cập nhật invoice_date và payment_due_date
+        // 2.  Cập nhật invoice_date và payment_due_date
         paymentDao.updateInvoiceDates(contractId);
 
         // 3. Lấy tổng tiền sử dụng + phí cọc pin
         double totalFee = ((BigDecimal) bill.get("totalFee")).doubleValue();
 
-        // ✅ Thêm dòng này: cộng thêm deposit_fee (nếu có trong kết quả SQL)
+        // Thêm dòng này: cộng thêm deposit_fee (nếu có trong kết quả SQL)
         double depositFee = 400000.0;
         if (bill.containsKey("deposit_fee") && bill.get("deposit_fee") != null) {
             depositFee = ((BigDecimal) bill.get("deposit_fee")).doubleValue();
@@ -228,9 +218,7 @@ public class PaymentService {
         return ordered;
     }
 
-    /* =============================================================
-       6️⃣ DANH SÁCH THANH TOÁN
-       ============================================================= */
+    /*   DANH SÁCH THANH TOÁN */
     public List<Payment> getAllPayments() {
         return paymentDao.getAllPayments();
     }
@@ -240,9 +228,7 @@ public class PaymentService {
     }
 
 
-    /* =============================================================
-       7️⃣ Helpers
-       ============================================================= */
+    /*  Helpers */
     private void updateFromReturn(String txnRef, Map<String, String> params, String status) {
         Payment p = new Payment();
         p.setTransactionRef(txnRef);
