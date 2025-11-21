@@ -84,7 +84,7 @@ const BatteryFormModal = ({ isOpen, onClose, onSave, battery }) => {
               />
             </div>
             <div>
-              <label className="battery-form-label">Dung lượng (Capacity kWh) *</label>
+              <label className="battery-form-label">% Pin (Capacity %) *</label>
               <input 
                 type="number" 
                 name="capacity" 
@@ -92,12 +92,14 @@ const BatteryFormModal = ({ isOpen, onClose, onSave, battery }) => {
                 onChange={handleChange} 
                 className="battery-form-input"
                 required 
-                min="1" 
-                placeholder="VD: 100" 
+                min="0" 
+                max="100" 
+                step="0.1" 
+                placeholder="VD: 100 (pin đầy 100%, pin yếu 20%)" 
               />
             </div>
             <div>
-              <label className="battery-form-label">Sức khỏe (State of Health %) *</label>
+              <label className="battery-form-label">Độ chai pin (State of Health %) *</label>
               <input 
                 type="number" 
                 name="stateOfHealth" 
@@ -108,7 +110,7 @@ const BatteryFormModal = ({ isOpen, onClose, onSave, battery }) => {
                 min="0" 
                 max="100" 
                 step="0.1" 
-                placeholder="VD: 95.5" 
+                placeholder="VD: 100 (mới 100%, càng dùng càng giảm)" 
               />
             </div>
             <div>

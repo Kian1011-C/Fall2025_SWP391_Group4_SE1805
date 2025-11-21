@@ -54,9 +54,7 @@ const SwapBatteryPage = () => {
                         {currentUser?.name || currentUser?.email || currentUser?.userId || 'Chưa đăng nhập'}
                     </strong>
                 </p>
-                <p style={{ margin: '5px 0 0 0', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <FiMapPin size={18} /> Trạm: <strong style={{ color: 'white' }}>#{MOCK_STATION_ID}</strong>
-                </p>
+               
                 {!currentStaffId && (
                     <p style={{ margin: '5px 0 0 0', color: '#ef4444', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <FiAlertTriangle size={16} /> Cảnh báo: Không tìm thấy Staff ID. Staff ID sẽ để NULL trong giao dịch.

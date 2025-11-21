@@ -9,7 +9,7 @@ const getRoleStyle = (role) => {
   return { ...style, background: '#4b5563', color: 'white' };
 };
 
-const UserRow = ({ user, onEdit, onDelete }) => {
+const UserRow = ({ user, onEdit }) => {
   return (
     <tr style={{ borderTop: '1px solid #374151' }}>
       <td style={{ padding: '15px 20px', fontWeight: 'bold', color: 'white' }}>{user.userId}</td>
@@ -28,11 +28,6 @@ const UserRow = ({ user, onEdit, onDelete }) => {
           onClick={() => onEdit(user)} 
           style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer' }}>
            Sửa
-        </button>
-        <button 
-          onClick={() => onDelete(user.userId)} 
-          style={{ background: '#ef4444', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer' }}>
-           Xóa
         </button>
       </td>
     </tr>

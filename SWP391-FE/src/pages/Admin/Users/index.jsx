@@ -106,9 +106,8 @@ const AdminUsers = () => {
             </tr>
           </thead>
           <tbody>
-            {/* Truyền handleOpenEditModal và handleDeleteUser xuống cho các nút Sửa và Xóa */}
             {currentUsers.map(user => (
-              <UserRow key={user.userId} user={user} onEdit={handleOpenEditModal} onDelete={handleDeleteUser} />
+              <UserRow key={user.userId} user={user} onEdit={handleOpenEditModal} />
             ))}
           </tbody>
         </table>

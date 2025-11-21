@@ -132,30 +132,48 @@ const DriverRow = ({ driver, onGenerateInvoice, onViewHistory, activeTab }) => {
       {activeTab !== 'pending' && (
         <td style={{ padding: '16px' }}>
           <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-            {activeTab === 'generate' && (
-              <button
-                onClick={() => onGenerateInvoice(driver)}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#3b82f6',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontSize: '13px',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}
-                onMouseEnter={(e) => e.target.style.backgroundColor = '#2563eb'}
-                onMouseLeave={(e) => e.target.style.backgroundColor = '#3b82f6'}
-              >
-                <span></span>
-                Xuất hóa đơn
-              </button>
-            )}
+            {activeTab === 'generate' && (() => {
+              // Check nếu contract bị tạm ngưng (suspended/SUSPENDED hoặc không phải active/ACTIVE)
+              const isSuspended = driver.contractStatus !== 'active' && 
+                                 driver.contractStatus !== 'ACTIVE' && 
+                                 driver.contractStatus !== 'inactive' &&
+                                 driver.contractStatus !== 'INACTIVE';
+              
+              return (
+                <button
+                  onClick={() => onGenerateInvoice(driver)}
+                  disabled={isSuspended}
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: isSuspended ? '#9ca3af' : '#3b82f6',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    cursor: isSuspended ? 'not-allowed' : 'pointer',
+                    transition: 'all 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    opacity: isSuspended ? 0.6 : 1
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isSuspended) {
+                      e.target.style.backgroundColor = '#2563eb';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isSuspended) {
+                      e.target.style.backgroundColor = '#3b82f6';
+                    }
+                  }}
+                >
+                  <span></span>
+                  Xuất hóa đơn
+                </button>
+              );
+            })()}
             
             {activeTab === 'history' && (
               <button

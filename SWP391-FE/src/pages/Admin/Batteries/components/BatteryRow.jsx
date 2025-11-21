@@ -61,11 +61,11 @@ const BatteryRow = ({ battery, onEdit, onDelete, onViewDetail }) => {
         <div className="admin-battery-health">
           <div className="admin-battery-health-bar">
             <div 
-              className={`admin-battery-health-fill ${getHealthClass(battery.stateOfHealth)}`}
-              style={{ width: `${battery.stateOfHealth}%` }}
+              className={`admin-battery-health-fill ${getHealthClass(battery.capacity)}`}
+              style={{ width: `${battery.capacity}%` }}
             ></div>
           </div>
-          <span className="admin-battery-health-text">{battery.stateOfHealth}%</span>
+          <span className="admin-battery-health-text">{battery.capacity}%</span>
         </div>
       </td>
 

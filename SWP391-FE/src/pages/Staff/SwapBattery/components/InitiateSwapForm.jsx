@@ -252,8 +252,7 @@ const InitiateSwapForm = ({
                             <h4 style={styles.subtitle}>Thông tin xe:</h4>
                             <p> Biển số: <strong>{selectedVehicle.plateNumber}</strong></p>
                             <p> Model: <strong>{selectedVehicle.vehicleModel || selectedVehicle.model || 'N/A'}</strong></p>
-                            <p> Pin hiện tại: <strong>{selectedVehicle.batteryId || 'Không có'}</strong></p>
-                            <p> Hợp đồng: <strong>{selectedVehicle.contractId || 'Không có'}</strong></p>
+                            <p> Pin hiện tại: <strong>{selectedVehicle.batteryId || 'Không có'}</strong></p>                         
                         </div>
                     )}
 
