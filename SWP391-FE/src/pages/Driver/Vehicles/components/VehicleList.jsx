@@ -15,7 +15,7 @@ const VehicleList = ({ vehicles, onViewDetails }) => {
     }}>
       {vehicles.map((vehicle, index) => (
         <VehicleCard
-          key={vehicle.vehicleId || index}
+          key={`vehicle-${vehicle.vehicleId}-${index}`}
           vehicle={vehicle}
           onClick={onViewDetails}
         />

@@ -2,7 +2,8 @@
 // Container for Driver Dashboard - orchestrates all components and hooks
 
 import React from 'react';
-import { FiRefreshCw, FiAlertTriangle, FiTruck } from 'react-icons/fi';
+import { FiRefreshCw, FiAlertTriangle } from 'react-icons/fi';
+import { FaCar } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { useDashboardData, useSelectedVehicle } from './hooks';
@@ -132,7 +133,7 @@ const DriverDashboard = () => {
               onClick={() => navigate('/driver/vehicles')}
               style={{ background: '#f59e0b', color: 'white', display: 'flex', alignItems: 'center', gap: '8px', margin: '0 auto' }}
             >
-              <FiTruck size={18} /> Đăng ký phương tiện
+              <FaCar size={18} /> Đăng ký phương tiện
             </button>
           </div>
         )}

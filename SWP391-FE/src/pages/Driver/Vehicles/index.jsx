@@ -1,8 +1,9 @@
 // Driver/Vehicles/index.jsx
 // Vehicles page (container inlined)
 import React, { useMemo } from 'react';
-import { FiTruck, FiPlus } from 'react-icons/fi';
 import { FaCar } from 'react-icons/fa';
+import { FiPlus } from 'react-icons/fi';
+
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import { useVehiclesData, useVehicleModals, useVehicleForm } from './hooks';
 import { findVehicleContract } from './utils';
