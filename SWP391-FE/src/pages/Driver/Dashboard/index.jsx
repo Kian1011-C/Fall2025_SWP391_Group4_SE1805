@@ -13,9 +13,9 @@ import {
   WelcomeHeader,
   StatsCards,
   QuickActions,
-  VehicleManagement,
-  PaymentHistory
+  VehicleManagement
 } from './components';
+import SwapHistory from './components/SwapHistory';
 
 const DriverDashboard = () => {
   const navigate = useNavigate();
@@ -25,7 +25,6 @@ const DriverDashboard = () => {
   const {
     vehicles,
     contracts,
-    recentPayments,
     stats,
     loading,
     error,
@@ -160,10 +159,8 @@ const DriverDashboard = () => {
         onSelectVehicle={setSelectedVehicle}
       />
       
-      {/* Payment History */}
-      <PaymentHistory 
-        payments={recentPayments} 
-      />
+      {/* Swap History */}
+      <SwapHistory />
     {showSelectModal && (
       <SelectVehicleModal
         vehicles={vehicles}
