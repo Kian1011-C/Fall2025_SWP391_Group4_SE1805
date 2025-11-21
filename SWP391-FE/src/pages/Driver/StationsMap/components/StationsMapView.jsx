@@ -297,25 +297,6 @@ const StationsMapView = ({ stations = [], onStationSelect }) => {
       >
          Vị trí của tôi
       </button>
-      
-      {/* Debug Info Overlay */}
-      <div style={styles.debugOverlay}>
-        <div style={styles.debugTitle}> Map Debug Info</div>
-        <div style={styles.debugItem}>
-           Center: [{mapCenter[0].toFixed(4)}, {mapCenter[1].toFixed(4)}]
-        </div>
-        <div style={styles.debugItem}>
-           Stations: {stationsData.length}
-        </div>
-        <div style={styles.debugItem}>
-           Data source: {stations.length > 0 ? 'Backend API' : 'MOCK_STATIONS'}
-        </div>
-        {stationsData.slice(0, 3).map((s, i) => (
-          <div key={s.id} style={styles.debugItem}>
-            {i + 1}. {s.name} [{s.lat?.toFixed(4)}, {s.lng?.toFixed(4)}]
-          </div>
-        ))}
-      </div>
     </div>
   );
 };

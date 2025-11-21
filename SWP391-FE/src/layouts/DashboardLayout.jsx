@@ -7,10 +7,11 @@ function DashboardLayout({ children, role = 'driver', title = null }) {
   return (
     <div style={{
       display: 'flex',
-      minHeight: '100vh',
+      height: '100vh',
       background: 'linear-gradient(180deg, #0b1020 0%, #0e1430 100%)',
       color: '#FFFFFF',
-      willChange: 'contents'
+      willChange: 'contents',
+      overflow: 'hidden'
     }}>
       <Sidebar role={role} />
 
@@ -20,6 +21,8 @@ function DashboardLayout({ children, role = 'driver', title = null }) {
         marginLeft: '0',
         display: 'flex',
         flexDirection: 'column',
+        height: '100vh',
+        overflow: 'hidden',
         willChange: 'contents'
       }}>
         {title ? <Header title={title} /> : null}

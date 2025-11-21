@@ -149,32 +149,6 @@ const StationsMap = () => {
           />
         </div>
 
-        {/* Danh sách trạm dạng thẻ (bên dưới map) - DISABLED interactions */}
-        <div style={{ marginTop: '20px', pointerEvents: 'none', opacity: 0.6, userSelect: 'none' }}>
-          <h3 style={{ color: '#FFFFFF', marginBottom: '15px' }}>
-             Danh sách Trạm
-          </h3>
-          <StationsList
-            stations={stations}
-            onSelect={handleSelect}
-          />
-        </div>
-
-        {/* Debug info for selected station */}
-        {selectedStation && import.meta.env.VITE_ENABLE_DEBUG === 'true' && (
-          <div style={{
-            marginTop: '20px',
-            padding: '15px',
-            background: 'rgba(255, 165, 0, 0.1)',
-            border: '1px solid rgba(255, 165, 0, 0.3)',
-            borderRadius: '10px',
-            color: '#ffa500',
-            fontSize: '0.875rem'
-          }}>
-            <strong> Selected Station:</strong> {selectedStation.name}
-          </div>
-        )}
-
         {showTowers && (
           <div 
             style={{

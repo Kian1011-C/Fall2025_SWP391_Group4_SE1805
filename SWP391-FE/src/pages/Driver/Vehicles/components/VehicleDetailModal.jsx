@@ -98,8 +98,6 @@ const VehicleDetailModal = ({
           <h4 style={{ color: '#19c37d', marginBottom: '15px' }}> Gói dịch vụ</h4>
           <ContractSection vehicleContract={vehicleContract} onClose={onClose} />
         </div>
-        
-        <SwapHistorySection />
 
         {/* Action Buttons */}
         <div style={{

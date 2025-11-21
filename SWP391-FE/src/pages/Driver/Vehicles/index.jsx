@@ -2,6 +2,7 @@
 // Vehicles page (container inlined)
 import React, { useMemo } from 'react';
 import { FiTruck, FiPlus } from 'react-icons/fi';
+import { FaCar } from 'react-icons/fa';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import { useVehiclesData, useVehicleModals, useVehicleForm } from './hooks';
 import { findVehicleContract } from './utils';
@@ -62,7 +63,9 @@ const VehiclesContainer = () => {
       <DashboardLayout>
         <div className="vehicles-container">
           <div className="vehicles-header">
-            <h1>Quản lý phương tiện</h1>
+            <h1 style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <FaCar size={32} /> Quản lý phương tiện
+            </h1>
           </div>
           <div style={{ textAlign: 'center', padding: '50px', fontSize: '18px', color: '#666' }}>
             Đang tải dữ liệu...
@@ -78,7 +81,9 @@ const VehiclesContainer = () => {
       <DashboardLayout>
         <div className="vehicles-container">
           <div className="vehicles-header">
-            <h1>Quản lý phương tiện</h1>
+            <h1 style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <FaCar size={32} /> Quản lý phương tiện
+            </h1>
           </div>
           <div style={{ textAlign: 'center', padding: '50px', fontSize: '18px', color: '#ff6b6b' }}>
             {error}
@@ -94,7 +99,7 @@ const VehiclesContainer = () => {
         {/* Header */}
         <div className="vehicles-header">
           <h1 style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <FiTruck size={32} /> Quản lý phương tiện
+            <FaCar size={32} /> Quản lý phương tiện
           </h1>
           <button 
             className="btn btn-primary" 
