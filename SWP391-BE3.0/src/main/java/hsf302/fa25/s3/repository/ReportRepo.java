@@ -13,6 +13,54 @@ import java.sql.Timestamp;
 @Slf4j
 public class ReportRepo {
 
+    // ====================== COUNT HELPER ======================
+
+    private int executeCount(String sql) {
+        try (Connection conn = ConnectDB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            return rs.next() ? rs.getInt(1) : 0;
+        } catch (Exception e) {
+            log.error("executeCount error, sql={}", sql, e);
+            throw new RuntimeException("DB error executeCount", e);
+        }
+    }
+
+    // Users
+    public int countUsers() {
+        return executeCount("SELECT COUNT(*) FROM Users");
+    }
+
+    public int countActiveUsers() {
+        return executeCount("SELECT COUNT(*) FROM Users WHERE status = 'active'");
+    }
+
+    // Stations
+    public int countStations() {
+        return executeCount("SELECT COUNT(*) FROM Stations");
+    }
+
+    // Batteries
+    public int countBatteries() {
+        return executeCount("SELECT COUNT(*) FROM Batteries");
+    }
+
+    public int countActiveBatteries() {
+        return executeCount("SELECT COUNT(*) FROM Batteries WHERE status = 'AVAILABLE'");
+    }
+
+    // Swaps
+    public int countSwaps() {
+        return executeCount("SELECT COUNT(*) FROM Swaps");
+    }
+
+    // Payments
+    public int countPayments() {
+        return executeCount("SELECT COUNT(*) FROM Payments");
+    }
+
+    // ====================== DOANH THU ======================
+
     /** Tổng doanh thu toàn hệ thống (chỉ tính status='success'). */
     public double getTotalRevenue() {
         final String sql = "SELECT ISNULL(SUM(amount),0) AS total FROM Payments WHERE status='success'";

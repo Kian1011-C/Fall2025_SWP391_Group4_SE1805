@@ -1,30 +1,24 @@
 package hsf302.fa25.s3.service;
 
-import hsf302.fa25.s3.repository.ReportRepo;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import org.springframework.http.ResponseEntity;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.Map;
 
-@Service
-@RequiredArgsConstructor
-public class ReportService {
+public interface ReportService {
 
-    private final ReportRepo reportDao;
+    // Các API báo cáo tổng quan
+    Map<String, Object> getOverviewReport(String dateRange);
 
-    public double getTotalRevenue() {
-        return reportDao.getTotalRevenue();
-    }
+    Map<String, Object> getRevenueReport(String dateRange);
 
-    public double getRevenueInRange(String from, String to) {
-        try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            Date d1 = sdf.parse(from);
-            Date d2 = sdf.parse(to);
-            return reportDao.getRevenueInRange(d1, d2);
-        } catch (Exception e) {
-            throw new RuntimeException("Invalid date format. Use yyyy-MM-dd");
-        }
-    }
+    Map<String, Object> getUsageReport(String dateRange);
+
+    Map<String, Object> getCustomerReport(String dateRange);
+
+    Map<String, Object> exportReport(Map<String, Object> exportRequest);
+
+    // Doanh thu
+    double getTotalRevenue();
+
+    double getRevenueInRange(String from, String to);
 }
