@@ -12,32 +12,6 @@ import java.util.Map;
 
 public class BatteryRepo {
 
-    public List<Battery> getBatteriesBySlotId(int slotId) {
-        List<Battery> list = new ArrayList<>();
-        String sql = "SELECT * FROM Batteries WHERE slot_id=?";
-        try (Connection conn = ConnectDB.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, slotId);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                Battery b = new Battery();
-                b.setBatteryId(rs.getInt("battery_id"));
-                b.setModel(rs.getString("model"));
-                b.setCapacity(rs.getInt("capacity"));
-                b.setStateOfHealth(rs.getDouble("state_of_health"));
-                b.setStatus(rs.getString("status"));
-                // use getObject to preserve NULL -> null in Integer slotId
-                Object slotObj = rs.getObject("slot_id");
-                if (slotObj != null) b.setSlotId(((Number) slotObj).intValue());
-                list.add(b);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
-
     // Lấy tất cả pin
     public List<Battery> getAllBatteries() {
         List<Battery> list = new ArrayList<>();

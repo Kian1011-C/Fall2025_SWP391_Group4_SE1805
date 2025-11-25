@@ -1,7 +1,5 @@
 package hsf302.fa25.s3.service;
 
-import org.springframework.http.ResponseEntity;
-
 import java.util.Map;
 
 public interface ReportService {

@@ -2,14 +2,12 @@ package hsf302.fa25.s3.repository;
 
 import hsf302.fa25.s3.utils.ConnectDB;
 import hsf302.fa25.s3.model.Tower;
-import org.springframework.stereotype.Repository;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
-@Repository
+
 public class TowerRepo {
 
     public List<Tower> getTowersByStationId(int stationId) {

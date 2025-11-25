@@ -33,7 +33,7 @@ public class BatteryChargingService {
                     int currentCapacity = rs.getInt("capacity");
                     int currentCycleCount = rs.getInt("cycle_count");
 
-                    double newSoh = Math.min(100.0, soh + 10.0);
+                    double newSoh = Math.min(100.0, soh + 1.0);
                     String newBatteryStatus = currentStatus;
                     String newSlotStatus = null;
                     int newCycleCount = currentCycleCount;
@@ -48,7 +48,7 @@ public class BatteryChargingService {
                         if (justReachedFull) {
                             newCycleCount = currentCycleCount + 1;
                             // Reduce capacity by 0.00667% per cycle (reaches 80% after ~3000 cycles)
-                            newCapacity = (int) Math.max(0, currentCapacity - (currentCapacity * 0.0000667));
+                            newCapacity = (int) Math.max(0, currentCapacity - (currentCapacity * 0.00667));
                         }
                     }else {
                         if (newSoh >= 100.0) {
@@ -58,12 +58,17 @@ public class BatteryChargingService {
                             if (justReachedFull) {
                                 newCycleCount = currentCycleCount + 1;
                                 // Reduce capacity by 0.00667% per cycle (reaches 80% after ~3000 cycles)
-                                newCapacity = (int) Math.max(0, currentCapacity - (currentCapacity * 0.0000667));
+                                newCapacity = (int) Math.max(0, currentCapacity - (currentCapacity * 0.00667));
                             }
                         } else {
                             // still charging
                             newBatteryStatus = "charging";
                             newSlotStatus = "charging";
+                        }
+
+                        if (newCapacity <= 85.0) {
+                            newBatteryStatus = "faulty";
+                            newSlotStatus = "faulty";
                         }
                     }
 

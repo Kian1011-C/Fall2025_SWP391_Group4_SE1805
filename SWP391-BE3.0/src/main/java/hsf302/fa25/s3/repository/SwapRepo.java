@@ -70,24 +70,6 @@ public class SwapRepo {
         return list;
     }
 
-    // Lấy swap theo station ID
-    public List<Swap> getSwapsByStationId(int stationId) {
-        List<Swap> list = new ArrayList<>();
-        String sql = "SELECT * FROM Swaps WHERE station_id=? ORDER BY swap_id DESC";
-        try (Connection conn = ConnectDB.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, stationId);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                Swap swap = createSwapFromResultSet(rs);
-                list.add(swap);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
 
     /**
      * Create a swap and return the generated swap_id, or null on failure.
@@ -214,24 +196,6 @@ public class SwapRepo {
         }
     }
 
-    // Lấy swap gần đây
-    public List<Swap> getRecentSwaps(int limit) {
-        List<Swap> list = new ArrayList<>();
-        String sql = "SELECT * FROM Swaps ORDER BY swap_id DESC OFFSET 0 ROWS FETCH NEXT ? ROWS ONLY";
-        try (Connection conn = ConnectDB.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, limit);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                Swap swap = createSwapFromResultSet(rs);
-                list.add(swap);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
 
     // Lấy lịch sử swap của 1 battery
     public List<Map<String, Object>> getBatterySwapHistory(int batteryId) {
@@ -272,9 +236,9 @@ public class SwapRepo {
                 swap.put("swapDate", rs.getTimestamp("swap_date"));
                 
                 if (rs.getObject("old_battery_id") != null && rs.getInt("old_battery_id") == batteryId) {
-                    swap.put("batteryRole", "REMOVED");
-                } else if (rs.getObject("new_battery_id") != null && rs.getInt("new_battery_id") == batteryId) {
                     swap.put("batteryRole", "INSTALLED");
+                } else if (rs.getObject("new_battery_id") != null && rs.getInt("new_battery_id") == batteryId) {
+                    swap.put("batteryRole", "REMOVED");
                 }
                 
                 history.add(swap);
@@ -385,63 +349,7 @@ public class SwapRepo {
         return swap;
     }
 
-    // Lấy active swaps (INITIATED hoặc IN_PROGRESS)
-    public List<Map<String, Object>> getActiveSwaps(String userId) {
-        List<Map<String, Object>> activeSwaps = new ArrayList<>();
-        String sql = """
-            SELECT s.*, st.name as station_name, 
-                   sl.slot_number, t.tower_number
-            FROM Swaps s
-            INNER JOIN Stations st ON s.station_id = st.station_id
-            LEFT JOIN Batteries b ON s.new_battery_id = b.battery_id
-            LEFT JOIN Slots sl ON b.slot_id = sl.slot_id
-            LEFT JOIN Towers t ON sl.tower_id = t.tower_id
-            WHERE s.status IN ('INITIATED', 'IN_PROGRESS')
-        """;
-        
-        if (userId != null) {
-            sql += " AND s.user_id = ?";
-        }
-        
-        sql += " ORDER BY s.swap_date DESC";
-        
-        try (Connection conn = ConnectDB.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            if (userId != null) {
-                ps.setString(1, userId);
-            }
-            
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                Map<String, Object> swap = new HashMap<>();
-                swap.put("swapId", rs.getLong("swap_id"));
-                swap.put("userId", rs.getString("user_id"));
-                swap.put("stationId", rs.getLong("station_id"));
-                swap.put("stationName", rs.getString("station_name"));
-                swap.put("status", rs.getString("status"));
-                swap.put("initiatedAt", rs.getTimestamp("swap_date"));
-                swap.put("oldBatteryId", rs.getObject("old_battery_id"));
-                swap.put("newBatteryId", rs.getLong("new_battery_id"));
-                
-                if (rs.getObject("slot_number") != null) {
-                    swap.put("slotNumber", rs.getInt("slot_number"));
-                }
-                if (rs.getObject("tower_number") != null) {
-                    swap.put("towerNumber", rs.getInt("tower_number"));
-                }
-                
-                // Estimate completion time (5-10 minutes from initiation)
-                long initiatedTime = rs.getTimestamp("swap_date").getTime();
-                swap.put("estimatedCompletion", new java.util.Date(initiatedTime + 300000)); // 5 minutes
-                
-                activeSwaps.add(swap);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return activeSwaps;
-    }
 
     // Tạo swap tự động (không cần staff_id). Thêm swap_date = GETDATE() và trạng thái mặc định 'AUTO'.
     // Sử dụng khi hệ thống tự tạo swap (ví dụ: theo lịch hoặc khi detect cần đổi pin),

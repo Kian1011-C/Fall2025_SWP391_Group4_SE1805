@@ -13,7 +13,7 @@ public class ConnectDB {
                     + "trustServerCertificate=true;";
 
     private static final String USER = "sa";
-    private static final String PASSWORD = "12345";
+    private static final String PASSWORD = "123";
 
     public static Connection getConnection() {
         Connection conn = null;

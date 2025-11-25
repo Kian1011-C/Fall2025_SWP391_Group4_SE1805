@@ -16,31 +16,17 @@ import java.util.Map;
 @RequestMapping("/issues")
 public class IssueController {
 
-    // Đổi từ IssueRepo -> IssueService
     private final IssueService issueService;
 
     /** 1) Tạo feedback (Driver gọi) */
     @PostMapping
     public ResponseEntity<?> create(@RequestBody CreateIssueRequest req) {
-        // ✅ Giữ nguyên validate & status code như cũ
-        if (req.getUserId() == null || req.getUserId().isBlank()
-                || req.getStationId() == null
-                || req.getDescription() == null || req.getDescription().isBlank()) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(Map.of(
-                            "success", false,
-                            "message", "Thiếu dữ liệu bắt buộc"
-                    ));
+        try {
+            boolean ok = issueService.createIssue(req.getUserId(), Long.valueOf(req.getStationId()), req.getDescription());
+            return ResponseEntity.ok(Map.of("success", ok));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
         }
-
-        boolean ok = issueService.createIssue(
-                req.getUserId(),
-                req.getStationId(),
-                req.getDescription()
-        );
-
-        return ResponseEntity.ok(Map.of("success", ok));
     }
 
     /**
@@ -51,25 +37,15 @@ public class IssueController {
     @GetMapping
     public ResponseEntity<?> list(@RequestParam String role,
                                   @RequestParam(required = false) String userId) {
+        try {
+            List<Issue> items = issueService.listIssuesByVisibility(role, userId);
 
-        boolean isDriver = "EV Driver".equalsIgnoreCase(role);
-        if (!(isDriver || "Staff".equalsIgnoreCase(role) || "Admin".equalsIgnoreCase(role))) {
-            return ResponseEntity.badRequest().body(
-                    Map.of("success", false, "message", "role không hợp lệ")
-            );
+            Map<String, Object> res = new HashMap<>();
+            res.put("success", true);
+            res.put("items", items);
+            return ResponseEntity.ok(res);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
         }
-        if (isDriver && (userId == null || userId.isBlank())) {
-            return ResponseEntity.badRequest().body(
-                    Map.of("success", false, "message", "EV Driver phải truyền userId")
-            );
-        }
-
-
-        List<Issue> items = issueService.listIssuesByVisibility(role, userId);
-
-        Map<String, Object> res = new HashMap<>();
-        res.put("success", true);
-        res.put("items", items);
-        return ResponseEntity.ok(res);
     }
 }
