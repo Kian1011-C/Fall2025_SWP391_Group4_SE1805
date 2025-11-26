@@ -8,6 +8,7 @@ const TakeNewBattery = () => {
     const [newBatteryId, setNewBatteryId] = useState(null);
     const [newBatterySlot, setNewBatterySlot] = useState(null);
     const [newBatteryLevel, setNewBatteryLevel] = useState(null);
+    const [newBatteryCapacity, setNewBatteryCapacity] = useState(null);
     const [loadingBattery, setLoadingBattery] = useState(true);
     const [error, setError] = useState(null);
 
@@ -50,15 +51,17 @@ const TakeNewBattery = () => {
                                            batteryData.state_of_health || 
                                            batteryData.batteryLevel || 
                                            batteryData.battery_level ||
-                                           batteryData.health ||
-                                           batteryData.capacity || 100;
+                                           batteryData.health || 100;
+                        const batteryCapacity = batteryData.capacity || 100;
                         
                         console.log(' Đã lấy thông tin pin mới từ API:');
                         console.log('  - Battery ID:', newBatteryIdFromStorage);
                         console.log('  - Battery Level (THẬT từ API):', batteryLevel + '%');
+                        console.log('  - Battery Capacity (Độ chai):', batteryCapacity + '%');
                         console.log('  - Full battery data:', batteryData);
                         
                         setNewBatteryLevel(batteryLevel);
+                        setNewBatteryCapacity(batteryCapacity);
                         
                         // Cập nhật sessionStorage với dữ liệu từ API (để đảm bảo đồng bộ)
                         sessionStorage.setItem('newBatteryLevel', String(batteryLevel));
@@ -155,9 +158,16 @@ const TakeNewBattery = () => {
                     </div>
                     
                     <div className="detail-item">
-                        <span className="detail-label">Dung lượng:</span>
+                        <span className="detail-label">Dung lượng (%):</span>
                         <span className="detail-value battery-level">
                             {newBatteryLevel !== null ? `${newBatteryLevel}%` : (newBattery?.newBatteryPercent ? `${newBattery.newBatteryPercent}%` : 'Đang tải...')}
+                        </span>
+                    </div>
+                    
+                    <div className="detail-item">
+                        <span className="detail-label">Độ chai pin (%):</span>
+                        <span className="detail-value">
+                            {newBatteryCapacity !== null ? `${newBatteryCapacity}%` : 'Đang tải...'}
                         </span>
                     </div>
                 </div>

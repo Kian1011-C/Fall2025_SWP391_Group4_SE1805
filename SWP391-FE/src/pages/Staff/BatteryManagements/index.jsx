@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { FiBattery, FiBatteryCharging, FiPackage, FiTool, FiZap, FiActivity, FiRefreshCw, FiSearch, FiFilter } from 'react-icons/fi';
 import { useBatteryStockData } from './hooks/useBatteryStockData';
-import BatteryDetailModal from '../../Admin/Batteries/components/BatteryDetailModal';
+import BatteryDetailModal from './components/BatteryDetailModal';
 import BatteryFormModal from '../../Admin/Batteries/components/BatteryFormModal';
 import '../../../assets/css/AdminBatteryManagement.css';
 
@@ -18,11 +18,22 @@ const BatteryManagement = () => {
   // Calculate statistics
   const stats = useMemo(() => {
     const total = batteries.length;
-    const available = batteries.filter(b => b.status?.toLowerCase() === 'available').length;
+    
+    // Tính số pin cần bảo trì (dựa trên capacity từ API)
+    const batteriesWithMaintenance = batteries.filter(b => {
+      const capacity = b.capacity || 0;
+      return capacity <= 85 || b.status?.toLowerCase() === 'faulty' || b.status?.toLowerCase() === 'maintenance';
+    });
+    
+    const available = batteries.filter(b => {
+      const capacity = b.capacity || 0;
+      return capacity > 85 && b.status?.toLowerCase() === 'available';
+    }).length;
     const inStock = batteries.filter(b => b.status?.toLowerCase() === 'in_stock').length;
     const charging = batteries.filter(b => b.status?.toLowerCase() === 'charging').length;
-    const maintenance = batteries.filter(b => b.status?.toLowerCase() === 'faulty' || b.status?.toLowerCase() === 'maintenance').length;
+    const maintenance = batteriesWithMaintenance.length;
     const inUse = batteries.filter(b => b.status?.toLowerCase() === 'in_use').length;
+    // Trung bình dung lượng (stateOfHealth) từ API
     const avgHealth = batteries.length > 0 
       ? (batteries.reduce((sum, b) => sum + (b.stateOfHealth || 0), 0) / batteries.length).toFixed(1)
       : 0;
@@ -298,7 +309,14 @@ const BatteryManagement = () => {
             </tr>
           </thead>
           <tbody>
-            {currentBatteries.map(battery => (
+            {currentBatteries.map(battery => {
+              // Độ chai = capacity
+              const capacity = battery.capacity || 0;
+              
+              // Tự động cập nhật trạng thái sang MAINTENANCE nếu capacity <= 85%
+              const displayedStatus = capacity <= 85 ? 'maintenance' : battery.status;
+              
+              return (
               <tr key={battery.batteryId}>
                 {/* Battery ID */}
                 <td>
@@ -315,12 +333,12 @@ const BatteryManagement = () => {
 
                 {/* Status */}
                 <td>
-                  <span className={`admin-battery-status ${formatStatus(battery.status)}`}>
-                    {displayStatus(battery.status)}
+                  <span className={`admin-battery-status ${formatStatus(displayedStatus)}`}>
+                    {displayStatus(displayedStatus)}
                   </span>
                 </td>
 
-                {/* Health */}
+                {/* State of Health */}
                 <td>
                   <div className="admin-battery-health">
                     <div className="admin-battery-health-bar">
@@ -369,7 +387,8 @@ const BatteryManagement = () => {
                   </div>
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>

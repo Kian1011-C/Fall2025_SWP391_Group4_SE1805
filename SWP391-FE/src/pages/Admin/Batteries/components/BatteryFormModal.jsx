@@ -13,8 +13,8 @@ const BatteryFormModal = ({ isOpen, onClose, onSave, battery }) => {
     if (isEditing) {
       setFormData({
         model: battery.model || '',
-        capacity: battery.capacity || 100,
-        stateOfHealth: battery.stateOfHealth || 100,
+        capacity: battery.capacity || 100,         // Độ chai pin
+        stateOfHealth: battery.stateOfHealth || 100, // Dung lượng
         cycleCount: battery.cycleCount || 0,
         status: (battery.status || 'available').toLowerCase(),
       });
@@ -84,11 +84,11 @@ const BatteryFormModal = ({ isOpen, onClose, onSave, battery }) => {
               />
             </div>
             <div>
-              <label className="battery-form-label">% Pin (Capacity %) *</label>
+              <label className="battery-form-label">Dung lượng pin (State of Health %) *</label>
               <input 
                 type="number" 
-                name="capacity" 
-                value={formData.capacity} 
+                name="stateOfHealth" 
+                value={formData.stateOfHealth} 
                 onChange={handleChange} 
                 className="battery-form-input"
                 required 
@@ -99,11 +99,11 @@ const BatteryFormModal = ({ isOpen, onClose, onSave, battery }) => {
               />
             </div>
             <div>
-              <label className="battery-form-label">Độ chai pin (State of Health %) *</label>
+              <label className="battery-form-label">Độ chai pin (Capacity %) *</label>
               <input 
                 type="number" 
-                name="stateOfHealth" 
-                value={formData.stateOfHealth} 
+                name="capacity" 
+                value={formData.capacity} 
                 onChange={handleChange} 
                 className="battery-form-input"
                 required 

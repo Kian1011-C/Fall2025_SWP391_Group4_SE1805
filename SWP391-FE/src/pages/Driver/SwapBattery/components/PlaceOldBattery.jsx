@@ -10,6 +10,7 @@ const PlaceOldBattery = () => {
     // 2. STATE FOR THE FORM
     const [code, setCode] = useState(''); // Real ID
     const [percent, setPercent] = useState(0); // Initialize percentage state
+    const [capacity, setCapacity] = useState(null); // Battery capacity (độ chai pin)
     const [isPercentGenerated, setIsPercentGenerated] = useState(false); // Flag to ensure random generation happens only once
     const [selectedVehicle, setSelectedVehicle] = useState(null); // Vehicle data
 
@@ -110,18 +111,22 @@ const PlaceOldBattery = () => {
                         
                         const batteryLevel = batteryData.stateOfHealth || batteryData.state_of_health || 
                                           batteryData.batteryLevel || batteryData.battery_level || 0;
+                        const batteryCapacity = batteryData.capacity || 100;
                         
                         console.log(' Dung lượng pin cũ từ API:', batteryLevel);
+                        console.log(' Độ chai pin cũ từ API:', batteryCapacity);
                         console.log(' Các trường có sẵn:', {
                             stateOfHealth: batteryData.stateOfHealth,
                             state_of_health: batteryData.state_of_health,
                             batteryLevel: batteryData.batteryLevel,
-                            battery_level: batteryData.battery_level
+                            battery_level: batteryData.battery_level,
+                            capacity: batteryData.capacity
                         });
                         
                         // Không kiểm tra - chỉ set giá trị
                         console.log(' Dung lượng pin cũ:', batteryLevel);
                         setPercent(batteryLevel);
+                        setCapacity(batteryCapacity);
                     } else {
                         console.warn(' Không lấy được thông tin pin cũ từ API');
                         console.log(' Kiểm tra dữ liệu từ xe đã chọn...');
@@ -251,13 +256,23 @@ const PlaceOldBattery = () => {
                          )}
                      </div>
                     <div className="form-group">
-                        <label htmlFor="batPercent">% pin cũ (Đã quét):</label>
+                        <label htmlFor="batPercent">Dung lượng pin (%):</label>
                         <input
                             type="number"
                             id="batPercent"
-                            value={percent} // Display random percentage
+                            value={percent} // Display battery level (stateOfHealth)
                             readOnly // Make percentage read-only
                             className="readonly-input" // Add a class for styling
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="batCapacity">Độ chai pin (%):</label>
+                        <input
+                            type="number"
+                            id="batCapacity"
+                            value={capacity !== null ? capacity : 'Đang tải...'} // Display capacity
+                            readOnly
+                            className="readonly-input"
                         />
                     </div>
 

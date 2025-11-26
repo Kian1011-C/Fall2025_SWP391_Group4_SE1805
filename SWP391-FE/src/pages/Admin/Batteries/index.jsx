@@ -17,11 +17,22 @@ const AdminBatteries = () => {
   // Calculate statistics
   const stats = useMemo(() => {
     const total = batteries.length;
-    const available = batteries.filter(b => b.status?.toLowerCase() === 'available').length;
+    
+    // Tính số pin cần bảo trì (dựa trên capacity từ API)
+    const batteriesWithMaintenance = batteries.filter(b => {
+      const capacity = b.capacity || 0;
+      return capacity <= 85 || b.status?.toLowerCase() === 'faulty' || b.status?.toLowerCase() === 'maintenance';
+    });
+    
+    const available = batteries.filter(b => {
+      const capacity = b.capacity || 0;
+      return capacity > 85 && b.status?.toLowerCase() === 'available';
+    }).length;
     const inStock = batteries.filter(b => b.status?.toLowerCase() === 'in_stock').length;
     const charging = batteries.filter(b => b.status?.toLowerCase() === 'charging').length;
-    const maintenance = batteries.filter(b => b.status?.toLowerCase() === 'faulty' || b.status?.toLowerCase() === 'maintenance').length;
+    const maintenance = batteriesWithMaintenance.length;
     const inUse = batteries.filter(b => b.status?.toLowerCase() === 'in_use').length;
+    // Trung bình dung lượng (stateOfHealth) từ API
     const avgHealth = batteries.length > 0 
       ? (batteries.reduce((sum, b) => sum + (b.stateOfHealth || 0), 0) / batteries.length).toFixed(1)
       : 0;

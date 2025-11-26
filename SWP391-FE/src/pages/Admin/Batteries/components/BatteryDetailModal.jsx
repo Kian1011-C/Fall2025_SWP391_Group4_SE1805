@@ -8,14 +8,13 @@ const HistoryItem = ({ swap }) => {
     if (!dateString) return 'N/A';
     try {
       const date = new Date(dateString);
-      return date.toLocaleString('vi-VN', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    } catch (e) {
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      return `${hours}:${minutes} ${day}/${month}/${year}`;
+    } catch {
       return dateString;
     }
   };
@@ -47,125 +46,108 @@ const HistoryItem = ({ swap }) => {
         Trạm: {swap.stationName || 'N/A'}
       </div>
       <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '4px' }}>
-        Thời gian: {formatDate(swap.swapDate)}
+        Thời gian: {formatDate(swap.swapTime || swap.swapDate)}
       </div>
       <div style={{ fontSize: '12px', color: '#94a3b8' }}>
-        Trạng thái: {swap.swapStatus || 'N/A'}
+        Trạng thái: {swap.status || swap.swapStatus || 'N/A'}
       </div>
     </div>
   );
 };
 
 const BatteryDetailModal = ({ isOpen, onClose, battery }) => {
-  const [chargingHistory, setChargingHistory] = useState(null);
   const [swapHistory, setSwapHistory] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (isOpen && battery) {
-      setIsLoading(true);
-      // Simulate API call delay với mock data
-      setTimeout(() => {
-        loadMockData();
-        setIsLoading(false);
-      }, 500);
-    } else {
-      // Reset data when modal closes
-      setSwapHistory([]);
-      setCurrentUser(null);
-    }
-  }, [isOpen, battery]);
-
-  const loadMockData = () => {
-    if (!battery) return;
-    
-    const batteryId = battery.batteryId || battery.id;
-    const status = battery.status?.toLowerCase();
-
-    // Mock lịch sử swap
-    const mockHistory = [
-      {
-        swapId: 101,
-        stationId: 1,
-        stationName: 'Trạm Sạc Quận 1',
-        userName: 'Nguyễn Văn A',
-        vehicleId: 5,
-        oldBatteryId: batteryId === 1 ? 2 : batteryId - 1,
-        newBatteryId: batteryId,
-        swapDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-        swapStatus: 'COMPLETED',
-        batteryRole: 'INSTALLED'
-      },
-      {
-        swapId: 98,
-        stationId: 2,
-        stationName: 'Trạm Sạc Quận 3',
-        userName: 'Trần Thị B',
-        vehicleId: 8,
-        oldBatteryId: batteryId,
-        newBatteryId: batteryId === 1 ? 2 : batteryId - 1,
-        swapDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-        swapStatus: 'COMPLETED',
-        batteryRole: 'REMOVED'
-      },
-      {
-        swapId: 95,
-        stationId: 1,
-        stationName: 'Trạm Sạc Quận 1',
-        userName: 'Lê Văn C',
-        vehicleId: 3,
-        oldBatteryId: batteryId === 1 ? 5 : batteryId - 3,
-        newBatteryId: batteryId,
-        swapDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-        swapStatus: 'COMPLETED',
-        batteryRole: 'INSTALLED'
-      },
-      {
-        swapId: 92,
-        stationId: 3,
-        stationName: 'Trạm Sạc Quận 7',
-        userName: 'Phạm Thị D',
-        vehicleId: 12,
-        oldBatteryId: batteryId,
-        newBatteryId: batteryId === 1 ? 3 : batteryId - 2,
-        swapDate: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString(),
-        swapStatus: 'COMPLETED',
-        batteryRole: 'REMOVED'
-      },
-      {
-        swapId: 88,
-        stationId: 1,
-        stationName: 'Trạm Sạc Quận 1',
-        userName: 'Hoàng Văn E',
-        vehicleId: 7,
-        oldBatteryId: batteryId === 1 ? 8 : batteryId - 4,
-        newBatteryId: batteryId,
-        swapDate: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000).toISOString(),
-        swapStatus: 'COMPLETED',
-        batteryRole: 'INSTALLED'
+    const loadBatteryData = async () => {
+      if (!isOpen || !battery) {
+        setSwapHistory([]);
+        setCurrentUser(null);
+        return;
       }
-    ];
+      
+      const batteryId = battery.batteryId || battery.id;
+      
+      try {
+        setIsLoading(true);
+        
+        // Import apiUtils
+        const { apiUtils } = await import('../../../../assets/js/config/api.js');
+        
+        // Gọi API GET /api/batteries/{id}/history
+        const response = await apiUtils.get(`/api/batteries/${batteryId}/history`);
+        
+        if (response.success && response.data) {
+          // Normalize data
+          const normalizedData = response.data.map(swap => ({
+            ...swap,
+            swapTime: swap.swapTime || swap.swapDate,
+            status: swap.status || swap.swapStatus
+          }));
+          
+          // Sắp xếp theo thời gian mới nhất trước
+          const sortedHistory = normalizedData.sort((a, b) => {
+            const dateA = new Date(a.swapTime);
+            const dateB = new Date(b.swapTime);
+            return dateB - dateA;
+          });
+          
+          setSwapHistory(sortedHistory);
 
-    // Mock thông tin user đang sử dụng (chỉ khi status là IN_USE)
-    const mockCurrentUser = (status === 'in_use' || status === 'in-use') ? {
-      userId: 'USER' + (batteryId * 10),
-      firstName: 'Nguyễn',
-      lastName: 'Văn A',
-      fullName: 'Nguyễn Văn A',
-      email: `user${batteryId}@example.com`,
-      phone: '090' + String(batteryId).padStart(7, '0'),
-      vehicle: {
-        vehicleId: batteryId * 2,
-        plateNumber: `51A-${String(batteryId * 100).padStart(5, '0')}`,
-        model: 'VinFast VF8'
-      },
-      contractId: batteryId * 10
-    } : null;
+          // Nếu pin đang IN_USE, lấy thông tin user từ lịch sử swap gần nhất
+          const batteryStatus = battery.status?.toLowerCase();
+          const isInUse = batteryStatus === 'in_use' || batteryStatus === 'in-use';
+          
+          if (isInUse && sortedHistory.length > 0) {
+            const latestInstalled = sortedHistory.find(swap => {
+              const isNewBattery = (swap.newBatteryId == batteryId);
+              const isInstalled = swap.batteryRole === 'INSTALLED';
+              const isCompleted = swap.status === 'COMPLETED' || swap.swapStatus === 'COMPLETED';
+              return isNewBattery && isInstalled && isCompleted;
+            });
+            
+            if (latestInstalled) {
+              setCurrentUser({
+                fullName: latestInstalled.userName,
+                vehicle: {
+                  plateNumber: latestInstalled.vehiclePlateNumber || 'N/A',
+                  model: latestInstalled.vehicleModel || 'N/A'
+                }
+              });
+            } else {
+              const latestSwap = sortedHistory.find(swap => swap.userName);
+              if (latestSwap) {
+                setCurrentUser({
+                  fullName: latestSwap.userName,
+                  vehicle: latestSwap.vehiclePlateNumber ? {
+                    plateNumber: latestSwap.vehiclePlateNumber,
+                    model: latestSwap.vehicleModel || 'N/A'
+                  } : null
+                });
+              } else {
+                setCurrentUser(null);
+              }
+            }
+          } else {
+            setCurrentUser(null);
+          }
+        } else {
+          setSwapHistory([]);
+          setCurrentUser(null);
+        }
+      } catch (error) {
+        console.error('Error loading battery history:', error);
+        setSwapHistory([]);
+        setCurrentUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    setSwapHistory(mockHistory);
-    setCurrentUser(mockCurrentUser);
-  };
+    loadBatteryData();
+  }, [isOpen, battery]);
 
   if (!isOpen || !battery) return null;
 
@@ -240,14 +222,11 @@ const BatteryDetailModal = ({ isOpen, onClose, battery }) => {
               <div className="battery-detail-stat-card">
                 <div className="stat-icon"></div>
                 <div className="stat-content">
-                  <span className="stat-label">Dung lượng tối đa</span>
+                  <span className="stat-label">Độ chai pin</span>
                   <h3 className="stat-value">
-                    {chargingHistory ? 
-                      `${(100 - (chargingHistory.capacityDegradation || 0)).toFixed(1)}%` : 
-                      `${((battery.capacity / 100) * 100).toFixed(1)}%`
-                    }
+                    {battery.capacity?.toFixed(1)}%
                   </h3>
-                  <span className="stat-subtitle">Còn lại so với ban đầu</span>
+                  <span className="stat-subtitle">Tình trạng sức khỏe</span>
                 </div>
               </div>
 
@@ -264,84 +243,20 @@ const BatteryDetailModal = ({ isOpen, onClose, battery }) => {
               </div>
             </div>
 
-            {/* Charging History Data */}
-            {chargingHistory && (
-              <div className="battery-detail-section">
-                <h3 className="section-title"> Thông tin chu kỳ sạc</h3>
-                <div className="battery-detail-info-grid">
-                  <div className="info-item">
-                    <span className="info-label">Tổng chu kỳ sạc:</span>
-                    <span className="info-value">{chargingHistory.totalChargingCycles}</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">Tổng lần thay pin:</span>
-                    <span className="info-value">{chargingHistory.totalSwaps}</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">Độ chai pin:</span>
-                    <span className="info-value text-warning">
-                      {chargingHistory.capacityDegradation?.toFixed(2)}%
-                    </span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">Dung lượng còn lại:</span>
-                    <span className="info-value text-success">
-                      {(100 - chargingHistory.capacityDegradation).toFixed(2)}%
-                    </span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">Dung lượng thực tế:</span>
-                    <span className="info-value">{chargingHistory.currentCapacity} kWh</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">Dung lượng ước tính ban đầu:</span>
-                    <span className="info-value">{chargingHistory.estimatedOriginalCapacity} kWh</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">Chu kỳ còn lại:</span>
-                    <span className="info-value text-success">{chargingHistory.remainingCycles}</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">Tiến độ tuổi thọ:</span>
-                    <span className="info-value">{chargingHistory.lifecycleProgress}%</span>
-                  </div>
-                </div>
-
-                {/* Lifecycle Progress Bar */}
-                <div className="lifecycle-progress">
-                  <div className="progress-header">
-                    <span>Vòng đời pin</span>
-                    <span>{chargingHistory.totalChargingCycles} / 3000 chu kỳ</span>
-                  </div>
-                  <div className="progress-bar-container">
-                    <div 
-                      className="progress-bar-fill"
-                      style={{ 
-                        width: `${Math.min(100, chargingHistory.lifecycleProgress)}%`,
-                        backgroundColor: chargingHistory.lifecycleProgress > 80 ? '#ef4444' : 
-                                       chargingHistory.lifecycleProgress > 60 ? '#fb923c' : 
-                                       chargingHistory.lifecycleProgress > 40 ? '#fbbf24' : '#4ade80'
-                      }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Degradation Info */}
+            {/* Battery Health Info */}
             <div className="battery-detail-section degradation-info">
               <h3 className="section-title"> Thông tin độ chai pin</h3>
               <p className="degradation-text">
-                 <strong>Cơ chế độ chai:</strong> Mỗi chu kỳ sạc đầy (100%), pin giảm <strong>0.00667%</strong> dung lượng.
+                 <strong>Dung lượng (State of Health):</strong> Mức pin hiện tại, thể hiện phần trăm năng lượng còn lại trong pin.
               </p>
               <p className="degradation-text">
-                 <strong>Ước tính:</strong> Sau khoảng <strong>3000 chu kỳ</strong>, pin còn ~80% dung lượng ban đầu.
+                 <strong>Độ chai (Capacity):</strong> Tình trạng sức khỏe của pin, giảm dần qua mỗi chu kỳ sạc.
               </p>
               <p className="degradation-text">
-                ⏰ <strong>Chu kỳ sạc:</strong> Được tính tự động mỗi khi pin đạt 100% SOH (State of Health).
+                ⚠️ <strong>Bảo trì:</strong> Khi độ chai pin (Capacity) ≤ 85%, pin tự động chuyển sang trạng thái bảo trì.
               </p>
               <p className="degradation-text">
-                 <strong>Hệ thống tự động:</strong> Service chạy mỗi 6 giây để cập nhật trạng thái sạc và tính toán độ chai.
+                 <strong>Chu kỳ sạc:</strong> Số lần pin đã được sạc đầy, ảnh hưởng đến độ bền của pin.
               </p>
             </div>
 
@@ -356,14 +271,6 @@ const BatteryDetailModal = ({ isOpen, onClose, battery }) => {
                     <div className="info-item">
                       <span className="info-label">Tên người dùng:</span>
                       <span className="info-value">{currentUser.fullName || `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim()}</span>
-                    </div>
-                    <div className="info-item">
-                      <span className="info-label">Email:</span>
-                      <span className="info-value">{currentUser.email || 'N/A'}</span>
-                    </div>
-                    <div className="info-item">
-                      <span className="info-label">Số điện thoại:</span>
-                      <span className="info-value">{currentUser.phone || 'N/A'}</span>
                     </div>
                     {currentUser.vehicle && (
                       <>

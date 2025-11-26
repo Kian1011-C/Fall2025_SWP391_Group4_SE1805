@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUtils } from '../../../../assets/js/config/api.js';
 
 // Hàm để lấy style cho trạng thái
 const getStatusStyle = (status = '') => {
@@ -26,49 +27,55 @@ const HistoryItem = ({ swap }) => {
         if (!dateString) return 'N/A';
         try {
             const date = new Date(dateString);
-            return date.toLocaleString('vi-VN', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        } catch (e) {
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${hours}:${minutes} ${day}/${month}/${year}`;
+        } catch {
             return dateString;
         }
     };
 
+    const getStatusBadge = (status) => {
+        if (status === 'COMPLETED') {
+            return <span style={{ background: '#166534', color: '#86efac', padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: '600' }}>COMPLETED</span>;
+        }
+        return <span style={{ background: '#475569', color: '#cbd5e1', padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: '600' }}>{status}</span>;
+    };
+
     const getRoleBadge = (role) => {
         if (role === 'INSTALLED') {
-            return <span style={{ background: '#166534', color: '#86efac', padding: '2px 8px', borderRadius: '10px', fontSize: '10px' }}>Đã gắn</span>;
+            return <span style={{ background: '#166534', color: '#86efac', padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: '600' }}>Đã gắn</span>;
         } else if (role === 'REMOVED') {
-            return <span style={{ background: '#dc2626', color: '#fecaca', padding: '2px 8px', borderRadius: '10px', fontSize: '10px' }}>Đã tháo</span>;
+            return <span style={{ background: '#dc2626', color: '#fecaca', padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: '600' }}>Đã tháo</span>;
         }
         return null;
     };
 
     return (
         <div style={{ 
-            padding: '12px', 
+            padding: '14px', 
             background: '#0f172a', 
             borderRadius: '8px', 
-            marginBottom: '8px',
+            marginBottom: '10px',
             border: '1px solid #334155'
         }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <div style={{ fontWeight: '600', color: 'white' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <div style={{ fontWeight: '700', color: 'white', fontSize: '15px' }}>
                     {swap.userName || 'N/A'}
                 </div>
                 {getRoleBadge(swap.batteryRole)}
             </div>
-            <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '4px' }}>
+            <div style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '6px' }}>
                 Trạm: {swap.stationName || 'N/A'}
             </div>
-            <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '4px' }}>
-                Thời gian: {formatDate(swap.swapDate)}
+            <div style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '6px' }}>
+                Thời gian: {formatDate(swap.swapTime)}
             </div>
-            <div style={{ fontSize: '12px', color: '#94a3b8' }}>
-                Trạng thái: {swap.swapStatus || 'N/A'}
+            <div style={{ fontSize: '13px', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span>Trạng thái:</span> {getStatusBadge(swap.status)}
             </div>
         </div>
     );
@@ -78,121 +85,156 @@ const BatteryDetailModal = ({ isOpen, battery, onClose }) => {
     const [history, setHistory] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [historyTotal, setHistoryTotal] = useState(0);
 
     useEffect(() => {
-        if (isOpen && battery) {
-            setLoading(true);
-            // Simulate API call delay với mock data
-            setTimeout(() => {
-                loadMockData();
-                setLoading(false);
-            }, 500);
-        } else {
-            // Reset data when modal closes
-            setHistory([]);
-            setCurrentUser(null);
-        }
-    }, [isOpen, battery]);
-
-    const loadMockData = () => {
-        if (!battery) return;
-        
-        const batteryId = battery.id || battery.batteryId;
-        const status = battery.status?.toLowerCase();
-
-        // Mock lịch sử swap
-        const mockHistory = [
-            {
-                swapId: 101,
-                stationId: 1,
-                stationName: 'Trạm Sạc Quận 1',
-                userName: 'Nguyễn Văn A',
-                vehicleId: 5,
-                oldBatteryId: batteryId === 1 ? 2 : batteryId - 1,
-                newBatteryId: batteryId,
-                swapDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 ngày trước
-                swapStatus: 'COMPLETED',
-                batteryRole: 'INSTALLED'
-            },
-            {
-                swapId: 98,
-                stationId: 2,
-                stationName: 'Trạm Sạc Quận 3',
-                userName: 'Trần Thị B',
-                vehicleId: 8,
-                oldBatteryId: batteryId,
-                newBatteryId: batteryId === 1 ? 2 : batteryId - 1,
-                swapDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 ngày trước
-                swapStatus: 'COMPLETED',
-                batteryRole: 'REMOVED'
-            },
-            {
-                swapId: 95,
-                stationId: 1,
-                stationName: 'Trạm Sạc Quận 1',
-                userName: 'Lê Văn C',
-                vehicleId: 3,
-                oldBatteryId: batteryId === 1 ? 5 : batteryId - 3,
-                newBatteryId: batteryId,
-                swapDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(), // 15 ngày trước
-                swapStatus: 'COMPLETED',
-                batteryRole: 'INSTALLED'
-            },
-            {
-                swapId: 92,
-                stationId: 3,
-                stationName: 'Trạm Sạc Quận 7',
-                userName: 'Phạm Thị D',
-                vehicleId: 12,
-                oldBatteryId: batteryId,
-                newBatteryId: batteryId === 1 ? 3 : batteryId - 2,
-                swapDate: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString(), // 25 ngày trước
-                swapStatus: 'COMPLETED',
-                batteryRole: 'REMOVED'
-            },
-            {
-                swapId: 88,
-                stationId: 1,
-                stationName: 'Trạm Sạc Quận 1',
-                userName: 'Hoàng Văn E',
-                vehicleId: 7,
-                oldBatteryId: batteryId === 1 ? 8 : batteryId - 4,
-                newBatteryId: batteryId,
-                swapDate: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000).toISOString(), // 35 ngày trước
-                swapStatus: 'COMPLETED',
-                batteryRole: 'INSTALLED'
+        const loadBatteryData = async () => {
+            if (!isOpen || !battery) {
+                // Reset data when modal closes
+                setHistory([]);
+                setCurrentUser(null);
+                setHistoryTotal(0);
+                return;
             }
-        ];
+            
+            const batteryId = battery.id || battery.batteryId;
+            
+            try {
+                setLoading(true);
+                
+                // Gọi API GET /api/batteries/{id}/history
+                const response = await apiUtils.get(`/api/batteries/${batteryId}/history`);
+                
+                console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                console.log('Battery history API response:');
+                console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                console.log(JSON.stringify(response, null, 2));
+                console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                
+                if (response.success && response.data) {
+                    console.log('Số lượng bản ghi:', response.data.length);
+                    console.log('Total từ API:', response.total);
+                    
+                    // Log từng bản ghi để xem cấu trúc
+                    response.data.forEach((swap, index) => {
+                        console.log(`\n[Bản ghi ${index + 1}]:`);
+                        console.log('  swapId:', swap.swapId);
+                        console.log('  userName:', swap.userName);
+                        console.log('  stationName:', swap.stationName);
+                        console.log('  swapDate:', swap.swapDate);
+                        console.log('  swapTime:', swap.swapTime);
+                        console.log('  swapStatus:', swap.swapStatus);
+                        console.log('  status:', swap.status);
+                        console.log('  stateOfHealth:', swap.stateOfHealth);
+                        console.log('  batteryRole:', swap.batteryRole);
+                        console.log('  Full object:', swap);
+                    });
+                    
+                    // Normalize data: map swapDate -> swapTime và swapStatus -> status
+                    const normalizedData = response.data.map(swap => ({
+                        ...swap,
+                        swapTime: swap.swapTime || swap.swapDate,
+                        status: swap.status || swap.swapStatus
+                    }));
+                    
+                    // Sắp xếp theo thời gian mới nhất trước
+                    const sortedHistory = normalizedData.sort((a, b) => {
+                        const dateA = new Date(a.swapTime);
+                        const dateB = new Date(b.swapTime);
+                        return dateB - dateA; // Descending order (mới nhất trước)
+                    });
+                    
+                    console.log('\n Normalized & sorted data:', sortedHistory);
+                    
+                    setHistory(sortedHistory);
+                    setHistoryTotal(response.total || sortedHistory.length);
 
-        // Mock thông tin user đang sử dụng (chỉ khi status là IN_USE)
-        const mockCurrentUser = (status === 'in_use' || status === 'in-use') ? {
-            userId: 'USER' + (batteryId * 10),
-            firstName: 'Nguyễn',
-            lastName: 'Văn A',
-            fullName: 'Nguyễn Văn A',
-            email: `user${batteryId}@example.com`,
-            phone: '090' + String(batteryId).padStart(7, '0'),
-            vehicle: {
-                vehicleId: batteryId * 2,
-                plateNumber: `51A-${String(batteryId * 100).padStart(5, '0')}`,
-                model: 'VinFast VF8'
-            },
-            contractId: batteryId * 10
-        } : null;
+                    // Nếu pin đang IN_USE, lấy thông tin user từ lịch sử swap gần nhất
+                    const batteryStatus = battery.status?.toLowerCase();
+                    const isInUse = batteryStatus === 'in_use' || batteryStatus === 'in-use' || batteryStatus === 'đang dùng';
+                    
+                    if (isInUse && sortedHistory.length > 0) {
+                        console.log('\n Pin đang IN_USE, tìm swap gần nhất...');
+                        console.log('   Battery ID:', batteryId);
+                        
+                        // Tìm swap gần nhất mà pin này là newBatteryId và role = INSTALLED
+                        const latestInstalled = sortedHistory.find(swap => {
+                            const isNewBattery = (swap.newBatteryId == batteryId); // == để match cả string và number
+                            const isInstalled = swap.batteryRole === 'INSTALLED';
+                            const isCompleted = swap.status === 'COMPLETED' || swap.swapStatus === 'COMPLETED';
+                            
+                            console.log(`   Swap ${swap.swapId}:`, {
+                                newBatteryId: swap.newBatteryId,
+                                batteryRole: swap.batteryRole,
+                                isNewBattery,
+                                isInstalled,
+                                isCompleted
+                            });
+                            
+                            return isNewBattery && isInstalled && isCompleted;
+                        });
+                        
+                        if (latestInstalled) {
+                            console.log(' Tìm thấy swap INSTALLED:', latestInstalled);
+                            setCurrentUser({
+                                fullName: latestInstalled.userName,
+                                vehicle: {
+                                    plateNumber: latestInstalled.vehiclePlateNumber || 'N/A',
+                                    model: latestInstalled.vehicleModel || 'N/A'
+                                }
+                            });
+                        } else {
+                            console.warn(' Không tìm thấy swap INSTALLED, thử lấy swap gần nhất bất kỳ...');
+                            // Fallback: lấy swap gần nhất có userName
+                            const latestSwap = sortedHistory.find(swap => swap.userName);
+                            if (latestSwap) {
+                                console.log('ℹ Sử dụng swap gần nhất:', latestSwap);
+                                setCurrentUser({
+                                    fullName: latestSwap.userName,
+                                    vehicle: latestSwap.vehiclePlateNumber ? {
+                                        plateNumber: latestSwap.vehiclePlateNumber,
+                                        model: latestSwap.vehicleModel || 'N/A'
+                                    } : null
+                                });
+                            } else {
+                                setCurrentUser(null);
+                            }
+                        }
+                    } else {
+                        console.log('ℹ Pin không ở trạng thái IN_USE');
+                        setCurrentUser(null);
+                    }
+                } else {
+                    console.warn(' No history data or API returned success: false');
+                    setHistory([]);
+                    setHistoryTotal(0);
+                    setCurrentUser(null);
+                }
+            } catch (error) {
+                console.error('Error loading battery history:', error);
+                setHistory([]);
+                setHistoryTotal(0);
+                setCurrentUser(null);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-        setHistory(mockHistory);
-        setCurrentUser(mockCurrentUser);
-    };
+        loadBatteryData();
+    }, [isOpen, battery]);
 
     if (!isOpen || !battery) return null;
 
     // Chuẩn hóa dữ liệu
     const id = battery.id || battery.batteryId;
-    const status = battery.status || 'N/A';
-    const charge = battery.stateOfHealth || battery.charge || 0;
-    const health = battery.health || charge;
+    const charge = battery.stateOfHealth || 0;  // Dung lượng = stateOfHealth
+    const health = battery.capacity || 0;        // Độ chai = capacity
+    
+    // Tự động cập nhật trạng thái sang MAINTENANCE nếu capacity <= 85%
+    const status = health <= 85 ? 'maintenance' : (battery.status || 'N/A');
+    
     const slot = battery.slotId || battery.slot || 'N/A';
-    const cycleCount = battery.cycleCount || 'N/A';
+    const cycleCount = battery.cycleCount || 0;
     const model = battery.model || 'Unknown';
 
     const isInUse = status?.toLowerCase() === 'in_use' || status?.toLowerCase() === 'in-use';
@@ -242,8 +284,6 @@ const BatteryDetailModal = ({ isOpen, battery, onClose }) => {
                             ) : currentUser ? (
                                 <div>
                                     <DetailRow label="Tên người dùng" value={currentUser.fullName || `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim()} />
-                                    <DetailRow label="Email" value={currentUser.email || 'N/A'} />
-                                    <DetailRow label="Số điện thoại" value={currentUser.phone || 'N/A'} />
                                     {currentUser.vehicle && (
                                         <>
                                             <DetailRow label="Biển số xe" value={currentUser.vehicle.plateNumber || 'N/A'} />
@@ -260,14 +300,14 @@ const BatteryDetailModal = ({ isOpen, battery, onClose }) => {
                     {/* Lịch sử swap */}
                     <div>
                         <h3 style={{ margin: '0 0 16px 0', fontSize: '16px', color: '#cbd5e1' }}>
-                            Lịch sử đổi pin ({history.length})
+                            Lịch sử đổi pin ({historyTotal})
                         </h3>
                         {loading ? (
                             <div style={{ color: '#94a3b8', fontSize: '14px', padding: '20px', textAlign: 'center' }}>Đang tải lịch sử...</div>
                         ) : history.length > 0 ? (
-                            <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                            <div style={{ maxHeight: '300px', overflowY: 'auto', paddingRight: '8px' }}>
                                 {history.map((swap, index) => (
-                                    <HistoryItem key={swap.swapId || index} swap={swap} />
+                                    <HistoryItem key={index} swap={swap} />
                                 ))}
                             </div>
                         ) : (
