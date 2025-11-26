@@ -22,83 +22,115 @@ export const SwapContext = React.createContext();
 
 const SwapBatteryPage = () => {
     const navigate = useNavigate();
+    const [isCheckingVehicle, setIsCheckingVehicle] = React.useState(true);
+    const [hasValidVehicle, setHasValidVehicle] = React.useState(false);
     
     // Kiểm tra selectedVehicle khi component mount
     useEffect(() => {
         const checkSelectedVehicle = async () => {
+            setIsCheckingVehicle(true);
+            
             try {
                 const selectedVehicleStr = sessionStorage.getItem('selectedVehicle');
                 
                 // Nếu chưa có selectedVehicle, tự động lấy xe đầu tiên của user
                 if (!selectedVehicleStr) {
-                    console.warn(' Chưa chọn xe, đang tự động lấy xe đầu tiên...');
+                    console.warn('⚠️ Chưa chọn xe, đang kiểm tra danh sách xe...');
                     
                     try {
-                        // Import vehicleService để lấy danh sách xe
-                        const { default: vehicleService } = await import('/src/assets/js/services/vehicleService.js');
-                        const userId = sessionStorage.getItem('userId') || sessionStorage.getItem('UserID') || 'driver001';
-                        
-                        const response = await vehicleService.getUserVehicles(userId);
-                        
-                        if (response && response.success && response.data && response.data.length > 0) {
-                            const firstVehicle = response.data[0];
-                            console.log(' Tự động chọn xe đầu tiên:', firstVehicle);
-                            
-                            // Lưu vào sessionStorage
-                            sessionStorage.setItem('selectedVehicle', JSON.stringify(firstVehicle));
-                            
-                            // Kiểm tra xe có pin không
-                            const batteryId = firstVehicle?.batteryId || 
-                                             firstVehicle?.currentBatteryId || 
-                                             firstVehicle?.current_battery_id ||
-                                             firstVehicle?.battery?.id;
-                            
-                            if (!batteryId) {
-                                console.warn(' Xe đầu tiên chưa có pin');
-                                alert('Xe của bạn chưa được gắn pin.\nVui lòng kiểm tra lại thông tin xe.');
-                                navigate('/driver/dashboard');
-                                return;
-                            }
-                            
-                            // Lưu batteryId
-                            sessionStorage.setItem('old_battery_id', String(batteryId));
-                            console.log(' Đã tự động chọn xe có pin, batteryId:', batteryId);
-                            return; // OK, tiếp tục flow
-                        } else {
-                            console.error(' Không tìm thấy xe nào');
-                            alert('Bạn chưa có xe nào.\nVui lòng thêm xe trước khi đổi pin.');
-                            navigate('/driver/dashboard');
+                        // Lấy userId từ localStorage (currentUser)
+                        const currentUserStr = localStorage.getItem('currentUser');
+                        if (!currentUserStr) {
+                            console.error(' Không tìm thấy thông tin user');
+                            alert('Phiên đăng nhập đã hết hạn.\nVui lòng đăng nhập lại.');
+                            setIsCheckingVehicle(false);
+                            navigate('/driver/dashboard', { replace: true });
                             return;
                         }
+                        
+                        const currentUser = JSON.parse(currentUserStr);
+                        const userId = currentUser?.id;
+                        
+                        if (!userId) {
+                            console.error(' Không tìm thấy userId trong currentUser');
+                            alert('Phiên đăng nhập đã hết hạn.\nVui lòng đăng nhập lại.');
+                            setIsCheckingVehicle(false);
+                            navigate('/driver/dashboard', { replace: true });
+                            return;
+                        }
+                        
+                        // Import vehicleService để lấy danh sách xe
+                        const { default: vehicleService } = await import('/src/assets/js/services/vehicleService.js');
+                        
+                        console.log('🔍 Kiểm tra vehicles của userId:', userId);
+                        const response = await vehicleService.getUserVehicles(userId);
+                        console.log('📋 API Response:', response);
+                        
+                        if (!response || !response.success || !response.data || response.data.length === 0) {
+                            console.error(' User không có xe nào');
+                            alert('Bạn chưa đăng ký xe nào.\nVui lòng đăng ký xe trước khi sử dụng dịch vụ đổi pin.');
+                            setIsCheckingVehicle(false);
+                            navigate('/driver/vehicles', { replace: true });
+                            return;
+                        }
+                        
+                        // Tìm xe có pin
+                        const vehicleWithBattery = response.data.find(v => {
+                            return v?.batteryId;
+                        });
+                        
+                        if (!vehicleWithBattery) {
+                            console.error(' Không có xe nào được gắn pin');
+                            alert('Xe của bạn chưa được gắn pin.\nVui lòng liên hệ nhân viên.');
+                            setIsCheckingVehicle(false);
+                            navigate('/driver/vehicles', { replace: true });
+                            return;
+                        }
+                        
+                        console.log(' Tìm thấy xe có pin:', vehicleWithBattery);
+                            
+                        // Lưu vào sessionStorage
+                        sessionStorage.setItem('selectedVehicle', JSON.stringify(vehicleWithBattery));
+                        
+                        const batteryId = vehicleWithBattery.batteryId;
+                        
+                        // Lưu batteryId
+                        sessionStorage.setItem('old_battery_id', String(batteryId));
+                        console.log(' Đã chọn xe có pin, batteryId:', batteryId);
+                        
+                        setHasValidVehicle(true);
+                        setIsCheckingVehicle(false);
+                        return;
                     } catch (apiError) {
-                        console.error(' Lỗi khi lấy danh sách xe:', apiError);
-                        alert('Không thể tải thông tin xe.\nVui lòng thử lại.');
-                        navigate('/driver/dashboard');
+                        console.error(' Lỗi API:', apiError);
+                        alert('Không thể tải thông tin xe.\nVui lòng thử lại sau.');
+                        setIsCheckingVehicle(false);
+                        navigate('/driver/dashboard', { replace: true });
                         return;
                     }
                 }
                 
                 // Nếu đã có selectedVehicle, kiểm tra pin
                 const selectedVehicle = JSON.parse(selectedVehicleStr);
-                const batteryId = selectedVehicle?.batteryId || 
-                                 selectedVehicle?.currentBatteryId || 
-                                 selectedVehicle?.current_battery_id ||
-                                 selectedVehicle?.battery?.id;
+                const batteryId = selectedVehicle?.batteryId;
                 
                 if (!batteryId) {
-                    console.warn(' Xe chưa có pin (batteryId null), redirect về Dashboard');
-                    alert('Xe của bạn chưa được gắn pin.\nVui lòng kiểm tra lại thông tin xe.');
-                    navigate('/driver/dashboard');
+                    console.warn(' Xe không có pin');
+                    alert('Xe của bạn chưa được gắn pin.\nVui lòng liên hệ quản trị viên.');
+                    setIsCheckingVehicle(false);
+                    navigate('/driver/vehicles', { replace: true });
                     return;
                 }
                 
-                console.log(' selectedVehicle hợp lệ, batteryId:', batteryId);
-                // Lưu batteryId vào session để useSwapData dùng
+                console.log(' Vehicle hợp lệ, batteryId:', batteryId);
                 sessionStorage.setItem('old_battery_id', String(batteryId));
+                setHasValidVehicle(true);
+                setIsCheckingVehicle(false);
             } catch (err) {
-                console.error(' Lỗi khi kiểm tra selectedVehicle:', err);
+                console.error(' Exception:', err);
                 alert('Có lỗi xảy ra. Vui lòng thử lại.');
-                navigate('/driver/dashboard');
+                setIsCheckingVehicle(false);
+                navigate('/driver/dashboard', { replace: true });
             }
         };
         
@@ -171,6 +203,22 @@ const SwapBatteryPage = () => {
 
     // 4. Quyết định render component nào
     const renderCurrentStep = () => {
+        // Hiển thị loading khi đang check vehicle
+        if (isCheckingVehicle) {
+            return (
+                <div style={{ color: 'white', textAlign: 'center', padding: '60px 20px' }}>
+                    <div style={{ fontSize: '48px', marginBottom: '20px' }}>🔍</div>
+                    <h3 style={{ marginBottom: '10px' }}>Đang kiểm tra thông tin xe...</h3>
+                    <p style={{ color: '#94a3b8' }}>Vui lòng đợi trong giây lát</p>
+                </div>
+            );
+        }
+        
+        // Chặn render nếu không có vehicle hợp lệ
+        if (!hasValidVehicle) {
+            return null;
+        }
+        
         // Ưu tiên hiển thị lỗi nếu có
         if (dataProps.error) {
             return (

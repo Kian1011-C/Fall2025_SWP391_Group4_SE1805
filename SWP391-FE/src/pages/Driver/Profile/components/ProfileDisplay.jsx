@@ -95,12 +95,7 @@ export const ProfileDisplay = ({ user }) => {
       </div>
 
       {/* Address */}
-      <div style={infoItemStyle}>
-        <div style={labelStyle}>Địa chỉ</div>
-        <div style={valueStyle}>
-          {user?.address || 'Chưa cập nhật'}
-        </div>
-      </div>
+      
     </div>
   );
 };
