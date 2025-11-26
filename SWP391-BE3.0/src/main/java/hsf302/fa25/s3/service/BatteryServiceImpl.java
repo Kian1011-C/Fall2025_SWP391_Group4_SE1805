@@ -2,7 +2,6 @@ package hsf302.fa25.s3.service;
 
 import hsf302.fa25.s3.model.Battery;
 import hsf302.fa25.s3.repository.BatteryRepo;
-import hsf302.fa25.s3.repository.SwapRepo;
 import hsf302.fa25.s3.repository.ContractRepo;
 import hsf302.fa25.s3.utils.ConnectDB;
 import org.springframework.stereotype.Service;
@@ -16,12 +15,12 @@ import java.util.*;
 public class BatteryServiceImpl implements BatteryService {
 
     private final BatteryRepo batteryRepo;
-    private final SwapRepo swapRepo;
+    private final SwapService swapService;
     private final ContractRepo contractRepo;
 
-    public BatteryServiceImpl() {
+    public BatteryServiceImpl(SwapService swapService) {
         this.batteryRepo = new BatteryRepo();
-        this.swapRepo = new SwapRepo();
+        this.swapService = swapService;
         this.contractRepo = new ContractRepo();
     }
 
@@ -32,7 +31,7 @@ public class BatteryServiceImpl implements BatteryService {
 
     @Override
     public List<Map<String, Object>> getBatteryHistory(Long id) {
-        return swapRepo.getBatterySwapHistory(id.intValue());
+        return swapService.getBatterySwapHistory(id.intValue());
     }
 
     @Override

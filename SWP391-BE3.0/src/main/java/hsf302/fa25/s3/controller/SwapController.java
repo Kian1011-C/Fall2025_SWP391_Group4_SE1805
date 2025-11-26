@@ -82,32 +82,61 @@ public class SwapController {
         return response;
     }
 
-    @GetMapping("/swaps/{swapId}")
-    public Map<String, Object> getSwapById(@PathVariable Long swapId) {
+
+    @PostMapping("/swaps")
+    public Map<String, Object> createSwap(@RequestBody Swap swap) {
+        System.out.println("SwapController: Creating new swap for user: " + swap.getUserId());
         Map<String, Object> response = new HashMap<>();
-        
+
         try {
-            Swap swap = swapService.getSwapById(swapId);
-            
-            if (swap != null) {
+            Integer swapId = swapService.createSwap(swap);
+            if (swapId != null) {
+                // set generated id back to model for client
+                try { swap.setSwapId(swapId); } catch (Exception ignore) {}
                 response.put("success", true);
                 response.put("data", swap);
-                response.put("message", "Lấy thông tin giao dịch thành công");
+                response.put("swapId", swapId);
+                response.put("message", "Tạo bản ghi đổi pin thành công");
             } else {
                 response.put("success", false);
-                response.put("message", "Không tìm thấy giao dịch với ID: " + swapId);
+                response.put("message", "Không thể tạo bản ghi đổi pin");
+                response.put("data", null);
             }
-            
-        } catch (IllegalArgumentException e) {
-            response.put("success", false);
-            response.put("message", e.getMessage());
+
         } catch (Exception e) {
-            System.err.println("SwapController: Error fetching swap " + swapId + ": " + e.getMessage());
+            System.err.println("SwapController Error: " + e.getMessage());
             e.printStackTrace();
             response.put("success", false);
-            response.put("message", "Lỗi khi lấy thông tin giao dịch: " + e.getMessage());
+            response.put("message", "Lỗi khi tạo bản ghi đổi pin: " + e.getMessage());
+            response.put("data", null);
         }
-        
+
+        return response;
+    }
+
+    /**
+     * Confirm (complete) a swap and apply related updates (vehicle, batteries, slot)
+     * POST /api/swaps/{swapId}/confirm
+     */
+    @PostMapping("/swaps/{swapId}/confirm")
+    public Map<String, Object> confirmSwap(@PathVariable int swapId) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            boolean ok = swapService.completeSwap(swapId);
+            if (ok) {
+                response.put("success", true);
+                response.put("message", "Swap completed and related records updated");
+                // Return the updated swap and related rows for verification
+                response.put("data", swapService.getSwapById(swapId));
+            } else {
+                response.put("success", false);
+                response.put("message", "Could not complete swap or no changes applied");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.put("success", false);
+            response.put("message", "Error while confirming swap: " + e.getMessage());
+        }
         return response;
     }
 }
