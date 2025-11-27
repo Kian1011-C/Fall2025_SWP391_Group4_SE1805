@@ -7,14 +7,13 @@ import hsf302.fa25.s3.repository.ContractRepo;
 import hsf302.fa25.s3.repository.ServicePlanRepo;
 import hsf302.fa25.s3.repository.UserRepo;
 import hsf302.fa25.s3.utils.ConnectDB;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.util.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.*;
 
 @Service
 public class ContractServiceImpl implements ContractService {
@@ -27,19 +26,25 @@ public class ContractServiceImpl implements ContractService {
     private static boolean isBlank(String s) {
         return s == null || s.trim().isEmpty();
     }
+
     private static String asString(Object o) {
         return (o == null) ? null : String.valueOf(o);
     }
+
     private static Integer asInteger(Object o) {
         if (o == null) return null;
         if (o instanceof Integer i) return i;
         if (o instanceof Number n) return n.intValue();
-        try { return Integer.parseInt(String.valueOf(o)); } catch (Exception e) { return null; }
+        try {
+            return Integer.parseInt(String.valueOf(o));
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     // ==================== CREATE CONTRACT ====================
     @Override
-    public ResponseEntity<?> createContract(Map<String, Object> body) {
+    public Map<String, Object> createContract(Map<String, Object> body) {
         Map<String, Object> res = new HashMap<>();
         try {
             String userId = asString(body.get("userId"));
@@ -53,7 +58,7 @@ public class ContractServiceImpl implements ContractService {
             if (isBlank(userId) || vehicleId == null || isBlank(startDate) || isBlank(endDate)) {
                 res.put("success", false);
                 res.put("message", "Thiếu tham số: userId, vehicleId, startDate, endDate là bắt buộc.");
-                return ResponseEntity.badRequest().body(res);
+                return res;
             }
 
             LocalDate s, e;
@@ -63,12 +68,12 @@ public class ContractServiceImpl implements ContractService {
             } catch (DateTimeParseException ex) {
                 res.put("success", false);
                 res.put("message", "Định dạng ngày không hợp lệ. Dùng yyyy-MM-dd.");
-                return ResponseEntity.badRequest().body(res);
+                return res;
             }
             if (e.isBefore(s)) {
                 res.put("success", false);
                 res.put("message", "endDate phải >= startDate.");
-                return ResponseEntity.badRequest().body(res);
+                return res;
             }
 
             // User phải tồn tại & active
@@ -76,14 +81,14 @@ public class ContractServiceImpl implements ContractService {
             if (u == null || !"active".equalsIgnoreCase(u.getStatus())) {
                 res.put("success", false);
                 res.put("message", "Tài khoản không tồn tại hoặc chưa kích hoạt.");
-                return ResponseEntity.badRequest().body(res);
+                return res;
             }
 
             // Xe phải thuộc user
             if (!contractDao.vehicleBelongsToUser(vehicleId, userId)) {
                 res.put("success", false);
                 res.put("message", "Xe không thuộc về người dùng " + userId + ".");
-                return ResponseEntity.badRequest().body(res);
+                return res;
             }
 
             // Xác định planId (ưu tiên planId, fallback planName)
@@ -92,13 +97,13 @@ public class ContractServiceImpl implements ContractService {
                 if (isBlank(planName)) {
                     res.put("success", false);
                     res.put("message", "Thiếu planId hoặc planName.");
-                    return ResponseEntity.badRequest().body(res);
+                    return res;
                 }
                 finalPlanId = contractDao.getPlanIdByName(planName);
                 if (finalPlanId == null) {
                     res.put("success", false);
                     res.put("message", "Không tìm thấy gói dịch vụ đang active: " + planName);
-                    return ResponseEntity.badRequest().body(res);
+                    return res;
                 }
             }
 
@@ -108,7 +113,7 @@ public class ContractServiceImpl implements ContractService {
             if (contractDao.hasActiveOverlap(vehicleId, ds, de)) {
                 res.put("success", false);
                 res.put("message", "Xe đã có hợp đồng active trùng/đè khoảng thời gian này.");
-                return ResponseEntity.badRequest().body(res);
+                return res;
             }
 
             // Tạo hợp đồng
@@ -119,7 +124,7 @@ public class ContractServiceImpl implements ContractService {
             if (contractId <= 0) {
                 res.put("success", false);
                 res.put("message", "Tạo hợp đồng thất bại.");
-                return ResponseEntity.status(500).body(res);
+                return res;
             }
 
             Map<String, Object> data = new HashMap<>();
@@ -134,26 +139,27 @@ public class ContractServiceImpl implements ContractService {
             res.put("success", true);
             res.put("message", "Tạo hợp đồng thành công.");
             res.put("data", data);
-            return ResponseEntity.ok(res);
+            return res;
 
         } catch (Exception e) {
             e.printStackTrace();
             res.put("success", false);
             res.put("message", "Lỗi hệ thống: " + e.getMessage());
-            return ResponseEntity.status(500).body(res);
+            return res;
         }
     }
 
     // ==================== GET ALL CONTRACTS (filter + paging) ====================
     @Override
-    public ResponseEntity<?> getAllContracts(String status,
-                                             String userId,
-                                             Integer planId,
-                                             int page,
-                                             int size) {
+    public Map<String, Object> getAllContracts(String status,
+                                               String userId,
+                                               Integer planId,
+                                               int page,
+                                               int size) {
+        Map<String, Object> response = new HashMap<>();
         try {
             StringBuilder sql = new StringBuilder("""
-                SELECT c.contract_id, c.vehicle_id, c.plan_id, c.start_date, c.end_date, 
+                SELECT c.contract_id, c.vehicle_id, c.plan_id, c.start_date, c.end_date,
                        c.status, c.contract_number, c.signed_place, c.monthly_distance, c.monthly_base_fee,
                        sp.plan_name,
                        v.plate_number, v.model as vehicle_model, v.user_id,
@@ -166,11 +172,11 @@ public class ContractServiceImpl implements ContractService {
             """);
 
             List<Object> params = new ArrayList<>();
-            if (status != null && !status.isEmpty()) {
+            if (!isBlank(status)) {
                 sql.append(" AND c.status = ?");
                 params.add(status);
             }
-            if (userId != null && !userId.isEmpty()) {
+            if (!isBlank(userId)) {
                 sql.append(" AND v.user_id = ?");
                 params.add(userId);
             }
@@ -224,7 +230,6 @@ public class ContractServiceImpl implements ContractService {
             List<Map<String, Object>> paginatedContracts =
                     start >= allContracts.size() ? List.of() : allContracts.subList(start, end);
 
-            Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("data", paginatedContracts);
             response.put("total", allContracts.size());
@@ -232,23 +237,22 @@ public class ContractServiceImpl implements ContractService {
             response.put("size", size);
             response.put("totalPages", (allContracts.size() + size - 1) / size);
 
-            return ResponseEntity.ok(response);
+            return response;
         } catch (Exception e) {
             e.printStackTrace();
-            Map<String, Object> response = new HashMap<>();
             response.put("success", false);
             response.put("message", "Error fetching contracts: " + e.getMessage());
-            return ResponseEntity.status(500).body(response);
+            return response;
         }
     }
 
     // ==================== GET CONTRACTS BY USER ====================
     @Override
-    public ResponseEntity<?> getUserContracts(String userId) {
+    public List<Map<String, Object>> getUserContracts(String userId) {
+        List<Map<String, Object>> contractMaps = new ArrayList<>();
         try {
             List<Contract> contracts = contractDao.getContractsByUserId(userId);
 
-            List<Map<String, Object>> contractMaps = new ArrayList<>();
             for (Contract contract : contracts) {
                 ServicePlan plan = servicePlanDao.getPlanById(contract.getPlanId());
 
@@ -284,25 +288,17 @@ public class ContractServiceImpl implements ContractService {
 
                 contractMaps.add(contractMap);
             }
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("data", contractMaps);
-            response.put("total", contractMaps.size());
-
-            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", false);
-            response.put("message", "Error fetching contracts: " + e.getMessage());
-            return ResponseEntity.status(500).body(response);
+            e.printStackTrace();
+            // có thể log, hiện tại trả về danh sách rỗng khi lỗi
         }
+        return contractMaps;
     }
 
     // ==================== UPDATE  ====================
     @Override
-    public ResponseEntity<?> updateContract(Long contractId, Map<String, Object> updates) {
-        // TODO: sau này implement thật
+    public Map<String, Object> updateContract(Long contractId, Map<String, Object> updates) {
+        // TODO: sau này implement thật với DB
         Map<String, Object> updatedContract = new HashMap<>();
         updatedContract.put("contractId", contractId);
         updatedContract.putAll(updates);
@@ -313,16 +309,15 @@ public class ContractServiceImpl implements ContractService {
         response.put("message", "Contract updated successfully");
         response.put("data", updatedContract);
 
-        return ResponseEntity.ok(response);
+        return response;
     }
-
 
     // ==================== PLANS ====================
     @Override
-    public ResponseEntity<?> getAvailablePlans() {
+    public List<Map<String, Object>> getAvailablePlans() {
+        List<Map<String, Object>> plans = new ArrayList<>();
         try {
             List<ServicePlan> servicePlans = servicePlanDao.getAllActivePlans();
-            List<Map<String, Object>> plans = new ArrayList<>();
 
             for (ServicePlan plan : servicePlans) {
                 Map<String, Object> planMap = new HashMap<>();
@@ -361,93 +356,67 @@ public class ContractServiceImpl implements ContractService {
                 planMap.put("features", features);
                 plans.add(planMap);
             }
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("data", plans);
-
-            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", false);
-            response.put("message", "Error fetching service plans: " + e.getMessage());
-            return ResponseEntity.status(500).body(response);
+            e.printStackTrace();
         }
+        return plans;
     }
 
     // ==================== BILLING / REPORT / RESET ====================
     @Override
-    public ResponseEntity<?> processMonthlyBilling(Integer contractId) {
+    public Map<String, Object> processMonthlyBilling(Integer contractId) {
+        Map<String, Object> response = new HashMap<>();
         try {
             contractDao.calculateAndUpdateMonthlyFees(contractId);
             boolean success = contractDao.processMonthlyBilling(contractId);
 
-            Map<String, Object> response = new HashMap<>();
             response.put("success", success);
             response.put("message", success ?
                     "Monthly billing processed successfully" :
                     "Failed to process monthly billing");
-
-            return ResponseEntity.ok(response);
+            return response;
         } catch (Exception e) {
-            Map<String, Object> response = new HashMap<>();
             response.put("success", false);
             response.put("message", "Error processing monthly billing: " + e.getMessage());
-            return ResponseEntity.status(500).body(response);
+            return response;
         }
     }
 
     @Override
-    public ResponseEntity<?> getMonthlyBillingReport(String monthYear) {
+    public List<Map<String, Object>> getMonthlyBillingReport(String monthYear) {
         try {
-            List<Map<String, Object>> reports = contractDao.getMonthlyBillingReport(monthYear);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("data", reports);
-            response.put("month", monthYear);
-            response.put("totalContracts", reports.size());
-
-            java.math.BigDecimal totalRevenue = reports.stream()
-                    .map(r -> (java.math.BigDecimal) r.get("monthlyTotalFee"))
-                    .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
-            response.put("totalRevenue", totalRevenue);
-
-            return ResponseEntity.ok(response);
+            // Trả thẳng danh sách report từ DAO
+            return contractDao.getMonthlyBillingReport(monthYear);
         } catch (Exception e) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", false);
-            response.put("message", "Error generating billing report: " + e.getMessage());
-            return ResponseEntity.status(500).body(response);
+            e.printStackTrace();
+            return List.of();
         }
     }
 
     @Override
-    public ResponseEntity<?> autoResetMonth() {
+    public Map<String, Object> autoResetMonth() {
+        Map<String, Object> response = new HashMap<>();
         try {
             boolean success = contractDao.checkAndResetIfNewMonth();
-
-            Map<String, Object> response = new HashMap<>();
             response.put("success", success);
             response.put("message", success ?
                     "All contracts reset to new month successfully" :
                     "Some contracts failed to reset");
-
-            return ResponseEntity.ok(response);
+            return response;
         } catch (Exception e) {
-            Map<String, Object> response = new HashMap<>();
             response.put("success", false);
             response.put("message", "Error resetting contracts: " + e.getMessage());
-            return ResponseEntity.status(500).body(response);
+            return response;
         }
     }
 
     // ==================== VEHICLE PLAN ====================
     @Override
-    public ResponseEntity<?> getVehiclePlan(int vehicleId) {
+    public Map<String, Object> getVehiclePlan(int vehicleId) {
+        Map<String, Object> result = new HashMap<>();
         try {
             String sql = """
-                SELECT 
+                SELECT
                     sp.plan_name,
                     sp.base_price,
                     sp.base_distance,
@@ -490,24 +459,18 @@ public class ContractServiceImpl implements ContractService {
                         planInfo.put("isUnlimited", false);
                         planInfo.put("limitInfo", baseDistance + " km/tháng");
                     }
+
+                    result.put("success", true);
+                    result.put("data", planInfo);
                 } else {
-                    Map<String, Object> response = new HashMap<>();
-                    response.put("success", false);
-                    response.put("message", "Không tìm thấy gói thuê pin cho xe này");
-                    return ResponseEntity.status(404).body(response);
+                    result.put("success", false);
+                    result.put("message", "Không tìm thấy gói thuê pin cho xe này");
                 }
             }
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("data", planInfo);
-
-            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", false);
-            response.put("message", "Error: " + e.getMessage());
-            return ResponseEntity.status(500).body(response);
+            result.put("success", false);
+            result.put("message", "Error: " + e.getMessage());
         }
+        return result;
     }
 }

@@ -1,31 +1,29 @@
 package hsf302.fa25.s3.service;
 
-import org.springframework.http.ResponseEntity;
-
+import java.util.List;
 import java.util.Map;
 
 public interface ContractService {
 
-    ResponseEntity<?> createContract(Map<String, Object> body);
+    Map<String, Object> createContract(Map<String, Object> body);
 
-    ResponseEntity<?> getAllContracts(String status,
-                                      String userId,
-                                      Integer planId,
-                                      int page,
-                                      int size);
+    Map<String, Object> getAllContracts(String status,
+                                        String userId,
+                                        Integer planId,
+                                        int page,
+                                        int size);
 
-    ResponseEntity<?> getUserContracts(String userId);
+    List<Map<String, Object>> getUserContracts(String userId);
 
-    ResponseEntity<?> updateContract(Long contractId, Map<String, Object> updates);
+    Map<String, Object> updateContract(Long contractId, Map<String, Object> updates);
 
+    List<Map<String, Object>> getAvailablePlans();
 
-    ResponseEntity<?> getAvailablePlans();
+    Map<String, Object> processMonthlyBilling(Integer contractId);
 
-    ResponseEntity<?> processMonthlyBilling(Integer contractId);
+    List<Map<String, Object>> getMonthlyBillingReport(String monthYear);
 
-    ResponseEntity<?> getMonthlyBillingReport(String monthYear);
+    Map<String, Object> autoResetMonth();
 
-    ResponseEntity<?> autoResetMonth();
-
-    ResponseEntity<?> getVehiclePlan(int vehicleId);
+    Map<String, Object> getVehiclePlan(int vehicleId);
 }
