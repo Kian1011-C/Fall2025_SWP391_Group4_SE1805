@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import contractService from '../../../../assets/js/services/contractService';
+import React from 'react';
 
 const DetailRow = ({ label, value }) => (
     <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #374151' }}>
@@ -17,42 +16,8 @@ const getStatusStyle = (status) => {
     return { ...style, background: '#4b5563', color: '#e5e7eb' };
 };
 
-const ContractDetailModal = ({ contract, onClose, onRefresh }) => {
-    const [isTerminating, setIsTerminating] = useState(false);
-    const [terminationReason, setTerminationReason] = useState('');
-    const [isProcessing, setIsProcessing] = useState(false);
-
+const ContractDetailModal = ({ contract, onClose }) => {
     if (!contract) return null;
-
-    const handleTerminate = async () => {
-        if (!terminationReason.trim()) {
-            alert('Vui lòng nhập lý do hủy hợp đồng');
-            return;
-        }
-
-        if (!confirm('Bạn có chắc chắn muốn hủy hợp đồng này?')) {
-            return;
-        }
-
-        setIsProcessing(true);
-        try {
-            const response = await contractService.terminateContract(contract.contractId, { 
-                reason: terminationReason 
-            });
-            
-            if (response.success) {
-                alert('Hủy hợp đồng thành công');
-                onRefresh && onRefresh();
-                onClose();
-            } else {
-                alert('Lỗi: ' + response.message);
-            }
-        } catch (error) {
-            alert('Lỗi khi hủy hợp đồng: ' + error.message);
-        } finally {
-            setIsProcessing(false);
-        }
-    };
 
     return (
         <div style={{ 
@@ -175,98 +140,6 @@ const ContractDetailModal = ({ contract, onClose, onRefresh }) => {
                         <DetailRow label="Nơi ký" value={contract.signedPlace || 'N/A'} />
                         <DetailRow label="Trạng thái" value={contract.status} />
                     </div>
-
-                    {/* Terminate Contract Section */}
-                    {contract.status?.toLowerCase() === 'active' && !isTerminating && (
-                        <div style={{ 
-                            background: '#991b1b', 
-                            padding: '15px', 
-                            borderRadius: '8px',
-                            marginTop: '20px'
-                        }}>
-                            <button
-                                onClick={() => setIsTerminating(true)}
-                                style={{
-                                    width: '100%',
-                                    background: '#dc2626',
-                                    color: 'white',
-                                    border: 'none',
-                                    padding: '12px',
-                                    borderRadius: '8px',
-                                    cursor: 'pointer',
-                                    fontWeight: 'bold'
-                                }}
-                            >
-                                Hủy Hợp đồng
-                            </button>
-                        </div>
-                    )}
-
-                    {/* Termination Form */}
-                    {isTerminating && (
-                        <div style={{ 
-                            background: '#1f2937', 
-                            padding: '15px', 
-                            borderRadius: '8px',
-                            border: '1px solid #991b1b',
-                            marginTop: '20px'
-                        }}>
-                            <h4 style={{ margin: '0 0 10px 0', color: '#fca5a5' }}>Lý do hủy hợp đồng</h4>
-                            <textarea
-                                value={terminationReason}
-                                onChange={(e) => setTerminationReason(e.target.value)}
-                                placeholder="Nhập lý do hủy hợp đồng..."
-                                style={{
-                                    width: '100%',
-                                    minHeight: '80px',
-                                    background: '#374151',
-                                    color: 'white',
-                                    border: '1px solid #4b5563',
-                                    borderRadius: '6px',
-                                    padding: '10px',
-                                    marginBottom: '10px',
-                                    fontFamily: 'inherit',
-                                    resize: 'vertical'
-                                }}
-                            />
-                            <div style={{ display: 'flex', gap: '10px' }}>
-                                <button
-                                    onClick={handleTerminate}
-                                    disabled={isProcessing}
-                                    style={{
-                                        flex: 1,
-                                        background: isProcessing ? '#4b5563' : '#dc2626',
-                                        color: 'white',
-                                        border: 'none',
-                                        padding: '10px',
-                                        borderRadius: '6px',
-                                        cursor: isProcessing ? 'not-allowed' : 'pointer',
-                                        fontWeight: 'bold'
-                                    }}
-                                >
-                                    {isProcessing ? 'Đang xử lý...' : 'Xác nhận Hủy'}
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        setIsTerminating(false);
-                                        setTerminationReason('');
-                                    }}
-                                    disabled={isProcessing}
-                                    style={{
-                                        flex: 1,
-                                        background: '#374151',
-                                        color: 'white',
-                                        border: 'none',
-                                        padding: '10px',
-                                        borderRadius: '6px',
-                                        cursor: isProcessing ? 'not-allowed' : 'pointer'
-                                    }}
-                                >
-                                    Hủy bỏ
-                                </button>
-                            </div>
-                        </div>
-                    )}
                 </div>
 
                 {/* Footer */}

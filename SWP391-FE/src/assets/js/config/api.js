@@ -12,8 +12,6 @@ export const API_CONFIG = {
     AUTH: {
       LOGIN: '/api/auth/login',
       LOGOUT: '/api/auth/logout',
-      ME: '/api/auth/me',
-      REFRESH: '/api/auth/refresh'
     },
 
     DRIVER: {
@@ -32,17 +30,12 @@ export const API_CONFIG = {
       BY_VEHICLE: (vehicleId) => `/api/batteries/vehicle/${vehicleId}`,
       SWAP_INITIATE: '/api/batteries/swap/initiate',
       SWAP_CONFIRM: (swapId) => `/api/batteries/swap/${swapId}/confirm`,
-      SWAP_ACTIVE: '/api/batteries/swap/active',
-      MAINTENANCE: (id) => `/api/batteries/${id}/maintenance`
+      
     },
     
     // Vehicle Management
     VEHICLES: {
-      BASE: '/api/vehicles',
-      BY_ID: (id) => `/api/vehicles/${id}`,
-      BY_USER: (userId) => `/api/users/${userId}/vehicles`,
-      SERVICE_HISTORY: (id) => `/api/vehicles/${id}/service-history`,
-      REGISTER_SERVICE: (id) => `/api/vehicles/${id}/register-service`
+      BY_USER: (userId) => `/api/users/${userId}/vehicles`
     },
     
     // Contract Management
@@ -50,29 +43,18 @@ export const API_CONFIG = {
       BASE: '/api/contracts',
       PLANS: '/api/contracts/plans',
       BY_USER: (userId) => `/api/contracts/user/${userId}`,
-      BILLING: (contractId) => `/api/contracts/${contractId}/billing`,
-      TERMINATE: (contractId) => `/api/contracts/${contractId}/terminate`
+      BILLING: (contractId) => `/api/contracts/${contractId}/billing`
     },
     
     // Payment Management
     PAYMENTS: {
-      BASE: '/api/payments',
-      PROCESS: '/api/payments/process',
-      CREATE: '/payment/create',  // VNPay create payment URL
-      PAY_MONTHLY: '/payment/pay-monthly',  // VNPay pay monthly bill (Admin xuất hóa đơn)
-      VNPAY_RETURN: '/payment/vnpay-return',  // VNPay return URL (HTML page)
-      VNPAY_RETURN_JSON: '/payment/vnpay-return-json',  // VNPay return JSON API
-      QUERYDR: '/payment/querydr',  // VNPay query transaction
-      ADMIN_ALL: '/payment/admin/all',  // Admin xem tất cả payments
-      USER_PAYMENTS: (userId) => `/payment/user/${userId}`,  // User xem lịch sử của mình
-      CALCULATE_MONTHLY: (contractId) => `/api/payments/calculate-monthly-bill/${contractId}`,
-      CURRENT_BILL: (userId) => `/api/payments/current-bill-status/user/${userId}`,
-      MONTHLY_SUMMARY: (contractId) => `/api/payments/monthly-usage-summary/${contractId}`,
-      PROCESS_MONTHLY: (contractId) => `/api/payments/process-monthly-payment/${contractId}`,
-      HISTORY: (userId) => `/api/payments/user/${userId}/history`,
-      METHODS: (userId) => `/api/payments/methods/${userId}`,
-      REFUND: (paymentId) => `/api/payments/${paymentId}/refund`,
-      AUTO_PAYMENT: '/api/payments/auto-payment'
+      CREATE: '/payment/create',
+      PAY_MONTHLY: '/payment/pay-monthly',
+      VNPAY_RETURN: '/payment/vnpay-return',
+      VNPAY_RETURN_JSON: '/payment/vnpay-return-json',
+      QUERYDR: '/payment/querydr',
+      ADMIN_ALL: '/payment/admin/all',
+      USER_PAYMENTS: (userId) => `/payment/user/${userId}`
     },
     
     
@@ -80,33 +62,15 @@ export const API_CONFIG = {
     STATIONS: {
       BASE: '/api/stations',
       BY_ID: (id) => `/api/stations/${id}`,
-      NEARBY: '/api/stations/nearby',
-      STATS: () => `/api/stations/stats`,
-      BOOK: (id) => `/api/stations/${id}/book`,
-      AVAILABLE_SLOTS: (id) => `/api/stations/${id}/available-slots`,
-      ESTIMATED_TIME: (id) => `/api/stations/${id}/estimated-time`
+      STATS: () => `/api/stations/stats`
     },
     
     // Swap Management
     SWAPS: {
       BASE: '/api/swaps',
-      BY_ID: (id) => `/api/swaps/${id}`,
-      BY_USER: (userId) => `/api/users/${userId}/swaps`,
-      CANCEL: (id) => `/api/swaps/${id}/cancel`,
-      RATE: (id) => `/api/swaps/${id}/rate`,
-      BOOK_SLOT: '/api/swaps/book-slot',
-      STATISTICS: (userId) => `/api/users/${userId}/swap-statistics`,
-      COMPLETE: '/api/swaps/complete'
+      BY_USER: (userId) => `/api/users/${userId}/swaps`
     },
     
-    // Notification Management
-    NOTIFICATIONS: {
-      BASE: '/api/notifications',
-      BY_ID: (id) => `/api/notifications/${id}`,
-      BY_USER: (userId) => `/api/users/${userId}/notifications`,
-      MARK_READ: (id) => `/api/notifications/${id}/read`,
-      MARK_ALL_READ: (userId) => `/api/users/${userId}/notifications/read-all`
-    },
     // Issues/Support
     ISSUES: {
       // Nếu BE không dùng context-path và controller map ở "/issues"
@@ -117,11 +81,7 @@ export const API_CONFIG = {
     USERS: {
       BASE: '/api/users',
       BY_ID: (id) => `/api/users/${id}`,
-      PROFILE: (id) => `/api/users/${id}/profile`,
-      NOTIFICATIONS: (id) => `/api/users/${id}/notifications`,
-      STATISTICS: (id) => `/api/users/${id}/statistics`,
-      SUBSCRIPTION: (id) => `/api/users/${id}/subscription`,
-      TOGGLE_STATUS: (id) => `/api/users/${id}/toggle-status`
+      PROFILE: (id) => `/api/users/${id}/profile`
     },
     
     // Report Management
